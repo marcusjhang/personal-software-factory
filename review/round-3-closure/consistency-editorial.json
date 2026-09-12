@@ -1,0 +1,142 @@
+{
+  "reviewer": "consistency-editorial",
+  "scope": "Final plan-only closure audit of PLAN.md, README.md, requirements traceability, the round-2 resolution register, all six round-2 reviews, all four round-1 resolution memos, and the repository-agent-operating-system evidence-repair/provenance artifacts. The removed prototype was treated as intentionally absent. No implementation proof was requested or inferred. I checked all 25 round-2 findings claimed addressed, the 52/52 round-1 root register, section and local-path references, R0-R4 vocabulary, authority ownership, roadmap numbering, normative conflicts, and ordered reader execution.",
+  "strengths": [
+    "PLAN.md consistently labels the deliverable plan-only and explicitly says implementation, semantic evidence validation, production safety, and autonomous self-government are not proven.",
+    "The traceability counts reconcile: 16/16 user requirements, 52/52 memo-local round-1 roots, and 25/25 round-2 findings (15 high and 10 medium) are present in their registers.",
+    "Section 20 is the sole increment-numbering authority and contains one coherent Increment 0-10 sequence. Release 0 is clearly distinguished from risk tier R0, and R0-R4 are otherwise used consistently.",
+    "The authority table separates protected contract ownership, approval custody, human issuance, runtime validation, actuator authority, durable facts, external resources, and disposable execution.",
+    "All checked local Markdown links and named repository paths resolve. The plan defines future entry/exit evidence rather than claiming those gates passed."
+  ],
+  "findings": [
+    {
+      "id": "CEC-R3-001",
+      "severity": "high",
+      "title": "The claimed total state projection still maps declared improvement transitions to illegal canonical edges",
+      "requirement": "R-08/P-08 and the claimed closure of STATE-R2-001 and R2-RJ-001 require every private edge to map to a legal canonical edge, a stutter, or an explicitly guarded ordered canonical transition sequence without skipping READY, LEASED, verification, outcome, rollback verification, or cleanup.",
+      "evidence": {
+        "files": [
+          "PLAN.md:196-206",
+          "PLAN.md:230-236",
+          "PLAN.md:352-366",
+          "review/round-2-resolution.md:15",
+          "review/round-2-resolution.md:19"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Apply the explicit candidate sequence in PLAN section 8.4 to the section 14.0 IMPROVEMENT mapping. CURATION_PASSED -> OFFLINE_PENDING projects VERIFYING -> READY, and OFFLINE_PASSED -> SHADOW_PENDING also projects VERIFYING -> READY. Neither is a legal edge or stutter in the canonical lifecycle.",
+        "Apply the explicit rollout sequence CANARY_READY -> CANARY_RUNNING. It projects READY -> OBSERVING, bypassing LEASED and intervening canonical work phases. The row lists LEASED but the declared rollout sequence contains no edge through it.",
+        "Section 14.0 permits a private edge to emit intermediate canonical events only when those ordered events and each guard are specified. No such per-edge expansion is supplied for these transitions."
+      ],
+      "impact": "Increment 1 cannot derive the promised graph-valid fixture from the normative plan without inventing transitions. An implementer can either reject the built-in improvement factory or silently bypass admission and lifecycle gates. This leaves two prior high findings incompletely closed and permits an unsafe or undefined implementation.",
+      "recommendation": "Publish the transition-level mapping, not only a state lookup. Route each mutating rollout through an explicit private LEASED/admission edge and specify every ordered canonical event and guard for multi-phase projections. Add a table or generated fixture proving every declared candidate, rollout, attempt, and control-health edge maps legally.",
+      "verification": "Enumerating every section 8.4 edge against the mapping yields only canonical legal edges, stutters, or fully listed guarded event sequences, with no READY-to-OBSERVING or VERIFYING-to-READY shortcut.",
+      "confidence": "high",
+      "prior_findings": "STATE-R2-001; R2-RJ-001"
+    },
+    {
+      "id": "CEC-R3-002",
+      "severity": "high",
+      "title": "Repository identity remains both optional and mandatory in the supposedly domain-neutral contract",
+      "requirement": "The claimed closure of CDD-R2-004 and R-15/P-15 require a typed domain ScopeRef and require repository identity only for engineering repository records; a repository ID must not substitute for GTM or other-domain authority.",
+      "evidence": {
+        "files": [
+          "PLAN.md:121-140",
+          "PLAN.md:400-403",
+          "PLAN.md:434-440",
+          "review/round-2-resolution.md:27"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "PLAN.md:123 says repository identity is mandatory only for engineering repository records/effects and that the neutral kernel rejects it as a substitute for another domain's authority.",
+        "PLAN.md:140 then says each artifact has repository_id without marking it optional or domain-qualified.",
+        "PLAN.md:402 more broadly requires every stored, queued, cached, object-stored, and audited record to carry immutable repository_id. This includes the neutral research, decision, identity, and future GTM records described elsewhere."
+      ],
+      "impact": "A schema implementer must either violate the universal artifact/tenant MUSTs or invent repository identities for non-repository scopes. Fake repository binding can become an unsafe authorization substitute, while rejecting it makes the future cross-domain branch unrepresentable. The prior finding is not fully closed.",
+      "recommendation": "Replace universal repository_id requirements with mandatory tenant_id plus mandatory typed ScopeRef. Require repository_id only when ScopeRef.domain is engineering/repository, with a conditional schema rule that forbids it from satisfying account, consent, campaign, subject, or environment authority in other domains. Apply the same rule to storage, queues, cache keys, audit, and ArtifactRef.",
+      "verification": "Schema fixtures accept a valid non-repository ResearchArtifact/GTM proposal without repository_id, require repository_id for an engineering repository artifact, and reject cross-domain authorization based only on repository_id.",
+      "confidence": "high",
+      "prior_findings": "CDD-R2-004"
+    },
+    {
+      "id": "CEC-R3-003",
+      "severity": "medium",
+      "title": "Linked evidence artifacts still assert the unverified pre-cutoff retrieval history that the repair disclaims",
+      "requirement": "EVID-R2-001 was claimed addressed by treating the cutoff only as intended scope and making no unsupported UTC collection-history assertion.",
+      "evidence": {
+        "files": [
+          "PLAN.md:3-4",
+          "PLAN.md:71-84",
+          "research/repository-agent-operating-system/evidence-index.md:3",
+          "research/repository-agent-operating-system/evidence-cutoff.md:1-3",
+          "research/repository-agent-operating-system/evidence-repair.md:3-5",
+          "research/repository-agent-operating-system/evidence-repair.md:31-40",
+          "research/repository-agent-operating-system/research-manifest.json",
+          "review/round-2-resolution.md:13"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "The plan, evidence-repair.md, and research-manifest.json correctly say the legacy corpus does not prove retrieval time and that no re-fetch is claimed.",
+        "evidence-index.md nevertheless says 2026-09-13 access dates reflect retrieval performed before the cutoff, and evidence-cutoff.md states that research was executed at approximately 15:00-17:30 UTC. Those are positive collection-history assertions, not merely a convention.",
+        "These files remain linked supporting material and are explicitly included in the coverage audit, so a reader encounters two incompatible provenance accounts."
+      ],
+      "impact": "The plan itself fails safe by requiring a fresh immutable re-fetch, so this does not prove an unsafe implementation. It does leave the prior evidence correction editorially incomplete and can cause a reviewer to repeat an unsupported provenance claim.",
+      "recommendation": "Rewrite evidence-index.md and evidence-cutoff.md to label the timing narrative unverified and non-evidentiary, or archive them under a clearly marked superseded-claims heading. Point all current provenance statements to the manifest disclaimer and PLAN section 4.",
+      "verification": "A repository-wide search finds no assertion that legacy retrieval occurred before the cutoff; all such dates are labeled unverified local-calendar metadata pending the fresh-run gate.",
+      "confidence": "high",
+      "prior_findings": "EVID-R2-001"
+    },
+    {
+      "id": "CEC-R3-004",
+      "severity": "low",
+      "title": "Ordered lists and exact-location citations contain avoidable numbering drift",
+      "requirement": "A single reader should be able to follow the walkthrough and audit each claimed correction in order.",
+      "evidence": {
+        "files": [
+          "PLAN.md:18-28",
+          "PLAN.md:220-226",
+          "review/round-2-resolution.md:9-33"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "The walkthrough is numbered 1, 3, 4, 5, 6, 7, 8, 9, 9, 10, 11. The effect reconciliation outcomes are numbered 1, 3, 4.",
+        "The round-2 register labels locations exact but some parenthetical line ranges are stale: ARCH-R2-003 points to PLAN 111-113 although the Release 0 recovery envelope starts at line 117, and SECIMP-R2-006 points to PLAN line 109 although the canonical-principal independence clause is line 99."
+      ],
+      "impact": "No safety gate is bypassed, but sequence references are harder to quote reliably and the exact-location claim is false for some rows.",
+      "recommendation": "Renumber both lists and replace volatile line-number parentheticals with section heading plus stable clause/table-row names, or regenerate line anchors after final edits.",
+      "verification": "Both lists are consecutive and every round-2 location resolves to the named clause in the final PLAN.md.",
+      "confidence": "high"
+    },
+    {
+      "id": "CEC-R3-005",
+      "severity": "low",
+      "title": "The roadmap still instructs the builder to archive prototype artifacts that were removed by design",
+      "requirement": "The plan-only roadmap and immediate actions should describe executable next actions against the final checkout.",
+      "evidence": {
+        "files": [
+          "README.md:19-21",
+          "PLAN.md:465-479",
+          "PLAN.md:528-538"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "README.md says the prototype was removed after its failures were incorporated into the plan.",
+        "Increment 0 still says to archive the prototype as non-shipping, and immediate action 3 says to archive or label every prototype schema/model/SQL/CLI artifact. Those artifacts are absent by design."
+      ],
+      "impact": "The first roadmap increment contains a stale, non-executable task. A reader cannot tell whether removal already satisfies it or whether an external archive is required.",
+      "recommendation": "Change the task to verify and record that prototype product artifacts are absent, while retaining only the review/resolution evidence. If an external archive is required, name its owner, location, contents, and non-authoritative status.",
+      "verification": "Increment 0 and section 24 describe an action that can be completed from the final plan-only repository and agree with README.md.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "This audit did not execute future compilers, model checking, databases, sandboxes, GitHub effects, evidence re-fetches, or pilot gates. The plan correctly leaves all such proof in future increments.",
+    "External HTTP content and semantic source entailment were not revalidated. PLAN section 4 correctly blocks implementation pending that work.",
+    "Apart from the findings above, all 25 round-2 findings have an identifiable plan-level response; closure cannot pass while CEC-R3-001 and CEC-R3-002 remain open."
+  ]
+}

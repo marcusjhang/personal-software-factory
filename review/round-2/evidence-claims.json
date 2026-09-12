@@ -1,0 +1,55 @@
+{
+  "reviewer": "round-2 evidence and claims reviewer",
+  "scope": "Decision-grade review of PLAN.md after round-1 corrections, limited to evidence cutoff/provenance, selected citations, capability-versus-inference labels, conflicts, the 37-result synthesis claim, and disclosure of evidence gaps. The intentional absence of implementation was not treated as a defect.",
+  "strengths": [
+    "PLAN.md clearly says that no working implementation is claimed and keeps Release 0 read-only.",
+    "PLAN.md \u00a74 correctly separates vendor capability claims, architecture inference, and unvalidated local outcomes. Its updated GitHub Actions concurrency statement matches the currently available official documentation for the default single queue and max queue.",
+    "PLAN.md treats the METR paper and blog as one evidence family and does not use the two URLs as independent corroboration.",
+    "PLAN.md \u00a7\u00a722 and 24 disclose important transfer, snapshot, mutable-source, safety, productivity, and pilot uncertainty instead of claiming demonstrated end-to-end effectiveness.",
+    "The selected inline citations for GitHub concurrency, GitHub secure-use guidance, SLSA provenance, OWASP prompt injection/excessive agency, and METR are relevant to the limited primitive or risk claims attached to them."
+  ],
+  "findings": [
+    {
+      "id": "EVID-R2-001",
+      "severity": "high",
+      "title": "The cutoff explanation converts unverified future-dated provenance into an asserted collection history",
+      "requirement": "P-16 requires validated research in the plan-only deliverable. Evidence/experience PC-1 requires an immutable research run, actual UTC retrieved_at, validation-time checks, content digests, and snapshot lineage; its residual uncertainty says the full corpus was not re-fetched and claimed retrieval times remain unverified.",
+      "evidence": [
+        "PLAN.md:4,73,75,543",
+        "review/requirements-traceability.md:5-7,32,47",
+        "review/round-1-resolutions/evidence-experience.md:13-23,67-72,154-157",
+        "research/repository-agent-operating-system/evidence-cutoff.md:1-5",
+        "research/**/results/*.json (all 37 checked-in result files)"
+      ],
+      "reproduction": "Parse research/**/results/*.json. There are 37 files and every top-level as_of is 2026-09-13, while the declared UTC cutoff is 2026-09-12. Across those files there are zero retrieved_at fields, zero run_id fields, zero research_run records, zero snapshot_unavailable_reason fields, and zero evidence_family_id fields; only three content_digest key occurrences exist. The round-1 memo explicitly says the full corpus was not re-fetched and observation times remain unverified. Despite that, PLAN.md:4 states as fact that collection occurred before UTC midnight and calls the dates display stamps, and PLAN.md:73 calls the results validated.",
+      "impact": "A later implementation decision cannot distinguish sources actually observed before cutoff from copied scope/access dates or mutable pages viewed later. This directly fails the required validated-research boundary and can admit post-cutoff or changed evidence as if its provenance were known.",
+      "recommendation": "Do not assert the inferred collection time or call the corpus provenance-validated. Either execute PC-1 now for all material sources and publish one completed run with UTC observations, digests/snapshot dispositions, and validator output, or label the existing dates invalid/unverified legacy provenance and make plan approval explicitly provisional on a named pre-implementation evidence-repair gate.",
+      "verification": "A clean audit must show one immutable run covering every relied-on result/source, retrieved_at <= validation time and within the declared policy, digests or explicit snapshot-unavailable reasons, no mixed runs, and successful negative tests for future timestamps. The plan wording must match that audit rather than infer collection time from the host timezone.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-R2-002",
+      "severity": "high",
+      "title": "The claimed 37-file synthesis has no complete auditable claim graph or conflict-preserving matrix",
+      "requirement": "Evidence/experience PC-2 requires the expanded 23-item RAOS report and matrix, stable claim IDs and claim-source edges for normative decisions, evidence-family identity, and preservation of conflicts, unsupported claims, transfer assumptions, and explicit unknowns. P-16 requires validated research, not only a future evidence-graph design.",
+      "evidence": [
+        "PLAN.md:73-77,390,514-529,543,546-565",
+        "review/round-1-resolutions/evidence-experience.md:17-23,48-53,74-87,133-150",
+        "research/repository-agent-operating-system/report.md:36",
+        "research/repository-agent-operating-system/evidence-matrix.md:1-15",
+        "research/self-managing-software-projects/synthesis-audit.md:61-86",
+        "review/requirements-traceability.md:5-7,32,47"
+      ],
+      "reproduction": "Count the result files: 14 SMSP plus 10 RAOS base plus 8 lifecycle-extension plus 5 domain-extension equals 37. The RAOS report still says its evidence set is all 10 JSON results and its evidence matrix has only 10 item rows; no regenerated matrix covers the 13 RAOS extension items. The 37 JSON files contain no evidence_family_id or run_id fields and PLAN.md contains no stable claim IDs or claim-source edge table. Compare SMSP synthesis-audit.md:61-86: it records eight cross-item conflicts and specific gaps such as the unresolved Dependabot limit and unavailable Serper search, while PLAN.md provides broad risk/uncertainty prose but no mapping proving those conflicts and gaps were preserved in each affected decision.",
+      "impact": "Reviewers cannot reproduce the statement that the plan synthesized all 37 validated results, determine which evidence supports or refutes a material decision, detect repeated sources counted as corroboration, or confirm that inconvenient conflicts and missing-search gaps did not disappear during synthesis. This leaves a direct round-1 evidence correction open before safe implementation planning can rely on the research.",
+      "recommendation": "Regenerate the RAOS report/matrix for all 23 RAOS items and publish a corpus manifest covering all 37 results. Add stable decision/claim IDs, typed support/refute/context edges, canonical work and family IDs, and explicit conflict/unsupported/unknown rows. Link material PLAN.md decisions to those IDs. Until that exists, replace the categorical synthesis/validated claim with an accurate statement that the plan consulted 37 heterogeneous results and that completeness and semantic validation remain pending.",
+      "verification": "A deterministic build from a clean checkout must enumerate all three outlines and all 37 result IDs, prove each material plan decision has at least one auditable claim edge, collapse METR and other duplicate works to one family, retain every unresolved conflict/gap, reject non-entailing or vendor-only efficacy support, and emit a coverage report with zero unexplained omissions.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "This review selectively re-fetched the current GitHub Actions concurrency page; it did not re-fetch the full source corpus, consistent with the unresolved PC-1 gap.",
+    "The plan may in fact have been informed manually by all 37 files, but the current artifacts cannot prove complete or conflict-preserving synthesis.",
+    "Living documentation can change after the stated cutoff. Current-page agreement verifies the corrected wording, not its historical state at the cutoff."
+  ]
+}

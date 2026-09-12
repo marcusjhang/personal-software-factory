@@ -1,0 +1,174 @@
+{
+  "reviewer": "audit-r1-factory-cross-domain",
+  "scope": "Adversarial review of the factory DSL and composition, deep-research contract, engineering-first/domain boundary, consumer installation, repository/project isolation, upgrades, dogfooding, feedback, and premature abstraction across the repository-agent research, design, configuration, Python, SQL, and tests.",
+  "strengths": [
+    "The documents consistently label the implementation as a proposed, plan-only reference and do not claim that a production controller or GTM domain exists.",
+    "The research recommends engineering-first delivery, a separate future GTM repository, typed artifact handoffs, and measured extraction gates rather than a universal agent ontology.",
+    "Factory examples explicitly reserve approval authority for humans/controllers and include budgets, retry, escalation, and cleanup headings.",
+    "Consumer guidance pins workflow references to immutable commit SHAs and says consumer feedback and eval changes are proposals only."
+  ],
+  "findings": [
+    {
+      "id": "FCD-001",
+      "severity": "high",
+      "title": "The shipped CLI and the reviewed factory files implement incompatible factory contracts",
+      "requirement": "One versioned factory definition must be loadable, validatable, selected, compiled, and pinned consistently across repository configuration and runtime code.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:205-212",
+          "src/agent_os/loaders.py:31-32",
+          "src/agent_os/cli.py:45-47",
+          ".agent-os/schemas/factory.schema.json:1-105",
+          ".agent-os/factories/deep-research.yaml:1-91",
+          "tests/test_loaders_cli.py:24-42"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `.venv/bin/agent-os factory-validate .agent-os/factories/deep-research.yaml`. It exits 1 with missing `name`, `version`, and `runner`, and rejects `schema_version`, `id`, `roles`, `phases`, and the other DSL fields as extras. The passing CLI test instead constructs the unrelated `{name, version, runner, capabilities, settings}` shape.",
+      "impact": "None of the four reviewed factories can be consumed by the Python API or selected by the demo. A controller built against one contract will reject or misinterpret artifacts approved against the other.",
+      "recommendation": "Choose a single canonical factory schema and generate or share its Python model. Make every bundled factory, registry entry, composition rule, CLI path, digest operation, and test use that contract. Remove the parallel metadata-only model.",
+      "verification": "For every enabled registry entry, run both JSON Schema and Python loading, compile it, and assert an identical canonical digest. Add a test that the CLI loads all shipped examples and rejects the old alternate shape.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-002",
+      "severity": "high",
+      "title": "The factory schema validates labels, not the typed workflow DAG required by the design",
+      "requirement": "The DSL/compiler must represent and reject invalid input/output schemas, dependency edges, role and capability bindings, sandbox/tool profiles, deterministic gates and joins, write-set conflicts, idempotency/compensation, cleanup/retention, evaluations, and projection mappings.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md:222-231",
+          "docs/end-to-end.md:361-370",
+          ".agent-os/schemas/factory.schema.json:32-100",
+          ".agent-os/factories/build.yaml:1-95",
+          ".agent-os/bin/validate.py:78-87",
+          "research/repository-agent-operating-system/lifecycle-extension/results/06-general-factory-dsl-and-orchestrator-runtime.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "Load `factory.schema.json`, change a build transition `from` to `NOT_A_PHASE`, add `COMPLETE -> PLAN` with guard `always`, and replace roles with `[\"\"]`; `Draft202012Validator(...).iter_errors(...)` returns zero errors. Tools, budgets, retry, and guards are unconstrained objects/strings, and there are no node input/output or dependency fields to test. The checked-in deep-research file also names role `parallel_researchers` but assigns tools to undeclared `researchers`; `uv run --with jsonschema==4.23.0 python .agent-os/bin/validate.py` still reports success.",
+      "impact": "Invalid, cyclic, unbound, over-capable, or conflicting workflows can pass the advertised validator. The current format cannot express the compile-time safety and composability properties the architecture requires, so apparent factory review does not create an enforceable contract.",
+      "recommendation": "Implement the minimum engineering-first typed kernel: nodes/edges; schema-addressed artifact ports; authenticated role/capability/sandbox bindings; structured predicates; budgets; write/resource sets; retry/idempotency/compensation; cleanup/retention; eval and projection references. Add semantic compilation for reference closure, reachability, cycles, authority, capability intersection, joins, and parallel resource conflicts. Avoid adding GTM nouns before a second domain proves an extension need.",
+      "verification": "Mutation/property tests must reject unknown phases, empty/duplicate roles and IDs, unreachable terminals, cycles not explicitly modeled as retry, missing artifact producers, incompatible ports, unbound gates, widened capabilities/budgets, and overlapping parallel writes. Compile every bundled engineering factory successfully.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-003",
+      "severity": "high",
+      "title": "Composition and registry are explicitly excluded from validation",
+      "requirement": "Subfactory composition must resolve only pinned known definitions, pass compatible digest-addressed artifacts, reduce budgets/capabilities, reject cycles, preserve authority, and define child failure/cancellation cleanup.",
+      "evidence": {
+        "files": [
+          ".agent-os/bin/validate.py:41-43",
+          ".agent-os/bin/validate.py:78-87",
+          ".agent-os/factories/registry.yaml:1-7",
+          ".agent-os/factories/composition.yaml:1-21",
+          ".agent-os/factories/README.md:1-7",
+          "docs/architecture.md:222-227"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect `.agent-os/bin/validate.py`: it requires `composition.yaml` and `registry.yaml` to exist and parses all YAML, but lines 82-83 skip both during factory validation and no later code validates their shape or semantics. Renaming a parent to an unknown ID, creating a composition cycle, duplicating registry IDs, or setting an absent default therefore produces no validator finding.",
+      "impact": "The declared cross-factory paths (`maintenance -> build`, `research -> ideation`) have no enforceable compatibility, pinning, budget/capability, artifact, cancellation, or authority guarantees. This blocks safe composability even if individual factories become valid.",
+      "recommendation": "Add versioned schemas plus semantic resolution for the registry and composition graph. Pin child factory digests and typed port mappings. Compile effective budgets/capabilities, reject cycles and unresolved/default/duplicate IDs, and require deterministic join, cancellation, and cleanup behavior.",
+      "verification": "Add negative fixtures for unknown/disabled/default factories, duplicate IDs, cycles, incompatible artifact schemas, mutable child references, budget/capability expansion, missing child cleanup, and a composition that attempts to manufacture READY/approval.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-004",
+      "severity": "high",
+      "title": "The enabled deep-research factory lacks complete lifecycle and enforceable evidence semantics",
+      "requirement": "Deep research must produce schema-valid, claim-level cited records; distinguish repeated/correlated sources from independent corroboration; validate coverage and source quality; preserve conflicts/uncertainty; audit gaps independently; resume by digest; selectively refresh stale evidence; and hand an exact digest to a human. Every declared state also needs legal entry, exit, cancellation, stale/retry, cleanup, and terminal behavior.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/review-protocol.md:50-60",
+          ".agent-os/factories/deep-research.yaml:1-91",
+          ".agent-os/schemas/factory.schema.json:69-100",
+          "docs/architecture.md:229-231",
+          "docs/end-to-end.md:369-370",
+          "research/repository-agent-operating-system/lifecycle-extension/results/05-deep-research-factory-as-a-reusable-workflow.json"
+        ],
+        "urls": [
+          "https://json-schema.org/draft/2020-12"
+        ]
+      },
+      "reproduction": "Inspect `deep-research.yaml`: `sources_per_claim: 3`, \u201cmaterial claims cite retrievable sources,\u201d and auditor independence \u201cwhere practical\u201d are free text. Artifacts are path names only. There is no Claim/Observation/Source/Conflict schema binding, source-family identity, entailment/coverage result, deterministic dedup/join, stale/refresh state, input/result digest reuse rule, or refresh transition. The generic validator can only check the outer shape. It also transitions to undeclared `BLOCKED` and has no resume, cancellation, stale, timeout, refresh, or cleanup-completion transitions, yet schema validation succeeds.",
+      "impact": "Three URLs copied from one vendor or derivative source can satisfy the apparent count, unsupported synthesis can reach handoff, conflicts can disappear, and stale or partial runs cannot be safely resumed. The enabled factory does not implement the repository\u2019s own validated research design. Interrupted or exhausted work has no deterministic durable recovery or terminal semantics.",
+      "recommendation": "Model research items, fields, claims, observations, sources/source families, conflicts, validation and freshness as typed digest-addressed artifacts. Require claim-to-observation links, access/snapshot metadata, independence classification, coverage and conflict joins, explicit UNKNOWN, independent gap audit, digest-based resume, selective refresh, and exact report/decision digests.",
+      "verification": "Use fixtures with three duplicate vendor URLs, a citation that does not entail its claim, missing required fields, contradictory sources, stale snapshots, a partially valid prior run, and changed field/source digests. The first five must block or surface uncertainty; resume must reuse only matching valid artifacts and refresh only invalidated dependents. Also validate declared-state closure and exercise cancellation, exhaustion, stale inputs, cleanup failure, resume, and terminal completion.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-005",
+      "severity": "high",
+      "title": "The PostgreSQL product has no enforceable project or repository tenant boundary",
+      "requirement": "Each consumer repository/project/environment must have a distinct tenant identity, database isolation, idempotency namespace, queue/quota, credential selection, and artifact/workspace boundary; foreign-project reads and writes must fail closed.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md:242-250",
+          "migrations/0002_schema.sql:9-43",
+          "migrations/0003_security.sql:1-18",
+          "tests-sql/001_integrity.sql",
+          "tests-sql/002_leases.sql",
+          "tests-sql/003_effects_and_roles.sql",
+          "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect the schema: `work_items` has only a free-text `repository`; the inbox has no project key; idempotency uses a caller-supplied free-text `scope`; dependent tables inherit no mandatory project/environment key. `polar_runtime` receives SELECT/INSERT/UPDATE/DELETE on every table. There is no project registration foreign key, row-level security policy, per-project runtime role/session claim, or negative cross-project SQL test.",
+      "impact": "A compromised or buggy shared controller credential can read or mutate every consumer\u2019s work, approvals, artifacts, and effects. Logical naming conventions cannot meet the stated hard project isolation or future GTM separation requirement.",
+      "recommendation": "Introduce immutable tenant/project/environment registration and mandatory foreign keys/compound uniqueness throughout all aggregates, inbox/outbox, artifacts, approvals, leases, effects, and idempotency. Enforce project-scoped service identity with RLS or separate databases/roles as the threat model requires. Keep fleet metadata separate and deny cross-project handoffs unless both owners approve a typed digest.",
+      "verification": "Run two-project SQL tests under project-scoped runtime identities. Foreign SELECT/INSERT/UPDATE/lease/effect/idempotency reuse must fail. Also test repository aliasing, project reassignment, missing session claims, cross-domain handoffs, backup/export boundaries, and an admin-only audited exception path.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-006",
+      "severity": "high",
+      "title": "Consumer pinning is a document-only sketch and omits the upgrade/dogfood contract",
+      "requirement": "Consumers must have a validated immutable bundle/content digest, compatibility ranges, selected domain/factory/adapter versions, required permissions, effective-config provenance, install hash verification, rollback pin, migrations, canary rings, privacy-filtered feedback, and an isolated stable-release dogfood path.",
+      "evidence": {
+        "files": [
+          ".agent-os/CONSUMING.md:1-19",
+          ".agent-os/consumer.example.yaml:1-17",
+          ".agent-os/schemas/consumer.schema.json:15-74",
+          ".agent-os/bin/validate.py:68-72",
+          ".github/workflows/agent-os-validate.yml:1-35",
+          "docs/architecture.md:242-254",
+          "research/repository-agent-operating-system/domain-extension/results/04-engineering-first-extension-and-extraction-gates.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "The consumer schema requires only repository, commit, integer version, workflow ref, enabled factory names, capability reductions, and three proposal booleans. It has no content digest/hash manifest, compatibility ranges, factory/domain/adapter pins, permissions, project/environment identity, migration/rollback/canary metadata, or effective-config digest. `validate.py` validates only the bundled `consumer.example.yaml`; the guide never names or validates an installed consumer manifest. No dogfood manifest, upgrade workflow, release artifact, or feedback envelope exists. The schema also accepts a bundle commit of 40 `1` characters with a workflow ref pinned to 40 `2` characters, although the guide requires the same SHA; arbitrary schema-valid modifications of vendored bundle files are not compared with upstream.",
+      "impact": "A consumer cannot deterministically prove what was installed, whether it is compatible, how to roll back, or whether reductions remain reductions. The repository cannot exercise its own released version independently of candidate code, so upgrade and feedback claims cannot be tested and fleet/GTM expansion would be premature.",
+      "recommendation": "Define an actual consumer manifest path and validate it in the reusable workflow. Publish a signed/hash-manifested release artifact with compatibility and permission metadata. Add install/verify/update/rollback tooling, effective-config compilation, migrations and canary evidence. Dogfood the last stable release through a separate tenant and keep privacy-filtered outcome/eval proposals typed and reviewed. Enforce commit/workflow equality or explicitly independent pins with separate meaning.",
+      "verification": "In a clean external repository, install a pinned release, verify every file hash, reject a tampered file and unsupported controller/schema/adapter combination, prove capability expansion fails, run an upgrade PR with permission/effective-config diff and rollback, then prove this repository\u2019s candidate cannot govern its own validation/promotion and raw consumer content cannot enter central feedback.",
+      "confidence": "high"
+    },
+    {
+      "id": "FCD-007",
+      "severity": "medium",
+      "title": "Measured dogfood, extraction, and GTM gates are stranded in research rather than the operative rollout plan",
+      "requirement": "The engineering-first plan must sequence self-hosting, consumer proof, SDK extraction, and a separate GTM start with measurable owners, denominators, stop conditions, and explicit non-goals so generic interfaces are extracted only from demonstrated reuse.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/domain-extension/results/04-engineering-first-extension-and-extraction-gates.json (implementation_recommendation)",
+          "research/repository-agent-operating-system/report.md:338-397",
+          "docs/architecture.md:233-254",
+          "docs/end-to-end.md:372-376"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare the domain-extension research `implementation_recommendation` with the primary report\u2019s Stage 0-4 roadmap and the architecture. The research specifies a 14-day self-host shadow, 2-3 consumer repos, 3 materially different workflows, two adapters stable for two releases/60 days, 80% duplicated call sites, named ownership, and concrete GTM volume/governance gates. The operative report contains no factory, dogfood, SDK extraction, or GTM phase, while architecture only states that GTM is future and dogfooding should happen.",
+      "impact": "Implementers can build or publish a generic SDK too early, or start GTM without the evidence thresholds that the research itself recommends. Conversely, no owner can determine when the intended cross-domain seam is proven.",
+      "recommendation": "Promote the domain-extension phased recommendation into the authoritative rollout/ADR. Name owners and evidence artifacts, link each gate to project states and acceptance tests, and state that failure keeps abstractions internal. Keep GTM in a separate repository and read-only/draft-only until its later authority gate.",
+      "verification": "A plan traceability test or checklist should map every self-host, consumer, extraction, GTM-start, and GTM-authority condition to a phase, owner, metric denominator, artifact, stop/rollback rule, and explicit decision record. Confirm no public plugin/SDK or GTM work is scheduled before its predecessor gates pass.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No production controller, artifact store, release registry, consumer repository, or GTM repository is present, so runtime behavior and tenant escape rates cannot be measured; absence is treated as a blocker for delivered capability, not proof that the proposed architecture is unsafe.",
+    "The project pytest suite passed 22 tests. The project `.venv` lacks `jsonschema`, but `uv run --with jsonschema==4.23.0 python .agent-os/bin/validate.py` passed; direct JSON Schema mutation tests reproduced the semantic acceptance gaps.",
+    "Vendor and standards sources repeated across research files were treated as capability evidence, not independent outcome evidence. No claim here relies on multiple occurrences as independent corroboration.",
+    "GTM was assessed only as a future fit boundary. Deferring GTM and a universal SDK is appropriate until engineering dogfood and a second domain produce measured evidence."
+  ]
+}

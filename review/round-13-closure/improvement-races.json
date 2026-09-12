@@ -1,0 +1,133 @@
+{
+  "reviewer": "round-13 independent improvement race closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-12 combined correction",
+    "specialty": "Cancellation, degradation, revocation, digest, Effect, rollback, and cleanup-ownership interleavings.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-12-resolution.md",
+      "review/round-12-closure/cross-consistency.json",
+      "review/round-12-closure/evidence-requirements.json",
+      "review/round-12-closure/formal-model.json",
+      "review/round-12-closure/improvement-adversary.json",
+      "review/round-12-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model proof",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md states that the repository contains a plan, not a working controller or deployed factory.",
+        "Recomputed PLAN.md SHA-256 is 19fea5cc0f6df092eec3fa4f0b0488465b4e3460c8c54fe94c85006a795bea1c.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 8fb9782a8e20310ce8975486a8e0742a02e76148fba85624e4197ff1073f0a1d."
+      ],
+      "basis": "The hashes match review/round-12-resolution.md and the schema-3 generated_against record."
+    },
+    {
+      "area": "schema_3_evidence_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-12.",
+        "It records editorial_candidate_associations_only and legacy_unverified, 37 corpus result files, 25 source observations, 20 claims, 36 evidence edges, and all 28 normative headings."
+      ],
+      "basis": "The graph binds the current PLAN/manifest digests and promotes zero edges to supports or refutes. Future fresh retrieval and semantic review remain explicit gates."
+    },
+    {
+      "area": "round_12_correction_inventory",
+      "result": "pass",
+      "exact_text": [
+        "All five round-12 reviews parse and contain 0 critical and 8 high findings in total.",
+        "review/round-12-resolution.md maps all 8/8 findings and records 785 unique manifest rows: 96 canonical and 689 private/product."
+      ],
+      "basis": "Historical findings were used as correction contracts, not automatically counted against the corrected bytes."
+    },
+    {
+      "area": "cancellation_and_rollback_cleanup_ownership",
+      "result": "pass",
+      "exact_text": [
+        "IX06-XR/XQ now include exposed CANARY_PASSED and ExposedCancellationSourcesV1 requires exact generated equality.",
+        "B71/M59 own first post-settlement cancellation; B71-P/M59-P adopt cancellation persisted during rollback; B71-R/M59-R are replay only; B39/M30 race on the same expected-version/absence boundary.",
+        "IRB07-N/R/Q release exact RO00-I blocks only after closure, restoration, and independent verification, and require the BlockReleaseReceipt before IRB08, IR13C-X, IX03, or terminal resolution."
+      ],
+      "basis": "The corrected rows close the round-12 cancellation and rollback-release findings and preserve one cleanup owner per cancellation/origin branch."
+    },
+    {
+      "area": "digest_revocation_effect_continuations",
+      "result": "pass",
+      "exact_text": [
+        "IC24-RWX/RPX/RN preserve the original Effect identity and finish EVIDENCE_STALE reconciliation without an unrelated revocation.",
+        "The X continuations create or reuse at most one rollback; IC24-RN creates no rollback and is the sole no-exposure cleanup-entry owner."
+      ],
+      "basis": "The round-12 digest-only X/N continuation defect is corrected for a healthy, non-cancelled execution."
+    },
+    {
+      "area": "control_degradation_during_existing_unsettled_reconciliation",
+      "result": "fail",
+      "exact_text": [
+        "IH01-W/P can record degradation only while atomically changing WIDENING_EFFECT/PROMOTING to the corresponding reconciliation state.",
+        "IC24-A and IC32-UW/UP can independently leave HEALTHY tuples already in WIDENING_RECONCILING or PROMOTION_RECONCILING with the original Effect unsettled.",
+        "Generic IH01 excludes every tuple with an active generation, exposure, or exposure-capable Effect; IH01-RX/RN require a protected X or N classifier; IH06-* require the Effect already settled."
+      ],
+      "basis": "A degradation arriving after digest invalidation or revocation has moved an unsettled Effect into reconciliation, but before settlement, has no legal health edge. Finding R13-IR-001."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R13-IR-001",
+      "severity": "high",
+      "title": "Control degradation has no edge while a digest/revocation-triggered Effect is already reconciling and unsettled",
+      "requirement": "PLAN \u00a78.4 requires control degradation to commit durably and atomically fence active exposure before any later receipt, and manifest \u00a715.6 claims exactly one safe interrupt for every active generation/exposure/Effect interval.",
+      "evidence": [
+        "IC24-A sends an UNSETTLED active widening or promotion Effect to WIDENING_RECONCILING or PROMOTION_RECONCILING while candidate becomes EVIDENCE_STALE; IC32-UW/UP create the same already-reconciling shape on revocation.",
+        "IH01-W and IH01-P require the source rollout to be WIDENING_EFFECT or PROMOTING and atomically perform the transition into reconciliation, so they cannot consume a tuple already in WIDENING_RECONCILING or PROMOTION_RECONCILING.",
+        "IH01-RX/RN cover only protected X/N outcomes. Before reconciliation settles, neither classifier exists. IH06-WX/WN/PX/PN likewise require the original Effect terminal/reconciled or the complete Effect set settled.",
+        "Generic IH01 is forbidden because the tuple still has an active generation and an unsettled exposure-capable Effect. The cancellation safety allowlist does not repair a health event in the work_cancel_state=NONE trace.",
+        "The ReachableActiveExposureInterruptCoordinatesV1 equality says every member has one interrupt after X/N or unsettled classification is fixed, but supplies no unsettled interrupt for an already-reconciling source. Waiting for classification contradicts the promise that degradation durably commits before any later receipt."
+      ],
+      "adversarial_trace": [
+        "Reach HEALTHY + SHADOW_PASSED + WIDENING_EFFECT (or PROMOTING) with the original Effect unsettled.",
+        "Commit IC24-A on a bound digest change (or IC32-UW/UP on revocation), producing HEALTHY + WIDENING_RECONCILING/PROMOTION_RECONCILING with that Effect still unsettled.",
+        "Before an Effect settlement receipt, deliver continuity/SLO degradation.",
+        "IH01-W/P reject because their rollout source was already consumed; IH01-RX/RN and IH06-* reject because no settled X/N exists; generic IH01 rejects the active Effect. The degradation cannot be durably recorded by any legal edge."
+      ],
+      "impact": "The closed manifest either drops/delays a valid control-loss event until after a later Effect receipt or requires an invented transition. This violates the declared degradation ordering and leaves an undefined safety interleaving during an externally uncertain effect.",
+      "required_correction": "Add exact unsettled already-reconciling degradation rows for widening and promotion. They must atomically record TELEMETRY_DEGRADED, preserve the original Effect identity and reconciliation coordinate, fence all remaining authority/sends, create no rollback before X/N settlement, and then hand off only to IH06-X/N. Include them in the exact interrupt equality and race degradation before and after IC24-A and IC32-UW/UP, plus before and after Effect settlement."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1,
+    "round_12_review_files_reviewed": 5,
+    "round_12_raw_critical_findings_reviewed": 0,
+    "round_12_raw_high_findings_reviewed": 8,
+    "manifest_rows_reported": 785,
+    "canonical_rows_reported": 96,
+    "private_and_product_rows_reported": 689,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_evidence_edges_checked": 36,
+    "current_normative_headings": 28
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static adversarial audit. It does not claim implementation, exhaustive model execution, runtime safety, or production validation.",
+    "Fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, and reviewed-edge regeneration remain accepted future gates."
+  ],
+  "closure_criteria_pass": false
+}

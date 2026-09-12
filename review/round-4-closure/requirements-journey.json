@@ -1,0 +1,86 @@
+{
+  "reviewer": "round-4 requirements-and-owner-journey closure auditor",
+  "scope": "Final plan-only closure audit of all 16 requirements and the owner journey across IDEATION, BUILD, MAINTENANCE, DEEP-RESEARCH, and IMPROVEMENT. Reviewed PLAN.md, README.md, docs/state-transition-manifests.md, requirements traceability, every round-3 closure JSON and its resolution, every round-2 review and its resolution, relevant round-1 reviews/resolutions, and the named current evidence artifacts. The audit accepts the explicit no-implementation scope and does not require future gates to have passed.",
+  "strengths": [
+    "All 16 user requirements have substantive plan contracts and roadmap/validation locations. The plan does not claim that any requirement is implemented.",
+    "The owner journey is readable and covers durable conversation, ideation, BUILD, MAINTENANCE, DEEP-RESEARCH, IMPROVEMENT, status/why, pause/resume/cancel, review, merge, exceptions, UNKNOWN effects, cleanup, export, upgrade, rollback, and uninstall.",
+    "The R0/R1 DelegatedAdmissionPolicy and PolicyAdmissionReceipt design removes the earlier universal per-item human READY gate while preserving exact-digest human authority for R2-R4 and exceptional actions.",
+    "The incorporated manifest materially closes the earlier private-edge, improvement-reducer, lease, wait, cancellation, UNKNOWN-effect, cleanup, and unconfirmed-quiescence gaps.",
+    "Repository identity is now conditional under universal tenant plus typed ScopeRef, and the cross-scope transfer envelope, sandbox matrix, and independent-principal rules are explicit and fail closed.",
+    "Evidence files and PLAN §4 consistently distinguish structural validation from provenance, semantic validation, and local outcome proof. material-claims.json matches the current PLAN and manifest SHA-256 digests and explicitly labels its regeneration editorial and semantically unverified."
+  ],
+  "findings": [
+    {
+      "id": "R4-RJ-001",
+      "severity": "medium",
+      "title": "The generic owner decision command still omits enablement and advertises decision exits absent from the normative manifests",
+      "requirement": "R-09 exception-driven human decisions, R-12 governed maximum-safe improvement, and the required complete Issue/CLI owner decision journey.",
+      "evidence": "PLAN §8.5 (line 242) requires a distinct ImprovementEnablementDecision. PLAN §10.1 (line 280) declares a closed /factory decide subject-type list containing DecisionRecord, ResearchDecision, CurationDecision, CanaryAdmissionDecision, WideningDecision, and PromotionDecision, but not ImprovementEnablementDecision. The same row promises that deny enters each subject's declared block/failure/cleanup path. The normative IDEATION rows I07-I08 and DEEP-RESEARCH rows D19-D20 define accept and request-changes but no deny edge; rollout row IR02 defines enablement acceptance and IR03 canary admission acceptance but no explicit denial/request-change edge at either source state.",
+      "reproduction": "Compare PLAN lines 242 and 280 with docs/state-transition-manifests.md rows I07-I08, D19-D20, IR02-IR03, and the closed-edge rule in manifest §1. ImprovementEnablementDecision cannot be selected through the advertised closed command, and several advertised deny outcomes have no legal edge.",
+      "impact": "An implementer cannot build the promised complete owner interface deterministically. Enablement can remain permanently waiting, or an adapter must invent an unlisted transition. This is a plan-contract/usability defect, not evidence of an unsafe deployed system.",
+      "recommendation": "Add ImprovementEnablementDecision to the durable catalog and /factory decide closed subject list. Add explicit accept, request-changes, deny, expiry, withdrawal, and stale-input edges and exact recovery commands for every advertised decision subject, or narrow each subject's action set to its actual manifest edges.",
+      "verification": "A generated check should enumerate every §10.1 subject/action pair and prove exactly one legal manifest edge plus event, wait closure, status result, and recovery command. It should reject any UI action not present in the manifest.",
+      "confidence": "high",
+      "prior": "R3-REQ-004 was only partially closed; its generic action exists, but the closed subject/action coverage remains incomplete."
+    },
+    {
+      "id": "R4-RJ-002",
+      "severity": "medium",
+      "title": "Delegated R0/R1 admission has conflicting durable mutation authority",
+      "requirement": "R-04 rigorous READY including delegated R0/R1 admission, R-08 deterministic status/state authority, and R-09 exception-driven human involvement.",
+      "evidence": "PLAN §10 says the runtime validator deterministically derives and signs PolicyAdmissionReceipt and uses it to authorize READY_REVIEW -> READY. PLAN §5.1 places that receipt in Work and decisions, whose mutation rule says only the authenticated human gateway may append issue/deny/revoke events and that runtime is read/validate/consume only. PLAN §5's authority table also says the scheduler/runtime must not manufacture authority, while the durable controller fact authority's owned record list does not name PolicyAdmissionReceipt.",
+      "reproduction": "Follow an eligible R1 walkthrough step 4 through PLAN §§10 and 13, then apply the PLAN §5.1 owner/mutation rule to the required durable PolicyAdmissionReceipt. No named role is both allowed to derive/sign and persist that receipt without contradicting the catalog wording.",
+      "impact": "The core closure for exception-driven READY is implementationally ambiguous. One reading prevents persistence/replay of delegated admission; another broadens the runtime's decision-record write authority beyond the stated separation boundary.",
+      "recommendation": "Give a named narrow controller role explicit append-only authority for PolicyAdmissionReceipt and its invalidation/consumption events. State that the receipt derives authority solely from a current human-issued DelegatedAdmissionPolicy and is not an approval or new authority. Keep all human decision records gateway-only.",
+      "verification": "Compile a record-family/operation/role matrix and prove that receipt derive, sign, append, validate, consume, expire, revoke-by-policy, and replay operations each have exactly one allowed role and no gateway/runtime overlap.",
+      "confidence": "medium-high",
+      "prior": "R3-REQ-001's policy semantics are otherwise closed, but the current record-custody wording leaves its durable execution path ambiguous."
+    },
+    {
+      "id": "R4-RJ-003",
+      "severity": "low",
+      "title": "The Increment 0 roadmap still instructs the builder to archive an absent prototype",
+      "requirement": "R-16 plan-only delivery and a directly executable, readable roadmap.",
+      "evidence": "PLAN §20 line 484 says 'Archive prototype as non-shipping'. README says prototype code was removed, and PLAN §24 item 3 says to verify that prototype artifacts are absent and that no external prototype archive is required. The round-3 resolution specifically claims this stale archive work was replaced.",
+      "reproduction": "Search PLAN.md for 'Archive prototype' and compare the sole match at line 484 with PLAN line 549 and README Status.",
+      "impact": "The first roadmap increment contains a small contradictory and impossible task. It does not block the architecture or make implementation unsafe.",
+      "recommendation": "Replace the Increment 0 phrase with the §24 checkout-verifiable absence and review-evidence preservation requirement.",
+      "verification": "A repository search finds no remaining instruction to archive removed prototype artifacts, while Increment 0 still requires an absence record and preservation of review/resolution evidence.",
+      "confidence": "high",
+      "prior": "CEC-R3-005 remains open despite the round-3 resolution's closure claim."
+    },
+    {
+      "id": "R4-RJ-004",
+      "severity": "low",
+      "title": "Synthesis coverage still states an unverified UTC+08 provenance explanation as fact",
+      "requirement": "R-10 evidence-honest resumable research and R-16 honest plan-only delivery.",
+      "evidence": "synthesis-coverage.md line 11 says records use 2026-09-13 'because that is the UTC+08 host’s local calendar date'. evidence-cutoff.md says the earlier UTC+08 account is an unverified process narrative, and research-manifest.json says the explanation does not itself verify retrieval occurred before cutoff. The synthesis paragraph later disclaims attested retrieval times, but its causal sentence is still categorical.",
+      "reproduction": "Compare synthesis-coverage.md line 11 with evidence-cutoff.md paragraphs 1-3 and research-manifest.json provenance_disclaimer.access_date_scope.",
+      "impact": "This does not restore the former pre-cutoff retrieval claim, and PLAN §4 remains appropriately blocked. It does leave a small evidence-provenance inconsistency in a current audit artifact.",
+      "recommendation": "Change 'because that is' to 'under an unverified process account, may represent' and keep the no-retrieval-proof disclaimer.",
+      "verification": "All current evidence artifacts characterize UTC+08 as an unverified narrative and make no categorical claim about why the legacy dates exist.",
+      "confidence": "high",
+      "prior": "The material ROAD-EVID-R3-001/CEC-R3-003 pre-cutoff overclaim is closed; this is a narrower residual wording defect."
+    },
+    {
+      "id": "R4-RJ-005",
+      "severity": "low",
+      "title": "Traceability calls P-01 through P-16 normative PLAN clauses that do not exist in PLAN.md",
+      "requirement": "R-01-R-16 traceability must be accurate and directly auditable.",
+      "evidence": "requirements-traceability.md says P-01-P-16 are one-to-one normative plan clauses, but PLAN.md defines no P-ID anchors or clauses. The table actually maps each alias to bundles of PLAN sections.",
+      "reproduction": "Search PLAN.md for 'P-01' through 'P-16'; none occurs. Compare with requirements-traceability.md §1 and §2.",
+      "impact": "The substantive 16/16 mapping is intact, but a reader cannot resolve the claimed normative clause identifiers in the sole plan authority.",
+      "recommendation": "Call P-01-P-16 traceability aliases, or add explicit normative P-ID anchors to PLAN.md.",
+      "verification": "Every identifier described as a normative PLAN clause resolves to an exact PLAN anchor, or the traceability text clearly labels it non-normative.",
+      "confidence": "high",
+      "prior": "No direct round-3 finding; this is residual traceability terminology."
+    }
+  ],
+  "residual_uncertainty": [
+    "No implementation, generated compiler output, model-check result, database race proof, security test, semantic evidence review, or pilot exists. That is accepted scope and is not a closure defect.",
+    "The very large normative edge tables were manually checked against the prior high findings, but only the planned future compiler/model checker can prove total reachability, illegal-edge rejection, and improvement-tuple invariants exhaustively.",
+    "The legacy 37-file corpus remains provenance- and semantics-unverified. PLAN §4 correctly blocks Increment 1 until a fresh immutable run and human edge review pass.",
+    "Future GitHub, tenant, and identity-provider behavior remains subject to the plan's target-tenant probes and signed admission gates."
+  ],
+  "closure_criteria_pass": true
+}

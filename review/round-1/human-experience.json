@@ -1,0 +1,225 @@
+{
+  "reviewer": "round-1-human-experience",
+  "scope": "Adversarial review of the planned end-to-end user and agent experience and human-needed policy, from a vague idea through clarification, ready ticket, build, review, maintenance, waiting, escalation, notification, and exception handling. Reviewed the required research corpus, docs/**, .agent-os/**, src/**, migrations/**, tests/**, and tests-sql/** only where they make the plan concrete or contradict it. Expected absence of a production controller was not treated as a defect. Repeated copies of claims were treated as one evidence lineage.",
+  "strengths": [
+    "The design clearly states that agents only propose and that consequential actions require deterministic policy plus exact-content human approval.",
+    "The end-to-end documentation gives concise clarification guidance: one owned question, bounded options, trade-offs, a recommendation, evidence, and a deadline.",
+    "The research recognizes human-load controls such as batching questions, pausing after a reminder, deduplicating signals, and never treating silence as consent.",
+    "The checked-in JSON schemas and plan-only CLI show an intent to make tickets, decisions, approvals, and reconciliation reviewable rather than leaving them in chat."
+  ],
+  "findings": [
+    {
+      "id": "HX-002",
+      "severity": "high",
+      "title": "The plan has incompatible configuration, factory, and decision contracts",
+      "requirement": "The plan must nominate one versioned, machine-checkable contract for each artifact so the proposed compiler and user workflow are unambiguous.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py",
+          "src/agent_os/loaders.py",
+          "src/agent_os/cli.py",
+          ".agent-os/config.yaml",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/example.conversation-decision.json",
+          ".agent-os/README.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "From the repository root run `.venv/bin/agent-os config-validate`, `.venv/bin/agent-os factory-validate .agent-os/factories/ideation.yaml`, and `.venv/bin/agent-os decision-validate .agent-os/factories/example.conversation-decision.json`. All fail with Pydantic validation errors because the Python models describe different shapes. `agent-os demo --factory .agent-os/factories/ideation.yaml` also fails.",
+      "impact": "The plan does not identify an authoritative executable contract. An implementer or fresh adopter cannot tell which shape the proposed compiler must consume.",
+      "recommendation": "Choose one versioned contract per artifact, generate or align Python models and JSON Schemas from it, document the CLI invocation, and make all checked-in examples pass both validators.",
+      "verification": "Add an end-to-end smoke test that installs the package, validates `.agent-os/config.yaml`, every registered factory, and every example, then runs `agent-os demo --factory` for each executable example.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-003",
+      "severity": "high",
+      "title": "Generic factory guards require future-stage gates and deadlock the happy path",
+      "requirement": "Each transition must evaluate only gates that are available at that phase; early ideation and planning cannot require later approval, lease, verification, or review artifacts.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/build.yaml",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/maintenance.yaml",
+          ".agent-os/factories/README.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect each factory: every normal edge uses `phase artifacts complete and configured gates pass`, while the global gate list includes final ticket acceptance in ideation and current lease, exact-SHA checks, and risk review in build. Evaluate `PLAN -> READY_REVIEW` or `DISCOVER -> DIVERGE` literally: required downstream artifacts do not yet exist, so the guard cannot pass.",
+      "impact": "A conforming controller either deadlocks on the first transition or must invent undocumented phase-specific semantics, making review and human expectations non-portable.",
+      "recommendation": "Represent gates as typed, phase-bound IDs. List exactly which artifacts and decisions each edge requires. Reject forward references unless explicitly modeled as deferred gates.",
+      "verification": "Compile every factory and execute a happy-path trace with artifact availability checked at each edge; prove no edge requires an artifact first produced in a later phase.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-013",
+      "severity": "high",
+      "title": "The installation plan requires human role bindings that the consumer contract cannot represent",
+      "requirement": "A consumer must be able to bind each required human role to authenticated principals before any human-needed gate can compile or run.",
+      "evidence": {
+        "files": [
+          "docs/operations.md",
+          "docs/end-to-end.md",
+          ".agent-os/schemas/consumer.schema.json",
+          ".agent-os/consumer.example.yaml",
+          ".agent-os/config.yaml",
+          ".agent-os/risk-policy.yaml"
+        ],
+        "urls": []
+      },
+      "reproduction": "Follow the installation contract in `docs/operations.md`, which says the manifest pins risk/owner role bindings. Try to add product owner, technical owner, security owner, on-call, deploy reviewer, exception owner, or promoter bindings to `consumer.example.yaml`. `consumer.schema.json` has no such fields and rejects additions because `additionalProperties` is false. The central config also contains no principal-to-role mapping.",
+      "impact": "The compiler cannot verify the planned human intervention matrix. A fresh adopter has no authoritative place to say who receives a question or who may approve each tier.",
+      "recommendation": "Add a versioned role-binding schema with provider/organization/repository scope, principal identifiers, teams, eligible roles, separation constraints, fallback/on-call mapping, validity period, and provenance. Include it in the effective-config digest.",
+      "verification": "Validate an example consumer with all roles used by the human intervention matrix; reject missing roles, self-conflicting roles, ambiguous teams, removed principals, and insufficient risk-tier quorum.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-006",
+      "severity": "high",
+      "title": "The maintenance factory omits the documented maintenance lifecycle and outcomes",
+      "requirement": "Maintenance must preserve signal correlation, suppression with expiry, scheduling, observation, rollback, resurface, and explicit resolution/follow-up ownership.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/maintenance.yaml",
+          "docs/end-to-end.md",
+          "docs/operations.md",
+          "docs/architecture.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare the factory phases (`SCAN, TRIAGE, PLAN, READY_REVIEW, EXECUTE, VERIFY, REVIEW, COMPLETE`) with the documented states (`SIGNAL_RECEIVED, CORRELATED, DIAGNOSED, PROPOSED, SCHEDULED, EXECUTING, VERIFIED, OBSERVING, RESOLVED` plus `SUPPRESSED`, `BLOCKED`, `CANCELLED`, `ROLLED_BACK`). There are no suppress, expiry/resurface, observe, rollback, or explicit resolved edges/artifacts.",
+      "impact": "A fresh operator cannot represent routine noise suppression or verify that remediation held. `COMPLETE` can conceal an unobserved or rolled-back outcome.",
+      "recommendation": "Align the factory with the documented durable maintenance state machine and define required signal-group, suppression, schedule, observation, remediation receipt, rollback, and follow-up artifacts.",
+      "verification": "Run transition coverage tests for success, duplicate signal, suppression expiry, remediation delegated to BUILD, observation failure, rollback, cancellation, and resurface.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-007",
+      "severity": "medium",
+      "title": "Ideation retry targets an undefined clarification state",
+      "requirement": "A vague idea must support an explicit, durable question/wait/answer/resume loop rather than strand the user after budget or retry exhaustion.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/schemas/conversation-decision.schema.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/07-human-need-decision-engine-and-interaction-contract.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "In `ideation.yaml`, `retry.on_exhaustion` is `NEEDS_CLARIFICATION`, but that value is absent from `phases` and no transition enters or exits it. Exhaust retries in any phase and attempt to resume after an answer; the factory has no legal resume edge.",
+      "impact": "The exact uncertain-input path advertised by ideation becomes a dead end or requires controller-specific behavior outside the factory.",
+      "recommendation": "Add a real `NEEDS_INPUT`/`NEEDS_CLARIFICATION` phase with question artifact, owner, deadline, reminder policy, resume token, answer validation, return phase, cancellation, and expiry behavior.",
+      "verification": "Execute a trace from DISCOVER to clarification, append a valid answer, resume the saved phase, and also test expiry, withdrawal, and cancellation.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-008",
+      "severity": "medium",
+      "title": "Normal change-request loops are absent from the build and ticket-review factories",
+      "requirement": "Human reviewers must be able to request a revision, receive a new digest, and re-review without converting ordinary feedback into an exception/block.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/build.yaml",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/prompts/reviewer.md",
+          ".agent-os/lifecycle.yaml",
+          "docs/end-to-end.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "The reviewer prompt allows `request_changes` and the canonical lifecycle permits `REVIEW -> IMPLEMENTING`. The build factory permits REVIEW only to HANDOFF or BLOCKED. Ideation permits TICKET_REVIEW only to COMPLETE or BLOCKED. Follow a normal reviewer request for a small correction: neither factory has a review-to-edit/synthesis edge.",
+      "impact": "Routine back-and-forth is misclassified as BLOCKED or handled outside durable state, losing revision, invalidation, and reviewer context.",
+      "recommendation": "Add explicit `REVIEW -> IMPLEMENT` and `TICKET_REVIEW -> SYNTHESIZE/CLARIFY` loops. Require a new artifact revision, digest recomputation, stale approval invalidation, and capped repair rounds.",
+      "verification": "Test one and multiple change-request rounds, a changed head, exhausted repair budget, and final acceptance on the newest digest only.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-009",
+      "severity": "high",
+      "title": "BLOCKED has no durable owner, deadline, saved prior state, or complete resume route",
+      "requirement": "Every named wait must expose why it waits, who must act, by when, how it resumes, and what happens on silence.",
+      "evidence": {
+        "files": [
+          ".agent-os/lifecycle.yaml",
+          ".agent-os/project-fields.yaml",
+          "migrations/0002_schema.sql",
+          "docs/architecture.md",
+          "docs/operations.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Move an item from VERIFYING, REVIEW, or MERGE_QUEUED to BLOCKED. The YAML BLOCKED transitions do not permit return to those states despite the architecture promising return to an explicitly saved prior state. The work_items table stores only lifecycle_state/risk/title/spec reference; Project fields include a blocked reason but no owner, deadline, prior state, or resume token.",
+      "impact": "Human work can sit silently and cannot be resumed according to the declared state machine. Any reminder implementation would lack authoritative recipient and due time.",
+      "recommendation": "Add a typed wait record with prior state, reason code, blocking fields, responsible principal, created/due timestamps, notification/dedupe state, escalation path, and resume token. Derive resume edges from the saved state and recheck relevant gates.",
+      "verification": "For every nonterminal state, test block, display owner/deadline, one deduplicated reminder, answer/unblock to the saved state, expiry escalation, cancellation, and restart recovery.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-010",
+      "severity": "medium",
+      "title": "A conversation decision can be marked answered with no answer",
+      "requirement": "An answered clarification must contain an attributable, timely answer selecting or explicitly overriding the offered choices.",
+      "evidence": {
+        "files": [
+          ".agent-os/schemas/conversation-decision.schema.json",
+          ".agent-os/factories/example.conversation-decision.json",
+          ".agent-os/bin/validate.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Load the example JSON, change only `status` to `answered`, leave `answer` as null, and validate it against `conversation-decision.schema.json` with Draft 2020-12 validation. It has zero schema errors. If an answer object is supplied, `option_id` also is not checked against the declared option IDs.",
+      "impact": "An agent/controller can resume planning while the decision remains unresolved or cites a nonexistent choice, so apparent human input is not verifiable.",
+      "recommendation": "Add conditional schema requirements: open requires null/no answer; answered requires a non-null answer and answer event. Enforce option membership and authenticate/authorize the decision actor in controller code.",
+      "verification": "Add negative tests for answered/null, unknown option, missing answer event, unauthorized actor, expired response, and answer after withdrawal.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-011",
+      "severity": "medium",
+      "title": "Exception approvals cannot encode the exception evidence required by the operating model",
+      "requirement": "Exceptions must bind exact SHA/scope, reason, compensating controls, expiry, owner, and incident/follow-up reference.",
+      "evidence": {
+        "files": [
+          ".agent-os/schemas/approval.schema.json",
+          "docs/end-to-end.md",
+          "docs/security.md",
+          "migrations/0002_schema.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Set `purpose` to `exception` in an approval that validates today. Attempt to add `scope`, `reason`, `compensating_controls`, or `follow_up`; `additionalProperties: false` rejects them, and none is conditionally required. `candidate_sha` remains optional/null.",
+      "impact": "Humans cannot create a machine-verifiable exception that meets the documented rule. Controllers must rely on free text elsewhere or accept an under-specified waiver.",
+      "recommendation": "Define a dedicated exception schema or conditional payload with exact subject/SHA, bounded scope, rationale, compensating controls, owner, issue/incident, expiry, non-waivable controls, and revocation.",
+      "verification": "Test missing fields, overbroad scope, expired exception, wrong SHA, prohibited waiver, agent self-grant, and successful use only for the exact declared action.",
+      "confidence": "high"
+    },
+    {
+      "id": "HX-014",
+      "severity": "medium",
+      "title": "The plan names deadlines but does not define a bounded notification and silence policy",
+      "requirement": "Every human-needed wait must define delivery channel, acknowledgement, reminder cadence/cap, deduplication, escalation, and safe timeout behavior so silence neither authorizes work nor creates spam.",
+      "evidence": {
+        "files": [
+          "docs/end-to-end.md",
+          "docs/operations.md",
+          ".agent-os/project-fields.yaml",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/maintenance.yaml",
+          "research/repository-agent-operating-system/lifecycle-extension/results/07-human-need-decision-engine-and-interaction-contract.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "Trace `NEEDS_INPUT`, `NEEDS_CLARIFICATION`, readiness approval, review, unknown effect, deploy approval, and exception expiry through the plan. The docs sometimes require an owner/deadline, while the research recommends a reminder then pause, but the plan/config defines no notification channel, acknowledgement, reminder count/cadence, dedupe key, escalation destination, quiet hours, batching, or timeout transition.",
+      "impact": "Different controller implementers can either wait silently or repeatedly page humans. Users cannot predict where a request arrives or what happens if they do not respond.",
+      "recommendation": "Add one typed human-interaction policy shared by all factories: severity, channel, recipient resolution, digest-linked action, acknowledgement, batching, reminder cap/cadence, dedupe key, due time, escalation, quiet-hours exception, expiry, and fail-closed terminal/pause behavior.",
+      "verification": "Simulate each human-needed event with answer, duplicate event, no response, unavailable owner, and controller restart. Verify bounded notification count, stable dedupe, visible ownership/deadline, no consent from silence, and deterministic pause/cancel/escalate.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "The repository explicitly describes the deliverable as a proposed plan. This review therefore reports contradictions and missing decision-grade contracts, not the expected absence of production controller/provider implementations.",
+    "No usability study, pilot transcript, or measured notification volume exists. The likely human burden cannot be quantified until the plan defines an interaction policy and is exercised in shadow.",
+    "Some factory guard phrases may have intended semantics not expressed in the YAML. Confidence is high that the checked-in plan is ambiguous; the eventual compiler could choose a safe interpretation only after that interpretation is specified.",
+    "Research results frequently reuse the same vendor or first-party sources. Those repetitions were not counted as independent validation."
+  ]
+}

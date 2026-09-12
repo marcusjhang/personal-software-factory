@@ -1,0 +1,109 @@
+{
+  "reviewer": "round-17 independent improvement-race closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-16 correction and schema-3 graph regeneration",
+    "specialty": "Adversarial cancellation, revocation, control degradation, Effect settlement/reconciliation, release-attempt failure, rollback, cleanup, replay, and terminalization interleavings around the round-16 rows.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-16-resolution.md",
+      "review/round-16-closure/formal-model.json",
+      "review/round-16-closure/improvement-races.json",
+      "review/round-16-closure/cross-consistency.json",
+      "review/round-16-closure/recovery-remediation.json",
+      "review/round-16-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "future deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "round_16_correction_and_current_artifact_identity",
+      "result": "pass",
+      "evidence": [
+        "All five round-16 review JSON files parse. Their raw high-ID set is R16-IR-001, R16-XC-001, R16-XC-002, and R16-ER-001, matching the round-16 resolution map to three unique defects.",
+        "Recomputed PLAN.md SHA-256 is 31a7c01db2def3d0d708c448dc5f2bbbe60aa53346261e24c2c873ec5bdf6e6f and manifest SHA-256 is 7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917; both equal the round-16 register and schema-3 graph generated_against values.",
+        "README and traceability consistently identify round 16 as current, round 15 as historical, and retain the plan-only and pending-gate boundary."
+      ]
+    },
+    {
+      "area": "manifest_and_schema_3_graph",
+      "result": "pass",
+      "evidence": [
+        "Independent literal first-column parsing reproduces 801 unique normative edge IDs with no duplicate, consistent with 96 canonical and 705 private/product rows in the correction register.",
+        "material-claims.json is schema_version 3.0.0 at regeneration_checkpoint round-16 and reports 25 source observations, 20 material claims, and 36 candidate/context edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "The graph explicitly limits itself to editorial candidate associations with legacy-unverified provenance. It does not overclaim fresh retrieval or semantic entailment."
+      ]
+    },
+    {
+      "area": "already_reconciling_unsettled_revocation",
+      "result": "pass",
+      "evidence": [
+        "IX06-HUR/HUQ cover authenticated SHADOW_PASSED|FROZEN|EVIDENCE_STALE -> REVOKED at REQUESTED/QUIESCING when rollout is already WIDENING_RECONCILING|PROMOTION_RECONCILING and the exact original Effect remains UNSETTLED.",
+        "They preserve the exact Effect, reconciliation, rollback, and cleanup identities and states; keep the fence; and create no saga or cleanup.",
+        "The declared CancellationRevocationCoordinatesV1 equality now includes pre-reconciliation UNSETTLED, already-reconciling UNSETTLED, protected N, and protected X branches, with cancellation-state, classifier/rollout, revocation-trigger, expected-version, replay, and conflict exclusion.",
+        "Named witnesses cover revocation before/after IX06-U and before/after protected X/N settlement for both REQUESTED and QUIESCING."
+      ]
+    },
+    {
+      "area": "cancellation_side_degradation",
+      "result": "pass",
+      "evidence": [
+        "IXH01-R/Q/C cover every generated reachable nonterminal HEALTHY cancellation coordinate at REQUESTED, QUIESCING, and CLEANING through an exact disjoint ACTIVE_GENERATION|NO_ACTIVE_GENERATION partition.",
+        "CancellationDegradationReceipt V1 has constructible repository/work, cancellation event/epoch, nullable generation partition, pre-event tuple, and degradation-event bindings. The no-active partition uses canonical null and forbids live exposure or an exposure-capable Effect.",
+        "The transaction changes health and records its receipt/fence only. It preserves Effect, rollout, rollback, release-attempt, and cleanup identities and ownership. A raced IX01, IX02, IX03, IX04, settlement, or degradation writer loses by tuple-version CAS and must rederive; CANCELLED remains immutable."
+      ]
+    },
+    {
+      "area": "attempt_failure_cancellation_cleanup",
+      "result": "pass",
+      "evidence": [
+        "IA16/IA17 require cancellation NONE. IA18-F/IA18-C exactly own failure-origin FAILURE_PENDING_CLEANUP|CLEANING after IX cancellation and are disjoint from ordinary-cancellation IA15 by cleanup origin.",
+        "The IX01-before/after-IA16 and before-IA17 orderings preserve the one IA07/IA08 CleanupManifest. IA18 changes only attempt-local settlement, IX05 can adopt an already-canonical CLEANING parent, IX03 alone owns parent cancellation cleanup, and IX04 alone terminalizes the parent.",
+        "Attempt terminalization cannot bypass parent child/effect/rollback/attempt and cleanup guards; replay and conflicting origin/receipt bytes are defined."
+      ]
+    },
+    {
+      "area": "effect_rollback_cleanup_terminal_interleavings",
+      "result": "pass",
+      "evidence": [
+        "IX cancellation rejects ordinary progress and admits only the closed safety allowlist. Pre-send E02/E03 settlement, UNSETTLED reconciliation, protected N no-exposure proof, and protected X unique rollback ownership are explicit and pairwise classified.",
+        "IX03 waits for terminal or quiescence-closed children, all Effects settled, and either a complete all-target NoExposureReceipt with rollback IDLE or exact ROLLED_BACK after exposure; unresolved rollback remediation cannot become clean or terminal.",
+        "Rollback cleanup ownership is partitioned by origin and cancellation state. Under REQUESTED/QUIESCING IX03 is the sole parent cleanup scheduler, and IX04 requires clean receipts plus no live child, authority, Effect, rollback, or attempt. No unsafe duplicate or missing owner was found in the audited orderings."
+      ]
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "total": 0,
+    "manifest_rows_reproduced": 801,
+    "canonical_rows_reproduced": 96,
+    "private_and_product_rows_reproduced": 705,
+    "round_16_review_files_reviewed": 5,
+    "round_16_raw_high_findings_reviewed": 4,
+    "round_16_unique_defects_reviewed": 3,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_edges_checked": 36
+  },
+  "residual_uncertainty": [
+    "This is a plan-contract closure audit, not implementation or exhaustive reachable-product execution.",
+    "Fresh immutable retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, production validation, and implementation remain accepted future gates.",
+    "No critical or high plan defect, contradiction, unsafe or undefined path, or material overclaim was found within the assigned interleaving specialty."
+  ],
+  "closure_criteria_pass": true
+}

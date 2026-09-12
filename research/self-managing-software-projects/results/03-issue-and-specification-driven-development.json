@@ -1,0 +1,884 @@
+{
+  "scope": {
+    "definition": "Workflow, not a tool catalog: intake of an idea/bug/incident into a structured ticket; an explicit PLANNING/NOT_READY state; clarification and product/technical plan approval; decomposition into bounded issues/tasks; acceptance criteria; assignment to a human or coding agent; issue-to-branch-to-PR traceability; verification, review, merge and closure.",
+    "included": [
+      "Repository-native specifications and issue templates/forms",
+      "Backlog triage and readiness policies",
+      "Feature, bugfix, and multi-PR planning",
+      "Agent execution initiated from issues or approved plans",
+      "Acceptance criteria as review and test oracles",
+      "Human gates, security controls, and feedback to templates/evals."
+    ],
+    "excluded": [
+      "Autonomous deployment/operations except the merge handoff",
+      "A generic comparison of coding-agent platforms",
+      "Claims that a prose spec is automatically correct or that passing tests proves product fitness."
+    ],
+    "foundation": "Uses Shape Up pitches for problem/appetite/rabbit-holes/no-gos [S15], RFC 2119 normative strength [S22], and executable Given/When/Then examples [S21]."
+  },
+  "current_state": [
+    "Verified platform capability: GitHub and GitLab can structure intake, relate child work, store templates in the repository, link changes to tickets, enforce branch checks/reviews, and close tickets on merge [S1][S2][S3][S7][S12].",
+    "Verified agent loop: GitHub Copilot cloud agent can research, plan and change one repository/branch and produce one PR; GitLab Software Development Flow gathers repository and issue/MR context, creates a plan and stages changes under user control [S5][S14].",
+    "Verified event automation: GitHub Copilot automations can triage new issues and open draft PRs on repository events or schedules; tools are scoped, but personal automations are private and not Git-versioned [S24]. GitHub Agentic Workflows offer repository-versioned natural-language workflows with declared permissions and safe outputs, but remain public preview [S25].",
+    "Specification frameworks are usable but outcome evidence is immature. Spec Kit 1.0 encodes constitution→specify→plan→tasks→implement [S8]; Kiro encodes requirements/bug analysis→design→tasks with optional approvals [S10]; OpenSpec offers an alternative artifact-guided, brownfield-oriented process [S11]. These are implementation mechanisms and vendor/project claims, not comparative proof.",
+    "The operationally safe pattern is not “issue opened→agent codes.” It is “intake→triage→PLANNING→READY approval→agent executes→independent verification/review→merge.” GitHub itself says assigned issues should be clear and well scoped with complete acceptance criteria [S4], and its review documentation requires the same thorough review as any contribution [S6]."
+  ],
+  "representative_systems": [
+    {
+      "system": "GitHub Issues/Projects/PRs",
+      "role": "Issue forms, sub-issues, project fields/automation, PR linking/closure, protected branches [S1][S2][S3][S7].",
+      "status": "Core tracker controls mature; issue forms still documented as public preview [S1]."
+    },
+    {
+      "system": "GitHub Copilot cloud agent and Automations",
+      "role": "Issue/prompt-to-plan/branch/PR and event-driven triage/fix loops [S5][S24].",
+      "status": "Productized with important one-repository/one-PR/59-minute constraints [S5]; automation governance has a versioning/visibility weakness [S24]."
+    },
+    {
+      "system": "GitHub Agentic Workflows",
+      "role": "Workflow-as-code for triage/CI investigation/docs and bounded outputs [S25].",
+      "status": "Emerging public preview, despite useful hardened compilation and least-privilege design."
+    },
+    {
+      "system": "GitLab issues/templates and Software Development Flow",
+      "role": "Repository templates plus context-aware plan/stage workflow [S12][S14].",
+      "status": "Flow generally available in GitLab 18.8; risks and local execution remain material [S14]."
+    },
+    {
+      "system": "GitHub Spec Kit 1.0",
+      "role": "Repository artifacts and commands separating intent, technical plan, tasks and implementation [S8].",
+      "status": "Active open-source framework; no independent comparative production outcomes found."
+    },
+    {
+      "system": "Kiro Specs",
+      "role": "requirements.md or bugfix.md, design.md, tasks.md; approval or Quick Spec paths; dependency-wave execution [S10].",
+      "status": "Product feature; vendor claims, no independent outcome study found."
+    },
+    {
+      "system": "OpenSpec",
+      "role": "Iterative artifact-guided SDD for brownfield and greenfield projects [S11].",
+      "status": "Active open source; efficacy not independently established."
+    },
+    {
+      "system": "pstack (likely the requested “PStack”)",
+      "role": "Cursor plugin workflow by poteto with feature, bugfix and multi-phase plan playbooks [S27][S28][S29][S30].",
+      "status": "Concrete, auditable workflow source; identity is likely but must be confirmed because “PStack” also names unrelated projects and ports. No independent outcomes found."
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "Structured forms can require fields, dropdowns and attestations, while sub-issues preserve parent progress and hierarchy.",
+      "evidence": "GitHub schema and sub-issue docs [S1][S2].",
+      "classification": "verified platform behavior"
+    },
+    {
+      "claim": "Issue-to-PR linkage provides in-progress visibility and closes only when a linked PR reaches the default branch.",
+      "evidence": "GitHub linkage and closing-keyword semantics [S3].",
+      "classification": "verified platform behavior"
+    },
+    {
+      "claim": "An ideal coding-agent task has a clear problem, complete acceptance criteria and file guidance.",
+      "evidence": "GitHub Copilot best-practice documentation [S4].",
+      "classification": "vendor operational guidance, plausible and directly applicable"
+    },
+    {
+      "claim": "Spec artifacts can formally separate policy, behavioral intent, architecture, tasks and implementation.",
+      "evidence": "Spec Kit, Kiro and OpenSpec source/docs [S8][S10][S11].",
+      "classification": "verified artifact/workflow capability, not verified benefit"
+    },
+    {
+      "claim": "Repository controls can stop direct/unsafe merges and require checks/reviews.",
+      "evidence": "Protected-branch documentation [S7].",
+      "classification": "verified control"
+    },
+    {
+      "claim": "Human review remains an explicit boundary for agent output and privileged CI.",
+      "evidence": "Copilot review rules and GitLab accept/modify/reject flow [S6][S14].",
+      "classification": "verified product behavior"
+    },
+    {
+      "claim": "pstack treats planning as work, not a preamble: feature work studies and architects before delegation; multi-phase planning produces a validated plan and stops until operator go; bugs reproduce and establish cause before fix implementation.",
+      "evidence": "First-party playbooks [S28][S29][S30].",
+      "classification": "verified prescribed workflow, not efficacy"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "SWE-bench formalized issue-text-to-patch evaluation from 2,294 issue-linked PR tasks in 12 Python repositories [S16][S17]. This demonstrates a reproducible loop, not autonomous product ownership."
+    },
+    {
+      "finding": "SWE-Bench+ manually audited successful patches and reported 32.67% solution leakage and 31.08% suspicious successes due to weak tests; filtering reduced SWE-agent+GPT-4 from 12.47% to 3.97% [S18]. This directly warns that acceptance tests can be incomplete and benchmark pass rates can overstate issue resolution."
+    },
+    {
+      "finding": "METR’s randomized trial found experienced maintainers took 19% longer with early-2025 AI [S19]. A 2026 follow-up produced apparent speedups but wide confidence intervals and serious selection/time-measurement bias, so the authors call the evidence weak [S20]."
+    },
+    {
+      "finding": "DORA 2024 found AI benefits at the individual level alongside worse delivery throughput and stability; it emphasizes small batches and robust tests [S26]. Association and survey design do not isolate issue-planning quality, but contradict simple “more generated code equals better delivery” claims."
+    },
+    {
+      "gap": "No independent controlled comparison located that isolates Spec Kit, Kiro Specs, OpenSpec or pstack against ordinary high-quality issue planning in production."
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "SWE-bench task count",
+      "value": "2,294 tasks from 12 Python repositories",
+      "meaning": "Coverage of real issue-linked PR patterns, but limited ecosystem and retrospective construction.",
+      "source": "[S16][S17]"
+    },
+    {
+      "metric": "Original baseline / early agent",
+      "value": "RAG 1.96%; SWE-agent 12.47%",
+      "meaning": "Historical 2023-era benchmark values, not current production reliability.",
+      "source": "[S17]"
+    },
+    {
+      "metric": "Audited benchmark adjustment",
+      "value": "32.67% successful patches with solution leakage; 31.08% suspicious due to weak tests; adjusted resolution 3.97% versus 12.47%",
+      "meaning": "Test pass and issue closure can be false proxies for correctness.",
+      "source": "[S18]"
+    },
+    {
+      "metric": "Early-2025 experienced-developer RCT",
+      "value": "19% longer with AI; reported confidence interval from +2% to +39% longer",
+      "meaning": "Applies to experienced contributors and selected tasks/tools, not unattended agents.",
+      "source": "[S19][S20]"
+    },
+    {
+      "metric": "Late-2025 follow-up estimates reported Feb 2026",
+      "value": "Original participants: 18% speedup, CI -38% to +9%; new participants: 4% speedup, CI -15% to +9%",
+      "meaning": "Not reliable causal estimates because opt-out, task-selection, pay and parallel-agent time-measurement biases were severe.",
+      "source": "[S20]"
+    },
+    {
+      "metric": "GitHub cloud-agent execution envelope",
+      "value": "one repository, one branch, exactly one PR per task, maximum 59 minutes",
+      "meaning": "A concrete reason to decompose cross-repo and long-running issues before READY.",
+      "source": "[S5]"
+    },
+    {
+      "metric": "GitHub sub-issue limits",
+      "value": "up to 100 sub-issues per parent and 8 nesting levels",
+      "meaning": "Capacity exists; excessive depth still raises coordination cost.",
+      "source": "[S2]"
+    },
+    {
+      "metric": "Product-specific planning-framework productivity",
+      "value": "Unknown",
+      "meaning": "Stars, downloads and vendor testimonials were not treated as efficacy metrics."
+    }
+  ],
+  "reference_workflow": [
+    {
+      "state": "1 INBOX",
+      "trigger": "Issue form, support report, telemetry alert, roadmap idea, dependency event or human request.",
+      "required_inputs": "Reporter, problem/evidence, affected users/surface, observed vs expected behavior, reproduction or use case, urgency, security/privacy flag. Forms reject required omissions [S1].",
+      "output": "Immutable intake record plus provenance; no code assignment."
+    },
+    {
+      "state": "2 TRIAGED",
+      "actions": "Deduplicate; classify bug/feature/chore/security; set owner, priority, appetite/budget and affected repositories; link incidents/designs. Reject spam and route security reports privately.",
+      "exit": "A named planner accepts ownership; otherwise remain INBOX or close with reason. Shape Up’s problem/appetite/rabbit-holes/no-gos is a useful compact frame [S15]."
+    },
+    {
+      "state": "3 PLANNING / NOT_READY",
+      "actions": "Inspect repository/history; reproduce bugs; state root-cause hypothesis confidence; define what/why before how; record constraints, dependencies, data/API/schema changes, rollout/rollback, risks and observability. Use normative MUST/SHOULD/MAY consistently [S22]. For large work, create spec/design/task artifacts [S8][S10].",
+      "hard_rule": "Implementation agents may read/prototype in an isolated branch, but may not create the production implementation PR. A prototype must be tagged disposable and its findings linked."
+    },
+    {
+      "state": "4 CLARIFICATION_REQUIRED",
+      "trigger": "Any missing product decision, irreproducible bug, contradictory requirement, undefined acceptance predicate, cross-team dependency, security-sensitive capability, or estimate beyond configured limit.",
+      "actions": "Ask one bounded question with evidence and options; assign decision owner and deadline. Empirical questions go to a spike/prototype; product/value/risk decisions go to a human. If unanswered, return to backlog, narrow scope, or close—not guess."
+    },
+    {
+      "state": "5 READY_REVIEW",
+      "readiness_checklist": [
+        "Problem and user/value are explicit",
+        "Scope and no-gos are explicit",
+        "Bug has reproducible failing evidence or documented exception",
+        "Acceptance criteria are observable, atomic, include negative/error paths, and map to tests/manual evidence",
+        "Affected surfaces/repositories and dependencies are known",
+        "Implementation approach and alternatives/tradeoffs are recorded",
+        "Tasks fit one repository/branch/PR/time budget or are decomposed",
+        "Security, migration, rollout, telemetry and rollback requirements are set",
+        "Reviewer, test commands/environments, and evidence artifacts are named",
+        "No unresolved blocking question"
+      ],
+      "output": "Versioned plan/spec and child issues. GitHub sub-issues preserve hierarchy [S2]."
+    },
+    {
+      "state": "6 READY / APPROVED",
+      "gate": "A product owner approves behavior/scope; a technical owner approves design/decomposition; security/data owner approves elevated-risk work. Record approver and spec revision/hash. Two-person approval can be one combined meeting but must cover both decisions. pstack’s multi-phase playbook similarly stops after validated plan delivery until explicit operator go [S29]."
+    },
+    {
+      "state": "7 IN_PROGRESS",
+      "trigger": "Only READY items enter agent/human queues. Freeze the accepted spec revision; create branch/worktree; lease task to one owner; agent receives only the bounded issue, repo instructions and tools. Parallelize only child issues with disjoint files/state; serialize migrations/shared invariants. pstack makes this decomposition checkpoint explicit [S28]."
+    },
+    {
+      "state": "8 PR_OPEN / VERIFYING",
+      "outputs": "Small PR links issue/spec revision and child issue, describes scope/no-gos, implementation, risks, generated tests and evidence. Use closing keywords only for the final/default-branch PR [S3].",
+      "checks": "Deterministic unit/integration/e2e/static/security checks; acceptance-criterion trace matrix; same-surface bug reproduction; diff-size/change-surface budget; no unexplained generated artifacts."
+    },
+    {
+      "state": "9 REVIEW_REQUIRED",
+      "gate": "Independent reviewer challenges behavior, design, tests and spec conformance. For agent PRs, author/assigner approval cannot satisfy GitHub’s required reviewer count; privileged Actions require explicit approval by default [S6]. Any spec change returns to PLANNING and increments revision."
+    },
+    {
+      "state": "10 MERGE_READY → MERGED",
+      "gate": "Required checks and approvals, no unresolved threads, rollout/rollback ready. Protected branch blocks bypass [S7]. Merge to default branch closes linked issue [S3]."
+    },
+    {
+      "state": "11 VERIFIED / CLOSED or REOPENED",
+      "actions": "Observe rollout and acceptance signals. Close only when deployed/observed if merge is not completion. Reopen/regress on failed criteria; link the failure to template, instruction or eval updates. Measure lead time by state, clarification rate, rework/reopen rate, escaped defects, reviewer time and cost—not code volume."
+    }
+  ],
+  "integration_points": [
+    {
+      "point": "Issue intake",
+      "mechanics": "GitHub YAML issue forms [S1] or repository-stored GitLab .gitlab/issue_templates/*.md [S12]; validate required evidence; webhook queues a triage job."
+    },
+    {
+      "point": "Planning artifacts",
+      "mechanics": "Version specs beside code (for example, constitution/spec/plan/tasks [S8] or requirements/design/tasks [S10]); link exact commit/hash in issue; CODEOWNERS review applies."
+    },
+    {
+      "point": "Backlog/project state",
+      "mechanics": "Map explicit status field INBOX/TRIAGED/PLANNING/CLARIFICATION_REQUIRED/READY_REVIEW/READY/IN_PROGRESS/VERIFYING/REVIEW_REQUIRED/DONE; never infer readiness from assignment alone."
+    },
+    {
+      "point": "Decomposition",
+      "mechanics": "Parent/sub-issue API and project progress [S2]; each executable issue stores dependencies, repository, predicted time, risk and acceptance subset."
+    },
+    {
+      "point": "Agent dispatch",
+      "mechanics": "GitHub issue assignment/prompt to Copilot [S4][S5], GitLab issue/MR context to Software Development Flow [S14], or queue/webhook to another agent. Require readiness token/spec hash before dispatch."
+    },
+    {
+      "point": "Workflow automation",
+      "mechanics": "Prefer versioned GitHub Agentic Workflows with declared triggers/permissions/safe outputs [S25]. If using Copilot automations, export/configure governance separately because creator-private automations are not Git-versioned [S24]."
+    },
+    {
+      "point": "Repository environment",
+      "mechanics": "Ephemeral worktree/container, pinned dependencies, repo instructions, deterministic setup/tests; keep write token scoped. Copilot uses an ephemeral Actions environment [S5]."
+    },
+    {
+      "point": "PR/CI",
+      "mechanics": "Link PR to issue and accepted spec revision; status checks, code owners, protected branches, scanners, artifact provenance [S3][S7][S23]."
+    },
+    {
+      "point": "Feedback/evaluation",
+      "mechanics": "Webhook state transitions and collect failure reason, clarification count, test gaps, human edits, reopen/rollback and spend; curate representative failed issues as private regression evals."
+    }
+  ],
+  "human_gates": [
+    {
+      "gate": "Triage acceptance",
+      "why": "Bots cannot reliably decide product value, duplicate intent, abuse or disclosure channel. Human owns priority/appetite and sensitive routing."
+    },
+    {
+      "gate": "READY approval (mandatory)",
+      "why": "Confirms ticket is planned before implementation. Product owner approves user behavior and no-gos; technical owner approves feasibility, decomposition, test/evidence plan, migration and rollback. High-risk changes add security/data/operations approval."
+    },
+    {
+      "gate": "Clarification/escalation",
+      "why": "Human chooses among value/risk tradeoffs. Agent may settle empirical questions with a time-boxed prototype, but may not silently invent policy, UX, compatibility or data-retention decisions."
+    },
+    {
+      "gate": "Privileged execution",
+      "why": "Approve secret access, network expansion, workflow-file modifications and CI execution. Copilot-created workflow runs are held for approval by default [S6]."
+    },
+    {
+      "gate": "Independent PR review",
+      "why": "Tests can encode an incomplete oracle; SWE-Bench+ documents weak-test false confidence [S18]. Copilot PRs require normal review and a separate required approver [S6]."
+    },
+    {
+      "gate": "Merge/deploy",
+      "why": "Required for auth, payments, destructive data changes, public APIs, compliance, migrations or low-confidence output; low-risk categories may auto-merge only after measured pilot thresholds and rollback readiness."
+    },
+    {
+      "gate": "Exception",
+      "why": "An emergency path may bypass normal planning only with incident commander, narrow reversible patch, logged rationale, post-merge plan/backfill and time-bound follow-up."
+    }
+  ],
+  "failure_modes": [
+    {
+      "mode": "Premature implementation",
+      "effect": "Agent treats ambiguous ticket as prompt, optimizes an unstated requirement and creates review churn.",
+      "signal": "IN_PROGRESS without readiness token; acceptance criteria added after code.",
+      "evidence": "GitHub recommends well-scoped tasks and complete criteria [S4]."
+    },
+    {
+      "mode": "Specification theater",
+      "effect": "Long generated spec appears precise but embeds hallucinated assumptions or duplicates code; approvals become rubber stamps.",
+      "signal": "No questions/tradeoffs/no-gos; criteria cannot be observed."
+    },
+    {
+      "mode": "Wrong decomposition",
+      "effect": "Children conflict on shared schema/files, duplicate work or leave integration gaps; too-large task hits session/tool limit.",
+      "signal": "Cross-PR shared writes, cycles, repeated rebases, 59-minute timeout [S5]."
+    },
+    {
+      "mode": "Weak acceptance oracle",
+      "effect": "Patch passes visible tests but violates intended behavior or hidden edge cases.",
+      "signal": "Generated test mirrors implementation; no negative or same-surface test.",
+      "evidence": "SWE-Bench+ audit [S18]."
+    },
+    {
+      "mode": "Benchmark/vendor overgeneralization",
+      "effect": "Leaders assume issue-to-PR score predicts throughput, maintainability or product correctness.",
+      "signal": "Success measured only by closed tickets/pass rate.",
+      "evidence": "METR and DORA show real-work tradeoffs and uncertainty [S19][S20][S26]."
+    },
+    {
+      "mode": "Prompt injection/untrusted issue content",
+      "effect": "Issue text causes tool misuse, exfiltration or malicious workflow edit.",
+      "signal": "External reporter text reaches write/network tools.",
+      "evidence": "Copilot automations ignore non-writer-triggered events by default [S24]; Actions security guidance [S23]."
+    },
+    {
+      "mode": "Secret/local-file exposure",
+      "effect": "Local agent reads .env or ignored credentials and sends them to model/API.",
+      "signal": "Unbounded filesystem/context collection.",
+      "evidence": "GitLab explicitly documents access to untracked and ignored files [S14]."
+    },
+    {
+      "mode": "Invisible configuration drift",
+      "effect": "Personal automation behavior changes outside code review/audit.",
+      "signal": "No repository config or change history.",
+      "evidence": "Copilot automations are creator-private and not committed to Git [S24]."
+    },
+    {
+      "mode": "Closure semantics mismatch",
+      "effect": "Issue closes at merge though rollout or acceptance remains unverified; non-default target fails to close.",
+      "signal": "Closed != deployed; stacked PR keyword used early.",
+      "evidence": "GitHub closing behavior [S3]."
+    },
+    {
+      "mode": "Economic queue explosion",
+      "effect": "Cheap generation produces expensive human review, CI and rework.",
+      "signal": "PR arrival exceeds review capacity; Actions/AI-credit burn rises [S5]."
+    },
+    {
+      "mode": "Organizational ownership loss",
+      "effect": "No person owns product decision, spec freshness or generated maintenance debt.",
+      "signal": "Repeated reopen, abandoned PRs, stale READY items."
+    },
+    {
+      "mode": "PStack identity/port confusion",
+      "effect": "A team evaluates a fork or unrelated Unix/network pstack as if it were poteto’s workflow.",
+      "signal": "Repository/publisher/version not recorded.",
+      "evidence": "Relevant candidate is the poteto plugin in cursor/plugins [S27], but user intent is not confirmed."
+    }
+  ],
+  "controls_and_mitigations": [
+    "Model readiness as a server-enforced state transition. Dispatch requires READY plus approved spec hash; changing scope invalidates it and returns the item to PLANNING.",
+    "Store Definition of Ready as policy-as-code: required problem/evidence, scope/no-gos, criteria, test plan, dependencies, risk, rollout/rollback, owners and unanswered-questions=0. Keep evidence, not check-box prose.",
+    "Use bounded clarification: distinguish empirical questions (agent spike) from product/risk decisions (human); offer options with consequences; escalate after SLA; never let silence select a default.",
+    "Decompose by independently verifiable outcome and ownership boundary. Keep shared schema/migration first; serialize shared mutable state; cap task time/diff/files and create an integration issue. GitHub hierarchy supports tracking [S2]; Copilot limits make bounding necessary [S5].",
+    "Write acceptance criteria as observable predicates and examples, including negative/error/accessibility/performance/compatibility paths; use Given/When/Then where executable [S21], but retain product review because examples cannot exhaust intent.",
+    "Bind issue→spec revision→branch→commits→PR→CI artifacts→deployment; reject a PR whose cited spec is stale; use default-branch closing semantics deliberately [S3].",
+    "Use least-privilege ephemeral credentials, read-only by default, allowlisted network, no production secrets, pinned Actions, protected branches and required independent review [S7][S23][S25].",
+    "Treat external ticket text as untrusted data; do not dispatch it directly to a write-capable agent. Sanitize/quote, require maintainer triage, and preserve Copilot automation’s default writer-only event rule [S24].",
+    "Run independent test generation/review; require same-surface bug reproduction and mutation/property tests for critical invariants. Track reopen and escaped-defect rates because benchmark tests can be weak [S18].",
+    "Set concurrency, token/minute/CI budgets, retry ceiling, max PR size and review WIP. Quarantine repeated failures; do not automatically broaden scope or permissions.",
+    "Canary by risk class. Start docs/tests/small bug fixes; require human merge; auto-merge only reversible, low-risk classes after local data shows acceptable false-positive/reopen/rollback rates.",
+    "Version automation in repository where possible. GitHub Agentic Workflows do this [S25]; if using private Copilot automations, maintain an approved exported registry and periodic drift audit [S24].",
+    "Audit every state transition, prompt/spec revision, tool call, approval, test artifact, cost and rollback. GitLab reports an audit event per Software Development Flow API request [S14]."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful and production-ready only as a gated workflow; autonomous backlog-to-merge without human product/technical gates remains emerging/high risk.",
+    "mature": [
+      "Structured intake/templates, issue hierarchy, PR linkage, branch protections and deterministic CI [S1][S2][S3][S7][S12].",
+      "Explicit PLANNING/READY state, Definition of Ready and approval are standard workflow engineering patterns, although enforcement is custom."
+    ],
+    "conditionally_useful": [
+      "Issue-to-PR coding agents for bounded single-repository tasks with strong criteria and review [S4][S5][S6][S14].",
+      "Spec Kit/Kiro/OpenSpec/pstack as scaffolds when artifacts stay reviewable and proportionate [S8][S10][S11][S27][S28][S29][S30]."
+    ],
+    "emerging": [
+      "Event-driven agent automations and workflow-as-code; powerful controls exist, but some are preview or private/non-versioned [S24][S25].",
+      "Parallel multi-agent plan execution; conflict, cost and verification overhead are not well quantified."
+    ],
+    "not_demonstrated": [
+      "Reliable autonomous product judgment, specification correctness, cross-repository architectural work, or safe unattended merge/deploy. Independent productivity evidence is mixed and methodologically unstable [S18][S19][S20][S26]."
+    ]
+  },
+  "build_vs_buy": {
+    "buy_or_adopt": [
+      "Use GitHub/GitLab native forms/templates/projects/sub-issues/PR protections rather than rebuild tracker primitives [S1][S2][S7][S12].",
+      "Use hosted agent flow when repository hosting, policy and data boundary fit: GitHub Copilot [S5][S24] or GitLab Software Development Flow [S14].",
+      "Adopt Spec Kit 1.0, Kiro Specs, OpenSpec or pstack selectively for artifact/playbook scaffolding [S8][S10][S11][S27][S28][S29][S30]."
+    ],
+    "custom_engineering_required": [
+      "Definition-of-Ready evaluator and enforced state machine",
+      "Product-specific templates and acceptance taxonomy",
+      "Risk scoring/routing and approval matrix",
+      "Spec-version binding and stale-plan detection",
+      "Queue leases/idempotency/retry/budget controls",
+      "Cross-repository dependency graph",
+      "Acceptance traceability and production-verification feedback",
+      "Local evals and ROI/quality dashboard"
+    ],
+    "selection_rule": "Prefer repository-native, diffable artifacts and open APIs. Avoid a product whose automation configuration, prompts or decisions cannot be reviewed/exported. Buy execution capacity; build the project-specific control plane and readiness policy."
+  },
+  "recommended_pattern": {
+    "pattern": "A two-loop, readiness-gated issue system.",
+    "planning_loop": "INBOX→TRIAGED→PLANNING↔CLARIFICATION_REQUIRED→READY_REVIEW→READY. It is owned by humans for value/risk and assisted by agents for repository research, reproduction, alternatives and decomposition. No production implementation starts before READY.",
+    "delivery_loop": "READY→leased bounded task→isolated branch/worktree→draft/change set→deterministic verification→independent review→protected merge→deployment observation→CLOSED/REOPENED.",
+    "minimum_artifacts": [
+      "Structured intake",
+      "Short shaped pitch/problem/appetite/no-gos [S15]",
+      "Versioned behavior spec with observable acceptance criteria",
+      "Technical plan and dependency graph",
+      "Child issues each with one verifiable outcome",
+      "Risk/permissions/rollout/rollback record",
+      "PR acceptance trace matrix and evidence links"
+    ],
+    "rollout": "Pilot 4–6 weeks on low-risk docs/tests and reproducible bugs. Keep human READY and merge gates. Compare against matched baseline: planning time, cycle time, human review minutes, first-pass acceptance, reopen/rollback/escaped defect, CI/AI cost. Expand only when total delivery outcome improves, not when code/PR count rises.",
+    "pstack_use": "If the intended PStack is poteto’s Cursor plugin, borrow three enforceable mechanics: architecture before feature delegation [S28], reproduction/causal evidence before a bug fix [S30], and a validated plan deliverable followed by an explicit operator go before multi-phase implementation [S29]. Do not adopt its model defaults, high parallelism or “overnight” rhetoric without local security/cost/effectiveness tests.",
+    "bottom_line": "The key reusable unit is an approved, versioned, testable plan—not an issue label and not an agent prompt. Agents can accelerate evidence gathering and execution; humans retain intent, risk and merge accountability."
+  },
+  "open_questions": [
+    "Which acceptance-criterion forms best predict first-pass correctness by task class and codebase?",
+    "What Definition-of-Ready false-reject rate is tolerable, and who can grant documented exceptions?",
+    "How should readiness quality be scored without incentivizing verbose specification theater?",
+    "What local thresholds for reopen, rollback, escaped defect, reviewer time and cost justify low-risk auto-merge?",
+    "How should a spec revision invalidate or migrate in-flight child issues and agent sessions?",
+    "How can cross-repository changes preserve atomic intent and rollback when common agents handle one repository/PR [S5]?",
+    "Which independent, controlled evidence shows benefit from Spec Kit, Kiro, OpenSpec or pstack versus disciplined templates and reviews alone?",
+    "Does the user’s “PStack” refer to poteto’s workflow in cursor/plugins [S27], a port such as phthomas/pstack, or another system?",
+    "How will issue content be isolated from secrets/tools and tested for prompt injection?",
+    "What is the post-2026-09-13 status of public-preview issue forms and GitHub Agentic Workflows? Unknown by scope."
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Syntax for GitHub's form schema",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema",
+      "publication_or_update_date": "undated; live documentation, public preview",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "YAML issue forms can require structured inputs; schema is public preview."
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Adding sub-issues",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Parent/child issue decomposition, project progress, 100 children and 8 nesting levels."
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Linking a pull request to an issue",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "PR/branch links expose work in progress; closing keywords close issues only after merge to default branch."
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Best practices for using GitHub Copilot to work on tasks",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/coding-agent/best-practices-for-using-copilot-to-work-on-tasks",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "GitHub recommends clear, well-scoped issues with complete acceptance criteria and file directions; issue is effectively an agent prompt."
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Agent researches/plans/changes one repository and one branch, opens one PR; ephemeral Actions environment; 59-minute session limit; costs Actions minutes and AI credits."
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Review output from Copilot",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/coding-agent/reviewing-a-pull-request-created-by-copilot",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Copilot PRs need normal thorough review; assigner approval does not satisfy required approval; Actions runs require explicit approval by default."
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "About protected branches",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Protected branches can require status checks, reviews and linear history and restrict destructive pushes."
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "Spec Kit repository README",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.com/github/spec-kit",
+      "publication_or_update_date": "repository state accessed 2026-09-13; README announces 1.0.0",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / first-party documentation",
+      "supported_claims": [
+        "Spec Kit 1.0 workflow: constitution, specify what/why, plan architecture, task breakdown, implement; integrates with 30+ agents; community extensions need review."
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "Spec-driven development with AI: Get started with a new open source toolkit",
+      "publisher_or_author": "Den Delimarsky, GitHub",
+      "url": "https://github.blog/news-insights/product-news/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/",
+      "publication_or_update_date": "2025-09-02",
+      "access_date": "2026-09-13",
+      "source_type": "first-party product announcement",
+      "supported_claims": [
+        "Initial rationale and launch framing for Spec Kit; useful for chronology but not independent effectiveness evidence."
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Specs",
+      "publisher_or_author": "Kiro / Amazon Web Services",
+      "url": "https://kiro.dev/docs/specs/",
+      "publication_or_update_date": "updated 2026-08-27",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Feature and bugfix specs create requirements/bugfix, design, tasks artifacts; supports approvals or gate-free Quick Spec and dependency-wave parallel execution."
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "OpenSpec repository README",
+      "publisher_or_author": "Fission-AI",
+      "url": "https://github.com/Fission-AI/OpenSpec",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / first-party documentation",
+      "supported_claims": [
+        "Alternative repository-native artifact-guided SDD framework; explicitly iterative and brownfield-oriented."
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Description templates",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/project/description_templates/",
+      "publication_or_update_date": "live docs; histories include 17.10 and 18.1 changes",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Repository-stored issue/MR templates standardize intake and support variables and quick actions."
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "Manage issues",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/project/issues/managing_issues/",
+      "publication_or_update_date": "live docs; feature histories shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Issues hold state/metadata; AI issue-description generation remains experimental in documented state."
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "Software Development Flow",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/",
+      "publication_or_update_date": "live docs; generally available in GitLab 18.8",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Flow gathers project/issue/MR context, plans and stages code with user accept/reject control; lists OAuth APIs, audit events, local-file/secret risk and approval behavior."
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "Write the Pitch (Shape Up, Chapter 6)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/1.5-chapter-06",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology / book",
+      "supported_claims": [
+        "A shaped work item contains problem, appetite, solution, rabbit holes and explicit no-gos."
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Carlos E. Jimenez et al.",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "submitted 2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper / preprint",
+      "supported_claims": [
+        "Benchmark construction from 2,294 issue-linked PR tasks in 12 Python repositories and issue-text-to-patch evaluation."
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "SWE-bench project: Original benchmark",
+      "publisher_or_author": "Princeton NLP contributors",
+      "url": "https://www.swebench.com/original.html",
+      "publication_or_update_date": "released 2023-10; live project page",
+      "access_date": "2026-09-13",
+      "source_type": "academic project documentation",
+      "supported_claims": [
+        "Original RAG baseline 1.96%; SWE-agent 12.47%; fail-to-pass tests define resolution."
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Reem Aleithan et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-10 revision",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical preprint",
+      "supported_claims": [
+        "Manual audit reports 32.67% solution leakage, 31.08% suspicious successful patches from weak tests, and adjusted SWE-agent+GPT-4 resolution 3.97% vs 12.47%."
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Joel Becker et al., METR",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_or_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled trial report",
+      "supported_claims": [
+        "Experienced maintainers took 19% longer with early-2025 AI in the measured setting; authors warn benchmarks may misstate real work."
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_or_author": "Joel Becker et al., METR",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "publication_or_update_date": "2026-02-24",
+      "access_date": "2026-09-13",
+      "source_type": "independent follow-up study report",
+      "supported_claims": [
+        "Late-2025 experiment suffered selection/time-measurement bias; original developers estimate 18% speedup CI -38% to +9%, new developers 4% speedup CI -15% to +9%, explicitly weak evidence."
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "Reference: Gherkin",
+      "publisher_or_author": "Cucumber",
+      "url": "https://cucumber.io/docs/gherkin/reference",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "Given/When/Then scenarios map natural-language examples to executable step definitions."
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "RFC 2119: Key words for use in RFCs to Indicate Requirement Levels",
+      "publisher_or_author": "S. Bradner / IETF",
+      "url": "https://www.rfc-editor.org/rfc/rfc2119",
+      "publication_or_update_date": "1997-03; updated by RFC 8174 in 2017",
+      "access_date": "2026-09-13",
+      "source_type": "standard / foundational primary source",
+      "supported_claims": [
+        "Normative MUST/SHOULD/MAY vocabulary reduces requirement-strength ambiguity."
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "Secure use reference",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "Actions threat model and mitigations include least-privilege token permissions, pinning actions and care with untrusted input/secrets."
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "About Copilot automations",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automations",
+      "publication_or_update_date": "undated; live documentation accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Event/schedule-triggered triage and draft-PR automations; scoped tools, default rejection of non-writer events, workflow approval; personal automations are private and not stored in Git."
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "About GitHub Agentic Workflows",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/about-github-agentic-workflows",
+      "publication_or_update_date": "undated; live documentation, public preview",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Repository-versioned natural-language workflows compile to locked Actions; frontmatter declares triggers, permissions and safe outputs; read-only tokens and firewalled containers by default."
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "Accelerate State of DevOps Report 2024",
+      "publisher_or_author": "DORA / Google Cloud",
+      "url": "https://dora.dev/research/2024/dora-report/",
+      "publication_or_update_date": "2024 report; page updated 2026-04-13",
+      "access_date": "2026-09-13",
+      "source_type": "industry survey research",
+      "supported_claims": [
+        "AI associated with individual gains but lower delivery stability/throughput; small batches and robust testing remain important."
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "pstack README",
+      "publisher_or_author": "poteto; distributed in Cursor plugins repository",
+      "url": "https://github.com/cursor/plugins/tree/main/pstack",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / first-party workflow documentation",
+      "supported_claims": [
+        "Likely relevant PStack identity: opinionated Cursor agent workflow, poteto-mode, playbooks, parallelism and verification-first framing; not evidence of outcomes."
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "pstack Feature playbook",
+      "publisher_or_author": "poteto; Cursor plugins repository",
+      "url": "https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/feature.md",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / workflow specification",
+      "supported_claims": [
+        "Feature workflow requires subsystem study, explicit architect step or recorded skip, decomposition checkpoint, scoped delegation, diff review, surface verification and PR opening."
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "pstack Multi-phase or multi-PR plan playbook",
+      "publisher_or_author": "poteto; Cursor plugins repository",
+      "url": "https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/multi-phase-plan.md",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / workflow specification",
+      "supported_claims": [
+        "Plan is a deliverable and implementation must not start until explicit operator go; open empirical questions are prototyped; plan validator and evidence boxes gate execution."
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "pstack Bug fix playbook",
+      "publisher_or_author": "poteto; Cursor plugins repository",
+      "url": "https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/bug-fix.md",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / workflow specification",
+      "supported_claims": [
+        "Bug readiness requires reproduced symptom, causal evidence, a fix plan, scoped delegation, same-surface verification and failing-before-passing evidence."
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate-high for platform mechanics and recommended gated design; moderate for maturity; low for comparative productivity of named SDD frameworks.",
+    "high": [
+      "GitHub/GitLab tracker, linkage, permission, workflow and documented limit behavior [S1][S2][S3][S4][S5][S6][S7][S12][S13][S14][S23][S24][S25].",
+      "SWE-bench/SWE-Bench+ and METR numeric findings as reported [S16][S17][S18][S19][S20]."
+    ],
+    "moderate": [
+      "Inference that an explicit READY gate plus independent review is the safest reusable production pattern. It triangulates vendor guidance, security controls and benchmark critiques but is not itself tested as one package.",
+      "DORA association as directional evidence, not causal proof specific to this workflow [S26]."
+    ],
+    "low": [
+      "Productivity/quality advantage of Spec Kit, Kiro, OpenSpec and pstack; no independent head-to-head production evaluation located.",
+      "PStack identity until the requester confirms; poteto’s cursor/plugins pstack is the strongest relevant match [S27]."
+    ]
+  },
+  "conflicts": [
+    {
+      "conflict": "Vendor capability framing says coding agents work independently and automate routine development [S5][S24], while GitHub also requires well-scoped tickets and thorough independent review [S4][S6].",
+      "resolution": "Independence describes execution, not correctness or product authority. Keep readiness/review gates."
+    },
+    {
+      "conflict": "SWE-bench shows increasing issue-resolution capability [S16][S17], but SWE-Bench+ reports leakage and weak-test inflation [S18].",
+      "resolution": "Use benchmark results only as capability evidence; require local acceptance oracles and review."
+    },
+    {
+      "conflict": "METR early-2025 found a slowdown [S19]; late-2025 data suggested speedup [S20].",
+      "resolution": "Tool capability changed, but the follow-up has wide intervals and selection/time-measurement bias. Treat direction and magnitude as unsettled."
+    },
+    {
+      "conflict": "Kiro Quick Spec can remove approval gates [S10], whereas the recommended process makes READY approval mandatory.",
+      "resolution": "Use Quick Spec only to draft artifacts; do not let its product shortcut bypass project readiness policy."
+    },
+    {
+      "conflict": "Spec frameworks encourage detailed artifacts [S8][S10], while small work can be harmed by ceremony; pstack itself says obvious one/two-file changes may skip a multi-phase plan [S29].",
+      "resolution": "Scale artifact depth to risk, but never skip the minimal READY evidence and approval. “Small” changes use a short plan, not no plan."
+    },
+    {
+      "conflict": "Copilot automations offer direct event response [S24], but external issue content is untrusted.",
+      "resolution": "Keep the default writer-only trigger behavior; external intake first enters triage with no write-capable tools."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    {
+      "claim": "The relevant “PStack” is poteto’s pstack in the Cursor plugins repository.",
+      "reason": "It is the strongest match to software-development workflow/planning and exposes feature, bugfix and multi-phase plan playbooks, but the name also refers to unrelated Unix stack tools, network stacks and multiple ports.",
+      "needed": "Requester confirmation of repository/author; until then cite the exact candidate URL [S27]."
+    },
+    {
+      "claim": "Spec Kit 1.0, Kiro Specs, OpenSpec or pstack improve delivery quality or lead time versus disciplined issue templates.",
+      "reason": "First-party docs establish mechanics, not comparative outcomes.",
+      "needed": "Independent controlled or longitudinal production study with defects, reviewer time and total cost."
+    },
+    {
+      "claim": "Late-2025/early-2026 AI agents speed experienced software work.",
+      "reason": "METR follow-up estimates cross zero and suffer selection and parallel-agent measurement bias [S20].",
+      "needed": "Redesigned preregistered study with representative adopters/tasks and multi-agent-aware time accounting."
+    },
+    {
+      "claim": "Passing issue acceptance tests means the user problem is solved.",
+      "reason": "Acceptance suites can be incomplete; SWE-Bench+ found weak-test successes [S18].",
+      "needed": "Independent review plus deployment/behavior signals and reopen/rollback tracking."
+    },
+    {
+      "claim": "Current preview features remain unchanged after the as-of date.",
+      "reason": "Issue forms and Agentic Workflows are documented as preview [S1][S25].",
+      "needed": "Post-2026-09-13 release notes/status."
+    }
+  ]
+}

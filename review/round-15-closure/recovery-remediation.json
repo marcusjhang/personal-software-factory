@@ -1,0 +1,128 @@
+{
+  "reviewer": "round-15 independent recovery/remediation closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-14 correction and schema-3 candidate-only regeneration",
+    "specialty": "All RemediationObligation purposes; block release; cleanup; and BUILD, MAINTENANCE, and IMPROVEMENT rollback and cancellation, including release-attempt IA and whole-work IX parent terminal behavior.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-14-resolution.md",
+      "review/round-14-closure/cross-consistency.json",
+      "review/round-14-closure/evidence-requirements.json",
+      "review/round-14-closure/formal-model.json",
+      "review/round-14-closure/improvement-races.json",
+      "review/round-14-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model execution, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation are accepted unperformed. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "authority_plan_only_status_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md identifies PLAN.md as the primary plan-only deliverable and docs/state-transition-manifests.md as its incorporated normative legal-edge authority.",
+        "Recomputed PLAN.md SHA-256 is 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271.",
+        "The manifest contains 794 unique edge rows with no duplicate ID: 96 canonical and 698 private/product rows, matching review/round-14-resolution.md.",
+        "README.md and the round-14 resolution explicitly disclaim implementation, exhaustive model proof, fresh semantic evidence validation, production safety, and independent closure."
+      ]
+    },
+    {
+      "area": "round_14_finding_resolution_inventory",
+      "result": "pass",
+      "exact_text": [
+        "All five round-14 closure JSON files parse. Their exact raw high-ID set is R14-IR-001, R14-IR-002, R14-IR-003, R14-XC-001, and R14-REC-001, with zero critical findings.",
+        "review/round-14-resolution.md individually maps all 5/5 raw highs and reports five unique defects.",
+        "IA09-IA15 now require a matching IX cancellation context, reducer priority 13 maps every release-attempt cancellation state to SAVED, IA14 owns attempt-local cleanup only, and IA15 is not a parent terminal edge.",
+        "The protected-X degradation adoption partition and the literal IH interrupt union are present, and every IH06-WX/WN/PX/PN guard requires work_cancel_state=NONE."
+      ]
+    },
+    {
+      "area": "remediation_obligation_and_block_release",
+      "result": "pass",
+      "exact_text": [
+        "RO00-B, RO00-M, and RO00-I are the only rollback-safety absent-to-OPEN creation transactions; they bind deterministic generation/link/child/event identities, retain the exact exposure/resource blocks, and create no CleanupItem or C11 transition.",
+        "RO09 closes a rollback-safety remediation child but releases no exposure/resource block. BUILD then requires B74, B34, and B38; MAINTENANCE requires M62, M25, and M29; IMPROVEMENT requires IRB09, IRB03, and exactly one of IRB07-N/R/Q.",
+        "Only B38, M29, or the selected IRB07-N/R/Q transaction removes its exact rollback-safety purpose/generation/key-set and seals or adopts genuine ROLLED_BACK with the required BlockReleaseReceipt.",
+        "RO11-RO13 revoke live remediation atomically with fencing, child quiescence, and effect settlement/reconciliation; RO14 is the sole reauthorization row. CLOSED is immutable and later signals create a new deterministic generation."
+      ]
+    },
+    {
+      "area": "build_and_maintenance_rollback_cleanup_cancellation",
+      "result": "pass",
+      "exact_text": [
+        "B37/M28 enter distinct nonterminal ROLLBACK_REMEDIATION_WAIT and atomically create the rollback-safety obligation; unresolved B77/M65 remains visible and cannot clean, cancel-terminalize, resume ordinary work, or release resources.",
+        "B71/M59 persist a first cancellation arriving after ROLLED_BACK; B71-P/M59-P continue a disposition persisted during rollback; B71-R/M59-R are replay-only. Their expected-version/disposition CAS races the ordinary B39/M30 cleanup entry.",
+        "A cancellation persisted during rollback cannot bypass restoration, independent verification, the exact block-release owner, or later cleanup receipts."
+      ]
+    },
+    {
+      "area": "improvement_rollback_and_parent_terminal_ownership",
+      "result": "pass",
+      "exact_text": [
+        "IRB07-N/R/Q form the exact NONE/REQUESTED/QUIESCING rollback-settlement partition. IRB08 owns non-WIDENING_ABORT cleanup only under NONE; IR13C-X owns exposed WIDENING_ABORT cleanup under NONE; IX03 owns parent cancellation cleanup under REQUESTED or QUIESCING.",
+        "IX03 requires terminal children, direct termination or quiescence-closed, settled effects, and either a complete protected NoExposureReceipt with rollback IDLE or actual ROLLED_BACK plus every applicable rollback-safety BlockReleaseReceipt.",
+        "IX04 is the sole parent CANCELLED owner and requires previously committed clean receipts plus no live child, authority, effect, rollback, or attempt.",
+        "The corrected IA09-IA15 path no longer independently derives parent CANCELLED."
+      ]
+    },
+    {
+      "area": "schema_3_evidence_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-14 and its recorded PLAN and normative-manifest SHA-256 values match the current bytes.",
+        "It records 37 corpus files, 25 source observations, 20 material claims, and 36 evidence edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 PLAN sections and all 28 dynamically derived normative-manifest headings are marked reviewed.",
+        "The graph explicitly remains editorial_candidate_associations_only with legacy_unverified provenance; no semantic validation or immutable fresh retrieval is claimed."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "R15-REC-001",
+      "severity": "high",
+      "title": "IX05 can strand a reachable release attempt in failure cleanup, so accepted whole-work cancellation has no parent-terminal continuation",
+      "requirement": "Every reachable nonterminal improvement tuple accepts IX01, and cancellation must settle its attempt/effects/rollback/cleanup before IX04 alone reaches parent CANCELLED.",
+      "basis": [
+        "docs/state-transition-manifests.md:976-985 makes each IA07-* or IA08-* failure transaction reach release_attempt_state=FAILURE_PENDING_CLEANUP while creating or preserving one CleanupManifest and projecting the parent to canonical CLEANING.",
+        "docs/state-transition-manifests.md:993-994 makes IA16 the only FAILURE_PENDING_CLEANUP->CLEANING edge and IA17 the only CLEANING->FAILED edge for that release attempt.",
+        "docs/state-transition-manifests.md:1002 and 1006 authorize IX01 for every ReachableNonterminalTupleV1, reject ordinary work during cancellation, and name only IA09-IA15 as release-attempt cancellation advances in matching IX context.",
+        "docs/state-transition-manifests.md:986-992 gives IA09-IA12 sources only READY, LEASED, EXECUTING, or VERIFYING; no IA cancellation row accepts FAILURE_PENDING_CLEANUP or CLEANING.",
+        "docs/state-transition-manifests.md:1010 lets IX05 adopt a pre-cancel canonical CLEANING tuple by changing work_cancel_state REQUESTED->CLEANING while preserving existing CleanupItems, but it does not settle or terminalize the nonterminal release attempt.",
+        "docs/state-transition-manifests.md:1009 requires IX04 to have no live attempt, and line 967 declares only SUCCEEDED, FAILED, and CANCELLED attempt-local terminals. Therefore FAILURE_PENDING_CLEANUP or CLEANING cannot satisfy IX04."
+      ],
+      "adversarial_trace": [
+        "Reach an exact IA07-* or IA08-* failure tuple. The synchronized row leaves the candidate failed, release_attempt_state=FAILURE_PENDING_CLEANUP, a CleanupManifest present, and the parent canonical CLEANING.",
+        "Before IA16, accept authenticated cancellation through IX01, which is promised for every reachable nonterminal tuple. The work cancellation coordinate becomes REQUESTED.",
+        "Take IX05 because the pre-cancel canonical state was CLEANING and the named stop/effect/rollback predicates are settled. The work cancellation coordinate becomes CLEANING, but the release attempt remains FAILURE_PENDING_CLEANUP.",
+        "IA09-IA12 cannot apply from FAILURE_PENDING_CLEANUP, IA13-IA15 cannot apply without their earlier attempt-local states, and IA16/IA17 are not cancellation allowlist rows. Even if IA16 were inferred to remain legal, IA17's fixed CLEANING>FAILED projection conflicts with cancellation priority 5, which keeps the parent canonical CLEANING.",
+        "IX04 rejects because the release attempt is nonterminal/live. The accepted cancellation can neither reach attempt-local CANCELLED nor parent CANCELLED. The same gap exists when IX01 wins after IA16 with release_attempt_state=CLEANING."
+      ],
+      "impact": "The closed plan contradicts its total IX01 eligibility and leaves a reachable accepted cancellation permanently stranded in parent CLEANING. It has no exact legal edge that settles the release attempt and therefore no legal IX04 terminal path.",
+      "required_correction": "Add an exact, mutually exclusive cancellation settlement/adoption partition for release_attempt_state=FAILURE_PENDING_CLEANUP and CLEANING. It must preserve or complete existing attempt-local cleanup without duplicating the parent CleanupManifest, produce an attempt-local terminal compatible with IX dominance, and leave IX04 as the sole parent CANCELLED owner. Add generated witnesses for IX01 immediately before and after IA16 and before IA17, including IX05 adoption, exact reducer projections, replay/CAS conflicts, no duplicate cleanup owner, and eventual IX04 only after both attempt-local and parent cleanup guards pass."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "Implementation and exhaustive generated reachable-product/full-model execution remain future gates and were not treated as findings.",
+    "Fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation remain future gates and were not treated as findings."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,161 @@
+{
+  "reviewer": "round-11 formal-state closure audit",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-10 combined correction and schema-3 regeneration",
+    "specialty": "Parse 764+ edges, closed vocabularies, reducer precedence, canonical adjacency, reachability, BUILD/MAINTENANCE rollback remediation, IX cancellation-first safety, rollout vocabulary, post-E06 degradation, IC32 totality, IR34/IR35 classification, cleanup origin, and IR13 settlement.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-10-resolution.md",
+      "review/round-10-closure/evidence-status.json",
+      "review/round-10-closure/formal-model.json",
+      "review/round-10-closure/improvement-races.json",
+      "review/round-10-closure/recovery-adversary.json",
+      "review/round-10-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, direct contradiction, unsafe or undefined path, or material overclaim. Future implementation, exhaustive full reachable-product/model proof, fresh immutable retrieval, same-run human semantic review, reviewed-edge regeneration, and production validation were accepted as unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_parse_closed_vocabularies_and_canonical_adjacency",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md §1: ‘A projection is invalid unless every adjacent pair appears in §2.’",
+        "PLAN.md §14.0 and manifest §15 declare the same 22-symbol rollout vocabulary, including `WIDENING_RECONCILING` and `PROMOTION_RECONCILING`.",
+        "Round-10 resolution declares 764 unique edge rows: 96 canonical and 668 private/product rows."
+      ],
+      "basis": "All Markdown table blocks parse at uniform width. The 96 §2 canonical rows are distinct. The current correction’s expanded edge accounting is 764 unique rows. The new `BLOCKED>ROLLBACK_REQUESTED` and `BLOCKED>CLEANING` reconciliation continuations use explicit §2 adjacency. No closed-rollout-vocabulary mismatch was found."
+    },
+    {
+      "area": "build_and_maintenance_rollback_remediation",
+      "result": "fail",
+      "exact_text": [
+        "B37/M28 enter distinct private `ROLLBACK_REMEDIATION_WAIT` states and create protected rollback-safety obligations.",
+        "B75/M63 adopt cancellation without leaving remediation wait; B74/M62 require RO09 closure, genuine restoration, and fresh independent verification authority.",
+        "B34/B38 and M25/M29 must prove verification and `ROLLED_BACK` before cleanup or cancellation continuation."
+      ],
+      "basis": "The generic BLOCKED escape is repaired and unresolved remediation stays observable. After a cancellation is persisted, however, the post-remediation `ROLLED_BACK` state enables both the ordinary cleanup row and the cancellation-continuation row because their guards do not partition on that disposition. Finding R11-FS-003."
+    },
+    {
+      "area": "ix_cancellation_first_safety_partition",
+      "result": "pass",
+      "exact_text": [
+        "IX01 is authorized for every member of generated `ReachableNonterminalTupleV1`.",
+        "While cancellation is pending, ordinary product progress is rejected and only the closed IX06/rollback/reconciliation/quiescence/cleanup safety allowlist may advance.",
+        "IX03 permits rollback `IDLE` only with a protected all-target `NoExposureReceipt`; exposure requires exactly `ROLLED_BACK`."
+      ],
+      "basis": "IX01-first and safety-event-first paths preserve one rollback saga and one cleanup owner. REQUESTED/QUIESCING U, N, and X rows cover unsettled, proved-no-exposure, and protected-exposure safety continuation. No separate critical/high cancellation bypass was found."
+    },
+    {
+      "area": "post_e06_degradation_and_canary_abort_classification",
+      "result": "pass",
+      "exact_text": [
+        "IH01-WV/PV cover the exact durable-E06/pre-IR38-or-IR18 interval and atomically fence progress, classify protected X, and request rollback.",
+        "IR34/IR35 create a generation-bound protected `NoExposureReceipt` only after rechecking that no exposure Effect was dispatched.",
+        "A racing possible exposure rejects IR34/IR35 and uses the protected-X stop path."
+      ],
+      "basis": "The round-10 post-E06 hole and IR34/IR35 unclassified abort entry are materially repaired at plan/table level. Future generated interleaving execution was not required."
+    },
+    {
+      "area": "candidate_revocation_reachable_coordinate_totality",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md §8.4: ‘Candidate revocation is partitioned by the exact rollout and target Effect.’",
+        "Manifest §15.2 says the checker requires equality between generated `ActualReachableRevocationCoordinatesV1` and the IC32/IX06 guard union.",
+        "The manifest’s stated reachable IC32 rollout set ends at `PROMOTED` and `OBSERVING` and omits `FAILED` and `RETIRED`."
+      ],
+      "basis": "Rollout `FAILED` and `RETIRED` are reachable while candidate remains `SHADOW_PASSED` and cleanup is still nonterminal, for example through IR16/IR21 and other deny/retire rows. No IC32 cleanup-adoption/stutter row covers a revocation there, and no normative rule proves the revocation irrelevant or rejects it after an irreversible disposition. Finding R11-FS-002."
+    },
+    {
+      "area": "cleanup_origin_and_ir13_settlement",
+      "result": "fail",
+      "exact_text": [
+        "Reducer priority 7a preserves `rollback_origin=WIDENING_ABORT` at canonical `ROLLED_BACK` through IR12/IR13A until IR13C schedules cleanup.",
+        "IR13A requires rollback exactly `ROLLED_BACK`; IR13B is the protected no-exposure branch.",
+        "IR13C is one combined branch row and declares only `REVIEW>CLEANING`."
+      ],
+      "basis": "The IR13B/no-exposure source projects REVIEW, but the IR13A/exposed source projects ROLLED_BACK by the higher-priority reducer. Therefore IR13C’s exposed branch states a non-adjacent/wrong-source canonical sequence and violates the universal exact-projection rule. Finding R11-FS-001."
+    },
+    {
+      "area": "schema_3_identity_traceability_and_status",
+      "result": "pass",
+      "exact_text": [
+        "Current PLAN SHA-256 is `29804814db262399090c60bbd5d6c15527ed9fdce2f72cecce7eea0be9d31063`.",
+        "Current normative-manifest SHA-256 is `d8e3c02cdffd28a7b8c33ab2cb9133ecc5dd4be8e99cf3a251b9ced50af65599`.",
+        "material-claims.json is schema `3.0.0` with regeneration checkpoint `round-10`."
+      ],
+      "basis": "Both stored generated_against hashes reproduce exactly. The dynamically derived ordered 28-heading set equals the recorded set. All 37 research inventory files exist, parse, and match their recorded byte hashes. The graph has 20 claims, 25 observations, and 36 unreviewed_candidate edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports, and zero refutes. README, traceability, and resolution do not claim implementation, semantic proof, full model proof, production safety, or independent closure."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R11-FS-001",
+      "severity": "high",
+      "title": "IR13C uses the no-exposure canonical projection for its exposed ROLLED_BACK branch",
+      "requirement": "Every synchronized tuple row must stutter or traverse only the exact legal §2 canonical adjacency from the reducer-selected pre-state.",
+      "evidence": [
+        "docs/state-transition-manifests.md §15.1 priority 7a says a no-cancellation WIDENING_ABORT with rollback ROLLED_BACK and cleanup NOT_REQUIRED remains canonical ROLLED_BACK through IR12/IR13A until IR13C schedules cleanup.",
+        "IR13A reaches CANARY_ABORT_SETTLED only with rollback exactly ROLLED_BACK, whereas IR13B is the no-exposure/rollback-IDLE branch.",
+        "IR13C combines both branch receipts but declares only `REVIEW>CLEANING`; REVIEW is the IR13B pre-state, not the IR13A pre-state. §2 provides `ROLLED_BACK>CLEANING` for the exposed branch."
+      ],
+      "impact": "A literal reducer rejects IR13C after a valid exposed canary abort, or an implementation ignores the stated projection. The sole WIDENING_ABORT/NONE cleanup path can strand after genuine rollback.",
+      "required_correction": "Split IR13C into exposed and no-exposure rows, or state a branch-dependent exact projection: `ROLLED_BACK>CLEANING` for IR13A and `REVIEW>CLEANING` for IR13B. Preserve the one-owner origin/cancellation partition and update exact witnesses."
+    },
+    {
+      "id": "R11-FS-002",
+      "severity": "high",
+      "title": "IC32 revocation totality omits reachable rollout FAILED and RETIRED cleanup tuples",
+      "requirement": "Candidate revocation must be total over the actual generated reachable rollout/effect/rollback/cancellation coordinates, with exact equality rather than a hand-maintained subset.",
+      "evidence": [
+        "IR16 and related denial/withdrawal rows can move rollout to FAILED and schedule cleanup while candidate remains SHADOW_PASSED; before cleanup receipts finish, the tuple is reachable and nonterminal.",
+        "IR21 can move rollout OBSERVING->RETIRED and schedule cleanup while candidate remains SHADOW_PASSED; the tuple is nonterminal until cleanup completes.",
+        "The IC32 reachable-rollout declaration and IC32 row union omit FAILED and RETIRED, and no row adopts/stutters a later revocation without duplicating cleanup."
+      ],
+      "impact": "A revocation arriving during failure/retirement cleanup has no exact candidate transition despite the claimed generated equality and PLAN’s exact-rollout revocation contract. Authority/history handling is undefined at a reachable nonterminal coordinate.",
+      "required_correction": "Add exact cleanup-adoption revocation rows for reachable FAILED/RETIRED tuples that preserve the existing CleanupManifest and create no rollback/duplicate owner, or add a normative irreversible-disposition rule that safely rejects and records such events and removes those coordinates from the declared revocation domain. Regenerate equality witnesses from the actual fixed point."
+    },
+    {
+      "id": "R11-FS-003",
+      "severity": "high",
+      "title": "BUILD and MAINTENANCE post-remediation cancellation and cleanup rows overlap",
+      "requirement": "After rollback remediation, persisted cancellation must select exactly one continuation and cannot race ordinary failure cleanup.",
+      "evidence": [
+        "B75 and M63 persist authenticated cancellation while remaining in ROLLBACK_REMEDIATION_WAIT.",
+        "After B74/M62, B34/B38 and M25/M29 can reach ROLLED_BACK with that cancellation disposition still persisted.",
+        "At ROLLED_BACK, B39/M30 require only an outcome receipt, while B71/M59 require authenticated cancellation after rollback settled. The ordinary rows do not require absence of cancellation, so both continuations are enabled."
+      ],
+      "impact": "The private BUILD/MAINTENANCE machines are nondeterministic at a safety-sensitive point. One scheduler can enter ordinary failure cleanup while another enters cancellation handling, undermining exact replay and sole cleanup/terminal ownership.",
+      "required_correction": "Partition the rows explicitly: B39/M30 require no persisted cancellation, and B71/M59 require the persisted cancellation disposition. Define CAS/replay behavior and add cancellation-during-remediation witnesses through ROLLED_BACK, cleanup, and CANCELLED."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "low": 0,
+    "total": 3,
+    "manifest_rows_parsed": 764,
+    "canonical_rows": 96,
+    "private_and_product_rows": 668,
+    "current_normative_headings": 28,
+    "reachable_effect_product_rows": 44,
+    "rollout_vocabulary_symbols": 22
+  },
+  "residual_uncertainty": [
+    "This was a plan-only static/table audit, not implementation execution, an exhaustive generated reachable-product/model proof, or production-safety validation.",
+    "Legacy source provenance and semantic entailment were not revalidated; immutable retrieval, same-run human review, and reviewed-edge regeneration correctly remain future gates."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,130 @@
+{
+  "reviewer": "round-16 independent formal-model closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-15 correction",
+    "specialty": "All 799 normative manifest rows, with emphasis on IA18/IX cancellation totality, IXH cancellation-side degradation, IX revocation candidate equality, deterministic reducer behavior, canonical adjacency, and terminal ownership.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-15-resolution.md",
+      "review/round-15-closure/formal-model.json",
+      "review/round-15-closure/improvement-races.json",
+      "review/round-15-closure/cross-consistency.json",
+      "review/round-15-closure/recovery-remediation.json",
+      "review/round-15-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "review/plan-link-check.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-product model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "independent_checks": {
+    "manifest_edge_rows_parsed": 799,
+    "unique_manifest_edge_ids": 799,
+    "duplicate_manifest_edge_ids": 0,
+    "markdown_table_width_mismatches": 0,
+    "canonical_rows": 96,
+    "private_or_product_rows": 703,
+    "canonical_symbols": 27,
+    "canonical_symbols_reachable_from_INBOX": 27,
+    "canonical_sinks": [
+      "CANCELLED",
+      "DONE",
+      "FAILED"
+    ],
+    "unlisted_literal_canonical_projection_adjacencies": 0,
+    "schema_version": "3.0.0",
+    "schema_checkpoint": "round-15",
+    "plan_sha256": "9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c",
+    "normative_manifest_sha256": "4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d",
+    "schema_plan_digest_matches_current_bytes": true,
+    "schema_manifest_digest_matches_current_bytes": true,
+    "requirements_structurally_mapped": "16/16"
+  },
+  "contract_reproduction": [
+    {
+      "area": "799_row_inventory_canonical_adjacency_and_terminals",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest parses to exactly 799 unique edge IDs: 96 canonical rows and 703 private/product rows. Parsing reaches ICL03, finds no duplicate edge ID, and finds no Markdown data-row width mismatch.",
+        "The 96-row canonical graph contains 27 symbols. Literal traversal from INBOX reaches all 27. Its exact sinks are CANCELLED, DONE, and FAILED.",
+        "Every adjacent pair in every literal canonical projection sequence is a listed canonical edge. A component event is legal only when its coordinate edge is listed and the projection is S, one canonical edge, or the exact synchronized sequence on that row.",
+        "Terminal Work states require previously committed clean receipts. DONE, FAILED, and CANCELLED are immutable; later retained risk proceeds through RemediationObligation/MAINTENANCE rather than reopening Work."
+      ],
+      "basis": "Independent escaped-pipe Markdown parsing, edge-ID uniqueness and table-width checks, canonical directed-graph traversal, literal projection-sequence comparison, and terminal-clause inspection. This is not exhaustive reachable-product execution."
+    },
+    {
+      "area": "deterministic_reducer_and_ownership",
+      "result": "pass",
+      "exact_text": [
+        "Each reducer predicate includes ‘and no earlier priority matched,’ making the priority predicates disjoint. Unknown symbols, zero or multiple synchronized matches, illegal adjacency, or disagreement with persisted canonical_state rejects the transaction.",
+        "SAVED means evaluation continues to the next lower-priority coordinate; it is not a default result. Priority 17 is total because the candidate map enumerates every candidate symbol.",
+        "Pending cancellation with an active rollback is visible at priority 2. Work cancellation REQUESTED, QUIESCING, CLEANING, and clean CANCELLED owns priorities 3 through 6. Subordinate release-attempt cancellation maps to SAVED at priority 13 and cannot derive parent cancellation or terminality.",
+        "IX03 is the sole parent cancellation-cleanup scheduler. IX04 is the sole row that changes the improvement work cancellation coordinate CLEANING to CANCELLED, and it requires clean receipts plus no live child, authority, effect, rollback, or attempt."
+      ],
+      "basis": "PLAN §§8.1-8.4 and manifest §§1-2, 15-15.1, 15.4-15.8."
+    },
+    {
+      "area": "IA18_and_IX_cancellation_totality",
+      "result": "pass",
+      "exact_text": [
+        "IA16 and IA17 require work_cancel_state=NONE. After IX01, they reject; IA18-F accepts failure-origin FAILURE_PENDING_CLEANUP and IA18-C accepts failure-origin CLEANING in exact REQUESTED, QUIESCING, or CLEANING IX context.",
+        "IA18-F preserves the one IA07/IA08 CleanupManifest byte-for-byte, creates no cleanup, saga, or parent terminal, and advances the attempt-local failure cleanup to CLEANING. IA18-C requires attempt-local clean receipts and seals only attempt-local CANCELLED.",
+        "FailureCleanupCancellationCoordinatesV1 is declared equal to the IA18-F/IA18-C source union and pairwise disjoint by attempt source. No member may use IA16/IA17 or become a nonterminal sink.",
+        "IA09-IA15 and IA18-F/IA18-C are IX-dominant canonical stutters. No attempt row terminalizes the parent; IX03 and IX04 retain sole parent cleanup and CANCELLED ownership.",
+        "The required witnesses race IX01 immediately before and after IA16 and before IA17, include IX05 adoption, expected-version CAS/replay conflicts, byte-identical CleanupManifest preservation, and eventual IX04 only after attempt-local and full parent guards pass."
+      ],
+      "basis": "PLAN §8.4; manifest IA07-IA18, §§15.4-15.5 and the release-attempt-failure witness in §15.8; round-15 item R15-REC-001."
+    },
+    {
+      "area": "IXH_cancellation_side_degradation_totality",
+      "result": "pass",
+      "exact_text": [
+        "IXH01-R, IXH01-Q, and IXH01-C accept HEALTHY reachable nonterminal cancellation tuples in REQUESTED, QUIESCING, and CLEANING respectively and atomically set health to TELEMETRY_DEGRADED while writing the deterministic generation/source-bound CancellationDegradationReceipt.",
+        "Each IXH row preserves exact candidate, rollout, release-attempt, Effect, rollback, cleanup, identity, and ownership coordinates; the cancellation fence stays active and no second saga or CleanupManifest is created.",
+        "ReachableCancellationDegradationCoordinatesV1 is declared exactly equal to the pairwise-disjoint IXH01-R/Q/C guard union. CANCELLED and every other terminal coordinate are absent.",
+        "The receipt identity binds parent_work_id, active_canary_generation, pre-event tuple digest, and degradation-event digest. Identical bytes replay; a conflicting digest or tuple version rejects. IX01/IX02 and Effect-settlement races use one tuple-version CAS and rederive the unique IXH/IX06 continuation."
+      ],
+      "basis": "PLAN §8.4; manifest §§15.5-15.8, especially IXH01-R/Q/C and ReachableCancellationDegradationCoordinatesV1; round-15 item R15-IR-001."
+    },
+    {
+      "area": "IX_revocation_candidate_equality",
+      "result": "pass",
+      "exact_text": [
+        "CancellationRevocationCoordinatesV1 is exactly the reachable REQUESTED/QUIESCING IX06 revocation relation over candidate sources SHADOW_PASSED, FROZEN, and EVIDENCE_STALE, partitioned by UNSETTLED, N, and X.",
+        "The exact guard union is IX06-UR/UQ, IX06-NR/NQ, and IX06-XR/XQ. Each revocation-triggered row maps SHADOW_PASSED|FROZEN|EVIDENCE_STALE to REVOKED, or preserves REVOKED on replay/continuation.",
+        "The six guards are pairwise disjoint after cancellation state and classifier are fixed. At IX01 their pre-cancel projection equals the corresponding IC32 guards: IC32 wins only while cancellation is NONE, IX06 wins after IX01, and a stale writer rejects by expected-version CAS.",
+        "The IX06 row preserves the exact Effect and any existing rollback identity/origin, creates no duplicate saga or cleanup, and retains the safe rollout target and branch owner for its X, N, or unsettled class."
+      ],
+      "basis": "PLAN §8.4; manifest IC32 partitions and §§15.5, 15.7-15.8; round-15 item R15-IR-002."
+    },
+    {
+      "area": "status_traceability_and_schema3_graph",
+      "result": "pass",
+      "exact_text": [
+        "All six raw round-15 high findings are mapped to four unique defects in the round-15 resolution. The requirements register remains structurally mapped 16/16 and explicitly defines mapped as a proposed contract, not implementation or empirical closure.",
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-15. Its stored PLAN SHA-256 9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c and manifest SHA-256 4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d match independently hashed current bytes.",
+        "The schema-3 artifact labels all legacy evidence edges as unreviewed editorial candidates, reserves supports/refutes for a future fresh ResearchRun plus recorded human semantic review, and reports zero promoted supports/refutes edges.",
+        "README, traceability, and the round-15 register state that round-15 formal bytes and the matching candidate graph are current, while implementation, exhaustive/full-product model execution, fresh immutable retrieval, same-run semantic review, deterministic reviewed-edge regeneration, production validation, and independent closure were pending before this review."
+      ],
+      "basis": "README status sections, requirements traceability §§1-2 and 18, round-15 resolution, schema-3 generated_against/scope/internal-validation fields, and independent digest comparison."
+    }
+  ],
+  "findings": [],
+  "severity_summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "closure_criteria_pass": true,
+  "verdict": "PASS"
+}

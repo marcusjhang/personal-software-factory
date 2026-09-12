@@ -1,0 +1,107 @@
+{
+  "reviewer": "round-4-closure-improvement-security",
+  "scope": "Final plan-only closure audit of PLAN.md, README.md, docs/state-transition-manifests.md, requirements traceability, round-1 through round-3 reviews/resolutions, all four round-3 closure reviews, and the current research evidence artifacts. No implementation exists by explicit scope, and no future proof gate was required to have passed. Specialty coverage: improvement product/reducer and synchronized edges, EvidenceBundle completeness, separate rollout decisions, independence, sandbox totality, lease/fence/effects, authority separation, break glass, and protected self-improvement boundaries.",
+  "strengths": [
+    "The four-timestamp database-time lease contract, stale-fence rejection, quiescence sequencing, and UNKNOWN-effect reconciliation are explicit and fail closed at plan level.",
+    "The R0-R4 by T0-T3 sandbox matrix is total, strongest-wins, and sends conflicts or unsupported isolation to S4_NO_EXECUTION.",
+    "PrincipalIdentitySnapshot and ControlRelationshipSnapshot bind canonical people, aliases, service controllers, organizations, freshness, conflicts, signatures, and revocation into governed decisions; a solo owner remains disabled.",
+    "Enablement, canary admission, widening, and promotion are separate purpose-bound record types, and break-glass/self-improvement prose preserves the important non-waivable boundaries.",
+    "The evidence artifacts now match the current PLAN and manifest digests, label legacy dates and semantics unverified, preserve conflicts, and do not claim the future immutable re-fetch or human semantic gate passed."
+  ],
+  "findings": [
+    {
+      "id": "R4-IMPSEC-001",
+      "severity": "high",
+      "title": "The improvement reducer is not total over its own reachable product and refers to undefined aggregate states",
+      "requirement": "R-12/P-12 maximum-safe improvement and the round-3 closure contract require a versioned, total, deterministic reducer for every reachable component edge, with impossible tuples rejected rather than implementation-time inference.",
+      "evidence": "docs/state-transition-manifests.md 'Improvement product and reducer v1' says every component event is reduced in the same transaction and must derive exactly one canonical result. Its precedence rows cover selected active/success/final conditions but provide no projection for reachable candidate states CURATION_FAILED, OFFLINE_FAILED, SHADOW_FAILED, EVIDENCE_STALE, FROZEN, or REVOKED, or rollout states CANARY_FAILED, CANARY_ABORTING, or CANARY_ABORTED when no higher-priority coordinate happens to apply. Those states are direct targets of IC04, IC09, IC14, IC16-IC24, IC30, IC32, and IR09-IR12. The tuple also introduces effect_set_state, cleanup_set_state, and rollback_state without closed vocabularies or aggregation edges. Precedence row 4 names cleanup FAILED_PENDING_DISPOSITION, but the normative CleanupItem machine instead declares CLEANUP_FAILED and ESCALATION_PENDING.",
+      "reproduction": [
+        "Start from the declared initial tuple and follow IC01-IC04 to reach candidate_state=CURATION_FAILED while rollout remains DISABLED, release attempt IDLE, control HEALTHY, and no active rollback/effect/cleanup.",
+        "Apply the precedence table in order. Rows 1-15 do not match, and row 16 is limited to final failure/rejection with settled coordinates; CURATION_FAILED is not declared a final disposition. No canonical result exists, although IC04 is a published legal edge.",
+        "Separately compare reducer cleanup predicate FAILED_PENDING_DISPOSITION with the complete CleanupItem state list; no such state or derivation is defined."
+      ],
+      "impact": "A conforming implementation cannot deterministically commit several published legal transitions. It must deadlock safe failure/stale/abort paths or invent projection and aggregate semantics. That reopens the concurrent-projection defect claimed closed by R3-STATESEC-002 and R3-REQ-002.",
+      "recommendation": "Publish closed vocabularies and aggregation functions for effect_set_state, cleanup_set_state, and rollback_state. Add an exhaustive reducer row or explicit synchronized projection for every reachable tuple/edge. Use the actual CleanupItem names. Provide a generated reachable-product table showing exactly one legal canonical result for every row before treating the plan contract as closed.",
+      "verification": "Enumerate the reachable product from declared initials using only manifest edges. For each event, assert that exactly one reducer row applies, every referenced aggregate value belongs to a closed vocabulary, and the resulting canonical stutter/edge/sequence is legal. Include explicit witnesses for all failure, stale, frozen, revoked, aborting, aborted, cleanup, effect, and rollback states.",
+      "confidence": "high",
+      "prior": [
+        "R3-STATESEC-002",
+        "R3-REQ-002",
+        "CEC-R3-001",
+        "SECIMP-R2-001"
+      ]
+    },
+    {
+      "id": "R4-IMPSEC-002",
+      "severity": "high",
+      "title": "IR04 atomically fabricates an entire asynchronous canary child lifecycle",
+      "requirement": "R-12/P-12 and the canonical work contract require every mutation to pass real admission, lease, worker-start, output, verification, review, effect, and observation guards without shortcutting protected stages.",
+      "evidence": "docs/state-transition-manifests.md defines CHILD(X) as creating or advancing a distinct child and A>B as committing all named canonical edges in one CAS transaction. Rollout row IR04 projects S + CHILD(READY_REVIEW>READY>LEASED>IMPLEMENTING>VERIFYING>REVIEW>MERGE_QUEUED>MERGED>OBSERVING) from CANARY_READY to CANARY_RUNNING. Its guard only says the child was admitted through the READY/LEASED path. Canonical CW06-CW17 separately require worker-started, outputs-sealed, oracle-pass, review-pass, verified effect, deployment authorization/receipt, and observation semantics. The improvement synchronized-check clause confirms IR04 creates this child trace while stuttering the parent.",
+      "reproduction": [
+        "Place the parent in CANARY_READY with a valid CanaryAdmissionDecision and a child that has only satisfied READY admission/lease.",
+        "Apply IR04 using its stated guard and A>B semantics.",
+        "The single CAS projects the child through IMPLEMENTING, VERIFYING, REVIEW, MERGE_QUEUED, MERGED, and OBSERVING even though the later asynchronous receipts cannot exist at canary start."
+      ],
+      "impact": "The normative path either records future facts before they occur or is not implementable as written. If implemented literally, it bypasses the very evaluators, review, effect verification, and observation boundaries intended to make canarying safe.",
+      "recommendation": "Replace IR04 with child creation/admission only. Define separate parent-child synchronization rows driven by durable child receipts for worker start, outputs, oracle result, review, bounded exposure effect, telemetry observation, stop/rollback, and cleanup. Parent rollout edges must consume those receipts rather than pre-commit the full trace.",
+      "verification": "Model a canary with delayed and failed receipts. Prove the child cannot advance beyond each canonical state until that state's guard receipt exists and that the parent cannot reach CANARY_PASSED or promotion review from a fabricated or incomplete child trace.",
+      "confidence": "high",
+      "prior": [
+        "R3-STATESEC-001",
+        "R3-STATESEC-002",
+        "CEC-R3-001",
+        "SECIMP-R2-001"
+      ]
+    },
+    {
+      "id": "R4-IMPSEC-003",
+      "severity": "high",
+      "title": "WideningDecision has no deterministic normal widening transition",
+      "requirement": "R-12/P-12 and round-3 group G7 require separate, stage-bound enablement, canary-admission, widening, and post-canary promotion decisions that advance only their named legal edges.",
+      "evidence": "PLAN.md \u00a78.4 says widening creates a new signed rollout decision, and \u00a78.5 says decisions advance only their named edges. The rollout manifest has no widening state or healthy CANARY_RUNNING widening edge. IR06 mentions a new WideningDecision only on CANARY_PAUSED -> CANARY_RUNNING after a telemetry/non-stop hold. IR25 sends CANARY_PAUSED -> CANARY_PENDING_APPROVAL for 'widening/input change', but the only exit IR03 requires a distinct CanaryAdmissionDecision, not WideningDecision.",
+      "reproduction": [
+        "Reach CANARY_RUNNING with healthy continuous telemetry and a valid bounded initial cohort.",
+        "Issue a valid WideningDecision for a larger cohort.",
+        "Search the closed rollout rows: no source CANARY_RUNNING row consumes it. If the canary is first paused and IR25 is used, CANARY_PENDING_APPROVAL can exit only through IR03 with the wrong decision type. The only consumable widening reference is IR06's resume-after-pause branch."
+      ],
+      "impact": "Normal staged exposure cannot widen under the closed manifest. An implementer must invent an unreviewed edge, misuse a canary-admission decision, or create a false pause, so the claimed independent widening authority is not operationally closed.",
+      "recommendation": "Add an explicit widening substate or synchronized stutter edge with old/new bounds, stage-complete prior-slice EvidenceBundle, WideningDecision digest, effect receipt, telemetry continuity, expiry/revocation, and failure/abort paths. Make IR25's return consume WideningDecision or remove the contradictory route.",
+      "verification": "From healthy CANARY_RUNNING, demonstrate one and only one legal path for unchanged bounds, approved widening, denied/expired widening, telemetry loss during widening, and widening-effect UNKNOWN. Prove CanaryAdmissionDecision and WideningDecision cannot substitute for each other.",
+      "confidence": "high",
+      "prior": [
+        "R3-STATESEC-007",
+        "SECIMP-R2-001",
+        "SECIMP-R2-002",
+        "SI-RC-13"
+      ]
+    },
+    {
+      "id": "R4-IMPSEC-004",
+      "severity": "high",
+      "title": "EvidenceBundle completeness does not bind the protected expected evaluator case and shard set",
+      "requirement": "R-12/P-12 requires promotion evidence that cannot be selected or summarized by the candidate and must fail closed on missing, failed, inconclusive, stale, or conflicting evaluation evidence.",
+      "evidence": "PLAN.md \u00a78.5 records trial seeds, ordered case IDs, raw/aggregate digests, metric denominators, exclusions, and stage results, but it does not bind a protected expected evaluator case/shard manifest, expected-versus-received set/count, or completeness proof. The explicit one-to-one completeness rule applies only to executable safety-manifest cases. 'Stage-complete' is not otherwise defined against the full offline, shadow, canary, mutation, property, adversarial, fault, privacy, isolation, deletion/hold, and holdout input universe.",
+      "reproduction": [
+        "Take a protected evaluation plan containing a passing shard and a failed non-safety evaluator shard.",
+        "Construct a bundle listing only the passing shard's ordered case IDs, raw results, aggregates, and internally consistent denominators.",
+        "All enumerated bundle fields can be populated and the safety-manifest one-to-one rule can still pass because no contract compares received evaluator shards/cases to a protected expected set."
+      ],
+      "impact": "A proposer or faulty collection path can select away failed or missing non-safety cases while producing a signed, internally consistent bundle that appears stage-complete. This preserves the selected-evidence attack behind SECIMP-R2-002 and can authorize unsafe canary or promotion decisions.",
+      "recommendation": "Bind every stage bundle to a protected EvaluationManifest digest containing the exact expected shard IDs, case IDs, seeds, evaluators, slices, required result classes, and missingness policy. Require set equality and expected-versus-received counts before sealing. Treat duplicate, missing, unexpected, failed, inconclusive, or unaccounted excluded cases as a denying result unless a separately protected policy explicitly defines the disposition.",
+      "verification": "Attempt to omit, duplicate, replace, reorder, or mark excluded one non-safety case or shard from each required evaluation class. Bundle sealing and all four decision validations must deny. Verify exact set equality against the protected manifest and not merely self-consistency of arrived results.",
+      "confidence": "high",
+      "prior": [
+        "SECIMP-R2-002",
+        "SI-002",
+        "SI-RC-12",
+        "R3-STATESEC-002"
+      ]
+    }
+  ],
+  "residual_uncertainty": [
+    "This is a plan-contract audit. It does not assess implementation, because none exists by explicit scope, and it does not require future compilation, model checking, runtime tests, pilots, immutable re-fetch, or semantic review to have passed.",
+    "The evidence graph's structural validator is self-reported in the artifact; digest equality, JSON validity, current disclaimers, and representative edge/conflict structure were reproduced locally, but source truth and semantic entailment intentionally remain future gates.",
+    "No additional critical/high defect was found in the sandbox matrix, lease/fence boundary, UNKNOWN-effect disposition, authority split, identity/control snapshots, tenant/scope envelope, unconfirmed-quiescence saga, or stated break-glass/self-improvement protected boundaries."
+  ],
+  "closure_criteria_pass": false
+}

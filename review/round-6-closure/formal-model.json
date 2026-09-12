@@ -1,0 +1,94 @@
+{
+  "reviewer": "round-6 independent formal-model closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-5 corrections",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-5-resolution.md",
+      "review/round-5-closure/evidence-integrity.json",
+      "review/round-5-closure/requirements-authority.json",
+      "review/round-5-closure/formal-transition.json",
+      "review/round-5-closure/improvement-product.json",
+      "review/round-5-closure/architecture-consistency.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "Canonical, built-in factory, runtime, Effect, Wait, CleanupItem, UnconfirmedQuiescence, and improvement-product tables; endpoints, adjacency, reachability, sinks, event partitions, cancellation, and the published tuple witnesses.",
+    "severity_rule": "Critical/high only for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Implementation proof, full model proof, and completion of future evidence gates were not required."
+  },
+  "repair_reproduction": [
+    {
+      "area": "canonical_and_builtin_factory_tables",
+      "result": "pass",
+      "basis": "Parsed 88 canonical edges and the four eight-column built-in tables: IDEATION 37 rows, BUILD 74, MAINTENANCE 61, and DEEP-RESEARCH 69. All private endpoints occur in the PLAN section 14.0 lookup, all explicit canonical adjacent pairs are listed, all explicit S projections have equal lookup endpoints, and all declared private states are reachable: 16/16, 31/31, 28/28, and 27/27. Every reachable nonterminal private state has an explicit cancel, cancel-adopt, or safety-defer row: 13/13, 28/28, 25/25, and 24/24."
+    },
+    {
+      "area": "runtime_wait_cleanup_quiescence",
+      "result": "pass",
+      "basis": "Parsed FactoryInstance 29 rows, NodeRun 32, Attempt 23, Wait 18, CleanupItem 12, and UnconfirmedQuiescence 10. Their explicit canonical sequences use listed adjacency. W04 and W14-W18 cover every reachable nonterminal Wait state. Cleanup entry and terminalization remain separate. U01-U10 grant no successor-work carrier; exact termination, U09, and A18 remain required."
+    },
+    {
+      "area": "effect_partition_and_false_guard_complements",
+      "result": "pass",
+      "basis": "Parsed 39 Effect rows over 21 states. All 15 nonterminal states have outgoing rows. Section 12's source-by-source partitions cover positive outcomes and their false/invalid/stale/forbidden/exhausted/deadline complements through E30-E39. ORIGINAL and COMPENSATION reconciliation remain disjoint, and no wait lacks a named bounded expiry outcome."
+    },
+    {
+      "area": "improvement_tuple_witnesses",
+      "result": "pass",
+      "basis": "Replayed the named coordinate changes and reducer priority: IC06 owns READY_REVIEW>READY while IA01 is S; IA05 is S and IC13 owns VERIFYING>REVIEW. IR19/IR22 synchronize rollback REQUESTED; IRB01/02/03/07/08 reach rollback verification, ROLLED_BACK, later CLEANING, and later FAILED. IR42 makes the widening effect UNRESOLVED and reaches QUARANTINED; IR56/E17 returns to REVIEW; IR38 stutters into CANARY_RUNNING. IR13A and IR13B are exclusive exposure/absence branches and IR13C alone enters cleanup. IR17 promotion dispatch stutters; IR18 alone crosses the verified-effect boundary; IR54/IR57/IR55 preserve UNKNOWN reconciliation and no-apply behavior."
+    },
+    {
+      "area": "research_publish_and_no_publish_witnesses",
+      "result": "fail",
+      "basis": "D19 and D19C1 form the legal no-publication REVIEW>OBSERVING then later OBSERVING>CLEANING path. The publication-success and no-application paths use canonical edges whose mandatory guards are absent or contradictory in the closed DEEP-RESEARCH rows; see R6-FM-001."
+    },
+    {
+      "area": "schema_3_material_claim_boundary",
+      "result": "pass",
+      "basis": "The schema-3 graph hashes match the current PLAN and normative manifest. It contains 36 edges: 23 candidate_support, 5 candidate_refute, and 8 context_only, with zero supports/refutes; legacy edges are marked unreviewed_candidate. The package keeps immutable retrieval and human semantic review as future gates. No fresh evidence completion was assumed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R6-FM-001",
+      "severity": "high",
+      "title": "The DEEP-RESEARCH publication branch cannot take its declared canonical exits under the closed canonical guards",
+      "requirement": "The incorporated manifest says each row is a closed edge, every intermediate canonical guard is rechecked, and no prose or inferred pair adds an edge. The publication path therefore needs an executable verified-success exit and a deterministic proven-no-application exit using the exact canonical guards.",
+      "evidence": [
+        "docs/state-transition-manifests.md:7 and 20 require every listed intermediate guard to be rechecked and define each table row as closed.",
+        "docs/state-transition-manifests.md:40-43 define CW14 MERGE_QUEUED->MERGED under verified-effect and CW16 MERGED->OBSERVING under the separate no-deploy-receipt guard.",
+        "docs/state-transition-manifests.md:342 makes D19P3 take MERGE_QUEUED>MERGED>OBSERVING with only a verified publication-effect receipt and remote identity. It names no no-deploy receipt, so the second edge's CW16 guard is not supplied by the closed row.",
+        "docs/state-transition-manifests.md:345 has the same missing CW16 guard after D19P6 reconciliation.",
+        "docs/state-transition-manifests.md:39 defines CW12 MERGE_QUEUED->REVIEW only for a head-or-check change, but line 344 makes D19P5 use MERGE_QUEUED>REVIEW>CLEANING on signed absence/no-application plus retry forbidden/exhausted. That condition is not a head-or-check change. No other non-cancel row leaves PUBLICATION_DISPATCHED after proven absence.",
+        "docs/state-transition-manifests.md:861 publishes D19P3 as a receipt-only successful witness, while PLAN.md:395 likewise states that a real verified publication receipt is sufficient to cross MERGED and that either publication branch later cleans. Neither contract supplies the distinct CW16 receipt or repairs the illegal D19P5 first edge."
+      ],
+      "reproduction": [
+        "Reach PUBLICATION_QUEUED via D19P1 and PUBLICATION_DISPATCHED via D19P2. On a verified publication effect, apply D19P3. CW14 is enabled, but after MERGED the required CW16 no-deploy-receipt is not among D19P3's exact guard/receipts, so the atomic sequence rejects or requires an unmodeled receipt.",
+        "Instead reconcile a no-application result and exhaust or forbid retry. D19P5 asks for MERGE_QUEUED->REVIEW, but CW12 enables that edge only on a head/check change. With no such unrelated change, D19P5 rejects and PUBLICATION_DISPATCHED has no non-cancel settled-failure exit.",
+        "The no-publication trace D19 then D19C1 does not have this defect; the issue is isolated to the requested publication branch."
+      ],
+      "impact": "A write-enabled research run can remain stuck after a proven no-application result, and even verified publication cannot complete its declared atomic projection without inventing a receipt outside the closed row. This contradicts the normative total-path contract and leaves the publication implementation path undefined.",
+      "recommendation": "For D19P3 and D19P6, bind and verify an explicit protected NoDeploymentReceipt (or add a purpose-specific legal canonical edge whose guard is exactly the publication outcome). For D19P5, add a legal effect-failure route such as an explicitly guarded MERGE_QUEUED>BLOCKED>CLEANING sequence with the saved-continuation and final-disposition predicates, or add a purpose-specific canonical no-application edge. Update the research tuple witnesses to instantiate and check every intermediate guard, not adjacency alone.",
+      "verification": "Replay D19P1/P2 followed by (a) verified application, (b) reconciled verified application, and (c) proven no-application/no-retry. Each trace must satisfy every intermediate canonical guard using fields named by the closed row, must enter cleanup only in a later transaction where promised, and must have no unrelated head/check-change dependency.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "This plan-only audit does not prove implementation, full reachable-product model checking, operational safety, external source truth, or semantic entailment.",
+    "The schema-3 coverage inventory reports 25 reviewed normative-manifest headings while the current document has 27 headings and omits 15.3.1 and 15.8 from that list. This is an editorial coverage-count defect, not treated as a material evidence overclaim because those sections are prescriptive contract/witness text and the artifact explicitly disclaims model proof."
+  ],
+  "closure_criteria_pass": false
+}

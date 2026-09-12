@@ -1,0 +1,113 @@
+{
+  "reviewer": "round-2-requirements-journey",
+  "scope": "Plan-only round-2 review of PLAN.md against every requirement in review/requirements-traceability.md and the full owner/agent journey from idea through build, maintenance, deep research, improvement, consumer dogfooding, and the gated GTM branch. The four round-1 resolution memos and the scope decision were treated as normative correction evidence. Research was checked selectively. The intentionally removed prototype and the absence of implementation were not treated as defects.",
+  "strengths": [
+    "PLAN.md is unusually clear about its plan-only status, the Release 0 read-only boundary, the three authorities, and the rule that GitHub is a human projection rather than a lock or transaction log.",
+    "The main idea-to-outcome walkthrough is readable and covers durable conversation, exact-digest approval, fenced execution, independent verification, reconciliation of ambiguous effects, observation, cleanup, maintenance, research, and governed improvement.",
+    "The plan turns most round-1 safety corrections into concrete records, states, compiler rejection rules, fault tests, stop gates, and staged implementation increments without pretending that those controls already exist.",
+    "Engineering-first scope, consumer pinning, privacy-filtered feedback, delayed multi-tenant/fleet work, and the future GTM branch have explicit boundaries and sensible non-goals."
+  ],
+  "findings": [
+    {
+      "id": "R2-RJ-001",
+      "severity": "high",
+      "title": "The published factory-to-work projection is incomplete for declared states",
+      "requirement": "R-08 and P-08 require one complete protected lifecycle mapping with no unmapped factory or sub-lifecycle state; R-12 requires one complete protected improvement lifecycle.",
+      "evidence": {
+        "files": [
+          "PLAN.md \u00a7\u00a78.6, 14.0-14.5",
+          "review/requirements-traceability.md R-08, R-12 and P-08",
+          "review/round-1-resolutions/state-orchestration.md RC-1, RC-2, RC-8"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare PLAN.md \u00a78.6 with the mapping table in \u00a714.0. Improvement declares REJECTED, FROZEN, EXPIRED, REVOKED, and RETIRED, but none has a canonical work-state mapping. The same table omits declared side states such as MAINTENANCE SUPPRESSED, DEEP-RESEARCH REFRESH_WAIT, BUILD UNKNOWN_EFFECT, and several NEEDS_INPUT/STALE/ROLLING_BACK states. \u00a714.0 then says the compiler rejects every unmapped state, so the listed built-ins cannot satisfy the plan's own compiler rule.",
+      "impact": "Implementers cannot compile or project the required built-in factories without inventing lifecycle semantics. Different inventions could bypass review, quarantine, rollback, or terminal rules. This blocks safe implementation of maintenance, deep research, and governed improvement.",
+      "recommendation": "Publish a total, versioned mapping for every state of every built-in factory, including wait, suppression, stale, unknown-effect, rollback-in-progress, rejection, freeze, expiry, revocation, and retirement. State the canonical state and required entry/exit/terminal behavior for each. Add the complete mapping fixture to Increment 1's exit gate.",
+      "verification": "Enumerate each factory's declared state set and diff it against the mapping fixture. The difference must be empty. Compiler/model tests must reject any future state addition without a mapping and must prove required READY, verify, observe, rollback verification, and cleanup paths.",
+      "confidence": "high"
+    },
+    {
+      "id": "R2-RJ-002",
+      "severity": "high",
+      "title": "The traceability matrix points to a different roadmap than PLAN.md",
+      "requirement": "R-01 through R-16 and P-16 require a readable, actionable plan in which each requirement has an unambiguous implementation increment and acceptance gate.",
+      "evidence": {
+        "files": [
+          "review/requirements-traceability.md Normative plan-clause register and R-01 through R-16",
+          "PLAN.md \u00a720",
+          "PLAN.md \u00a724"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare the matrix's proposed increments with PLAN.md \u00a720. For example, R-12 says improvement is hard-off through I3 and shadow/canary begins at I4+, while PLAN.md puts shadow at Increment 6 and canary at 7; R-13 says second-repository canary at I2, while PLAN.md keeps Release 0 to one repository and introduces the second repository at Increment 8. Many 'Primary plan locations' in the supposedly plan-focused clause register point only to older docs/** sections rather than PLAN.md. No version or translation table explains these two numbering systems.",
+      "impact": "Work can be scheduled against the wrong prerequisites. In particular, improvement or multi-repository work could be interpreted as admitted several increments before the plan's safety gates. The matrix therefore cannot serve as the implementation admission checklist it claims to be.",
+      "recommendation": "Make PLAN.md \u00a720 the sole roadmap numbering authority. Rewrite every matrix row with the exact PLAN.md increment number/name and exact PLAN.md section/acceptance clause. If older documents remain evidence, label them supporting sources rather than primary plan locations. Add a machine-checkable requirement-to-increment register.",
+      "verification": "A reviewer can join every R-01..R-16 row to one or more exact \u00a720 increment IDs and exact PLAN.md clauses with no legacy aliases. The improvement, second-repository, mutation, PostgreSQL, and GTM order is identical in both files.",
+      "confidence": "high"
+    },
+    {
+      "id": "R2-RJ-003",
+      "severity": "high",
+      "title": "The required research provenance and complete synthesis correction is still deferred",
+      "requirement": "P-10 and P-16, the scope decision, and evidence-experience PC-1 through PC-3 require validated research in this plan-only deliverable, including a complete typed synthesis of all 23 repository-agent-operating-system items and repaired observation provenance.",
+      "evidence": {
+        "files": [
+          "PLAN.md \u00a7\u00a71, 4, 24",
+          "research/repository-agent-operating-system/report.md line 36",
+          "research/repository-agent-operating-system/evidence-matrix.md opening and table",
+          "review/requirements-traceability.md Reading rules, P-10, P-16 and Coverage result",
+          "review/round-1-resolutions/evidence-experience.md PC-1 through PC-3",
+          "research/repository-agent-operating-system/scope-decision.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "The research tree contains 10 base, 8 lifecycle-extension, and 5 domain-extension JSON results. report.md still states that its evidence set is 'all 10 JSON results', and evidence-matrix.md still says it summarizes 10 items. PLAN.md calls these artifacts partial and \u00a724 schedules the provenance refetch and complete matrix regeneration as a future action. The traceability matrix also says evidence support remains pending PC-1/PC-3 repair, while PLAN.md labels itself decision-grade.",
+      "impact": "A direct plan-only deliverable requirement remains open. Reviewers cannot verify that lifecycle, improvement, dogfood, and cross-domain decisions were synthesized from the full requested evidence set or that living-source observations have valid non-future provenance. This blocks final decision-grade approval, though it does not imply implementation is required.",
+      "recommendation": "Before approving the plan, create the immutable ResearchRun and actual UTC SourceObservation records, re-fetch or explain unavailable snapshots, regenerate report.md and evidence-matrix.md from all 23 RAOS items, and link material PLAN.md decisions to stable typed claims. Keep local outcomes explicitly unvalidated.",
+      "verification": "The regenerated report and matrix identify one run, cover 23/23 RAOS items, pass future-time/digest/snapshot/family/conflict checks, count the METR paper/blog as one family, and have no material PLAN.md decision lacking a claim edge. The traceability reading rule no longer says PC-1/PC-3 are pending.",
+      "confidence": "high"
+    },
+    {
+      "id": "R2-RJ-004",
+      "severity": "medium",
+      "title": "The promised Issue/CLI owner experience lacks an implementable interaction contract",
+      "requirement": "R-01, R-03, R-04, R-07, R-09 and R-13 require an actionable owner journey for install, ideation, approval, exception handling, observation, upgrade, export, rollback, and uninstall\u2014not only backend record definitions.",
+      "evidence": {
+        "files": [
+          "PLAN.md \u00a7\u00a72, 3, 9-11, 17, 20, 24",
+          "review/requirements-traceability.md R-01, R-03, R-04, R-07, R-09, R-13"
+        ],
+        "urls": []
+      },
+      "reproduction": "PLAN.md promises a 'simple Issue/CLI experience' and names install/uninstall acceptance, but it never selects or specifies the interaction boundary: how an Issue/comment is authenticated and bound to a conversation, how conflicting Issue and CLI commands are ordered, what exact owner action accepts a DecisionRecord or issues READY, how the authorization digest and changed inputs are rendered, how an owner disposes an UNKNOWN effect, or what uninstall retains/exports/revokes. The roadmap has no UX contract or journey acceptance artifact that answers these questions.",
+      "impact": "Backend implementers can produce incompatible Issue and CLI flows that satisfy the data model but confuse owners, lose intent, or solicit an approval without a comprehensible diff. Recovery and uninstall behavior would be especially hard to test end to end.",
+      "recommendation": "Add a small normative owner-interaction contract and Release 0 journey table. For each step, define channel, authenticated command, displayed inputs/diff, success/error/wait response, durable record, next action, recovery behavior, and retention/export behavior. Include a single first-run and uninstall journey plus UNKNOWN-effect disposition.",
+      "verification": "Run paper prototypes for a fresh install, idea clarification, changed-input READY rejection, restart during NEEDS_INPUT, dry-run reconcile, UNKNOWN-effect disposition, upgrade rollback, export, and uninstall. Each owner action maps to one authenticated command and one durable receipt with no channel-order ambiguity.",
+      "confidence": "high"
+    },
+    {
+      "id": "R2-RJ-005",
+      "severity": "medium",
+      "title": "Break-glass is required by traceability but absent from the plan",
+      "requirement": "P-09 and R-09 explicitly require durable break-glass behavior alongside normal exception-driven human handling.",
+      "evidence": {
+        "files": [
+          "review/requirements-traceability.md P-09 and R-09",
+          "PLAN.md \u00a7\u00a77, 10, 16, 21"
+        ],
+        "urls": []
+      },
+      "reproduction": "Search PLAN.md for 'break-glass': there is no occurrence. Exceptions, escalation, and approvals are defined, but there is no emergency principal/action boundary, non-waivable deny list, maximum duration, credential issuance/revocation, post-use quarantine, retrospective review, or drill. The R-09 acceptance text nevertheless expects an emergency action to create bounded follow-up and audit.",
+      "impact": "A later operator must either remain blocked during an emergency or invent an unaudited bypass. The omission prevents testing the human-needed policy's emergency path but does not require granting broad emergency authority in Release 0.",
+      "recommendation": "Define break-glass as a separately authenticated, narrow, time-bound emergency workflow. State what it may never override, require reason and incident linkage, cap authority and duration, revoke automatically, quarantine affected work, notify an independent reviewer, and require retrospective closure. Keep it unavailable when no safe emergency action exists.",
+      "verification": "Tests prove that normal actors cannot invoke it; it cannot override tenant isolation, audit, non-delegable R4 rules, or self-approval; expiry revokes all grants; use creates complete audit/follow-up records; and a documented drill reaches safe quiescence.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "The original user prompt is represented through the traceability matrix rather than present verbatim in the reviewed files, so this review treats R-01 through R-16 as the explicit requirement set.",
+    "No local pilot exists, by design. Productivity, owner burden, recovery time, isolation, and GTM value remain unvalidated outcomes rather than defects in a plan-only review.",
+    "The plan's architecture is broad. Exact policy thresholds, command catalogs, GitHub API coverage, notification channels, and deployment adapters still require local decisions in their stated increments."
+  ]
+}

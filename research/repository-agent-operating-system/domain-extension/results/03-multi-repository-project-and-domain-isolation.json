@@ -1,0 +1,1290 @@
+{
+  "scope": {
+    "question": "Design one shared, domain-neutral factory runtime that serves separately owned engineering and GTM repositories without turning one repository, identity, queue, secret store, artifact namespace, policy, or improvement loop into an implicit global trust domain.",
+    "in_scope": [
+      "Project registration and configuration inheritance; per-project identity, secrets, quotas, execution, artifact/event partitions and audit; fleet bundle install/update; engineering-first dogfooding; GTM repository admission with explicit trigger gates; typed cross-repository handoffs; contribution of redacted evidence/evals back to the protected platform.",
+      "The concrete first adapter is GitHub plus Kubernetes/PostgreSQL/object storage. Standards are used at boundaries: CloudEvents-like envelopes [S16], OCI digests [S17], SLSA/in-toto attestations [S18,S19], workload identity [S11]."
+    ],
+    "out_of_scope": [
+      "One global chat/memory; direct database joins across projects; sharing raw prompts, customer records, code, tokens or telemetry; autonomous campaign publication, outreach, CRM mutation, spend change, merge, deploy or policy promotion; a general plugin marketplace before a second proven domain."
+    ],
+    "decision": "APPROVE an engineering-first shared control-plane kernel with hard project cells and domain-owned packages. DO NOT build a universal domain SDK yet. Admit GTM only as a separate repository/project after its data map, metrics, approval matrix, connectors and policy tests pass explicit gates. Other repositories dogfood through pinned bundles and contribute only reviewed evidence/eval proposals, never live self-modification."
+  },
+  "verified_capabilities": [
+    "Kubernetes documents namespace-based soft multi-tenancy and virtual-control-plane hard multi-tenancy. Namespaces do not contain cluster-scoped objects; isolation requires RBAC, quotas, network policy and further controls [S1-S6]. Thus one cluster can host project cells, but a namespace label is not a security boundary by itself.",
+    "Argo CD AppProjects allow source-repository, destination and resource allow/deny constraints and roles [S7]. ApplicationSet outside its control namespace is explicitly configurable and carries security cautions [S8]. These support fleet reconciliation but do not prove tenant isolation.",
+    "GitHub Apps expose installation-scoped repository/organization permissions; installation tokens can be narrowed to selected repositories/permissions and expire [S12,S13]. Actions OIDC can mint short-lived credentials bound to claims [S14]. These are usable primitives for separate project identities, not permission proofs unless grants are reconciled and negative-tested.",
+    "Vault policies are path based and deny by default; Vault Enterprise namespaces add administrative tenancy [S9,S10]. Kubernetes Secrets alone may be unencrypted in etcd unless configured [S6]. Secret isolation must therefore be an adapter contract with policy and audit, not a checked-in value.",
+    "OCI distribution provides digest-addressed blobs/manifests; SLSA and in-toto describe provenance/attestation envelopes [S17-S19]. GitHub artifact attestations make a similar vendor capability claim and warn provenance is not a guarantee that software is safe [S25].",
+    "CloudEvents defines portable event envelope attributes [S16]. GitHub repository_dispatch can wake a target workflow, requires authentication and a default-branch workflow [S23,S24]. Neither supplies business authorization, exactly-once delivery, artifact custody or target acceptance; the runtime must add these.",
+    "Backstage catalog descriptors and scaffolder actions show a practical split between declarative entity metadata and privileged executable actions [S21,S22]. OpenGitOps states versioned/declarative/reconciled intent [S20]. They support the design shape, not audited outcomes.",
+    "Salesforce/HubSpot expose typed CRM objects, associations, change events and subscription preferences [S34-S37]; ad networks publish API/advertising policy [S38,S39]. These support adapters. They do not establish lawful basis, factual accuracy, brand approval or permission to publish.",
+    "Independent evidence is narrower: AgentDojo demonstrates prompt-injection risk in tool-using agents [S30]; NIST/OWASP identify governance, privacy, excessive agency and disclosure risks [S27,S28]; one NBER field study observed productivity benefits for assisted support work but cannot be generalized to autonomous GTM or engineering [S40]. No cited source audits this combined architecture."
+  ],
+  "evidence_and_limits": {
+    "documented_not_audited": [
+      "[S1-S26,S34-S39,S41,S42] document product/standard mechanisms. They are capability evidence, usually without tenant-escape rates, workload denominators, recovery results or proof that a customer configured them safely.",
+      "Vendor platform policy or an approval state is not legal/compliance proof. CRM APIs accept writes; ad platforms may later reject content; neither proves consent, accuracy, attribution or brand fit.",
+      "GitHub/Kubernetes/Vault quotas are local to a subsystem. They do not provide a global dollar/token/API/spend quota or fair scheduling across domains."
+    ],
+    "independent_challenges": [
+      "AgentDojo [S30] challenges any claim that repository content or CRM/email content is safe instructions. Treat all cross-domain text as untrusted data and never pass it into privileged agent context without confinement.",
+      "NIST AI RMF [S27], OWASP [S28] and MIT risk repository [S29] challenge premature universality: risk, validity and privacy controls are context-specific.",
+      "Brynjolfsson et al. [S40] measured assistance in one customer-support population, with heterogeneity. It is evidence to run controlled GTM trials, not evidence to automate publication."
+    ],
+    "missing_denominators": [
+      "No measured per-project noisy-neighbor isolation, event loss/duplication rate, restore time, artifact leakage rate, cost fairness or GitHub/Vault reconciliation drift yet.",
+      "No representative engineering cohort has dogfooded bundle updates, and no GTM cohort has established incremental pipeline/revenue lift, unsubscribe/complaint risk, content correction rate or reviewer burden.",
+      "Future-as-of date is supplied by the research brief. Documentation is continuously updated and must be rechecked at implementation; exact enterprise plan features and limits can change."
+    ],
+    "audit_statement": "This is an evidence-led design recommendation, not a security audit, compliance opinion or production outcome."
+  },
+  "actors_and_authority": {
+    "principals": [
+      {
+        "actor": "fleet registry/reconciler",
+        "authority": "read approved project manifests; plan drift; create install/update PRs; no domain data read, code merge, secret read or policy promotion"
+      },
+      {
+        "actor": "project controller",
+        "authority": "append transitions for exactly one project_id; dispatch only allowlisted capability profiles; cannot act on another project"
+      },
+      {
+        "actor": "engineering worker",
+        "authority": "ephemeral branch/worktree and project artifact prefix; read source; propose PR; no merge/deploy/platform-policy rights"
+      },
+      {
+        "actor": "GTM researcher/drafter",
+        "authority": "read approved, minimized inputs; write draft artifacts; no CRM/email/ad/publication write"
+      },
+      {
+        "actor": "domain publisher adapters",
+        "authority": "each narrow adapter performs one effect (CRM staging, email schedule, ad draft, site publish) only after bound approval; mutually separate from author"
+      },
+      {
+        "actor": "evaluator",
+        "authority": "read candidate and domain-specific hidden holdout; emit signed result; cannot author or promote"
+      },
+      {
+        "actor": "platform promoter/rollback controller",
+        "authority": "promote signed bundle digest through canary rings or restore last-known-good; cannot author candidate/evals"
+      },
+      {
+        "actor": "human project owner/compliance/brand/sales ops/security owner",
+        "authority": "role-specific approval only; no single generic approve button; break-glass is time-bound and audited"
+      }
+    ],
+    "identity_contract": "Principal = issuer + subject + project_id + role + capability_profile + installation_id/repository_ids + run_id + expiry. Mint short-lived GitHub App installation tokens narrowed to the repository [S12,S13] and cloud tokens with OIDC claims [S14]. Map workloads to SPIFFE-like IDs [S11]. Never reuse a GTM connector token for engineering or a fleet credential inside workers.",
+    "separation": "Fleet metadata may name owners/repository URLs and aggregate counters. Project content, raw telemetry, secrets, holdouts and customer data remain project/domain owned. Separate database row-level policies plus separate encryption keys, object prefixes/buckets, queues/topics, KMS contexts, service accounts, namespaces and network policies; put regulated/high-impact GTM or hostile tenants in separate clusters/accounts when the threat model exceeds namespace soft tenancy [S1]."
+  },
+  "complete_state_catalog": {
+    "project_lifecycle": [
+      "DISCOVERED",
+      "REGISTRATION_PROPOSED",
+      "SECURITY_REVIEW",
+      "ACTIVE_SHADOW",
+      "ACTIVE_ASSISTED",
+      "ACTIVE_BOUNDED",
+      "PAUSED",
+      "QUARANTINED",
+      "UPGRADE_PENDING",
+      "UPGRADING_CANARY",
+      "ROLLBACK_PENDING",
+      "DECOMMISSIONING",
+      "DECOMMISSIONED"
+    ],
+    "work_item": [
+      "RECEIVED",
+      "INVALID",
+      "QUARANTINED",
+      "TRIAGED",
+      "CLARIFICATION_REQUIRED",
+      "READY_REVIEW",
+      "READY",
+      "QUEUED",
+      "LEASED",
+      "RUNNING",
+      "WAITING_DEPENDENCY",
+      "WAITING_APPROVAL",
+      "PROPOSED",
+      "VERIFYING",
+      "REJECTED",
+      "ACCEPTED",
+      "PUBLISH_PENDING",
+      "PUBLISHED",
+      "RECONCILING",
+      "SUCCEEDED",
+      "FAILED_RETRYABLE",
+      "FAILED_TERMINAL",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "STALE",
+      "ROLLBACK_PENDING",
+      "ROLLED_BACK",
+      "CLOSED"
+    ],
+    "handoff": [
+      "OFFERED",
+      "SCHEMA_REJECTED",
+      "POLICY_REJECTED",
+      "CONSENT_REJECTED",
+      "QUARANTINED",
+      "ACCEPTED",
+      "MATERIALIZING",
+      "DELIVERED",
+      "ACKNOWLEDGED",
+      "EXPIRED",
+      "REVOKED",
+      "FAILED",
+      "COMPENSATED"
+    ],
+    "upgrade": [
+      "AVAILABLE",
+      "PR_OPEN",
+      "COMPATIBILITY_FAILED",
+      "APPROVED",
+      "RING0",
+      "RING1",
+      "RING2",
+      "HELD",
+      "PROMOTED",
+      "ROLLED_BACK",
+      "SUPERSEDED"
+    ],
+    "rules": "Terminal is explicit, not inferred from missing work. WAITING_* states have reason, owner and deadline. STALE follows expired lease/fencing. Cancellation is cooperative until confirmed; external effects require reconciliation/compensation. Rollback records partial or impossible reversal rather than claiming history was erased."
+  },
+  "transition_contract": {
+    "envelope": "CloudEvents-compatible core: specversion, id, source, type, subject, time, datacontenttype; extensions projectid, domain, aggregateid, aggregateversion, correlationid, causationid, actorprincipal, policyversion, schemaversion, configdigest, bundledigest, traceparent, sensitivity, retentionclass; data stored inline only if policy allows [S16].",
+    "command_guards": [
+      "Authenticate principal; resolve project from immutable registration, never payload alone; verify expected aggregate version and capability; validate schema/signature/digests; check consent/data classification; enforce quota reservation; bind approval to exact input/artifact/policy/config digest; deny expired/replayed/foreign-project commands.",
+      "Idempotency key = project_id + command_type + semantic subject + input digest + policy version. Inbox deduplicates delivery IDs; outbox and per-aggregate sequence commit with state. Effect adapters record request key and observed provider result. At-least-once transport is expected.",
+      "Invalid/out-of-order events enter quarantine/audit and cannot regress state. Scheduled reconciliation inventories GitHub/CRM/publication remote state and repairs projections; provider events are facts, not transition authority."
+    ],
+    "invalidation": [
+      "Any change to source digest, target audience/query, consent snapshot, copy/creative, spend, recipient count, destination, model/tool/bundle/policy version or approval scope invalidates approval.",
+      "Revoked consent suppresses not-yet-sent contacts and triggers permitted downstream erasure/suppression handling; it never deletes audit facts that must be retained.",
+      "Lease expiry increments fencing token. Stale workers cannot publish artifacts or call effect adapters."
+    ],
+    "handoff_protocol": "Source emits OFFER with opaque artifact references and signed manifest; broker authorizes route but cannot accept for target; target validates schema/version/provenance/sensitivity/purpose/expiry, copies allowed immutable artifacts into its own store, assigns a new target aggregate and ACKs. Rejection is normal. Never share a branch, working directory, database row or bearer token across repositories."
+  },
+  "artifact_contracts": {
+    "common_manifest": {
+      "required": [
+        "artifact_id",
+        "media_type",
+        "schema_uri",
+        "schema_version",
+        "subject/project_id",
+        "producer_principal",
+        "created_at",
+        "content_digest",
+        "size",
+        "storage_uri",
+        "source_commit?",
+        "bundle_digest",
+        "policy_version",
+        "provenance_uri",
+        "signature",
+        "sensitivity",
+        "purpose",
+        "retention_class",
+        "license/usage_rights",
+        "lineage[]",
+        "redactions[]"
+      ],
+      "rule": "Immutable bytes by digest. Metadata changes create a new manifest. Verify size/digest/signature before materialization. OCI is a viable distribution substrate [S17]; attest with SLSA/in-toto-shaped evidence [S18,S19]."
+    },
+    "engineering_owned": [
+      "issue/spec",
+      "plan",
+      "patch/commit",
+      "test manifest/result",
+      "review",
+      "SBOM",
+      "build/deploy/rollback evidence"
+    ],
+    "gtm_owned": [
+      "research brief and cited source snapshots/rights",
+      "ICP/segment version and excluded/suppressed audiences",
+      "positioning/claims matrix with substantiation and expiry",
+      "brand/style/legal policy version",
+      "content/campaign/creative variants",
+      "channel plan, spend cap and experiment assignment",
+      "approval record",
+      "CRM change set/diff",
+      "publication receipt/permalink",
+      "lead/contact consent and suppression reference",
+      "attribution observation and metric definition"
+    ],
+    "shared_only": [
+      "envelope/state/evidence/provenance schemas",
+      "artifact registry interface",
+      "content digest/signature",
+      "classification/retention vocabulary",
+      "quota reservation and approval binding primitives"
+    ],
+    "privacy": "Do not place raw customer records, secrets, contact lists, call recordings or production logs in Git/OCI/general event payloads. Use opaque references to project-controlled encrypted stores, field-level minimization and purpose/retention tags per GDPR principles [S31]. Fleet analytics receive aggregates with minimum cohort thresholds and no free text by default."
+  },
+  "conversation_and_handoffs": {
+    "project_conversation": "Conversation is a versioned work artifact, not global memory: turns reference work_item, role, source artifact digests, decisions/questions, sensitivity, compaction version and checkpoint. Tool output is untrusted evidence, not instruction. A resume token binds project/run/checkpoint/config/bundle digest and lease fence.",
+    "clarification": "Questions become typed REQUESTED_INFORMATION records with owner, blocking fields, acceptable answer schema and deadline. Human answers append new facts; they do not silently edit history. If ambiguity touches target audience, claims, consent, spend, publication or destructive code, pause.",
+    "compaction": "A deterministic ledger retains decisions, approvals, citations, unresolved questions and artifact hashes. LLM summaries are labeled lossy and linked to originals. On model/bundle change or cross-repo transfer, revalidate from manifests rather than trust a prior summary.",
+    "cross_repo_examples": [
+      "Engineering -> GTM: RELEASE_FACT offer contains public release notes, feature flags, availability, substantiated capabilities/limitations, docs URLs and signed release digest. GTM accepts into a claims registry; it never reads private engineering memory.",
+      "GTM -> engineering: CUSTOMER_SIGNAL offer contains de-identified cohort, metric definition, evidence/citation, consent/retention class, confidence and requested outcome. Engineering target owner accepts/rejects; no automatic issue priority or raw CRM export.",
+      "Platform dogfood -> platform: EVAL_PROPOSAL contains redacted fixture or synthetic reproducer, failure taxonomy, expected invariant, source project approval, license/privacy declaration and measured baseline. Platform curators independently review; contributors cannot see hidden holdouts or promote their proposed fix."
+    ],
+    "github_transport": "repository_dispatch may be a wake-up signal [S23,S24], but the signed manifest in the broker/store is canonical. Never put sensitive handoff content in client_payload."
+  },
+  "orchestration_and_composition": {
+    "control_plane": "One logical service, not one failure/security cell: registry; authenticated ingress; PostgreSQL inbox/event/outbox and quota ledger partitioned by project_id with database-enforced row-level access; scheduler; project controllers; adapter gateway; artifact metadata service; evidence/eval service; upgrade reconciler. Per-project execution cells use isolated queues, namespace/service account/network policy, ephemeral workspace and artifact key.",
+    "composition": "DAG nodes declare domain action type, typed input/output schemas, capability profile, project, budget reservation, timeout, retry/compensation, evidence requirement and gate. Fanout reserves the maximum budget before launch; join supports all/quorum/best-effort with explicit missing inputs. Child factories cannot widen parent capability, project or remaining budget.",
+    "quotas": [
+      "Hierarchical limits: organization -> domain -> project -> workflow -> run for concurrent jobs, CPU/memory, model tokens, dollar cost, storage/retention, event rate, outbound API calls, contacts/recipients, campaign spend and publication rate. Kubernetes ResourceQuota covers only namespaced resources and not global fairness [S4]; GitHub has plan-dependent limits [S41], so a central reservation ledger is required.",
+      "Use weighted fair queues and separate emergency capacity. Reservation -> consume -> release; hard limits deny, soft thresholds pause/escalate. External providers are reconciled because timeouts may hide successful effects."
+    ],
+    "cleanup": "Finally paths revoke tokens, release leases/reservations, delete workspace and caches, upload minimal evidence and schedule retention deletion. Cancellation waits for effect reconciliation. Quarantine keeps only policy-required evidence. Project offboarding revokes App installation/connector grants, drains queues, exports audit, crypto-shreds eligible keys and proves no orphaned schedules."
+  },
+  "human_need_policy": {
+    "deterministic_stop": [
+      "project mismatch; invalid signature/schema/digest; unknown or expired approval; secret/PII in forbidden channel; denied egress/tool/path; quota exceeded; prompt-injection/tool-control signal; stale fence; policy/bundle compatibility failure; consent/suppression conflict; missing substantiation for external claim; no rollback/compensation for required reversible action."
+    ],
+    "deterministic_approval": [
+      "Platform: project registration, GitHub App install/repository expansion, connector/secret grant, schema/policy/evaluator/permission change, bundle promotion and break-glass. Engineering: ambiguous product intent, protected path, merge/deploy, destructive migration and high-risk security change. GTM: segment/audience definition, new factual claim, legal/privacy review when required, final creative, recipient/contact list, spend, CRM write and every first publication/channel; no author self-approval."
+    ],
+    "probabilistic_escalation": "Scores may route but never authorize: if calibrated citation/claim support, PII detection, brand compliance, toxicity, deliverability, security or outcome prediction crosses a predeclared threshold, escalate. Also sample >=10% of otherwise eligible low-risk actions and 100% after domain/model/version drift. Track calibration and false-negative rate by domain.",
+    "gtm_trigger_gates": [
+      "G0 discovery only: approved lawful-purpose/data map, DPA/retention/deletion/suppression process, connector threat model and owners.",
+      "G1 drafts: >=50 historical/synthetic fixtures; claim citation precision >=95%; zero secret/raw-contact leakage in red-team set; human-only publication.",
+      "G2 CRM staging: sandbox reconciliation and rollback drill 100%; field/association/consent mapping approved; zero unauthorized writes across >=1,000 negative authorization tests.",
+      "G3 bounded internal campaign experiment: preregister metric, holdout, attribution window, sample-size rule and stop conditions; manual recipient/spend/publish approvals; >=30 days, no substantiated privacy/brand incident.",
+      "G4 limited effect: only if incremental primary metric clears predeclared threshold and reviewer time/complaint/unsubscribe/correction guardrails are non-inferior. Expand one channel/capability at a time; publication never inferred from draft quality."
+    ],
+    "break_glass": "Named human, reason/ticket, exact capability/project, maximum one-hour TTL, two-person approval for cross-project/security-sensitive action, alert and post-event review. It cannot bypass artifact digest/signature, audit write or tenant boundary."
+  },
+  "factory_as_code_schema": {
+    "files": {
+      "fleet": "factory/fleet/v1/projects/*.yaml, bundles/*.yaml, rings.yaml, compatibility.yaml, policy/, schemas/, migrations/; platform CODEOWNERS",
+      "consumer": ".factory/project.yaml, domain.yaml, capabilities/*.yaml, workflows/*.yaml, policy/, evals/public/, handoffs/, distribution.lock; thin pinned workflows",
+      "controller_only": "encrypted registration bindings, installation IDs/remote IDs, event/lease/quota/approval state, secret references, hidden holdouts; never generated as alleged Git truth"
+    },
+    "inheritance": "Resolve defaults in fixed order `schema defaults < signed fleet base bundle < signed domain bundle < repository manifest < approved environment overlay`. Every layer declares allowed override paths. Deep merge is forbidden; maps use explicit replace/merge keys, lists replace unless keyed. A project cannot relax a fleet/domain deny, raise ceilings, add connector/egress/destination, change owners, or disable audit. Compiler emits canonical JSON, provenance for every value, config_digest and policy decision. Unknown keys fail.",
+    "example": "apiVersion: factory.dev/v1alpha1\nkind: ProjectFactory\nmetadata:\n  projectId: gtm-launches\n  domain: gtm\n  owners: [growth-ops, privacy, brand]\nspec:\n  repository:\n    provider: github\n    installationIdRef: registry://installations/gtm\n    repositories: [acme/gtm-factory]\n  inherits:\n    fleet: oci://registry/factory/base@sha256:BASE\n    domain: oci://registry/factory/gtm@sha256:GTM\n  isolation:\n    cell: gtm-launches\n    namespace: factory-gtm-launches\n    workloadIdentity: spiffe://acme/factory/project/gtm-launches\n    artifactPrefix: project/gtm-launches/\n    eventPrefix: project.gtm-launches.\n    secretNamespaceRef: vault://gtm-launches/\n  quotas:\n    concurrentRuns: 4\n    monthlyUSD: 2000\n    modelTokensPerRun: 300000\n    contactsPerRun: 0\n    outboundPublishesPerRun: 0\n  capabilities:\n    allow: [research.read, artifact.write, crm.sandbox.read]\n    deny: [crm.production.write, email.send, ads.spend, web.publish]\n  handoffs:\n    accept:\n      - type: dev.factory.release-fact.v1\n        fromProjects: [engineering-product]\n        sensitivityMax: internal\n  gates:\n    publish: {mode: deny}\n    crmWrite: {mode: deny}\n  improvement:\n    contribute: eval-proposal-only\n    rawTelemetryExport: false\n  distribution:\n    ring: dogfood-gtm\n    lockedDigest: sha256:BUNDLE\n    compatibility: '>=1.4 <2.0'\n",
+    "project_registration": "Registry uniquely binds projectId to repository IDs, GitHub App installation, domain, namespace/service account, Vault/registry/broker prefixes, KMS key, data region, retention and owners. Admission rejects ambiguous/duplicate bindings. Argo AppProject constraints [S7] and catalog namespace [S21] are secondary projections, not root authority.",
+    "install_update_contract": "Bootstrap opens a PR adding the consumer files and digest lock. The GitHub App is installed only on selected repositories; minted token is narrowed again [S12,S13]. Every update is a PR that shows schema migration, resolved-config semantic diff, permissions/egress/quota change, workflow/eval results, compatibility range, signed bundle/TUF metadata and rollback digest [S42]. No floating main/latest refs."
+  },
+  "end_to_end_workflows": {
+    "engineering_first": [
+      "Register one engineering repository; reconcile read-only bindings and run shadow event replay.",
+      "Install a digest-pinned base+engineering bundle by PR. Negative-test cross-project identity, network, secret, artifact and event access.",
+      "Allow plan/draft PR for R0/R1 only. Clean evaluator emits attested evidence. Humans merge/deploy under repository rules.",
+      "Dogfood on the platform repository and 2-3 opted-in engineering repositories. Each retains its own config/owners/quota and receives update PRs by ring. Measure lead time, accepted PR rate, reviewer minutes, escaped defects, cost, retry/recovery and security events.",
+      "Repositories submit redacted EVAL_PROPOSAL handoffs. Platform curates fixtures, evaluates a minimal change, canaries bundle digest, and rolls back independently."
+    ],
+    "gtm_separate_repository": [
+      "G0 register `gtm-factory` with zero effect permissions. Inventory artifacts: cited research, ICP/segment, claim substantiation, brand rules, channel rules, consent/suppression, CRM schema/associations, campaign/experiment plan, attribution definitions, approvals and publication receipts.",
+      "G1 research/draft: ingest only approved sources and de-identified CRM aggregates; generate cited positioning/creative proposals; human brand/product/legal reviewers edit/approve artifacts; no production connector token exists.",
+      "G2 sandbox: compile a CRM change-set against Salesforce/HubSpot typed fields/associations [S34,S36], read current subscription/suppression [S37], simulate duplicates/conflicts, apply to sandbox, read back, and rollback.",
+      "G3 controlled campaign: freeze cohort query and consent snapshot, claims, creative, UTM/experiment assignment, spend/recipient caps and stop rules. Distinct humans approve brand/legal/audience/spend/publication. Adapter creates drafts first; publication requires a second exact-digest command.",
+      "Observe provider receipts, delivery/bounce/complaint/unsubscribe, corrections, conversions and holdout. Reconcile CRM CDC/provider APIs [S35], label attribution assumptions, and do not infer causal lift from last-touch correlation.",
+      "Feedback produces project-local postmortem/eval candidates. Only approved minimized fixtures cross to platform. Raw contacts, free-text calls/emails and commercial strategy stay GTM-owned."
+    ],
+    "cross_repo_release_to_campaign": [
+      "Engineering publishes signed release fact by digest. GTM target validates route and accepts/copies it.",
+      "Product/legal owner converts it into an approved claims matrix. Drafter references exact claim IDs and docs.",
+      "Audience/spend/content approvals bind all inputs; effect adapter checks current suppression immediately before send/publish.",
+      "Receipts and experiment observations return only to GTM. A de-identified product signal can be offered to engineering and must be explicitly accepted."
+    ],
+    "upgrade_flow": [
+      "Reconciler detects signed compatible bundle version; opens PR per project, never force-pushes.",
+      "CI compiles config, checks compatibility/migrations, replays project fixtures and denies capability expansion without owners.",
+      "Promote same digest ring0=platform repo, ring1=opt-in engineering dogfood, ring2=other engineering, separate gtm-shadow ring, then gtm-effect only after domain approval.",
+      "Automated abort on authorization/leakage/invariant failure; metric degradation holds for review. Rollback restores prior lock/controller deployment and runs backward/forward compatibility plus state reconciliation. Irreversible migrations require dual-read/write and human runbook."
+    ]
+  },
+  "self_improvement_boundary": {
+    "loop": "Project-local telemetry -> redaction/classification -> anomaly/postmortem -> reviewed eval proposal -> target project ACCEPT -> curator creates versioned fixture -> independent offline replay -> shadow -> canary rings -> human promotion of immutable bundle digest -> monitor -> rollback/hold. Other repositories explicitly dogfood releases and contribute evidence; they do not push directly to platform policy.",
+    "protected_invariants": [
+      "No actor approves its own proposal/eval/result; hidden holdouts are unreadable to proposers.",
+      "Tenant binding, deny rules, audit append, secret/PII prohibition, approval binding, budget ceilings, signature verification, rollback controller and publisher separation cannot be edited by learned/runtime code.",
+      "GTM performance cannot trade away consent, suppression, factual claims, privacy, brand, spend or complaint guardrails. Engineering throughput cannot trade away tests, security, ownership or release gates.",
+      "Training/retrieval corpus excludes raw cross-project data by default. A project may opt into a specifically licensed, minimized fixture contribution with owner/privacy approval and revocation/retention terms."
+    ],
+    "promotion": "Candidate contains one hypothesis, affected slices, source/eval/bundle digests, baseline, threshold, uncertainty, compatibility, exposure, kill signal and rollback. Platform owners sign release; project owners choose channel. Canary uses same artifact digest, not rebuild. High-severity escape, cross-project access, false approval, audit gap, leaked PII/secret, complaint spike or rollback failure freezes fleet rollout.",
+    "anti_gaming": "Keep hidden and adversarial sets separate by domain/project risk. Evaluate usefulness plus security/privacy/cost/reviewer burden. Inspect metric regressions and distribution shift. Agents cannot choose only favorable evidence or edit attribution window after seeing results.",
+    "rollback": "Keep N-2 compatible bundles and schema readers; snapshot controller state and signed metadata; use expand/migrate/contract, dual read/write for irreversible formats; restore prior digest/config and reconcile outstanding effects. GTM messages already sent cannot be recalled: stop future effects, correct where required and record residual harm."
+  },
+  "validation_strategy": {
+    "schema_contract": [
+      "JSON Schema 2020-12 for manifests/events/artifacts/handoffs; additionalProperties false; canonicalization golden tests; reject unknown versions; property-test inheritance monotonicity so child cannot weaken deny/raise ceiling.",
+      "Compatibility matrix tests controller N/N-1 with bundle/domain packages and event/artifact readers; migration round trips and old-worker/new-controller skew."
+    ],
+    "isolation_security": [
+      "For every project pair, negative matrix tests repository token, DB RLS, queue/topic ACL, registry prefix, object/KMS key, Vault path, namespace service account, network egress, cache, log/search and backup restore. Inject forged project IDs, confused-deputy target, symlink/path traversal, SSRF, prompt injection, stale tokens and compromised source repo.",
+      "Validate Kubernetes namespace/RBAC/quota/network controls [S1-S6], but run hostile/regulated workloads in separate accounts/clusters. Verify GitHub installation selection and narrowed token [S12,S13], exact OIDC claims [S14], action SHA pins [S15]."
+    ],
+    "event_fault": [
+      "Duplicate, reorder, delay, drop and poison events; crash between DB/outbox/external effect; provider 429/5xx/timeouts; lease expiry; clock skew; partition; artifact deletion; schema skew. Assert no cross-project regression, at-most-one accepted semantic effect through idempotency/reconciliation, visible dead letter and bounded recovery.",
+      "Cross-repo handoff fuzzes schema/signature/digest/sensitivity/purpose/expiry/route; target rejection must not mutate target; source revocation and target retention are explicit."
+    ],
+    "quota_fairness": [
+      "Saturate one project/domain and prove weighted fairness and emergency headroom. Reconcile token/API/spend usage against provider bills; alert on reservation leakage. Measure p50/p95 queue delay, throttle/deny accuracy and noisy-neighbor resource impact."
+    ],
+    "engineering_eval": [
+      "Representative tickets by language/risk; exact test evidence, reviewer acceptance/minutes, change failure/escaped defects, lead time, cost; matched/manual baseline and severity slices. Security gates are absolute, not averaged."
+    ],
+    "gtm_eval": [
+      "Citation-to-claim precision/recall; unsupported/expired claim rate; PII/secret leakage; brand/legal rubric with adjudication; CRM field/association/dedup correctness; consent/suppression timing; publication/rollback receipts; deliverability, bounce, complaint, unsubscribe and correction rates; reviewer minutes; incremental conversion/pipeline/revenue from preregistered randomized holdout where ethical/feasible. Attribution dashboards alone are observational."
+    ],
+    "disaster_recovery": [
+      "Quarterly restore of one project without another; event replay, credential revoke, bundle rollback, connector kill, orphaned-schedule scan, region/account failover where promised. Record RPO/RTO and residual irreversible effects."
+    ],
+    "acceptance": "Before another repository: 100% negative authorization tests, zero leakage, all duplicate/replay/restore/rollback drills pass, and measured cost/reviewer burden. Before GTM effects: all G0-G3 gates and legal/brand/sales-ops approval. Statistical claims require predeclared denominator/confidence interval; absence of detected incidents is not proof of safety."
+  },
+  "implementation_recommendation": {
+    "decision": "Build a thin shared kernel now; keep engineering and GTM as separate signed domain bundles and repositories. Ship engineering first. Do not expose a public plugin SDK or generic agent marketplace until at least two domains prove the same interfaces and different domain policy/artifacts remain outside the kernel.",
+    "shared_kernel_now": [
+      "project registry/binding and configuration compiler with monotone inheritance",
+      "typed state/event/command engine, inbox/outbox, leases/fencing and reconciliation",
+      "identity/capability broker, per-project adapter gateway and secret references",
+      "quota reservation/fair scheduling",
+      "immutable artifact/provenance interface and signed cross-project handoff",
+      "approval binding, evidence/audit and fleet install/update/canary/rollback"
+    ],
+    "engineering_owned_now": [
+      "issue/spec/plan/patch/test/review/release schemas and GitHub adapter",
+      "engineering risk tiers, evaluator suites, sandbox images, merge/deploy gates and metrics"
+    ],
+    "gtm_owned_later": [
+      "research/ICP/claims/brand/content/campaign/audience/consent/CRM/attribution schemas",
+      "Salesforce/HubSpot/ad/CMS/email adapters, jurisdiction/privacy rules, brand/legal/sales-ops roles, effect state machines and GTM evals"
+    ],
+    "defer": [
+      "arbitrary third-party plugins in controller process",
+      "universal ontology of work",
+      "one cross-domain vector memory",
+      "shared domain prompts/evals",
+      "automatic optimization/promotion",
+      "global admin token and shared customer/artifact bucket"
+    ],
+    "phases": [
+      "0 (2-4 weeks): formal threat model; schemas/registry/config compiler; read-only GitHub inventory; two dummy project cells; negative isolation and restore tests.",
+      "1 (4-8 weeks): one engineering repository in shadow then assisted draft mode; event/outbox/artifact/evidence; no auto merge/deploy. Exit after >=30 representative tasks and all security/recovery tests.",
+      "2 (6-10 weeks): platform repo plus 2-3 engineering dogfood repositories. Pinned install/update PRs, ring0/ring1, compatibility and rollback. Exit after >=100 eligible runs and >=60 days with zero cross-project/privilege escapes; demonstrated value versus baseline without worse defects/reviewer burden.",
+      "3: extract only interfaces repeated across engineering repositories. Keep adapter ABI internal. Publish signed base/engineering bundles and N-2 support policy.",
+      "4 GTM G0-G2: separate repo/project, no production effect; complete privacy/claims/approval/metric artifacts and sandbox adapters.",
+      "5 GTM G3-G4: limited internal/bounded campaign with manual activation, preregistered holdout and hard complaint/privacy/spend stops. Expand one connector/effect at a time."
+    ],
+    "fleet_operating_slo": [
+      "Every installed repository has a current owner, selected-repository App grant, resolved config digest, bundle digest/channel, compatibility result, last reconciliation, quota and data classification.",
+      "Update controller opens PRs. Security patches may shorten deadline but never bypass tests/owners. Ring health is visible by project without exposing payloads.",
+      "Support N and N-1 bundle/controller protocol; N-2 is rollback-only for fixed window. Reject unsupported versions safely; migrations are signed and reversible or explicitly human-run."
+    ],
+    "build_vs_buy": "Use Kubernetes/GitHub Apps/OIDC/Vault-or-cloud secret manager/OCI and a transactional database as primitives, subject to plan and threat model. Argo CD/Backstage/Temporal may be adapters, not platform authority. Avoid confusing their namespaces/projects/catalog ownership with a full tenant boundary [S1,S7,S21,S26]."
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Multi-tenancy",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated; stable page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "url": "https://kubernetes.io/docs/concepts/security/multi-tenancy/",
+      "supported_claims": [
+        "namespace and virtual-control-plane tenancy models",
+        "namespaces do not isolate cluster-scoped resources",
+        "need RBAC, quotas, network and data-plane controls"
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Namespaces",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/",
+      "supported_claims": [
+        "namespace scope and DNS naming",
+        "not all resources are namespaced"
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Using RBAC Authorization",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+      "supported_claims": [
+        "Role/RoleBinding namespace scope",
+        "ClusterRole aggregation and privilege-escalation cautions"
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Resource Quotas",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://kubernetes.io/docs/concepts/policy/resource-quotas/",
+      "supported_claims": [
+        "per-namespace aggregate consumption constraints",
+        "quota is admission enforcement, not scheduling fairness"
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Network Policies",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+      "supported_claims": [
+        "pod traffic isolation is additive",
+        "requires an enforcing network plugin"
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Good practices for Kubernetes Secrets",
+      "publisher": "Kubernetes project",
+      "authors": "Kubernetes Documentation contributors",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official security guidance",
+      "url": "https://kubernetes.io/docs/concepts/security/secrets-good-practices/",
+      "supported_claims": [
+        "Secrets are unencrypted in etcd by default absent encryption configuration",
+        "least privilege and external secret-store guidance"
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "Projects",
+      "publisher": "Argo Project",
+      "authors": "Argo CD maintainers",
+      "publication_or_update_date": "release documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "url": "https://argo-cd.readthedocs.io/en/stable/user-guide/projects/",
+      "supported_claims": [
+        "AppProject allowlists source repositories and destinations",
+        "resource allow/deny and project roles"
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "ApplicationSet in any namespace",
+      "publisher": "Argo Project",
+      "authors": "Argo CD maintainers",
+      "publication_or_update_date": "release documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "url": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Appset-Any-Namespace/",
+      "supported_claims": [
+        "multi-namespace ApplicationSet feature requires explicit configuration",
+        "security warning around source repositories and project selection"
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "Namespaces",
+      "publisher": "HashiCorp Developer",
+      "authors": "HashiCorp",
+      "publication_or_update_date": "continuously updated; Enterprise feature documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor documentation",
+      "url": "https://developer.hashicorp.com/vault/docs/enterprise/namespaces",
+      "supported_claims": [
+        "Vault Enterprise namespace tenancy and delegated administration",
+        "namespace isolation is product-tier dependent"
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Policy concepts",
+      "publisher": "HashiCorp Developer",
+      "authors": "HashiCorp",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor documentation",
+      "url": "https://developer.hashicorp.com/vault/docs/concepts/policies",
+      "supported_claims": [
+        "path-based deny-by-default authorization",
+        "tokens inherit policies"
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "SPIFFE Identity and Verifiable Identity Document",
+      "publisher": "SPIFFE project / CNCF",
+      "authors": "SPIFFE specification maintainers",
+      "publication_or_update_date": "current specification",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification",
+      "url": "https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/",
+      "supported_claims": [
+        "workload identity by SPIFFE ID and SVID",
+        "identity decoupled from network location"
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "About permissions for GitHub Apps",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app",
+      "supported_claims": [
+        "repository and organization permission selection",
+        "installation-scoped access"
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "Generating an installation access token for a GitHub App",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official API documentation",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "supported_claims": [
+        "installation tokens can be narrowed to repositories and permissions",
+        "token expiry"
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "OpenID Connect",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://docs.github.com/en/actions/concepts/security/openid-connect",
+      "supported_claims": [
+        "short-lived cloud credentials without long-lived cloud secrets",
+        "claims can bind repository, branch and environment"
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "Security hardening for GitHub Actions",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official security guidance",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "supported_claims": [
+        "untrusted input and third-party action risks",
+        "full-SHA pinning and least privilege"
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "CloudEvents Specification v1.0.2",
+      "publisher": "CloudEvents project / CNCF",
+      "authors": "CloudEvents maintainers",
+      "publication_or_update_date": "2022-02-05 release tag",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification and repository",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "supported_claims": [
+        "portable event envelope attributes",
+        "extension and data content rules"
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "Open Container Initiative Distribution Specification v1.1.0",
+      "publisher": "Open Container Initiative",
+      "authors": "OCI Distribution maintainers",
+      "publication_or_update_date": "2024 release series",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification",
+      "url": "https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md",
+      "supported_claims": [
+        "content-addressed manifests/blobs",
+        "distribution API and digest semantics"
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "SLSA Provenance",
+      "publisher": "OpenSSF SLSA",
+      "authors": "SLSA specification maintainers",
+      "publication_or_update_date": "current specification",
+      "access_date": "2026-09-13",
+      "source_type": "supply-chain security specification",
+      "url": "https://slsa.dev/spec/v1.0/provenance",
+      "supported_claims": [
+        "provenance subject digests and build definition/run details",
+        "provenance is evidence, not quality proof"
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "in-toto Attestation Framework",
+      "publisher": "in-toto project / CNCF",
+      "authors": "in-toto maintainers",
+      "publication_or_update_date": "current specification",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification",
+      "url": "https://github.com/in-toto/attestation/tree/main/spec",
+      "supported_claims": [
+        "signed statement/predicate model",
+        "artifact subjects and predicate types"
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "OpenGitOps Principles v1.0",
+      "publisher": "OpenGitOps / CNCF",
+      "authors": "OpenGitOps working group",
+      "publication_or_update_date": "v1.0",
+      "access_date": "2026-09-13",
+      "source_type": "open principles specification",
+      "url": "https://opengitops.dev/",
+      "supported_claims": [
+        "declarative, versioned immutable, pulled automatically and continuously reconciled desired state",
+        "principles do not themselves implement tenancy"
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "Descriptor Format of Catalog Entities",
+      "publisher": "Backstage project / CNCF",
+      "authors": "Backstage maintainers",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "url": "https://backstage.io/docs/features/software-catalog/descriptor-format/",
+      "supported_claims": [
+        "versioned entity descriptors, metadata, relations and ownership",
+        "catalog metadata is not runtime authorization"
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "Writing Custom Actions",
+      "publisher": "Backstage project / CNCF",
+      "authors": "Backstage maintainers",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "url": "https://backstage.io/docs/features/software-templates/writing-custom-actions/",
+      "supported_claims": [
+        "typed scaffolder actions and registration",
+        "custom actions execute privileged backend code and require review"
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "Creating a repository dispatch event",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official REST API documentation",
+      "url": "https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event",
+      "supported_claims": [
+        "authenticated external custom events to a repository",
+        "client payload and permission requirements"
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "Events that trigger workflows: repository_dispatch",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch",
+      "supported_claims": [
+        "workflow must exist on default branch",
+        "event type and payload constraints"
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "Artifact attestations",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation/vendor claim",
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "supported_claims": [
+        "signed build provenance for artifacts",
+        "attestation establishes provenance, not that artifact is secure"
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "Temporal Cloud Namespace isolation",
+      "publisher": "Temporal Technologies",
+      "authors": "Temporal documentation team",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor documentation",
+      "url": "https://docs.temporal.io/cloud/namespaces",
+      "supported_claims": [
+        "namespace as workflow isolation unit and retention configuration",
+        "vendor capability, not audited outcome for this design"
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "NIST AI Risk Management Framework 1.0",
+      "publisher": "National Institute of Standards and Technology",
+      "authors": "NIST",
+      "publication_or_update_date": "2023-01",
+      "access_date": "2026-09-13",
+      "source_type": "government framework; independent normative guidance",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+      "supported_claims": [
+        "govern-map-measure-manage lifecycle",
+        "validity, privacy, security, transparency and accountability concerns"
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "OWASP Top 10 for LLM Applications 2025",
+      "publisher": "OWASP Foundation",
+      "authors": "OWASP GenAI Security Project",
+      "publication_or_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "supported_claims": [
+        "prompt injection, excessive agency, sensitive disclosure and supply-chain risks",
+        "need least privilege and human approval"
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "AI Risk Repository: risks from tools/agents and cross-domain deployment",
+      "publisher": "MIT FutureTech",
+      "authors": "Peter Slattery et al.",
+      "publication_or_update_date": "2024",
+      "access_date": "2026-09-13",
+      "source_type": "independent academic risk repository",
+      "url": "https://airisk.mit.edu/",
+      "supported_claims": [
+        "heterogeneous AI risk taxonomies and evidence gaps",
+        "domain shift makes generic safety claims unsafe"
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher": "NeurIPS 2024 Datasets and Benchmarks / arXiv",
+      "authors": "Edoardo Debenedetti et al.",
+      "publication_or_update_date": "2024-06-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed/academic independent evaluation",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "supported_claims": [
+        "tool-using agents remain vulnerable to indirect prompt injection",
+        "evaluation is benchmark evidence, not this runtime audit"
+      ]
+    },
+    {
+      "id": "S31",
+      "title": "General Data Protection Regulation, Articles 5 and 25",
+      "publisher": "European Union, EUR-Lex",
+      "authors": "European Parliament and Council",
+      "publication_or_update_date": "2016-04-27; applicable 2018-05-25",
+      "access_date": "2026-09-13",
+      "source_type": "primary law",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "supported_claims": [
+        "purpose limitation, data minimization, accuracy, storage limitation and accountability",
+        "data protection by design and default"
+      ]
+    },
+    {
+      "id": "S32",
+      "title": "CAN-SPAM Act: A Compliance Guide for Business",
+      "publisher": "U.S. Federal Trade Commission",
+      "authors": "FTC",
+      "publication_or_update_date": "2023-08 (page may be updated)",
+      "access_date": "2026-09-13",
+      "source_type": "government compliance guidance",
+      "url": "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business",
+      "supported_claims": [
+        "truthful headers/subjects, ad identification, address, opt-out and honoring opt-outs",
+        "company remains responsible when another company sends mail"
+      ]
+    },
+    {
+      "id": "S33",
+      "title": "FCC Makes AI-Generated Voices in Robocalls Illegal",
+      "publisher": "U.S. Federal Communications Commission",
+      "authors": "FCC",
+      "publication_or_update_date": "2024-02-08",
+      "access_date": "2026-09-13",
+      "source_type": "government declaratory ruling announcement with ruling link",
+      "url": "https://www.fcc.gov/document/fcc-makes-ai-generated-voices-robocalls-illegal",
+      "supported_claims": [
+        "AI-generated voice is artificial/prerecorded voice under TCPA",
+        "prior consent and disclosure requirements apply"
+      ]
+    },
+    {
+      "id": "S34",
+      "title": "Salesforce Object Reference for the REST API",
+      "publisher": "Salesforce Developers",
+      "authors": "Salesforce",
+      "publication_or_update_date": "versioned API documentation; continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product API documentation",
+      "url": "https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_list.htm",
+      "supported_claims": [
+        "CRM records are typed objects with field-level semantics",
+        "API existence does not grant approval or lawful basis"
+      ]
+    },
+    {
+      "id": "S35",
+      "title": "Salesforce Change Data Capture Developer Guide",
+      "publisher": "Salesforce Developers",
+      "authors": "Salesforce",
+      "publication_or_update_date": "versioned platform documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://developer.salesforce.com/docs/platform/pub-sub-api/guide/change-data-capture.html",
+      "supported_claims": [
+        "record change events and replay identifiers",
+        "delivery events need durable consumer/reconciliation handling"
+      ]
+    },
+    {
+      "id": "S36",
+      "title": "HubSpot CRM Associations API v4",
+      "publisher": "HubSpot Developers",
+      "authors": "HubSpot",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product API documentation",
+      "url": "https://developers.hubspot.com/docs/api-reference/crm-associations-v4/guide",
+      "supported_claims": [
+        "typed object associations and labels",
+        "CRM graph needs explicit mapping"
+      ]
+    },
+    {
+      "id": "S37",
+      "title": "Manage subscription preferences with the subscriptions API",
+      "publisher": "HubSpot Developers",
+      "authors": "HubSpot",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product API documentation",
+      "url": "https://developers.hubspot.com/docs/api-reference/communication-preferences-subscriptions-v4/guide",
+      "supported_claims": [
+        "subscription status/preferences are separate records and API scope",
+        "publication must check current consent/suppression"
+      ]
+    },
+    {
+      "id": "S38",
+      "title": "Google Ads API Policy",
+      "publisher": "Google for Developers",
+      "authors": "Google",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official platform policy",
+      "url": "https://developers.google.com/google-ads/api/docs/productionize/policies",
+      "supported_claims": [
+        "API use, data handling and required functionality policy obligations",
+        "platform access can be limited or revoked"
+      ]
+    },
+    {
+      "id": "S39",
+      "title": "Advertising Standards",
+      "publisher": "LinkedIn Legal",
+      "authors": "LinkedIn",
+      "publication_or_update_date": "2024-10-04 or later page revision",
+      "access_date": "2026-09-13",
+      "source_type": "official platform policy",
+      "url": "https://www.linkedin.com/legal/ads-policy",
+      "supported_claims": [
+        "prohibited/restricted content and advertiser obligations",
+        "platform review does not replace internal approval"
+      ]
+    },
+    {
+      "id": "S40",
+      "title": "Generative AI at Work",
+      "publisher": "NBER Working Paper 31161",
+      "authors": "Erik Brynjolfsson, Danielle Li, Lindsey R. Raymond",
+      "publication_or_update_date": "2023-04; revised 2023-11",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical working paper",
+      "url": "https://www.nber.org/papers/w31161",
+      "supported_claims": [
+        "measured productivity gains in one customer-support setting",
+        "effects vary by worker skill and do not establish autonomous GTM safety"
+      ]
+    },
+    {
+      "id": "S41",
+      "title": "GitHub Actions usage limits, billing, and administration",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration",
+      "supported_claims": [
+        "hosted runner concurrency and usage limits depend on plan",
+        "external quota controller remains necessary across systems"
+      ]
+    },
+    {
+      "id": "S42",
+      "title": "The Update Framework Specification",
+      "publisher": "The Update Framework / CNCF",
+      "authors": "TUF maintainers",
+      "publication_or_update_date": "current stable specification",
+      "access_date": "2026-09-13",
+      "source_type": "open security specification",
+      "url": "https://theupdateframework.github.io/specification/latest/",
+      "supported_claims": [
+        "signed metadata roles, expiry, rollback and freeze-attack protections",
+        "secure distribution needs more than a mutable tag"
+      ]
+    },
+    {
+      "id": "S43",
+      "title": "ApplicationSet Security",
+      "publisher": "Argo Project",
+      "authors": "Argo CD maintainers",
+      "publication_or_update_date": "stable documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source security documentation",
+      "url": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Security/",
+      "supported_claims": [
+        "ApplicationSets can create/delete many Applications and expose privileged data",
+        "templated project selection and generator inputs need admin control"
+      ]
+    },
+    {
+      "id": "S44",
+      "title": "OIDC reference",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official security reference",
+      "url": "https://docs.github.com/en/actions/reference/security/oidc",
+      "supported_claims": [
+        "subject and other claims for repository/environment trust conditions"
+      ]
+    },
+    {
+      "id": "S45",
+      "title": "Deployments and environments",
+      "publisher": "GitHub",
+      "authors": "GitHub Docs",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "supported_claims": [
+        "reviewers, delays, branch restrictions, environment secrets and bypass settings",
+        "availability varies by plan/repository"
+      ]
+    },
+    {
+      "id": "S46",
+      "title": "Object Security for Salesforce Platform",
+      "publisher": "Salesforce Developers",
+      "authors": "Salesforce",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product security documentation",
+      "url": "https://developer.salesforce.com/docs/platform/lwc/guide/data-security.html",
+      "supported_claims": [
+        "sharing, CRUD and field-level security",
+        "system-mode code can bypass user-mode expectations"
+      ]
+    },
+    {
+      "id": "S47",
+      "title": "Change Data Capture Developer Guide: Introduction",
+      "publisher": "Salesforce Developers",
+      "authors": "Salesforce",
+      "publication_or_update_date": "versioned documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official product event documentation",
+      "url": "https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_intro.htm",
+      "supported_claims": [
+        "record change-event capability",
+        "events are observation inputs"
+      ]
+    },
+    {
+      "id": "S48",
+      "title": "Validate requests from HubSpot",
+      "publisher": "HubSpot Developers",
+      "authors": "HubSpot",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official webhook security documentation",
+      "url": "https://developers.hubspot.com/docs/apps/legacy-apps/authentication/validating-requests",
+      "supported_claims": [
+        "request signature validation"
+      ]
+    },
+    {
+      "id": "S49",
+      "title": "Google Ads API ad policy approval status",
+      "publisher": "Google for Developers",
+      "authors": "Google",
+      "publication_or_update_date": "API v22",
+      "access_date": "2026-09-13",
+      "source_type": "official API reference",
+      "url": "https://developers.google.com/google-ads/api/reference/rpc/v22/PolicyApprovalStatusEnum.PolicyApprovalStatus",
+      "supported_claims": [
+        "UNDER_REVIEW, APPROVED, APPROVED_LIMITED and DISAPPROVED states",
+        "mutation acceptance is not policy approval"
+      ]
+    },
+    {
+      "id": "S50",
+      "title": "Create and manage creatives",
+      "publisher": "LinkedIn Marketing API / Microsoft Learn",
+      "authors": "LinkedIn",
+      "publication_or_update_date": "API view li-lms-2026-08",
+      "access_date": "2026-09-13",
+      "source_type": "official API documentation",
+      "url": "https://learn.microsoft.com/en-us/linkedin/marketing/integrations/ads/account-structure/create-and-manage-creatives?view=li-lms-2026-08",
+      "supported_claims": [
+        "creative status/review fields, scopes and account roles",
+        "active intent is not proof of serving"
+      ]
+    },
+    {
+      "id": "S51",
+      "title": "Approve HubSpot content",
+      "publisher": "HubSpot Knowledge Base",
+      "authors": "HubSpot",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "url": "https://knowledge.hubspot.com/website-and-landing-pages/approve-hubspot-content",
+      "supported_claims": [
+        "approval workflows for supported content types",
+        "suite approval remains external mutable evidence"
+      ]
+    },
+    {
+      "id": "S52",
+      "title": "California Consumer Privacy Act (CCPA)",
+      "publisher": "California Department of Justice, Office of the Attorney General",
+      "authors": "State of California",
+      "publication_or_update_date": "continuously updated regulatory overview",
+      "access_date": "2026-09-13",
+      "source_type": "government primary guidance",
+      "url": "https://oag.ca.gov/privacy/ccpa",
+      "supported_claims": [
+        "California consumer rights and business obligations",
+        "GTM data processing must model jurisdictional rights"
+      ]
+    },
+    {
+      "id": "S53",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher": "METR",
+      "authors": "Joel Becker et al.",
+      "publication_or_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled trial/report",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "supported_claims": [
+        "experienced developers in the studied setting were 19% slower with allowed AI tools despite expecting speedup",
+        "perception and vendor claims need controlled measurement"
+      ]
+    },
+    {
+      "id": "S54",
+      "title": "Salesforce Agentforce",
+      "publisher": "Salesforce",
+      "authors": "Salesforce",
+      "publication_or_update_date": "current product marketing page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor marketing claim",
+      "url": "https://www.salesforce.com/agentforce/",
+      "supported_claims": [
+        "vendor-stated agent capabilities only",
+        "not independent outcome evidence"
+      ]
+    },
+    {
+      "id": "S55",
+      "title": "Breeze AI",
+      "publisher": "HubSpot",
+      "authors": "HubSpot",
+      "publication_or_update_date": "current product marketing page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor marketing claim",
+      "url": "https://www.hubspot.com/products/artificial-intelligence",
+      "supported_claims": [
+        "vendor-stated AI capabilities only",
+        "not independent outcome evidence"
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict": "One shared runtime maximizes reuse, but namespace/project constructs are not hard isolation.",
+      "evidence": "Kubernetes states namespace tenancy needs other controls and virtual control planes may be needed [S1]; Argo AppProject constrains deployment sources/destinations [S7] but does not isolate workloads; Vault namespaces share a cluster/root domain [S9].",
+      "resolution": "Share the logical control plane and standards, use per-project cells/credentials/data partitions, and move mutually hostile/regulated GTM to separate accounts/clusters while retaining the same contracts."
+    },
+    {
+      "conflict": "GitOps suggests Git is authoritative, but live leases, approvals, budgets, remote CRM/ad state and secrets are mutable/non-atomic.",
+      "evidence": "OpenGitOps describes desired state reconciliation [S20]; CRM/ad/event APIs expose mutable provider state [S34-S39,S47-S50].",
+      "resolution": "Git owns reviewed desired policy/config. Transactional controller owns operational state. Providers are observed/effected systems reconciled through adapters."
+    },
+    {
+      "conflict": "A global catalog/domain namespace looks like tenancy.",
+      "evidence": "Backstage descriptors provide names and ownership relations [S21]; Kubernetes documents stronger but still incomplete namespace isolation [S1].",
+      "resolution": "Catalog ownership routes review only. Registry binding plus enforcement across IAM/data/compute/network supplies isolation."
+    },
+    {
+      "conflict": "Cross-repository dispatch is convenient, but direct dispatch couples authorization and may leak payloads.",
+      "evidence": "GitHub supports authenticated repository_dispatch with default-branch constraints [S23,S24]; CloudEvents only specifies envelope metadata [S16].",
+      "resolution": "Use signed artifact offer/accept through broker; repository_dispatch is a non-sensitive wake-up hint. Target always reauthorizes and copies accepted artifacts."
+    },
+    {
+      "conflict": "A signed attestation or digest seems to prove safety.",
+      "evidence": "OCI supplies content identity [S17]; SLSA/in-toto describe provenance [S18,S19]; GitHub says attestations establish origin/integrity, not security [S25].",
+      "resolution": "Require signature/trusted builder/input/policy plus domain evaluation and approval. Never equate provenance with correctness."
+    },
+    {
+      "conflict": "Vendor AI pages imply autonomous GTM value, while independent evidence is task- and context-specific.",
+      "evidence": "Agentforce/Breeze are vendor marketing [S54,S55]; NBER finds a measured assistive benefit in support [S40], while METR found slowdown for experienced open-source developers in its setting [S53].",
+      "resolution": "Label vendor claims, run project-specific shadow/canary with counterfactual/holdout, publish denominators and guardrails, and do not infer ROI or safety."
+    },
+    {
+      "conflict": "Platform or suite approval/status may look like internal authorization.",
+      "evidence": "HubSpot content approval exists [S51], Google distinguishes UNDER_REVIEW/APPROVED/etc. [S49], and LinkedIn has separate intended/serving review states [S50].",
+      "resolution": "Canonical internal approval binds exact digest, audience, spend, sender, destination and policy. Provider approval is a second observed condition; both are required."
+    },
+    {
+      "conflict": "Fleet-wide self-improvement benefits from all repository data, but that violates isolation/privacy and invites benchmark gaming.",
+      "evidence": "GDPR requires purpose limitation/minimization [S31]; AgentDojo shows untrusted content can attack tool agents [S30].",
+      "resolution": "Local raw evidence; opt-in reviewed minimized/synthetic eval proposals; independent curation/holdouts/promotion. Aggregate metrics only by policy."
+    }
+  ],
+  "uncertainties": [
+    {
+      "field": "evidence_and_limits",
+      "unknown": "No production measurements for this proposed runtime, so isolation, reliability, cost and productivity outcomes are unverified.",
+      "impact": "High; blocks autonomous effects and fleet expansion.",
+      "mitigation": "Shadow, fault/negative tests and staged cohorts with explicit denominators."
+    },
+    {
+      "field": "actors_and_authority",
+      "unknown": "Exact GitHub, cloud, Vault and CRM enterprise plan features/grants vary by organization and can change.",
+      "impact": "Medium-high; architecture may require separate installations/accounts or alternate secret manager.",
+      "mitigation": "Inventory effective grants and plan entitlements; validate with denied-action tests."
+    },
+    {
+      "field": "complete_state_catalog",
+      "unknown": "Provider-specific terminal/review/reversal semantics, especially email, ads and CRM approval locks, need connector-by-connector modeling.",
+      "impact": "High for GTM; a generic PUBLISHED state can hide partial effects.",
+      "mitigation": "No production adapter until its state/effect/compensation contract and sandbox drills are approved."
+    },
+    {
+      "field": "orchestration_and_composition",
+      "unknown": "Scale, traffic distribution and required tenant hardness are unknown.",
+      "impact": "Medium; premature workflow engine or cluster-per-project would waste effort, while under-isolation risks leakage.",
+      "mitigation": "Start PostgreSQL/queues and soft cells; define thresholds for sharding/dedicated cells from measured load/threat tier."
+    },
+    {
+      "field": "human_need_policy",
+      "unknown": "Calibrated thresholds and acceptable GTM guardrails lack organizational baselines.",
+      "impact": "High; cannot justify less human review.",
+      "mitigation": "Collect shadow labels, inter-rater agreement, baseline complaint/correction/reviewer-time and legal sign-off before thresholding."
+    },
+    {
+      "field": "end_to_end_workflows",
+      "unknown": "Causal GTM value and attribution are not established; vendor case studies lack an independent denominator/holdout.",
+      "impact": "High; GTM start gate remains closed beyond draft/sandbox.",
+      "mitigation": "Preregister randomized or credible quasi-experimental holdout, finance reconciliation and stop rules."
+    },
+    {
+      "field": "self_improvement_boundary",
+      "unknown": "Whether useful fixtures can be de-identified without losing validity, and how deletion/revocation applies to derived artifacts/models.",
+      "impact": "High for cross-project learning.",
+      "mitigation": "Synthetic/minimized default, privacy review, lineage and deletion tests; otherwise keep evaluation local."
+    },
+    {
+      "field": "factory_as_code_schema",
+      "unknown": "The smallest stable kernel/domain interface has not been validated by a second domain.",
+      "impact": "Medium-high; public SDK would fossilize wrong abstractions.",
+      "mitigation": "Keep internal v1alpha1, extract only after engineering dogfood plus GTM shadow reveal repeated contracts."
+    },
+    {
+      "field": "implementation_recommendation",
+      "unknown": "RPO/RTO, regional/data-residency and compliance certification requirements are unspecified.",
+      "impact": "Medium-high; may require separate control planes/stores.",
+      "mitigation": "Complete data inventory/threat model and legal/security architecture decision before GTM registration."
+    },
+    {
+      "field": "sources",
+      "unknown": "As-of 2026-09-13 is future-relative to some source publication metadata; live docs can drift and URLs may serve newer content.",
+      "impact": "Medium; exact limits/status enums may differ at build time.",
+      "mitigation": "Pin API/spec versions, archive source hash/date in ADRs and reverify immediately before implementation."
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate-high for architectural separation and staged recommendation; moderate for exact vendor integration details; low for unmeasured business and operational outcomes.",
+    "claim_level": {
+      "high": [
+        "Namespaces/AppProjects/catalogs alone are not full tenant boundaries [S1,S7,S21].",
+        "Installation-scoped/narrow tokens, OIDC claims, digest artifacts and typed event envelopes are documented primitives [S12-S19,S44].",
+        "GTM outbound work needs privacy/consent/suppression and platform review boundaries [S31-S39,S46-S52]."
+      ],
+      "moderate": [
+        "Per-project cells with signed handoffs and monotone config inheritance will reduce blast radius; this follows security patterns but is not audited here.",
+        "Engineering-first dogfood/update rings will expose stable shared contracts before GTM."
+      ],
+      "low": [
+        "Specific productivity, cost, autonomous completion, pipeline/revenue lift or acceptable GTM automation thresholds. No independent audit-grade end-to-end GTM study was found."
+      ]
+    },
+    "basis": "55 sources: 49 primary official product/open-source/standards/government/vendor-claim materials and 6 independent framework/academic/empirical sources ([S27-S30,S40,S53]); classification is stated per source. Vendor capability and marketing evidence are not audited outcomes. Conflicts and missing denominators are preserved."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "complete_state_catalog",
+    "orchestration_and_composition",
+    "human_need_policy",
+    "end_to_end_workflows",
+    "self_improvement_boundary",
+    "factory_as_code_schema",
+    "implementation_recommendation",
+    "sources"
+  ]
+}

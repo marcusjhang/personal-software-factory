@@ -1,0 +1,112 @@
+{
+  "reviewer": "round-8 independent evidence/status closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-7 corrections and schema-3 regeneration",
+    "specialty": "current graph digests, dynamically derived 28-heading coverage, candidate-only edge semantics, report banners, traceability, and status text; no categorical overclaim or stale pending statement",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-7-resolution.md",
+      "review/round-7-closure/lease-cleanup-adversary.json",
+      "review/round-7-closure/formal-transitions.json",
+      "review/round-7-closure/improvement-interleavings.json",
+      "review/round-7-closure/requirements-architecture.json",
+      "review/round-7-closure/evidence-currentness.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim. No implementation, full reachable-product model, fresh immutable retrieval, semantic review, or external source-truth proof is required. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "current_digest_and_heading_contract",
+      "result": "pass",
+      "exact_text": [
+        "README.md: ‘Round 7 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests. The graph dynamically covers all 28 current numbered headings; no fixed heading count is authoritative.’",
+        "review/round-7-resolution.md: ‘After formal edits, the candidate-only graph was regenerated against the round-7 digests and all 28 current headings; it still claims no semantic or provenance validation.’",
+        "review/requirements-traceability.md §10: ‘The candidate-only schema-3 material graph now matches the current PLAN/manifest bytes and all 28 dynamically derived headings. The requirement is timeless: derive the complete actual numbered heading set on every generation and require exact set equality; no fixed heading count is authoritative.’"
+      ],
+      "basis": "Recomputed SHA-256 is 25f6960b677d7d4a62c7a55c6bcbbe6ebe744e176c41855cbf08ffa5ed2f6acc for PLAN.md and b1cd4933042162367d7e6a3d8e42f07f85ad3308ffd5d38b5882500a3f542413 for docs/state-transition-manifests.md, exactly matching material-claims.json and round-7-resolution.md. Dynamic enumeration of every numbered level-2-or-deeper manifest heading yields 28, exactly equal to the graph’s ordered heading set."
+    },
+    {
+      "area": "candidate_only_graph_semantics",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md §4: ‘The normative meaning of the current legacy evidence graph is editorial association only: every external legacy edge is unreviewed and uses `candidate_support|candidate_refute|context_only`; `supports|refutes` are reserved for future observations from the same immutable run whose edge-level entailment a human reviewer accepts.’",
+        "material-claims.json provenance_policy.editorial_graph_status: ‘Every edge in this artifact points to the checked-in legacy corpus and has semantic_disposition=unreviewed_candidate. candidate_support and candidate_refute express editorial nomination or conflict preservation, not entailment.’",
+        "material-claims.json scope_and_method.repair_boundary: ‘This regeneration is an editorial candidate association graph only. It is not the planned immutable re-fetch, does not create a ResearchRun or actual UTC SourceObservation, and is not human semantic/entailment review.’"
+      ],
+      "basis": "The schema is 3.0.0. All 36 edges have semantic_disposition=unreviewed_candidate. Relations are exactly 23 candidate_support, 5 candidate_refute, and 8 context_only, with zero supports and zero refutes. The graph separately marks the local 37-file parse/byte assessment and does not promote an external-content edge."
+    },
+    {
+      "area": "report_matrix_and_coverage_banners",
+      "result": "pass",
+      "exact_text": [
+        "report.md and evidence-matrix.md: ‘NON-AUTHORITATIVE STATUS: The entire document below is retained only as historical synthesis. Every categorical claim, confidence label, cutoff/date statement, and source-to-claim association in it is an unreviewed legacy candidate association, not verified truth, verified current behavior, or semantic support.’",
+        "synthesis-coverage.md: ‘CURRENT STATUS — TRACEABILITY ONLY, NOT SEMANTIC SUPPORT: Every legacy source-to-claim relationship described here is an unreviewed candidate association.’"
+      ],
+      "basis": "The banners are at the start of each legacy synthesis before its categorical body and defer to PLAN §4, evidence-cutoff.md, and schema-3 material-claims.json. They require the future pre-implementation immutable re-fetch and human semantic review, so the retained legacy prose is not presented as current decision evidence."
+    },
+    {
+      "area": "plan_only_and_future_evidence_gate",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md status: ‘revised plan-only implementation contract; no working implementation, semantic evidence validation, or autonomous self-government is claimed.’",
+        "README.md: ‘This repository intentionally contains a plan, not a working controller or deployed factory.’",
+        "evidence-repair.md: ‘A fresh immutable re-fetch plus human semantic review is a PRE-IMPLEMENTATION gate that blocks Increment 1. It is not implementation-time work.’"
+      ],
+      "basis": "Current reader-visible banners consistently withhold implementation, full-model, provenance, semantic-validity, safety, and production claims."
+    },
+    {
+      "area": "traceability_status_consistency",
+      "result": "fail",
+      "exact_text": [
+        "review/requirements-traceability.md §6: ‘The current round-7 formal edit makes regeneration pending again’.",
+        "review/requirements-traceability.md §7: ‘The current round-7 formal edit now makes its byte digests and heading set stale pending later regeneration’.",
+        "review/requirements-traceability.md §8: ‘the schema-3 material graph now matches the current PLAN/manifest digests and all 27 headings’.",
+        "review/requirements-traceability.md §9: ‘The round-7 schema-3 regeneration now matches the current PLAN/manifest bytes and dynamically covers all 28 numbered headings.’",
+        "review/requirements-traceability.md §10: ‘The candidate-only schema-3 material graph now matches the current PLAN/manifest bytes and all 28 dynamically derived headings.’"
+      ],
+      "basis": "The first three current-tense statements are stale and directly contradict the later current status and the recomputed package. Historical section placement does not make ‘current round-7’, ‘pending later regeneration’, ‘current ... 27 headings’, and ‘current ... 28 headings’ mutually consistent."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R8-EVID-001",
+      "severity": "high",
+      "title": "The authoritative traceability file still says round-7 regeneration is pending/stale and reports 27 current headings",
+      "requirement": "Reader-visible traceability and status must reproduce the current round-7 graph state without a categorical overclaim or stale pending statement. README.md, round-7-resolution.md, and traceability §10 say regeneration is complete for the current PLAN/manifest bytes and all 28 dynamically derived headings.",
+      "evidence": [
+        "review/requirements-traceability.md line 104 says: ‘The current round-7 formal edit makes regeneration pending again’.",
+        "review/requirements-traceability.md line 108 says: ‘The current round-7 formal edit now makes its byte digests and heading set stale pending later regeneration’.",
+        "review/requirements-traceability.md line 112 says: ‘the schema-3 material graph now matches the current PLAN/manifest digests and all 27 headings’.",
+        "The same file at lines 121 and 131 says the round-7 graph matches the current bytes and all 28 headings. README.md and review/round-7-resolution.md agree with 28 and completed regeneration.",
+        "Independent recomputation confirms the graph’s PLAN and manifest digests match current bytes and its ordered heading set equals all 28 dynamically enumerated numbered headings."
+      ],
+      "impact": "The sole requirements/status register gives mutually exclusive current package states. A reader can conclude that the pre-closure editorial regeneration is still blocked or that the current normative heading coverage is 27, even though the checked graph is current and covers 28. This fails the requested no-stale-pending/no-contradictory-status closure condition and leaves R7-REQ-002’s status correction incomplete.",
+      "required_plan_repair": "Edit traceability §§6–8 so each paragraph is explicitly historical and does not call a superseded round-6 graph current. Remove both statements that round-7 regeneration is pending/stale. Replace the ‘current ... all 27 headings’ sentence with historical round-6 wording or the current completed 28-heading status. Preserve the distinct future immutable re-fetch and human semantic-review gate. Then re-run this independent plan-only closure audit; material-claims.json need not be regenerated if PLAN.md and the normative manifest bytes do not change."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "No implementation or deployed controller was assessed, as required by plan-only scope.",
+    "No full reachable-product model proof was required or inferred from deterministic document checks.",
+    "No fresh immutable retrieval, external source truth, provenance closure, or human semantic entailment review was required or claimed.",
+    "The stale review/plan-link-check.json PLAN digest is treated only as the recorded input identity of its historical URL-reachability run; its own semantics and the schema-3 graph do not claim that digest is current."
+  ],
+  "closure_criteria_pass": false
+}

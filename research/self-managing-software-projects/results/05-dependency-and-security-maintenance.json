@@ -1,0 +1,1423 @@
+{
+  "scope": {
+    "definition": "Dependency and security maintenance is the closed loop from inventory and advisory/release detection through update proposal, security/code scan, compatibility validation, risk-aware approval/merge, deployment observation, rollback and exception aging. It covers manifest/lockfile updates, container/action/toolchain pins, SCA, SAST/secret/misconfiguration scans and machine- or AI-generated fixes. It does not claim full autonomous incident response or general feature development.",
+    "systems_in_scope": [
+      "GitHub Dependabot alerts/version/security updates/dependency review and CodeQL Copilot Autofix",
+      "Renovate hosted or self-hosted",
+      "OSV-Scanner, Trivy, OpenSSF Scorecard, Sigstore/SLSA verification",
+      "commercial examples Snyk and Semgrep as optional scanners; detailed product claims are not relied on"
+    ],
+    "time_range": "2019 through 2026-09-13, with a 2017 automation experiment and 2018 event-stream incident as foundations."
+  },
+  "current_state": [
+    {
+      "status": "verified production capability",
+      "claim": "Bots can discover declared dependencies, query advisory/release metadata, edit supported manifests and lockfiles, open grouped PRs, rebase, and merge selected low-risk updates after repository-required checks. Dependabot configuration and Renovate document these controls.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+        "https://docs.renovatebot.com/configuration-options/",
+        "https://docs.renovatebot.com/key-concepts/automerge/"
+      ]
+    },
+    {
+      "status": "verified production capability",
+      "claim": "PR-time dependency review can block newly introduced vulnerable/disallowed dependencies; CodeQL can propose fixes for supported alerts; OSV-Scanner and Trivy can produce CI-consumable findings.",
+      "urls": [
+        "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-autofix-for-codeql-code-scanning",
+        "https://google.github.io/osv-scanner/usage/",
+        "https://trivy.dev/latest/docs/target/repository/"
+      ]
+    },
+    {
+      "status": "important boundary",
+      "claim": "No listed scanner or bot proves semantic compatibility, exploitability, maintainer trust, or absence of malicious code. GitHub explicitly says Autofix may be incorrect or insecure; the event-stream compromise shows a legitimate-looking dependency update can itself carry malicious code.",
+      "urls": [
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+        "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident"
+      ]
+    },
+    {
+      "status": "inference from controls and evidence",
+      "claim": "Safe auto-merge is mature for narrow, reversible, well-tested update classes. Autonomous merging of major versions, runtime-critical packages, unsigned/unprovenanced artifacts, workflow changes or generated security fixes remains conditional on human/security review.",
+      "urls": [
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+        "https://docs.renovatebot.com/key-concepts/automerge/",
+        "https://slsa.dev/spec/v1.2/verifying-artifacts",
+        "https://docs.sigstore.dev/cosign/verifying/verify/",
+        "https://doi.org/10.1109/MSR52588.2021.00037"
+      ]
+    },
+    {
+      "status": "verified 2026 mechanics",
+      "claim": "GitHub documents a default three-day cooldown for Dependabot version updates (not security updates). Renovate warns that GitHub platform-native automerge can merge despite failing non-required checks and can ignore Renovate merge windows; required status checks and correct platformAutomerge policy are therefore mandatory.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference",
+        "https://docs.renovatebot.com/configuration-options/"
+      ]
+    }
+  ],
+  "representative_systems": [
+    {
+      "name": "Dependabot",
+      "role": "GitHub-native advisory alerts plus version/security update PRs",
+      "strengths": "Low setup friction, GitHub Advisory Database/dependency graph integration, repository rules and dependency review.",
+      "limits": "Supported ecosystems/manifest resolution; GitHub-hosted control plane; PR Actions secrets/token restrictions; less policy flexibility than Renovate.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates",
+        "https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions"
+      ]
+    },
+    {
+      "name": "Renovate",
+      "role": "Highly configurable multi-platform update orchestration, hosted or self-hosted",
+      "strengths": "Package rules, grouping, dashboards, schedules, minimum release age, vulnerability-alert paths and automerge.",
+      "limits": "Large policy surface; unsafe presets/regex/custom managers or overprivileged tokens can widen risk; requires operating discipline.",
+      "urls": [
+        "https://docs.renovatebot.com/configuration-options/",
+        "https://docs.renovatebot.com/security-and-permissions/"
+      ]
+    },
+    {
+      "name": "GitHub dependency review + CodeQL/Autofix",
+      "role": "PR admission control and SAST remediation suggestions",
+      "strengths": "Native status checks and review UI.",
+      "limits": "Language/query coverage and generated-fix fallibility; not an approval oracle.",
+      "urls": [
+        "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+      ]
+    },
+    {
+      "name": "OSV-Scanner",
+      "role": "Open-source SCA for lockfiles, SBOMs and source; machine-readable CI output",
+      "strengths": "Open vulnerability schema/database integration and self-hosting.",
+      "limits": "Only finds known, represented vulnerabilities and resolvable packages.",
+      "urls": [
+        "https://google.github.io/osv-scanner/usage/"
+      ]
+    },
+    {
+      "name": "Trivy",
+      "role": "Consolidated repository/container/IaC/secret/license scanning",
+      "strengths": "Broad scan surface and CI integration.",
+      "limits": "Scanner breadth does not remove triage, database freshness or false-positive/negative problems.",
+      "urls": [
+        "https://trivy.dev/latest/docs/target/repository/"
+      ]
+    },
+    {
+      "name": "OpenSSF Scorecard + SLSA/Sigstore",
+      "role": "Upstream hygiene signals and artifact provenance/signature policy",
+      "strengths": "Adds supplier/build identity evidence that CVE-only scanning lacks.",
+      "limits": "Score/rules are signals; signed provenance does not make code safe.",
+      "urls": [
+        "https://github.com/ossf/scorecard-action",
+        "https://slsa.dev/spec/v1.2/verifying-artifacts",
+        "https://docs.sigstore.dev/cosign/verifying/verify/"
+      ]
+    },
+    {
+      "name": "Snyk, Mend, Semgrep, Socket and ecosystem-native audit tools",
+      "role": "Buy alternatives for SCA/SAST/reachability, remediation PRs and malicious-package signals",
+      "strengths": "May add curated intelligence, reachability or support.",
+      "limits": "Capabilities, pricing, telemetry and false-positive rates change; validate against the project’s own corpus.",
+      "urls": []
+    }
+  ],
+  "primary_evidence": [
+    {
+      "classification": "verified",
+      "claim": "Dependabot’s schema supports schedules, groups, cooldown, PR limits, private registries, ignore/allow and target-branch configuration.",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file"
+    },
+    {
+      "classification": "verified",
+      "claim": "Dependabot security updates attempt the smallest secure upgrade and depend on supported manifests/lockfiles and resolvability.",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates"
+    },
+    {
+      "classification": "verified",
+      "claim": "Renovate exposes automerge, grouping, stability delay/minimumReleaseAge, vulnerability alerts and internal checks; its own docs warn self-hosters about permissions and untrusted repository configuration.",
+      "urls": [
+        "https://docs.renovatebot.com/configuration-options/",
+        "https://docs.renovatebot.com/security-and-permissions/"
+      ]
+    },
+    {
+      "classification": "verified",
+      "claim": "Branch/ruleset protections supply required checks, reviews and constrained bypass independently of bot intent.",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+    },
+    {
+      "classification": "vendor limitation",
+      "claim": "GitHub says CodeQL Autofix suggestions can be wrong, insecure, incomplete or behavior-changing and require review/testing.",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+    },
+    {
+      "classification": "verified standard/control",
+      "claim": "SLSA verification evaluates provenance authenticity and expected builder/source identity; Sigstore verification must bind signature to an approved key or identity/issuer.",
+      "urls": [
+        "https://slsa.dev/spec/v1.2/verifying-artifacts",
+        "https://docs.sigstore.dev/cosign/verifying/verify/"
+      ]
+    },
+    {
+      "classification": "verified operational prioritization",
+      "claim": "CISA KEV indicates observed exploitation; EPSS estimates 30-day exploitation probability. Neither represents application reachability or business impact.",
+      "urls": [
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://www.first.org/epss/model"
+      ]
+    }
+  ],
+  "independent_evidence": [
+    {
+      "classification": "independent peer-reviewed result",
+      "claim": "A 2021 study of 2,904 JavaScript projects found 65.42% of Dependabot security PRs accepted, often in one day; 3.2% of manually inspected PRs had build breakage. Severity and breaking-change risk were not strongly tied to merge time. External validity is limited to sampled public JavaScript repositories and historical Dependabot behavior.",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037"
+    },
+    {
+      "classification": "independent peer-reviewed result",
+      "claim": "A 2024 large study analyzed 9,916,318 PR-related issues from 1,743,035 projects and reported Dependabot above 65% of dependency-management activity and sub-day handling after security PR creation, but average hidden-vulnerability and patch-disclosure delays of 512 and 362 days respectively. A bot accelerates the post-disclosure tail, not discovery.",
+      "url": "https://doi.org/10.1007/s10664-024-10523-y"
+    },
+    {
+      "classification": "independent peer-reviewed result",
+      "claim": "A 2022 mixed-method study reported 77% of sampled projects tried more than one bot and identified notification/PR noise plus practice adaptation as adoption/removal factors.",
+      "url": "https://doi.org/10.7717/peerj-cs.849"
+    },
+    {
+      "classification": "first-party incident evidence, not independent",
+      "claim": "The event-stream incident demonstrates that automatic consumption of a newly published release can import malicious code before conventional advisory controls catch it.",
+      "url": "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident"
+    },
+    {
+      "classification": "independent peer-reviewed result",
+      "claim": "In 1,823 projects/540,665 Dependabot PRs, mean npm technical lag in a 613-project cohort fell 48.99 to 25.38 days 90 days after adoption (median 13.96 to 3.62); >70% PRs merged. Only 3.4% had a known compatibility score, noise controls were common and 11.3% of projects deprecated Dependabot. Adopters were already proactive, so causality/generalization is bounded.",
+      "url": "https://doi.org/10.1109/TSE.2023.3278129"
+    },
+    {
+      "classification": "independent peer-reviewed result",
+      "claim": "A 2023 study of 4,195 closed security updates in 978 JavaScript projects found 57% PR merge; 53.48% of vulnerabilities fixed by bot, 30.27% manually and 16.25% unresolved. About half of bot fixes landed within one day, yet estimated probability of remaining unresolved after a year was 18%.",
+      "url": "https://doi.org/10.1109/MSR59073.2023.00042"
+    },
+    {
+      "classification": "independent peer-reviewed scanner evaluation",
+      "claim": "Across six SCA tools and 21,130 Maven modules, mean vulnerability-report F1 was .475; build scan dependency-detection F1 .890 versus .692 pre-build. Correct scan mode/method/scope reduced false positives and negatives.",
+      "url": "https://doi.org/10.1145/3611643.3616299"
+    },
+    {
+      "classification": "independent peer-reviewed supply-chain evidence",
+      "claim": "Studies found malicious packages, source-untraceable release files and weak publisher/package signals at ecosystem scale. Passing CVE and CI checks therefore does not establish release trust.",
+      "urls": [
+        "https://doi.org/10.14722/ndss.2021.23055",
+        "https://doi.org/10.1109/TSE.2023.3319509",
+        "https://doi.org/10.1145/3510457.3513044"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "65.42% security-PR acceptance",
+      "population": "Dependabot security PRs in 2,904 public JavaScript projects",
+      "caveat": "2021 observational sample; acceptance is not proof of defect-free deployment.",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037"
+    },
+    {
+      "metric": "3.2% build breakage in manually examined PRs",
+      "population": "Manual subsample in the same 2021 study",
+      "caveat": "Build success misses behavioral/security regressions and projects with weak tests.",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037"
+    },
+    {
+      "metric": "9,916,318 PR-related issues / 1,743,035 projects / >65% activity share",
+      "population": "2024 cross-language empirical dataset",
+      "caveat": "Activity share is not market share or quality; repository/project selection and bot classification matter.",
+      "url": "https://doi.org/10.1007/s10664-024-10523-y"
+    },
+    {
+      "metric": "<1 day post-PR fixes versus 512 days hidden and 362 days to patch disclosure on average",
+      "population": "2024 study",
+      "caveat": "Different lifecycle intervals; do not attribute discovery latency to the merge bot.",
+      "url": "https://doi.org/10.1007/s10664-024-10523-y"
+    },
+    {
+      "metric": "77% tried more than one bot",
+      "population": "Projects in a 2022 bot-adoption study",
+      "caveat": "The qualitative/93-project analysis is not all GitHub.",
+      "url": "https://doi.org/10.7717/peerj-cs.849"
+    },
+    {
+      "metric": "Project-specific operational SLOs (recommended, not reported facts)",
+      "targets": [
+        "critical KEV/reachable: triage <4h, safe patch deployed <24h",
+        "routine patch/minor: bot PR <24h of policy window, merge after soak and green checks",
+        "bot PR stale age <7d; rollback time <30m; false-positive dismissal reviewed quarterly",
+        "track update coverage, mean/95th-percentile time-to-remediate, CI minutes per merged update, revert/regression rate and exception age"
+      ],
+      "caveat": "Targets must reflect service criticality; measure deployment, not PR merge alone."
+    },
+    {
+      "metric": "Mean technical lag 48.99→25.38 days; median 13.96→3.62 after 90 days",
+      "population": "613 npm projects within 1,823-project/540,665-PR Dependabot study",
+      "caveat": "Adopters were unusually proactive and about one-third already trended downward; observational design.",
+      "url": "https://doi.org/10.1109/TSE.2023.3278129"
+    },
+    {
+      "metric": "Mean vulnerability-report F1 .475",
+      "population": "Six SCA tools on 21,130 Maven modules",
+      "caveat": "Java/Maven benchmark and study configuration; not a universal current ranking.",
+      "url": "https://doi.org/10.1145/3611643.3616299"
+    },
+    {
+      "metric": "20.1% updates had ≥1 source-untraceable phantom file; only 9.0% packages had every sampled update fully reviewed",
+      "population": "Latest ten updates of top 1,000 packages in npm, PyPI, RubyGems and Crates.io",
+      "caveat": "Phantom/generated files can be legitimate; metric signals review/provenance gap, not malware.",
+      "url": "https://doi.org/10.1109/TSE.2023.3319509"
+    }
+  ],
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "inventory",
+      "trigger": "merge, scheduled daily scan, lockfile/SBOM change, new registry/advisory event",
+      "actions": [
+        "Generate/refresh resolved dependency graph and SBOM including direct/transitive, dev/build, container base images, GitHub Actions and toolchains.",
+        "Record owner, runtime criticality, internet exposure, environment and current digest/version."
+      ],
+      "outputs": [
+        "versioned inventory/SBOM",
+        "ownership map"
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+        "https://google.github.io/osv-scanner/usage/"
+      ]
+    },
+    {
+      "step": 2,
+      "state": "detect and normalize",
+      "trigger": "new release/advisory/KEV or scheduled reconciliation",
+      "actions": [
+        "Run at least SCA plus secret, SAST and IaC/container scanners where relevant.",
+        "Deduplicate by package, advisory, path and fixed version. Preserve scanner provenance and timestamp."
+      ],
+      "outputs": [
+        "normalized maintenance finding"
+      ],
+      "urls": [
+        "https://google.github.io/osv-scanner/usage/",
+        "https://trivy.dev/latest/docs/target/repository/",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+      ]
+    },
+    {
+      "step": 3,
+      "state": "prioritize",
+      "trigger": "normalized finding",
+      "actions": [
+        "Combine affected resolved path and runtime reachability with fix availability, KEV, EPSS, severity, asset exposure and business impact.",
+        "Critical/no-fix issues open an incident or compensating-control task; do not wait for the routine bot queue."
+      ],
+      "outputs": [
+        "risk tier",
+        "SLA",
+        "owner"
+      ],
+      "urls": [
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://www.first.org/epss/model"
+      ]
+    },
+    {
+      "step": 4,
+      "state": "plan/update proposal",
+      "trigger": "eligible release or remediable finding",
+      "actions": [
+        "Bot chooses the minimum fixed version for vulnerabilities; routine updates follow semver and package rules.",
+        "Group only packages with the same lifecycle/blast radius; separate majors, runtime/security-critical and build/workflow changes.",
+        "Regenerate lockfiles in a hermetic ephemeral environment; attach changelog, dependency diff, advisory paths, provenance and risk rationale."
+      ],
+      "outputs": [
+        "signed/attributed PR",
+        "audit metadata"
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates",
+        "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+        "https://docs.renovatebot.com/configuration-options/"
+      ]
+    },
+    {
+      "step": 5,
+      "state": "supply-chain admission",
+      "trigger": "PR opened/synchronized",
+      "actions": [
+        "Reject unexpected registries, namespace changes, new install scripts/binaries/licenses or dependency confusion.",
+        "Enforce release-age soak for routine updates; bypass only for confirmed urgent patches after review.",
+        "Where supported, verify digest, signature and SLSA provenance against approved identities/builders. Pin CI actions by full SHA."
+      ],
+      "outputs": [
+        "admission result/evidence"
+      ],
+      "urls": [
+        "https://slsa.dev/spec/v1.2/verifying-artifacts",
+        "https://docs.sigstore.dev/cosign/verifying/verify/",
+        "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+        "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident"
+      ]
+    },
+    {
+      "step": 6,
+      "state": "patch validation",
+      "trigger": "admitted PR",
+      "actions": [
+        "Run clean install with lockfile frozen; compile/type/lint/unit/integration/contract tests, package-specific smoke/regression tests, dependency review, SCA/SAST/secrets/IaC scans and license/policy checks.",
+        "Build once; test/promote the same immutable artifact. Compare behavior/performance and SBOM to baseline.",
+        "Generated security fixes receive targeted exploit regression tests where feasible."
+      ],
+      "outputs": [
+        "required status checks",
+        "artifact/SBOM/provenance",
+        "test evidence"
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+        "https://csrc.nist.gov/pubs/sp/800/218/final"
+      ]
+    },
+    {
+      "step": 7,
+      "state": "decision",
+      "trigger": "all checks complete",
+      "actions": [
+        "Auto-merge only allowlisted patch/minor/dev dependency classes with no sensitive-file diff, trusted provenance, adequate tests, release-age/merge-confidence policy and zero unresolved high-risk findings.",
+        "Use platform rules/merge queue, never a bot-admin bypass. Majors, runtime-critical libraries, workflow/auth/crypto changes, new maintainers/packages and AI autofixes require owner/security approval."
+      ],
+      "outputs": [
+        "merged, queued, escalated or rejected decision"
+      ],
+      "urls": [
+        "https://docs.renovatebot.com/key-concepts/automerge/",
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+      ]
+    },
+    {
+      "step": 8,
+      "state": "progressive deploy/observe",
+      "trigger": "merge",
+      "actions": [
+        "Deploy canary or low-risk cohort; watch errors, latency, security signals and business invariants.",
+        "Automatically pause/rollback on explicit thresholds; retain artifact and prior lockfile for fast rollback."
+      ],
+      "outputs": [
+        "deployment outcome",
+        "rollback or promotion record"
+      ],
+      "urls": [
+        "https://csrc.nist.gov/pubs/sp/800/218/final"
+      ]
+    },
+    {
+      "step": 9,
+      "state": "close/learn",
+      "trigger": "successful soak or rollback",
+      "actions": [
+        "Close finding only after deployed inventory proves fixed version.",
+        "On failure, label root cause, suppress duplicate retry storms, tune tests/rules with reviewed change and expire exceptions."
+      ],
+      "outputs": [
+        "time-to-remediate/revert/noise metrics",
+        "policy/test improvement",
+        "auditable exception"
+      ]
+    }
+  ],
+  "integration_points": [
+    {
+      "point": "source control",
+      "mechanics": "GitHub/GitLab/Bitbucket app or scoped token; PR comments/check runs, CODEOWNERS, rulesets, merge queue and audit log.",
+      "urls": [
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+        "https://docs.renovatebot.com/key-concepts/automerge/"
+      ]
+    },
+    {
+      "point": "package sources",
+      "mechanics": "Ecosystem registries plus private-registry credentials; lockfiles and update APIs. Isolate read tokens from publishing credentials.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+        "https://docs.renovatebot.com/security-and-permissions/"
+      ]
+    },
+    {
+      "point": "security intelligence",
+      "mechanics": "GitHub Advisory Database/OSV plus vendor feeds; enrich with CISA KEV and EPSS, asset/reachability context.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+        "https://google.github.io/osv-scanner/usage/",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://www.first.org/epss/model"
+      ]
+    },
+    {
+      "point": "CI and artifacts",
+      "mechanics": "Status checks for tests/scans; ephemeral runners; cache isolation; SBOM, attestations, OCI registry and immutable digest promotion. Dependabot-triggered Actions have distinct token/secret behavior.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions",
+        "https://slsa.dev/spec/v1.2/verifying-artifacts"
+      ]
+    },
+    {
+      "point": "operations/governance",
+      "mechanics": "Issue/SIEM/on-call routing for SLA breaches; deployment controller and observability for canary/rollback; exception registry with expiry and owner; metrics warehouse for PR-to-deploy lifecycle."
+    }
+  ],
+  "human_gates": [
+    {
+      "gate": "policy/bootstrap",
+      "when": "initial rollout and every material rule/scanner/permission change",
+      "why": "Humans define risk appetite, update classes, test sufficiency, trusted builders/registries and rollback thresholds."
+    },
+    {
+      "gate": "high-blast-radius diff",
+      "when": "major version; runtime-critical/auth/crypto/database/network package; workflow/installer/build script; new package/maintainer/registry; broad transitive churn",
+      "why": "Semver/checks cannot establish semantic or supplier trust."
+    },
+    {
+      "gate": "generated fix",
+      "when": "CodeQL/AI/autofix changes logic or lacks a reproducing security test",
+      "why": "Vendor documentation explicitly denies correctness/security guarantees.",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+    },
+    {
+      "gate": "conflict or exception",
+      "when": "no fix, unresolvable graph, check disagreement, required secret unavailable, fix violates compatibility, SLA breach or proposed bypass",
+      "why": "Requires product tradeoff, compensating control or accepted risk with owner and expiry."
+    },
+    {
+      "gate": "production anomaly",
+      "when": "canary threshold fires or rollback fails",
+      "why": "Contain impact and choose forward-fix versus rollback."
+    }
+  ],
+  "failure_modes": [
+    {
+      "mode": "Known-vulnerability blind spots",
+      "detail": "Undeclared/dynamic/vendored dependencies, missing lockfiles, unsupported ecosystems, stale advisory databases and alias/version mismatch cause false negatives; scanners generally cannot find undisclosed vulnerabilities.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+        "https://google.github.io/osv-scanner/usage/"
+      ]
+    },
+    {
+      "mode": "False confidence from green CI",
+      "detail": "Weak/flaky tests and build-only checks miss API, behavioral, data, performance and security regressions. The 2021 3.2% build-break figure is not a semantic-correctness rate.",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037"
+    },
+    {
+      "mode": "Malicious or compromised update",
+      "detail": "A newest or CVE-free release may be malicious; install scripts and CI workflows can exfiltrate secrets. Release-age delay helps for routine releases but conflicts with urgent patching.",
+      "urls": [
+        "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident",
+        "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions"
+      ]
+    },
+    {
+      "mode": "Bot/CI privilege escalation",
+      "detail": "Overbroad app/token rights, untrusted repository config, pull_request_target misuse, mutable action tags and secret-bearing reruns let changed code reach credentials.",
+      "urls": [
+        "https://docs.renovatebot.com/security-and-permissions/",
+        "https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions",
+        "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions"
+      ]
+    },
+    {
+      "mode": "Automerge race or bypass",
+      "detail": "Required checks evaluated on stale heads, concurrent updates, merge-train interactions, misconfigured branch rules or admin bypass can merge an untested combination.",
+      "urls": [
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+        "https://docs.renovatebot.com/key-concepts/automerge/"
+      ]
+    },
+    {
+      "mode": "PR noise and abandonment",
+      "detail": "Update floods consume review/CI, collide with each other, go stale and train maintainers to ignore security alerts.",
+      "urls": [
+        "https://docs.renovatebot.com/noise-reduction/",
+        "https://doi.org/10.7717/peerj-cs.849"
+      ]
+    },
+    {
+      "mode": "Patch unavailable or resolution impossible",
+      "detail": "No fixed release, incompatible constraints, abandoned package, vulnerable transitive dependency or broken lockfile prevents an automatic PR. Vendoring/forking/replacement or compensating control is a human architecture decision.",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates"
+    },
+    {
+      "mode": "Autofix regression",
+      "detail": "SAST/AI suggestion can be incorrect, incomplete or introduce another vulnerability.",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+    },
+    {
+      "mode": "Risk misprioritization",
+      "detail": "CVSS alone overprioritizes unreachable code and underrepresents active exploitation/business context; KEV/EPSS also have bounded meanings.",
+      "urls": [
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://www.first.org/epss/model"
+      ]
+    },
+    {
+      "mode": "Economic/organizational failure",
+      "detail": "Excess CI, proprietary-seat/scan cost, rate limits and unclear ownership can make apparently free automation costly; bot acceptance metrics do not show deployment success or maintenance burden.",
+      "urls": [
+        "https://doi.org/10.7717/peerj-cs.849",
+        "https://doi.org/10.1007/s10664-024-10523-y"
+      ]
+    },
+    {
+      "mode": "Non-enforcing scanner defaults",
+      "detail": "A scanner report may look green to CI because its process exits successfully despite findings. Trivy explicitly exits 0 by default; GitHub/Snyk findings block only when checks/rules are required.",
+      "urls": [
+        "https://trivy.dev/docs/latest/configuration/others/#exit-code",
+        "https://docs.snyk.io/scan-fix-and-prevent/prevent/pull-request-checks.md",
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+      ]
+    },
+    {
+      "mode": "Remediation tool executes untrusted project hooks",
+      "detail": "OSV-Scanner guided remediation can invoke package-manager behavior, scripts or project-specified registries. Running autofix with secrets or unrestricted network can turn repair into code execution/exfiltration.",
+      "url": "https://google.github.io/osv-scanner/experimental/guided-remediation/"
+    }
+  ],
+  "controls_and_mitigations": [
+    {
+      "control": "Least privilege and isolation",
+      "mechanics": [
+        "Read-only discovery token; separate narrowly scoped PR-write identity; no package publish/cloud-deploy rights.",
+        "Ephemeral network-restricted update/test runner; Dependabot secrets separate from Actions secrets; never execute unreviewed fork/bot code with write token.",
+        "Pin actions to full SHA and protect workflow/config files with CODEOWNERS."
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions",
+        "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+        "https://docs.renovatebot.com/security-and-permissions/"
+      ]
+    },
+    {
+      "control": "Independent merge enforcement",
+      "mechanics": [
+        "Ruleset requires fresh status checks on current head, review for sensitive paths, conversation resolution and merge queue.",
+        "Bot cannot bypass or alter its own policy/check workflow. Break-glass is named, logged and reviewed."
+      ],
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+    },
+    {
+      "control": "Update segmentation and noise budgets",
+      "mechanics": [
+        "Allowlist ecosystems/update types; conservative PR concurrency; dashboard/group only compatible same-owner packages; stagger schedules.",
+        "Use minimumReleaseAge for routine releases, but an explicit reviewed emergency lane for exploited vulnerabilities."
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+        "https://docs.renovatebot.com/noise-reduction/",
+        "https://docs.renovatebot.com/configuration-options/"
+      ]
+    },
+    {
+      "control": "Defense-in-depth validation",
+      "mechanics": [
+        "Frozen clean install, multi-layer tests, dependency diff/review, SCA/SAST/secret/IaC/license gates.",
+        "Provenance/signature/registry policy and immutable artifact promotion. A second scanner can detect coverage differences but correlated databases mean it is not automatically independent."
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+        "https://slsa.dev/spec/v1.2/verifying-artifacts",
+        "https://docs.sigstore.dev/cosign/verifying/verify/"
+      ]
+    },
+    {
+      "control": "Operational containment",
+      "mechanics": [
+        "Canary, automated threshold rollback, prior artifact/lockfile retention and kill switch.",
+        "Close vulnerabilities on deployed evidence; quarantine bad versions; cap retries and CI spend."
+      ]
+    },
+    {
+      "control": "Governed exceptions and audit",
+      "mechanics": [
+        "Dismissal needs reason, owner, compensating control and expiry; recurring review reopens stale risk.",
+        "Log bot version/config, advisory snapshot, inputs, diffs, checks, approvals, artifact digest, deployment and rollback."
+      ],
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+        "https://csrc.nist.gov/pubs/sp/800/218/final"
+      ]
+    },
+    {
+      "control": "Make findings enforcing and record the baseline",
+      "mechanics": [
+        "Set scanner nonzero exit policy and severity/reachability thresholds explicitly; protect that status check.",
+        "Understand delta semantics: a passing before/after PR check can still leave baseline vulnerabilities. Record database/tool versions and re-scan the built artifact."
+      ],
+      "urls": [
+        "https://trivy.dev/docs/latest/configuration/others/#exit-code",
+        "https://docs.snyk.io/scan-fix-and-prevent/prevent/pull-request-checks.md"
+      ]
+    }
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally production-ready, not fully autonomous.",
+    "production_ready": [
+      "Inventory for supported ecosystems; scheduled update PR generation; advisory matching; routine SCA/SAST/secret/IaC checks; protected-branch merge after deterministic CI; dashboards and audit trails."
+    ],
+    "conditionally_useful": [
+      "Auto-merge for narrowly allowlisted patch/minor/dev updates with strong tests, trusted suppliers, release soak and rapid rollback; automated security-patch PRs; CodeQL/AI autofix as a reviewed draft."
+    ],
+    "emerging_or_weak": [
+      "Accurate reachability across languages, malicious-package detection, fully automatic major migrations, general semantic patch validation, autonomous no-fix mitigation and risk scoring that transfers between projects."
+    ],
+    "rationale": "Independent studies show substantial PR acceptance and fast post-PR remediation, yet also noise, bot switching and long pre-disclosure delay. Official Autofix limitations and supply-chain incidents rule out treating green scanners as proof.",
+    "urls": [
+      "https://doi.org/10.1109/MSR52588.2021.00037",
+      "https://doi.org/10.1007/s10664-024-10523-y",
+      "https://doi.org/10.7717/peerj-cs.849",
+      "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+      "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident"
+    ]
+  },
+  "build_vs_buy": {
+    "buy_or_managed": "Use Dependabot when GitHub-native coverage and low operations burden dominate. Consider managed Renovate/Mend, Snyk, Semgrep or similar where policy support, curated intelligence, reachability and support justify cost. Validate claims in a shadow trial.",
+    "self_host_or_open": "Self-host Renovate for cross-platform/deep policy and OSV-Scanner/Trivy/Scorecard for transparent CI, accepting upgrades, database mirrors, credentials, queues and availability as your responsibility.",
+    "custom_engineering_needed": [
+      "risk normalization across feeds and duplicate advisories",
+      "asset/reachability/business-context enrichment",
+      "package ownership and exception expiry",
+      "tests for critical dependencies",
+      "trusted publisher/builder policy",
+      "canary/rollback wiring",
+      "end-to-end metrics from alert through deployed fix"
+    ],
+    "selection_test": "Run 30–60 days in report-only/shadow mode on historical known incidents and current manifests. Compare supported dependency coverage, true/false triage load, fixability, PR conflict/noise, CI cost, time-to-deployed-fix, permissions/data residency and exportability. Do not select on alert count."
+  },
+  "recommended_pattern": {
+    "pattern": "Two-lane, evidence-gated maintenance controller.",
+    "routine_lane": "Renovate or Dependabot batches allowlisted patch/minor/dev updates on a fixed cadence. Apply 3–7 day release soak (project-specific), strict PR/CI budgets, immutable inputs and auto-merge only after full checks through the normal merge queue. Majors and sensitive diffs stay manual.",
+    "security_lane": "Continuously reconcile inventory against GitHub Advisory/OSV and vendor data; prioritize with affected path/reachability, KEV, EPSS, exposure and impact. Open the minimum-fix PR immediately. Confirmed exploited/reachable issues bypass routine soak only with owner/security approval, focused regression test and canary.",
+    "merge_predicate": [
+      "bot identity and config are approved",
+      "diff is within update-class and sensitive-path policy",
+      "resolved graph/SBOM is available",
+      "registry/publisher/digest and, where available, signature/provenance satisfy policy",
+      "no new disallowed license, install script, secret or high-risk dependency",
+      "all required fresh checks pass on current merge candidate",
+      "release-age or reviewed emergency exception satisfied",
+      "rollback artifact and observation rule exist"
+    ],
+    "rollout": [
+      "Phase 0 inventory/owner/test-baseline and report-only scans.",
+      "Phase 1 bot PRs with manual merge; measure coverage, noise, false findings and regressions.",
+      "Phase 2 auto-merge dev and low-risk patch updates behind ruleset and canary.",
+      "Phase 3 expand package-by-package only from measured evidence; keep major/sensitive/generated-fix gates."
+    ],
+    "why": "This captures the demonstrated speed advantage without granting scanners/bots authority they cannot justify.",
+    "urls": [
+      "https://doi.org/10.1109/MSR52588.2021.00037",
+      "https://doi.org/10.1007/s10664-024-10523-y",
+      "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+    ]
+  },
+  "open_questions": [
+    {
+      "question": "What fraction of the project’s resolved runtime/build/container/action graph is actually detected by each scanner?",
+      "evidence_needed": "Golden SBOM plus seeded vulnerable, aliased, vendored and private packages by ecosystem."
+    },
+    {
+      "question": "Which dependency changes are semantically covered by tests?",
+      "evidence_needed": "Mutation/contract tests, historical update failures and canary outcome linked to package/update class."
+    },
+    {
+      "question": "How accurate are reachability, malicious-package and AI-autofix claims on this repository?",
+      "evidence_needed": "Blind project-specific benchmark with labeled findings/fixes; vendors rarely publish transferable false-negative rates."
+    },
+    {
+      "question": "What release-age window best trades zero-day supply-chain exposure against patch latency?",
+      "evidence_needed": "Registry/ecosystem incident base rates, criticality and emergency override data; no universal threshold."
+    },
+    {
+      "question": "How should coordinated multi-package or major migrations be automated safely?",
+      "evidence_needed": "Repository-specific integration/e2e coverage and atomic rollout/rollback design."
+    },
+    {
+      "question": "Do empirical GitHub public-project results transfer to private monorepos and deployment outcomes?",
+      "evidence_needed": "Private operational cohorts tracking merged-to-deployed success, incidents, reviewer time and full cost."
+    },
+    {
+      "question": "What post-2026-09-13 changes occurred?",
+      "evidence_needed": "Future changelogs and new independent studies; outside this snapshot."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Configuration options for the dependabot.yml file",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependabot supports schedules, groups, cooldown, open-PR limits, target branches, registries, labels, reviewers and ignore/allow rules."
+      ]
+    },
+    {
+      "title": "About Dependabot security updates",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependabot can raise a PR that upgrades a vulnerable dependency to the minimum secure version when a supported manifest/lockfile is present; coverage and compatibility constraints apply."
+      ]
+    },
+    {
+      "title": "About Dependabot alerts",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Alerts derive from dependency-graph matches to GitHub Advisory Database entries; dismissals have reasons and can be governed."
+      ]
+    },
+    {
+      "title": "About dependency review",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependency review exposes dependency changes in PRs and can fail checks for vulnerable or disallowed dependencies."
+      ]
+    },
+    {
+      "title": "Troubleshooting Dependabot on GitHub Actions",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Actions initiated by Dependabot PRs use a read-only GITHUB_TOKEN and Dependabot secrets, not ordinary Actions secrets, unless an authorized rerun changes the context."
+      ]
+    },
+    {
+      "title": "About rulesets",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Repository rulesets can require reviews, status checks, signed commits, merge queue and restrict bypass."
+      ]
+    },
+    {
+      "title": "About autofix for CodeQL code scanning",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-autofix-for-codeql-code-scanning",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "GitHub can generate suggested fixes for supported CodeQL alerts; suggestions must be evaluated and committed or opened as PRs."
+      ]
+    },
+    {
+      "title": "Responsible use of Copilot Autofix for code scanning",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor limitations",
+      "supported_claims": [
+        "Autofix may be syntactically incorrect, insecure, incomplete, behavior-changing, or fail to address the alert; users must review and test."
+      ]
+    },
+    {
+      "title": "Automerge",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/key-concepts/automerge/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Renovate can automerge branches or PRs after its conditions pass; platform automerge, schedules, required tests and branch protection affect behavior."
+      ]
+    },
+    {
+      "title": "Noise Reduction",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/noise-reduction/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Grouping, schedules, dependency dashboard, stability days/minimumReleaseAge and PR limits reduce update noise."
+      ]
+    },
+    {
+      "title": "Configuration Options",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/configuration-options/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Renovate exposes package rules, vulnerabilityAlerts, minimumReleaseAge, internal checks, automerge types/strategies, rebase behavior, grouping and allowed versions."
+      ]
+    },
+    {
+      "title": "Security and Permissions",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/security-and-permissions/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Self-hosted Renovate needs careful token permissions and treats repository configuration as untrusted; host rules and secret exposure require controls."
+      ]
+    },
+    {
+      "title": "OSV-Scanner repository and documentation",
+      "publisher_or_author": "Google / OpenSSF",
+      "url": "https://github.com/google/osv-scanner",
+      "publication_or_update_date": "2022-present; release dates in repository",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source repository",
+      "supported_claims": [
+        "OSV-Scanner scans lockfiles, SBOMs and source for vulnerabilities from OSV and provides remediation-oriented features; behavior is inspectable and self-hostable."
+      ]
+    },
+    {
+      "title": "OSV-Scanner usage",
+      "publisher_or_author": "Google / OpenSSF",
+      "url": "https://google.github.io/osv-scanner/usage/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "OSV-Scanner supports recursive source scanning, lockfiles/SBOMs and machine-readable output for CI; findings depend on ecosystem and database coverage."
+      ]
+    },
+    {
+      "title": "Repository scanning",
+      "publisher_or_author": "Aqua Security Trivy Docs",
+      "url": "https://trivy.dev/latest/docs/target/repository/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Trivy repository scanning covers vulnerabilities, misconfigurations, secrets and licenses, with configurable scanners and CI output."
+      ]
+    },
+    {
+      "title": "Scorecard GitHub Action",
+      "publisher_or_author": "OpenSSF",
+      "url": "https://github.com/ossf/scorecard-action",
+      "publication_or_update_date": "2021-present; release dates in repository",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source repository",
+      "supported_claims": [
+        "Scorecard can run supply-chain practice checks in GitHub Actions and publish results; it is a risk signal, not proof that a release is safe."
+      ]
+    },
+    {
+      "title": "Verifying artifacts",
+      "publisher_or_author": "SLSA",
+      "url": "https://slsa.dev/spec/v1.2/verifying-artifacts",
+      "publication_or_update_date": "2025 (SLSA v1.2)",
+      "access_date": "2026-09-13",
+      "source_type": "industry specification",
+      "supported_claims": [
+        "Consumers should verify provenance authenticity and that artifact identity/builder/source expectations match policy; provenance is a control against substitution, not vulnerability absence."
+      ]
+    },
+    {
+      "title": "Verify signatures",
+      "publisher_or_author": "Sigstore Docs",
+      "url": "https://docs.sigstore.dev/cosign/verifying/verify/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Cosign verification requires identity/issuer or key policy plus signature verification; verification without identity policy is insufficient authorization."
+      ]
+    },
+    {
+      "title": "Secure Software Development Framework (SSDF) Version 1.1, SP 800-218",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "government standard",
+      "supported_claims": [
+        "SSDF calls for protecting software, producing well-secured releases, responding to vulnerabilities and retaining provenance/evidence; automation belongs inside governed practices."
+      ]
+    },
+    {
+      "title": "Known Exploited Vulnerabilities Catalog",
+      "publisher_or_author": "CISA",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "government operational catalog",
+      "supported_claims": [
+        "KEV records vulnerabilities known to be exploited and provides a high-value prioritization signal, but only for listed CVEs."
+      ]
+    },
+    {
+      "title": "Exploit Prediction Scoring System (EPSS)",
+      "publisher_or_author": "FIRST",
+      "url": "https://www.first.org/epss/model",
+      "publication_or_update_date": "model updated over time",
+      "access_date": "2026-09-13",
+      "source_type": "industry risk model documentation",
+      "supported_claims": [
+        "EPSS estimates probability of exploitation in the next 30 days; it is a prioritization input, not impact or reachability."
+      ]
+    },
+    {
+      "title": "On the Use of Dependabot Security Pull Requests",
+      "publisher_or_author": "Alfadel, Costa, Shihab, Mkhallalati; IEEE MSR",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037",
+      "publication_or_update_date": "2021-05",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Among 2,904 JavaScript GitHub projects, 65.42% of security PRs were accepted, often within one day; only 3.2% of manually examined PRs had build breakage; severity and breaking-change risk were not strongly associated with merge time."
+      ]
+    },
+    {
+      "title": "Dependabot and security pull requests: large empirical study",
+      "publisher_or_author": "Rebatchi, Bissyandé, Moha; Empirical Software Engineering",
+      "url": "https://doi.org/10.1007/s10664-024-10523-y",
+      "publication_or_update_date": "2024-07-30",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Dataset: 9,916,318 PR-related issues in 1,743,035 projects; Dependabot represented over 65% of dependency-management activity; fixes after PR creation often took under one day, while vulnerabilities remained hidden 512 days on average and patches were disclosed after 362 days on average."
+      ]
+    },
+    {
+      "title": "Dependency management bots in open-source systems—prevalence and adoption",
+      "publisher_or_author": "Erlenhov, de Oliveira Neto, Leitner; PeerJ Computer Science",
+      "url": "https://doi.org/10.7717/peerj-cs.849",
+      "publication_or_update_date": "2022-03-03",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Only 10 of 54 listed tools met the authors’ Devbot definition; 77% of studied projects experimented with more than one bot; noise and required practice changes drove adoption/removal discussions."
+      ]
+    },
+    {
+      "title": "Can Automated Pull Requests Encourage Software Developers to Upgrade Out-of-Date Dependencies?",
+      "publisher_or_author": "Mirhosseini and Parnin; IEEE/ACM ASE",
+      "url": "https://doi.org/10.1109/ASE.2017.8115671",
+      "publication_or_update_date": "2017-10",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed foundational experiment",
+      "supported_claims": [
+        "Automated update PRs can prompt upgrades but impose review/integration work; older foundation predating native Dependabot."
+      ]
+    },
+    {
+      "title": "Details about the event-stream incident",
+      "publisher_or_author": "npm",
+      "url": "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident",
+      "publication_or_update_date": "2018-11-26",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident report",
+      "supported_claims": [
+        "A malicious dependency version entered a legitimate dependency chain, illustrating that newest/allowed versions and passing vulnerability-database checks are not equivalent to trustworthy code."
+      ]
+    },
+    {
+      "title": "Secure use reference for GitHub Actions",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Pinning third-party actions to full commit SHAs is the only immutable release form; CODEOWNERS and least-privilege token controls reduce workflow supply-chain risk."
+      ]
+    },
+    {
+      "title": "About Dependabot version updates",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates",
+      "publication_or_update_date": "2026-07-15 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependabot version updates are configured in .github/dependabot.yml and open manifest-update PRs; available for all GitHub repositories."
+      ]
+    },
+    {
+      "title": "Dependabot options reference",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference",
+      "publication_or_update_date": "2026-08-21 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Schedules include cron and long intervals; version-update PR default cap is five; security PRs do not count; default version-update cooldown is three days and excludes security updates."
+      ]
+    },
+    {
+      "title": "Automating Dependabot with GitHub Actions",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions",
+      "publication_or_update_date": "2026-08-04 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "GitHub documents fetch-metadata plus actor/repository/dependency/update-type gates for patch auto-merge."
+      ]
+    },
+    {
+      "title": "Managing auto-merge for pull requests",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository",
+      "publication_or_update_date": "2026-08-14 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Auto-merge waits for merge requirements and is disabled by an untrusted push from a user without write access."
+      ]
+    },
+    {
+      "title": "How Renovate works",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/key-concepts/how-renovate-works/",
+      "publication_or_update_date": "2026; docs build referenced release 44.82.4",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Renovate clones, extracts dependencies, queries registries, applies grouping and pushes branches/PRs via manager/datasource/versioning/platform modules."
+      ]
+    },
+    {
+      "title": "Dependency Dashboard",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/key-concepts/dashboard/",
+      "publication_or_update_date": "2026-01-07 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dashboard issue reports update state and can gate selected PR creation; vulnerability remediation remains immediate."
+      ]
+    },
+    {
+      "title": "Known limitations",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/known-limitations/",
+      "publication_or_update_date": "2026-09-02 source update",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Renovate merges only up-to-date branches and ordinarily limits automerge to one update per target branch/run so later candidates rebase/retest."
+      ]
+    },
+    {
+      "title": "Automating Dependency Updates in Practice: An Exploratory Study on GitHub Dependabot",
+      "publisher_or_author": "He et al.; IEEE Transactions on Software Engineering",
+      "url": "https://doi.org/10.1109/TSE.2023.3278129",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "1,823 projects and 540,665 PRs; technical lag dropped after adoption; >70% PRs merged; compatibility-score availability was only 3.4%; noise and switching were observed."
+      ]
+    },
+    {
+      "title": "Investigating the Resolution of Vulnerable Dependencies with Dependabot Security Updates",
+      "publisher_or_author": "Mohayeji et al.; IEEE MSR",
+      "url": "https://doi.org/10.1109/MSR59073.2023.00042",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "4,195 closed security updates in 978 JavaScript projects; 57% PR merge; 53.48% bot fixes, 30.27% manual, 16.25% unresolved; rejection reasons and one-year persistence quantified."
+      ]
+    },
+    {
+      "title": "Software Composition Analysis for Vulnerability Detection: An Empirical Study on Java Projects",
+      "publisher_or_author": "Zhao et al.; ACM ESEC/FSE",
+      "url": "https://doi.org/10.1145/3611643.3616299",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Six SCA tools over 21,130 Maven modules: mean dependency-detection F1 .890 build/.692 pre-build and mean vulnerability-report F1 .475; correct scan configuration improved errors."
+      ]
+    },
+    {
+      "title": "On the Accuracy of GitHub's Dependency Graph",
+      "publisher_or_author": "Bifolco et al.; ACM EASE",
+      "url": "https://doi.org/10.1145/3661167.3661175",
+      "publication_or_update_date": "2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Random sample of 297 Java and 338 Python projects found dependency-graph inaccuracies that can propagate to Dependabot and GitHub SBOMs."
+      ]
+    },
+    {
+      "title": "Towards Measuring Supply Chain Attacks on Package Managers for Interpreted Languages",
+      "publisher_or_author": "Duan et al.; NDSS",
+      "url": "https://doi.org/10.14722/ndss.2021.23055",
+      "publication_or_update_date": "2021",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Across >1M packages, 339 previously unknown malicious packages found; maintainers confirmed/removed 278; malicious packages can persist and spread before advisories."
+      ]
+    },
+    {
+      "title": "Are Your Dependencies Code Reviewed? Measuring Code Review Coverage in Dependency Updates",
+      "publisher_or_author": "Imtiaz and Williams; IEEE TSE",
+      "url": "https://doi.org/10.1109/TSE.2023.3319509",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "20.1% of sampled updates contained a source-untraceable phantom file; updates were partially reviewed 52.5% of the time; 9.0% of packages had every sampled update fully reviewed."
+      ]
+    },
+    {
+      "title": "What Are Weak Links in the npm Supply Chain?",
+      "publisher_or_author": "Ohm et al.; ACM ICSE-SEIP",
+      "url": "https://doi.org/10.1145/3510457.3513044",
+      "publication_or_update_date": "2022",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "1.63M npm packages analyzed; account-takeover and install-script risk signals found, with stated false positives; 93.9% of 3,635 known malicious packages had an install script."
+      ]
+    },
+    {
+      "title": "Resolve code scanning alerts",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Copilot can open draft fix PRs; cloud-agent validation is best-effort; PR code scanning tests proposed fixes."
+      ]
+    },
+    {
+      "title": "Security and quality AI features: responsible use and limitations",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/responsible-use/security-and-quality-ai-features",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor limitations",
+      "supported_claims": [
+        "Generated security fixes have coverage and correctness limitations including semantic changes, new vulnerabilities and unsafe dependency/version suggestions."
+      ]
+    },
+    {
+      "title": "Dependabot errors",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-errors",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Security/update jobs can fail due to unresolvable constraints, inaccessible registries, credential/certificate issues, resolution errors or hosted-job timeout."
+      ]
+    },
+    {
+      "title": "Automatic Fix PR rules",
+      "publisher_or_author": "Snyk Docs",
+      "url": "https://docs.snyk.io/scan-fix-and-prevent/fix/snyk-pull-or-merge-requests/enable-automatic-fix-prs.md",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Snyk automatic fix PRs follow recurring retests, thresholds and grouping; a fix may introduce other vulnerabilities and is selected by relative severity policy."
+      ]
+    },
+    {
+      "title": "Pull request checks",
+      "publisher_or_author": "Snyk Docs",
+      "url": "https://docs.snyk.io/scan-fix-and-prevent/prevent/pull-request-checks.md",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Snyk PR checks compare before/after and only enforce merge when made required by repository branch protection; a pass does not certify a clean baseline."
+      ]
+    },
+    {
+      "title": "Autofix for Semgrep Code",
+      "publisher_or_author": "Semgrep Docs",
+      "url": "https://docs.semgrep.dev/semgrep-code/triage-remediation/autofix",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Semgrep AI Autofix opens a draft PR and requires repository write permission; humans retain review/merge responsibility."
+      ]
+    },
+    {
+      "title": "Rule-defined autofix",
+      "publisher_or_author": "Semgrep Docs",
+      "url": "https://docs.semgrep.dev/writing-rules/rule-defined-fix",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Semgrep rules can define deterministic fix templates and preview/apply them; semantic correctness still needs project validation."
+      ]
+    },
+    {
+      "title": "Guided remediation",
+      "publisher_or_author": "Google / OpenSSF OSV-Scanner",
+      "url": "https://google.github.io/osv-scanner/experimental/guided-remediation/",
+      "publication_or_update_date": "experimental documentation; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "Experimental fix strategies edit npm/Maven manifests or lockfiles; users must reinstall/test, and untrusted projects can cause package-manager scripts or external registries to execute."
+      ]
+    },
+    {
+      "title": "Vulnerability scanning",
+      "publisher_or_author": "Aqua Security Trivy Docs",
+      "url": "https://trivy.dev/docs/latest/scanner/vulnerability/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Trivy’s vendor advisory and detection-mode choices trade false positives and false negatives; unsupported/self-compiled packages and unspecified ranges can limit detection."
+      ]
+    },
+    {
+      "title": "Exit code",
+      "publisher_or_author": "Aqua Security Trivy Docs",
+      "url": "https://trivy.dev/docs/latest/configuration/others/#exit-code",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Trivy returns exit code 0 by default even when findings exist; enforcing CI must set --exit-code and policy."
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "High for documented mechanics and controls; moderate for general operational effectiveness; low-to-moderate for cross-project false-negative rates and malicious-package/autofix accuracy.",
+    "high": [
+      "Dependabot/Renovate configuration mechanics",
+      "GitHub rules/Actions security behavior",
+      "CodeQL Autofix stated limitations",
+      "SLSA/Sigstore verification model",
+      "reported sample sizes and outcomes in cited papers"
+    ],
+    "moderate": [
+      "Generalization that narrow auto-merge is safe when the stated gates hold",
+      "noise/adoption effects across private repositories",
+      "recommended SLOs and release-soak durations, which are engineering judgments"
+    ],
+    "low_or_unknown": [
+      "Vendor-comparative accuracy and total cost without a project trial",
+      "undisclosed-vulnerability/malicious-release detection rate",
+      "developments after the as-of cutoff"
+    ],
+    "reason": "Primary documentation establishes capabilities, three peer-reviewed studies provide independent operational evidence, but most docs are continuously updated and tool efficacy depends strongly on ecosystem, tests, policy and repository context."
+  },
+  "conflicts": [
+    {
+      "conflict": "Fast fixes versus slow vulnerability lifecycle",
+      "evidence": "Studies report many security PRs merged within a day, but the 2024 study reports vulnerabilities hidden 512 days and patch disclosure after 362 days on average.",
+      "resolution": "The clocks measure different stages. Automation shortens detection-to-PR/PR-to-merge after a machine-readable fix exists; it does not discover unknown flaws.",
+      "urls": [
+        "https://doi.org/10.1109/MSR52588.2021.00037",
+        "https://doi.org/10.1007/s10664-024-10523-y"
+      ]
+    },
+    {
+      "conflict": "Low observed build breakage versus unsafe-autofix warning",
+      "evidence": "The 2021 Dependabot study observed 3.2% build breakage in a manual subsample; GitHub states CodeQL Autofix can be wrong or insecure.",
+      "resolution": "Dependency version PRs and generated source-code security fixes differ, and build success is weaker than semantic/security correctness. Both can be true.",
+      "urls": [
+        "https://doi.org/10.1109/MSR52588.2021.00037",
+        "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning"
+      ]
+    },
+    {
+      "conflict": "Release delay versus emergency patch speed",
+      "evidence": "Renovate stability delay reduces exposure to freshly compromised releases/noise, while KEV and fast-remediation practice favor immediate fixes.",
+      "resolution": "Use separate routine and confirmed-exploited lanes, with a reviewed bypass and canary rather than one global delay.",
+      "urls": [
+        "https://docs.renovatebot.com/configuration-options/",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident"
+      ]
+    },
+    {
+      "conflict": "More scanners versus confidence",
+      "evidence": "OSV/Trivy/GitHub feeds can overlap and share upstream advisories.",
+      "resolution": "Use multiple tools for complementary ecosystem/surface coverage, not a majority vote; measure unique finds and correlated gaps.",
+      "urls": [
+        "https://google.github.io/osv-scanner/usage/",
+        "https://trivy.dev/latest/docs/target/repository/",
+        "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts"
+      ]
+    },
+    {
+      "conflict": "Bot popularity versus suitability",
+      "evidence": "Dependabot exceeded 65% of activity in the 2024 study, while 77% of projects in the 2022 study tried multiple bots.",
+      "resolution": "Popularity reflects accessibility/integration, not universal fit; policy flexibility and noise explain switching.",
+      "urls": [
+        "https://doi.org/10.1007/s10664-024-10523-y",
+        "https://doi.org/10.7717/peerj-cs.849"
+      ]
+    },
+    {
+      "conflict": "Security-PR acceptance and severity effects differ by study",
+      "evidence": "2021 reported 65.42% acceptance and severity not strongly tied to merge time; 2023 reported 57% merge and low-severity vulnerabilities 2.3× likelier than critical to persist after a year.",
+      "resolution": "Different Dependabot generations, periods, samples and unit/lifecycle methods; preserve both rather than average.",
+      "urls": [
+        "https://doi.org/10.1109/MSR52588.2021.00037",
+        "https://doi.org/10.1109/MSR59073.2023.00042"
+      ]
+    },
+    {
+      "conflict": "GitHub documentation appears inconsistent on security-update PR limits",
+      "evidence": "The 2026 Dependabot options reference states security PRs do not count toward the version-update limit and describes no cap, while the security-update concepts/reference material reports a limit of 10.",
+      "resolution": "Treat the effective cap as version/account/feature dependent and verify in the target repository/API before relying on concurrency behavior.",
+      "urls": [
+        "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference",
+        "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates"
+      ]
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "Post-cutoff developments after 2026-09-13 are unknown.",
+    "Exact current commercial packaging, prices and proprietary detection accuracy for Snyk, Mend, Semgrep and Socket were not independently verified and are intentionally excluded from comparative claims.",
+    "No source provides a universal false-positive/false-negative or regression rate across ecosystems; project-specific shadow evaluation is required.",
+    "Several continuously maintained documentation pages do not expose a stable publication/update date. Their access date and URL are recorded.",
+    "Release-soak windows and suggested SLOs are recommendations, not evidence-backed universal constants.",
+    "GitHub’s 2026 documentation is inconsistent about whether Dependabot security-update PRs have no cap or a limit of 10; verify behavior in the target repository."
+  ]
+}

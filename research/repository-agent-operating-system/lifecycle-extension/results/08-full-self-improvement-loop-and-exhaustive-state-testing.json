@@ -1,0 +1,1279 @@
+{
+  "scope": {
+    "question": "What is the maximum safe automated improvement loop for a repository agent operating system, and how must every lifecycle state/transition be tested?",
+    "included": [
+      "durable feedback/postmortem/eval-case curation",
+      "candidate prompt/router/tool/workflow/code proposals",
+      "offline replay, zero-authority shadow, bounded canary, automatic abort and compatible rollback",
+      "formal plus executable state-machine models, event/reconciliation tests, fault injection and adversarial security tests",
+      "versioned conversational decisions as authority-bearing artifacts"
+    ],
+    "excluded": [
+      "candidate changing its own protected tests, graders, policy, permissions, promotion authority or audit",
+      "raw-feedback online learning",
+      "autonomous product intent, legal/privacy judgment, high-impact irreversible repair or exception approval"
+    ],
+    "definition": "Fully self-improving means maximal safe automation supported by evidence: automatically observe, draft, evaluate, shadow, canary, abort and roll back inside a pre-approved reversible capability class. It does not mean self-governance. The candidate remains an untrusted proposer and experiment subject [S18-S26]."
+  },
+  "verified_capabilities": [
+    {
+      "claim": "Executable rule-based state-machine tests can generate action sequences, assert invariants and shrink failures [S3]; TLA+/TLC can specify and check bounded concurrent behaviors and safety/liveness properties [S4-S5].",
+      "limit": "Neither proves the abstraction matches all production behavior or explores an unbounded state space."
+    },
+    {
+      "claim": "Workflow replay, history checking and injected faults are established techniques: Temporal documents replay-based safe-deployment checks [S6], while Jepsen supplies consistency models and many empirical fault analyses [S7-S8].",
+      "limit": "A correct oracle/workload and realistic failure model are still required."
+    },
+    {
+      "claim": "GitHub supplies enforceable review/check/environment and provenance primitives [S9-S15]. Argo supplies analysis-driven pause/abort/promotion [S16].",
+      "limit": "Configuration, plan availability, bypass actors, metric correctness and irreversible side effects constrain the guarantee."
+    },
+    {
+      "claim": "Agent-eval guidance supports representative datasets, repeated stochastic trials, trajectory/outcome grading and human calibration [S1-S2].",
+      "limit": "Vendor methods are not independent proof that an LLM judge or benchmark predicts production value."
+    },
+    {
+      "claim": "Independent work shows why green tests are insufficient: benchmark leakage/weak tests and behaviorally divergent passing patches exist [S23-S24]; injection benchmarks show finite defenses and utility/security tradeoffs [S22].",
+      "limit": "Reported rates are benchmark-specific, not universal."
+    }
+  ],
+  "evidence_and_limits": {
+    "robust_conclusion": "Deterministic lifecycle control, protected Git review, provenance, formal/executable model testing, shadowing, canary and rollback are mature building blocks. No reviewed source validates a general agent that safely rewrites its own objective, evaluator and authority.",
+    "challenge_to_vendor_claims": [
+      "OpenAI/Anthropic recommend continuous evals [S1-S2], but SWE-Bench audits show that visible/weak oracles can reward incorrect patches [S23-S24].",
+      "Progressive delivery can abort on metrics [S16-S17], but rare, delayed, cohort-specific and irreversible harm can escape canaries.",
+      "GitHub gates constrain a candidate only when remote rulesets/environments and bypass lists are correctly configured and independently reconciled [S10-S13].",
+      "GitHub documents that successful, skipped or neutral required checks may satisfy branch protection and that admins/bypass roles can be exempt [S10]; therefore an external promotion policy must require a signed explicit PASS from the expected evaluator App, reject skipped/neutral/unknown, and verify no applicable bypass."
+    ],
+    "missing_denominators": [
+      "no public cross-repository false-promotion rate for self-modifying agents",
+      "no universal canary sample/window for rare harms",
+      "no stable cross-provider definition of immutable model behavior",
+      "no proof that LLM graders remain valid after candidates adapt to them",
+      "no complete finite test suite can establish correctness of an open, nondeterministic, externally integrated agent"
+    ],
+    "evidence_rule": "Store raw numerator/denominator, slice, trials, confidence interval, failure examples and cost. Never promote from one composite score, benchmark rank, one stochastic run or self-reported confidence [S1-S2,S23-S29]."
+  },
+  "actors_and_authority": [
+    {
+      "actor": "candidate/proposer agent",
+      "may": [
+        "read redacted evidence and public eval specification",
+        "write one candidate branch/PR and proposal manifest",
+        "run unprivileged local tests"
+      ],
+      "must_not": [
+        "read hidden answers",
+        "write protected test/grader/policy/permission/workflow/audit paths",
+        "approve, merge, deploy, promote or delete evidence"
+      ]
+    },
+    {
+      "actor": "curator/domain owner",
+      "may": [
+        "adjudicate intent and oracle",
+        "approve eval-case inclusion and retirement"
+      ],
+      "separation": "must not be the sole candidate promoter for own authored control changes"
+    },
+    {
+      "actor": "independent evaluator service",
+      "may": [
+        "read immutable candidate plus public/private suites",
+        "write signed/attested evidence only"
+      ],
+      "must_not": [
+        "modify candidate, policy or deployment",
+        "expose holdout outputs to candidate beyond bounded diagnostics"
+      ]
+    },
+    {
+      "actor": "policy engine",
+      "may": [
+        "compute deny/pause/eligible from protected versioned rules"
+      ],
+      "must_not": [
+        "accept candidate-authored rule/input without authenticated schema/provenance"
+      ]
+    },
+    {
+      "actor": "promoter/rollback controller",
+      "may": [
+        "deploy only an exact attested eligible digest",
+        "abort and restore an approved compatible last-known-good"
+      ],
+      "must_not": [
+        "author candidate/evaluator/policy or create exceptions"
+      ]
+    },
+    {
+      "actor": "human policy/security/product/release owners",
+      "authority": [
+        "define intent and risk appetite",
+        "approve graders/protected invariants/permissions/policy",
+        "approve high-risk promotion, irreversible action and exception",
+        "revoke automation and perform break-glass"
+      ]
+    },
+    {
+      "actor": "auditor/reconciler",
+      "authority": [
+        "read remote effective controls and append audit/drift records"
+      ],
+      "separation": "independent credentials; candidates cannot erase or suppress findings"
+    },
+    {
+      "actor": "evaluator governor/meta-evaluator",
+      "authority": [
+        "release grader/evaluator versions separately",
+        "run adversarial meta-tests and calibrate against blinded experts",
+        "audit holdout access and query leakage"
+      ],
+      "separation": "candidate plus proposed grader can never be approved in one transaction [S1-S2,S23-S26,S30-S31]."
+    }
+  ],
+  "complete_state_catalog": {
+    "case_states": [
+      "OBSERVED",
+      "QUARANTINED_UNTRUSTED",
+      "DEDUPED",
+      "TRIAGE_PENDING",
+      "TRIAGED_NO_ACTION",
+      "POSTMORTEM_REQUIRED",
+      "CURATION_PENDING",
+      "ORACLE_DISPUTED",
+      "EVAL_REVIEW",
+      "EVAL_APPROVED",
+      "EVAL_REJECTED",
+      "DEFERRED",
+      "CANCELLED"
+    ],
+    "candidate_states": [
+      "DRAFT",
+      "PROPOSED",
+      "SUPERSEDED",
+      "OFFLINE_QUEUED",
+      "OFFLINE_RUNNING",
+      "OFFLINE_PAUSED",
+      "OFFLINE_FAILED",
+      "OFFLINE_PASSED",
+      "SHADOW_QUEUED",
+      "SHADOW_RUNNING",
+      "SHADOW_INCONCLUSIVE",
+      "SHADOW_FAILED",
+      "SHADOW_PASSED",
+      "CANARY_PENDING_APPROVAL",
+      "CANARY_QUEUED",
+      "CANARY_RUNNING",
+      "CANARY_PAUSED",
+      "CANARY_FAILED",
+      "CANARY_PASSED",
+      "PROMOTION_PENDING",
+      "PROMOTED",
+      "REJECTED",
+      "EXPIRED",
+      "CANCEL_REQUESTED",
+      "CANCELLED"
+    ],
+    "release_states": [
+      "INACTIVE",
+      "ACTIVE_CANARY",
+      "ACTIVE_PRIMARY",
+      "ABORTING",
+      "ROLLBACK_PENDING",
+      "ROLLING_BACK",
+      "ROLLED_BACK",
+      "ROLLBACK_FAILED",
+      "REVOKED",
+      "RETIRED"
+    ],
+    "attempt_states": [
+      "PENDING",
+      "LEASED",
+      "RUNNING",
+      "WAITING_EXTERNAL",
+      "RETRY_BACKOFF",
+      "TIMED_OUT",
+      "DEAD_LETTER",
+      "SUCCEEDED",
+      "FAILED",
+      "CANCELLED",
+      "STALE"
+    ],
+    "control_health_states": [
+      "HEALTHY",
+      "DRIFT_DETECTED",
+      "EVIDENCE_STALE",
+      "METRICS_UNAVAILABLE",
+      "EVALUATOR_DEGRADED",
+      "AUDIT_GAP",
+      "PROMOTION_FROZEN",
+      "INCIDENT",
+      "RECOVERING"
+    ],
+    "terminal_semantics": "Terminal is per immutable revision, never per mutable logical issue. A new case, candidate or release revision gets a new ID. PROMOTED is not success forever; delayed failure can move the release to rollback while preserving its historical record.",
+    "cross_product_note": "Do not materialize every Cartesian combination. Define five orthogonal machines sharing immutable IDs; constrain illegal combinations with invariants and model-check their composition."
+  },
+  "transition_contract": {
+    "envelope": {
+      "schema_version": "semver",
+      "event_id": "UUID/ULID",
+      "event_type": "typed enum",
+      "occurred_at_received_at": "UTC RFC3339 both",
+      "actor": "immutable user/workload identity and role",
+      "subject_id_revision": "case/candidate/release plus monotonic revision",
+      "correlation_causation": "trace/change plus prior event ID",
+      "expected_state_revision": "optimistic concurrency fence",
+      "digests": "repo SHA, model, prompt, tool, workflow, policy, evaluator, dataset, harness, environment",
+      "risk_scope_budget": "tier, allowed tools/cohort/time/actions/cost/traffic",
+      "evidence_refs": "content-addressed URIs, provenance, privacy/retention",
+      "decision": "rule version/result/reasons/approvers/expiry"
+    },
+    "guards": [
+      "authenticated actor has capability",
+      "expected revision and every digest match",
+      "source state permits event",
+      "required evidence is fresh, complete and attested",
+      "all protected invariants pass",
+      "budget/error budget available",
+      "approval binds exact digest and is unexpired",
+      "rollback target is compatible and drill is current",
+      "all required positive attestations are individually authenticated, fresh and expectation-checked; absence or an unknown deny-critical predicate is not success [S39-S41]"
+    ],
+    "effects": [
+      "append event and state revision transactionally",
+      "enqueue outbox effect with deterministic idempotency key",
+      "perform external mutation using narrow identity",
+      "record receipt and re-read actual state",
+      "emit follow-up or exception without rewriting history"
+    ],
+    "idempotency": "Unique event_id and (subject revision, transition, candidate digest, policy version). Duplicate returns original decision/receipt. Crash between external effect and receipt is resolved by query/reconcile, never blind retry.",
+    "invalidation": "Any change to candidate, dataset, evaluator, policy, workflow, permissions, environment or rollback target invalidates downstream approval/evidence unless an explicit protected compatibility rule proves otherwise.",
+    "ordering_reconciliation": "Persist out-of-order events, but do not infer skipped success. Use per-subject fenced lease/CAS. Webhooks are hints; scheduled inventory replays from durable log, compares remote actual, and opens drift/incident on impossible or destructive differences.",
+    "forbidden": [
+      "candidate→PROMOTED directly",
+      "FAILED/INCONCLUSIVE→PASSED by retry without new attempt evidence",
+      "approval reused after digest/revision change",
+      "rollback marked complete before observed-state/SLO verification",
+      "audit deletion or evaluator/policy weakening by candidate"
+    ]
+  },
+  "artifact_contracts": {
+    "artifacts": [
+      {
+        "name": "DecisionRecord",
+        "fields": [
+          "decision_id",
+          "question",
+          "alternatives",
+          "user answer/approval/refusal",
+          "rationale",
+          "assumptions",
+          "scope",
+          "supersedes",
+          "effective/expiry",
+          "actor/time",
+          "artifact digests/signature"
+        ]
+      },
+      {
+        "name": "EvalCase",
+        "fields": [
+          "case_id/revision",
+          "input fixture ref",
+          "oracle/invariants",
+          "risk/slices",
+          "provenance/consent/license/privacy",
+          "public|private|temporal split",
+          "review/adjudication",
+          "retirement criteria",
+          "digest"
+        ]
+      },
+      {
+        "name": "ProposalManifest",
+        "fields": [
+          "hypothesis",
+          "single minimal delta",
+          "affected task classes",
+          "risk",
+          "expected metrics/non-inferiority",
+          "budgets",
+          "rollout/kill switch",
+          "compatible rollback digest",
+          "decision dependencies"
+        ]
+      },
+      {
+        "name": "EvidenceBundle",
+        "fields": [
+          "candidate/control digests",
+          "dataset/evaluator/harness/environment digests",
+          "trial seeds/counts",
+          "raw outcomes and traces",
+          "slice denominators/CIs",
+          "invariant violations",
+          "cost/latency",
+          "attestation/signature"
+        ]
+      },
+      {
+        "name": "ReleaseManifest",
+        "fields": [
+          "immutable component digests",
+          "compatibility envelope",
+          "cohort/exposure",
+          "previous known-good",
+          "migration/compensation",
+          "approval",
+          "SLSA/in-toto-style provenance",
+          "revocation"
+        ]
+      },
+      {
+        "name": "StateSnapshot",
+        "fields": [
+          "last event offset",
+          "all orthogonal states/revisions",
+          "lease/fence",
+          "pending effects",
+          "remote observed hash/time",
+          "drift classification"
+        ]
+      },
+      {
+        "name": "ExceptionRecord",
+        "fields": [
+          "failed rule",
+          "reason",
+          "scope",
+          "owner/approvers",
+          "start/expiry",
+          "compensating controls",
+          "rollback",
+          "follow-up"
+        ]
+      },
+      {
+        "name": "AuditEvent",
+        "fields": [
+          "before/after",
+          "actor",
+          "authority decision",
+          "inputs/digests",
+          "external receipt",
+          "tamper-evident retention"
+        ]
+      }
+    ],
+    "versioning": "JSON Schema $id plus semver; content-address all immutable bodies. Schema migrations are explicit, reversible where possible and tested against every retained fixture. Never use mutable model/action/image tags for a promoted release [S12,S14-S15]. Attestation verification must match trusted builder/signer, subject digest, predicate type, buildType and expected parameters; reject unknown critical parameters [S39]. A bundle is not itself authenticated, so require each positive attestation, freshness/nonces and exact revision; policy must be monotonic so missing/ignored evidence cannot convert DENY to ALLOW [S40-S41].",
+    "storage": "Git holds reviewed desired schemas/policy/public eval manifests and decision references. Restricted object storage holds raw/PII evidence and private holdouts. Durable database/event log holds actual lifecycle state. GitHub settings/Projects/deployments remain remote observed state."
+  },
+  "conversation_and_handoffs": {
+    "contract": "Every user-agent question, answer, correction, refusal, approval and scope change that affects behavior becomes an append-only, versioned DecisionRecord. Chat text is evidence, not current authority.",
+    "flow": [
+      "agent states decision needed, alternatives, recommendation, consequences and default safe action",
+      "user response is normalized but original text retained under privacy policy",
+      "system presents parsed decision for confirmation when ambiguity or material effect exists",
+      "confirmed record supersedes prior IDs explicitly and binds affected spec/proposal hashes",
+      "handoff bundle carries unresolved questions, decisions, assumptions, state/event offset, versions and next allowed action",
+      "resume validates record signatures/digests and recomputes authority; context summaries cite record IDs and cannot silently alter them"
+    ],
+    "ask_triggers": [
+      "conflicting decisions",
+      "ambiguous success oracle/product intent",
+      "protected-invariant change",
+      "new sensitive data use",
+      "irreversible/high-risk action",
+      "inconclusive evidence or exception"
+    ],
+    "timeouts": "No reply causes PAUSED/DEFERRED under a declared SLA. Silence never grants authority. Cancellation is durable, stops new work, revokes lease, reconciles effects and records cleanup."
+  },
+  "orchestration_and_composition": {
+    "pattern": "Deterministic controller owns state, leases, budgets, authority and joins. Model agents are replaceable workers. Each evaluation/shadow/canary is a child run bound to parent candidate revision.",
+    "fanout": "Fan out by frozen dataset slice, adversarial family, environment/version and stochastic seed. Use independent sandboxes and read-only tokens. Never let a candidate select only favorable shards.",
+    "join": "Join requires the declared complete shard set, unique receipts and attested digests; missing/stale/conflicting shards yield PAUSE, not pass. Critical invariant is AND; statistical outcomes use preregistered aggregation, not majority vote after viewing results.",
+    "dependencies": "Case approval→proposal→offline→shadow→canary approval→canary→promotion. Control-plane candidate classes terminate at human-reviewed proposal and cannot enter automatic promotion.",
+    "budgets_cleanup": "Hierarchical time/token/compute/actions/traffic/error budgets; cancellation propagates; retries use capped backoff; revoke credentials, destroy workspaces, archive evidence, mark orphan effects and sweep them.",
+    "subfactories": "Postmortem, eval curation, offline eval, security red-team, shadow, canary, rollback and reconciliation are separately versioned subfactories with typed inputs/outputs and least-privilege identities."
+  },
+  "human_need_policy": {
+    "deterministic_human_required": [
+      "product intent/priority or ambiguous oracle",
+      "new or modified protected invariant, hidden-test policy, grader/evaluator, promotion threshold, permissions, identity, policy, audit/retention, CODEOWNERS/ruleset/environment",
+      "security/IAM, legal/privacy/safety, public API, data/schema migration or irreversible/external side effect",
+      "high risk or blast radius above pre-approved cohort",
+      "exception/bypass, evidence conflict/inconclusive result, rollback incompatibility/failure, user appeal",
+      "release outside a locally proven reversible class"
+    ],
+    "automatic_allowed_only_if": [
+      "class explicitly allowlisted and risk<=R1",
+      "only prompt/router/tool/workflow/code digest changes; no control-plane delta",
+      "all critical invariants pass and independent evidence is current",
+      "predeclared non-inferiority/value thresholds meet minimum trials and slice coverage",
+      "zero-authority shadow passes",
+      "canary is reversible, bounded and has independent kill/rollback controller",
+      "error budget healthy and no control drift/audit gap",
+      "sampled post-promotion human audit remains enabled"
+    ],
+    "probabilistic_policy": "Statistical uncertainty never overrides a deterministic hard fail. Threshold, power/minimum trials, non-inferiority margin, multiple-comparison plan and delayed window are declared before results. Below confidence or conflicting slices→PAUSE/HUMAN, never automatic pass.",
+    "stop_policy": "Immediately freeze promotion on unauthorized action attempt, protected invariant failure, signature/digest mismatch, evidence/audit loss, suspected injection/exfiltration, budget breach or rollback controller failure. Preserve current known-good unless it is the hazard."
+  },
+  "factory_as_code_schema": {
+    "apiVersion": "agent-os.example/v1alpha1",
+    "kind": "ImprovementFactory",
+    "metadata": [
+      "name",
+      "owners",
+      "schemaDigest"
+    ],
+    "spec": {
+      "protected": [
+        "paths",
+        "invariants",
+        "evaluatorRefs",
+        "policyRef",
+        "permissionProfileRef",
+        "promotionAuthorityRef",
+        "auditStoreRef"
+      ],
+      "stateMachines": [
+        "caseRef",
+        "candidateRef",
+        "releaseRef",
+        "attemptRef",
+        "controlHealthRef"
+      ],
+      "events": [
+        "schemaRef",
+        "idempotency",
+        "ordering",
+        "retention"
+      ],
+      "artifacts": [
+        "schemas",
+        "stores",
+        "attestationPolicy"
+      ],
+      "evaluation": [
+        "datasets public/private/temporal",
+        "graders deterministic/stochastic/human",
+        "trials",
+        "slices",
+        "hardFails",
+        "nonInferiority",
+        "contaminationChecks"
+      ],
+      "stages": [
+        "offline",
+        "shadow(sideEffects=deny)",
+        "canary(cohort/budgets/analysis)",
+        "promotion",
+        "rollback"
+      ],
+      "humanGates": [
+        "triggers",
+        "owners",
+        "quorum",
+        "bindingDigests",
+        "expiry"
+      ],
+      "faultTests": [
+        "crashPoints",
+        "network/API faults",
+        "clock/order faults",
+        "security campaigns"
+      ],
+      "budgets": [
+        "time",
+        "cost",
+        "actions",
+        "traffic",
+        "errorBurn",
+        "retry"
+      ],
+      "cleanup": [
+        "revoke",
+        "destroy",
+        "retain",
+        "reconcile"
+      ],
+      "compatibility": [
+        "previousDigests",
+        "migration",
+        "compensation"
+      ]
+    },
+    "schema_rule": "Candidate-controlled inputs cannot populate or override spec.protected, humanGates, attestationPolicy or authority references. Controller loads those from a separately protected revision and rejects shadowed/duplicate keys, unknown fields and downgrade migrations.",
+    "example": "A low-risk prompt bundle may auto-advance after 200 preregistered trials, zero critical invariant failures, per-slice non-inferiority, shadow sideEffects=deny, <=1% canary traffic/100 actions/30 minutes and tested rollback. These numbers are illustrative; repository owners must calibrate them before use."
+  },
+  "end_to_end_workflows": [
+    "1 OBSERVE: authenticate, redact/quarantine and correlate telemetry/user/review/CI evidence to exact versions [S27].",
+    "2 TRIAGE: dedupe, classify severity/privacy/risk, reproduce safely; active harm routes to incident, not improvement.",
+    "3 LEARN: human-reviewed multifactor postmortem and owned actions [S28]; curate minimal case with provenance and oracle.",
+    "4 GOVERN EVAL: curator/adjudicator approves case and split; freeze private temporal holdout; candidate never controls expected answer.",
+    "5 PROPOSE: agent opens one minimal digest-bound change with hypothesis, preregistered scorecard, budget and rollback.",
+    "6 OFFLINE: hermetic deterministic/property/model/security suites plus repeated stochastic trials; independent evaluator attests raw results.",
+    "7 SHADOW: mirror representative live inputs using side-effect-denying adapters; compare control/candidate trajectories, attempted writes, quality, latency and cost.",
+    "8 CANARY GATE: policy computes eligibility; named owner approves exact digest if human trigger fires.",
+    "9 CANARY: smallest representative concurrent-control cohort; independent monitor aborts on any hard fail/threshold/budget, pauses on inconclusive [S16-S17].",
+    "10 PROMOTE: atomically select attested digest; preserve previous; verify remote actual and continue delayed/sliced monitoring.",
+    "11 ROLLBACK: independent controller restores compatible known-good automatically only for pretested reversible effects; otherwise contain, stop and invoke human runbook.",
+    "12 RECURRENCE: rollback/escape creates a new case; audit reviews false promotion, grader agreement, contamination, human load and exception expiry without deleting history."
+  ],
+  "self_improvement_boundary": {
+    "maximal_safe_automation": [
+      "automatic evidence normalization/deduplication and postmortem/eval drafts",
+      "automatic minimal candidate proposals",
+      "automatic schema/static/unit/integration/model/property/security evaluation",
+      "automatic repeated replay and signed report",
+      "automatic zero-authority shadow",
+      "automatic bounded canary start only where pre-authorized; otherwise wait for approval",
+      "automatic abort and restoration of a rehearsed compatible last-known-good",
+      "automatic recurrence issue, freeze and evidence preservation"
+    ],
+    "protected_invariants": [
+      "candidate cannot gain promotion/merge/deploy/policy/evaluator/holdout/audit authority",
+      "no real side effect in offline/shadow",
+      "only exact attested digest may advance",
+      "critical safety/security/authorization regression is zero-tolerance",
+      "missing/stale/inconclusive/conflicting evidence cannot pass",
+      "approval invalidates on any bound digest/revision change",
+      "audit is append-only/tamper-evident and retained",
+      "budget and cohort limits cannot be raised by candidate",
+      "rollback/kill path is independent and continuously tested",
+      "user decisions and refusals cannot be silently summarized away",
+      "required checks must be successful from a specific expected evaluator identity; skipped/neutral results never satisfy the independent policy even if hosting semantics accept them",
+      "holdout query rate and case-level diagnostics are bounded to resist adaptive leakage",
+      "evaluator changes ship separately from candidates and pass independent meta-evaluation",
+      "attestation policy is monotonic: deleting, replaying or adding unknown evidence cannot turn DENY/PAUSE into ALLOW [S40-S41]"
+    ],
+    "never_autonomous": [
+      "objective/value/risk appetite or roadmap choice",
+      "creation/weakening/retirement of protected tests, graders, thresholds or policy",
+      "permissions, secrets, identity, rulesets, CODEOWNERS, environment or audit control",
+      "exception/bypass approval or self-review",
+      "legal/privacy/safety adjudication and user recourse",
+      "irreversible destructive migration/external act",
+      "high-impact incident diagnosis/remediation/promotion without accountable owner",
+      "claim of exhaustive proof or general recursive self-improvement"
+    ],
+    "reason": "Specification gaming/reward hacking is a known problem [S25-S26]. If the candidate controls the objective, oracle and authority, passing evaluation ceases to be independent evidence."
+  },
+  "validation_strategy": {
+    "model_layers": [
+      "Reference model: TLA+/PlusCal-style specification of Init, Next, orthogonal machines, leases, approvals, effects, rollback and fairness; TLC exhaustively checks safety/liveness only over the configured finite state space [S34-S35]. Record constants, symmetry sets, state count, depth, coverage and tool version with results.",
+      "Executable model: Hypothesis 6.168.0 RuleBasedStateMachine generates whole API/event sequences, uses Bundles for prior artifacts, preconditions for enabled transitions and invariants after each step, compares controller with a simpler reference and shrinks failures [S3,S36]. max_examples/stateful_step_count and strategy coverage bound—not prove—coverage.",
+      "History/fault layer: Jepsen-style controller generates concurrent operations, a nemesis injects partitions, clock faults, kill/pause, truncation/bit flips, and a checker judges the recorded history against declared legal behavior [S7-S8,S37-S38]. Run only in disposable isolated infrastructure; no error found is not proof."
+    ],
+    "safety_properties": [
+      "never promote without exact eligible evidence/approval",
+      "never more than one effective primary release per scope",
+      "stale lease/revision cannot commit",
+      "duplicate event/effect produces at most one logical outcome",
+      "candidate cannot read/write protected assets",
+      "offline/shadow has zero external side effects",
+      "rollback target was approved, compatible and attested",
+      "cancelled/superseded candidate cannot later promote",
+      "every actual external mutation has authorized event and receipt",
+      "every approval binds unchanged digests",
+      "audit history never forks/deletes",
+      "budget never increases except protected authority"
+    ],
+    "liveness_properties": [
+      "eligible bounded run eventually passes, fails, pauses or times out",
+      "cancellation eventually revokes lease and cleans resources",
+      "lost/duplicate/out-of-order webhook eventually reconciles",
+      "failed reversible canary eventually becomes rolled back or incident",
+      "dead letter/rollback failure eventually alerts an owner; never silently waits"
+    ],
+    "generated_transition_matrix": "For every state × event × actor-role × digest-match × approval freshness × evidence status × budget status, assert exactly one of transition/deny/idempotent replay/pause. Cover every allowed and forbidden edge, terminal replays, revision supersession and migration.",
+    "fault_matrix": [
+      "crash before/after DB commit, outbox publish, external mutation and receipt",
+      "duplicate/lost/delayed/reordered webhook; split brain and stale worker",
+      "API 401/403/404/409/429/5xx, pagination truncation, schema drift and partial response",
+      "network partition, DNS/TLS failure, dependency/model outage or silent version change",
+      "clock skew/expiry boundary, disk full/corruption, queue poison/dead letter",
+      "metrics missing/stale/biased, analysis timeout, canary router leak and rollback failure",
+      "concurrent human edit, policy/evaluator update during run and break-glass",
+      "Jepsen-style asymmetric/majority-ring partitions, process pause/kill, clock scramble, file truncation and bit flip; verify nemesis teardown/healing itself [S37-S38]"
+    ],
+    "adversarial_matrix": [
+      "direct/indirect prompt injection in issue, repository, logs, PR, tool output and peer message [S20-S22]",
+      "grader/holdout exfiltration and adaptive probing",
+      "candidate edits/renames/shadows protected config; symlink/path traversal/case-fold trick",
+      "artifact substitution, wrong repo/run/SHA, mutable dependency/action/image/model alias, forged/missing attestation [S12-S15]",
+      "privileged workflow_run consumes/executes candidate artifact [S13]",
+      "benchmark leakage, weak oracle, test deletion/overfit and behaviorally divergent pass [S23-S24]",
+      "DoS/budget exhaustion/retry amplification, audit suppression and approval replay",
+      "required check spoofing or success via skipped/neutral conclusion, wrong expected source App, admin/bypass actor or stale approval [S10-S13]"
+    ],
+    "oracle_tests": [
+      "golden schemas/migrations",
+      "deterministic invariants",
+      "metamorphic/differential tests",
+      "mutation testing of policy and evaluator",
+      "private temporal holdout and contamination scan",
+      "blinded expert calibration/disagreement review",
+      "statistical preregistration and raw per-slice denominators"
+    ],
+    "acceptance": "All model properties hold within declared bounds; 100% state/event/actor cells have expected disposition; injected critical faults never authorize action; crash-point tests reconcile without duplicate effects; rollback and restore drill passes; independent evidence binds exact digests. This is strong bounded evidence, not proof of real-world exhaustiveness."
+  },
+  "implementation_recommendation": {
+    "minimum_build": [
+      "Protect control paths with CODEOWNERS/rulesets; establish separate proposer/evaluator/promoter/rollback/reconciler identities [S10-S13].",
+      "Implement append-only event store, reducer, outbox, fenced leases, versioned DecisionRecord and artifact schemas.",
+      "Write reference state tables and executable property model before granting writes. Add model checking for key concurrency/rollback invariants.",
+      "Build hermetic offline evaluator with deterministic hard invariants, repeated trials, private temporal holdout and attestations [S1-S5,S14-S15].",
+      "Add zero-authority shadow and a fake deployment/rollback simulator; inject every crash boundary and security-negative test.",
+      "Require signed explicit PASS from the expected evaluator App. Treat skipped, neutral, unknown or missing as PAUSE/DENY despite hosting gate semantics; test admin/bypass configuration and stale-approval invalidation [S10-S13]."
+    ],
+    "stages": [
+      "Stage 0 observe-only: replay production history and reconcile drift; no candidate writes.",
+      "Stage 1 proposal-only: agent drafts cases/candidates; humans curate/evaluate/promote.",
+      "Stage 2 offline+shadow automatic: retain human promotion; prove zero side effects and state/fault properties.",
+      "Stage 3 narrow canary: allowlisted reversible R0/R1 only, exact digest, small budgets, protected gate and independent auto-abort/rollback.",
+      "Stage 4 conditional auto-promotion: only after repository-specific denominators, stable grader agreement, zero critical escapes, successful rollback drills and sampled human audit; never for control-plane changes."
+    ],
+    "promotion_scorecard": [
+      "all critical invariants pass",
+      "non-inferiority and value by risk/slice with preregistered trials/CIs",
+      "security/unsafe-action/escaped-defect/rollback rates",
+      "user/SLO and delayed recurrence outcome",
+      "latency/compute/reviewer/on-call cost per retained improvement",
+      "grader-to-blinded-expert agreement and dataset freshness/contamination",
+      "shadow divergence/attempted effects and canary abort/rollback latency"
+    ],
+    "rollback": "Keep previous immutable digest warm; verify compatibility before canary; rollback decision service is independent of candidate/primary; auto-rollback only pre-classified reversible changes; fail or partial rollback declares incident and requires human containment. Treat effects as reversible, compensatable or irreversible. A deployment rollback restores workload version only, not data/IAM/external effects [S33]. Argo fast rollback may skip analysis [S42], so revalidate post-restore and never confuse recovery speed with fresh promotion evidence.",
+    "do_not_build_first": [
+      "online self-training from raw feedback",
+      "unified score optimizer",
+      "candidate-authored grader/policy",
+      "multi-agent recursive learner",
+      "auto-migration or broad production repair"
+    ]
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Evaluation best practices",
+      "publisher_or_author": "OpenAI",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "representative datasets, continuous evaluation, human-calibrated grading, evaluation anti-patterns"
+      ],
+      "limits": "Vendor guidance is not independent proof of evaluator validity."
+    },
+    {
+      "id": "S2",
+      "title": "Demystifying evals for AI agents",
+      "publisher_or_author": "Anthropic",
+      "publication_or_update_date": "2026-01-09",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "source_type": "first-party engineering guidance",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "agent harness/trajectory/outcome model; capability vs regression suites; repeated stochastic trials; production failures become cases"
+      ],
+      "limits": "Worked guidance, not audited production denominators."
+    },
+    {
+      "id": "S3",
+      "title": "Hypothesis stateful testing",
+      "publisher_or_author": "Hypothesis maintainers",
+      "publication_or_update_date": "current documentation; date not stated",
+      "url": "https://hypothesis.readthedocs.io/en/latest/stateful.html",
+      "source_type": "official open-source documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "rule-based state machines generate operation sequences, check invariants, and shrink failing examples"
+      ],
+      "limits": "Library tests executable models; it cannot prove the model matches reality."
+    },
+    {
+      "id": "S4",
+      "title": "TLA+ Home Page",
+      "publisher_or_author": "TLA+ project / Linux Foundation",
+      "publication_or_update_date": "current at access; date not stated",
+      "url": "https://lamport.azurewebsites.net/tla/tla.html",
+      "source_type": "official project documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "TLA+ specifies concurrent/distributed systems and TLC checks behaviors/invariants"
+      ],
+      "limits": "Finite model checking depends on abstraction and explored bounds."
+    },
+    {
+      "id": "S5",
+      "title": "The TLA+ Video Course",
+      "publisher_or_author": "Leslie Lamport / Microsoft Research",
+      "publication_or_update_date": "current at access; course originally 2013",
+      "url": "https://lamport.azurewebsites.net/video/videos.html",
+      "source_type": "official educational material",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "safety/liveness specification and model-checking concepts"
+      ],
+      "limits": "Education, not evidence about this proposed system."
+    },
+    {
+      "id": "S6",
+      "title": "Temporal Workflow Replay testing",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.temporal.io/develop/safe-deployments",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "workflow histories can be replayed to detect nondeterminism and safe deployment concerns"
+      ],
+      "limits": "Vendor-specific; replay proves compatibility with recorded histories, not semantic correctness."
+    },
+    {
+      "id": "S7",
+      "title": "Jepsen: Consistency Models",
+      "publisher_or_author": "Jepsen / Kyle Kingsbury",
+      "publication_or_update_date": "current at access; date not stated",
+      "url": "https://jepsen.io/consistency",
+      "source_type": "independent technical reference",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "formal consistency vocabulary and history-based analysis for concurrent systems"
+      ],
+      "limits": "Does not test application semantics without a correct workload/checker."
+    },
+    {
+      "id": "S8",
+      "title": "Jepsen analyses",
+      "publisher_or_author": "Jepsen / Kyle Kingsbury",
+      "publication_or_update_date": "current at access; date not stated",
+      "url": "https://jepsen.io/analyses",
+      "source_type": "independent empirical test archive",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "fault injection has exposed safety/liveness failures in real distributed systems"
+      ],
+      "limits": "Results are system/version/configuration specific."
+    },
+    {
+      "id": "S9",
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "living documentation; date not stated",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "source_type": "official product documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "bounded branch/draft-PR flow, workflow approval and security controls"
+      ],
+      "limits": "Documents one product; does not establish safe recursive autonomy."
+    },
+    {
+      "id": "S10",
+      "title": "About protected branches",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "required reviews/status checks and protected-branch controls"
+      ],
+      "limits": "Remote configuration and bypass settings must be verified."
+    },
+    {
+      "id": "S11",
+      "title": "Deployments and environments",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "required reviewers, prevent self-review, gated environment secrets"
+      ],
+      "limits": "Plan/repository restrictions apply; one listed reviewer may suffice."
+    },
+    {
+      "id": "S12",
+      "title": "Secure use reference — GitHub Actions",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "source_type": "official security documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "least privilege, untrusted input handling, full-SHA pinning"
+      ],
+      "limits": "Configuration guidance does not prove a workflow is safe."
+    },
+    {
+      "id": "S13",
+      "title": "Preventing pwn requests",
+      "publisher_or_author": "GitHub Security Lab",
+      "publication_or_update_date": "2021-08-20",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "source_type": "first-party security research",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "privileged workflow_run and untrusted-artifact/code attack patterns"
+      ],
+      "limits": "Examples require adaptation to each workflow."
+    },
+    {
+      "id": "S14",
+      "title": "Artifact attestations",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "build provenance attestations and verification"
+      ],
+      "limits": "Provenance is not a correctness or safety verdict."
+    },
+    {
+      "id": "S15",
+      "title": "SLSA Provenance v1.2",
+      "publisher_or_author": "SLSA project / OpenSSF",
+      "publication_or_update_date": "2025-04",
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "source_type": "open supply-chain specification",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "provenance predicate binds artifact to build process and inputs"
+      ],
+      "limits": "Does not certify behavior or source trustworthiness."
+    },
+    {
+      "id": "S16",
+      "title": "Analysis and progressive delivery",
+      "publisher_or_author": "Argo Rollouts project",
+      "publication_or_update_date": "current stable docs; date not stated",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "source_type": "official open-source documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "metric analysis can continue, pause, abort or promote a rollout"
+      ],
+      "limits": "Metrics can be biased, delayed, unavailable or incomplete."
+    },
+    {
+      "id": "S17",
+      "title": "Canarying Releases",
+      "publisher_or_author": "Google SRE",
+      "publication_or_update_date": "2018",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "source_type": "first-party operations book",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "control/canary comparison and limits of canary analysis"
+      ],
+      "limits": "Operational guidance, not a universal sample-size rule."
+    },
+    {
+      "id": "S18",
+      "title": "NIST AI 600-1: Generative Artificial Intelligence Profile",
+      "publisher_or_author": "NIST; Autio et al.",
+      "publication_or_update_date": "2024-07-26",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "source_type": "government standard/profile",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "pre-deployment testing, ongoing monitoring/review, provenance, incident response, feedback and recourse"
+      ],
+      "limits": "Voluntary risk guidance; does not prescribe this exact architecture."
+    },
+    {
+      "id": "S19",
+      "title": "NIST SP 800-53 Rev. 5",
+      "publisher_or_author": "NIST",
+      "publication_or_update_date": "2020-09; minor update 2020-12-10",
+      "url": "https://doi.org/10.6028/NIST.SP.800-53r5",
+      "source_type": "government control catalog",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "separation of duties, configuration change control, protected audit, contingency/recovery controls"
+      ],
+      "limits": "Controls require tailoring and implementation evidence."
+    },
+    {
+      "id": "S20",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "publication_or_update_date": "2025 edition; page date not stated",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "source_type": "practitioner consensus guidance",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "no foolproof prevention; use least privilege, segregation, validation, approvals and adversarial testing"
+      ],
+      "limits": "Consensus guidance, not a formal standard or guarantee."
+    },
+    {
+      "id": "S21",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "publication_or_update_date": "2025 edition; page date not stated",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "source_type": "practitioner consensus guidance",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "minimize tools, permissions and autonomy; complete mediation and human approval"
+      ],
+      "limits": "Consensus guidance."
+    },
+    {
+      "id": "S22",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher_or_author": "Debenedetti et al.",
+      "publication_or_update_date": "arXiv v3 2024-11-24",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "source_type": "academic paper/preprint",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "dynamic tool-agent prompt-injection benchmark and utility/security tradeoffs"
+      ],
+      "limits": "Benchmark coverage is finite and adaptive attackers can differ."
+    },
+    {
+      "id": "S23",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Aleithan et al.",
+      "publication_or_update_date": "2024-10-10 v2",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "source_type": "independent empirical preprint",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "solution leakage and weak-test/suspicious-pass critique; score drops after filtering"
+      ],
+      "limits": "One benchmark and methodology; not a universal inflation estimate."
+    },
+    {
+      "id": "S24",
+      "title": "Are Solved Issues in SWE-bench Really Solved Correctly?",
+      "publisher_or_author": "Wang, Pradel and Liu",
+      "publication_or_update_date": "2025-03-19 v1; later revision",
+      "url": "https://arxiv.org/abs/2503.15223",
+      "source_type": "independent empirical paper",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "passing developer tests can hide behavioral divergence and benchmark score inflation"
+      ],
+      "limits": "Preprint findings depend on generated tests and audited sample."
+    },
+    {
+      "id": "S25",
+      "title": "Specification gaming: the flip side of AI ingenuity",
+      "publisher_or_author": "Victoria Krakovna et al. / DeepMind",
+      "publication_or_update_date": "2020-04-21",
+      "url": "https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/",
+      "source_type": "first-party research synthesis",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "agents can optimize specified proxies through unintended behavior"
+      ],
+      "limits": "Illustrative examples, not a quantified coding-agent risk rate."
+    },
+    {
+      "id": "S26",
+      "title": "Concrete Problems in AI Safety",
+      "publisher_or_author": "Amodei et al.",
+      "publication_or_update_date": "2016-07-25",
+      "url": "https://arxiv.org/abs/1606.06565",
+      "source_type": "peer-reviewed/foundational paper",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "reward hacking, safe exploration, robustness and scalable oversight problem framing"
+      ],
+      "limits": "General AI-safety framing predates current repository agents."
+    },
+    {
+      "id": "S27",
+      "title": "OpenTelemetry overview",
+      "publisher_or_author": "OpenTelemetry project",
+      "publication_or_update_date": "current standard; date not stated",
+      "url": "https://opentelemetry.io/docs/specs/otel/overview/",
+      "source_type": "open standard",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "portable trace, metric and log architecture"
+      ],
+      "limits": "Telemetry collection does not supply ground truth or causality."
+    },
+    {
+      "id": "S28",
+      "title": "Postmortem Culture: Learning from Failure",
+      "publisher_or_author": "Google SRE",
+      "publication_or_update_date": "2016",
+      "url": "https://sre.google/sre-book/postmortem-culture/",
+      "source_type": "first-party operations book",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "blameless postmortems, evidence, owned preventive actions"
+      ],
+      "limits": "Human review remains needed for causal interpretation."
+    },
+    {
+      "id": "S29",
+      "title": "The SPACE of Developer Productivity",
+      "publisher_or_author": "Forsgren et al.",
+      "publication_or_update_date": "2021-03-06",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "source_type": "peer-reviewed framework",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "developer productivity is multidimensional and cannot be reduced to one activity metric"
+      ],
+      "limits": "Framework does not set local promotion thresholds."
+    },
+    {
+      "id": "S30",
+      "title": "Artificial Intelligence Risk Management Framework (AI RMF 1.0)",
+      "publisher_or_author": "NIST",
+      "publication_or_update_date": "2023-01",
+      "url": "https://doi.org/10.6028/NIST.AI.100-1",
+      "source_type": "government framework",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "GOVERN/MAP/MEASURE/MANAGE; independent assessors reduce bias/conflict; post-deployment monitoring, override, recovery and change management"
+      ],
+      "limits": "Voluntary, sector-agnostic and does not set risk tolerance."
+    },
+    {
+      "id": "S31",
+      "title": "Reward Tampering Problems and Solutions in Reinforcement Learning: A Causal Influence Diagram Perspective",
+      "publisher_or_author": "Everitt, Hutter, Kumar and Krakovna",
+      "publication_or_update_date": "arXiv submitted 2019-08-13; v5 2021-03-26",
+      "url": "https://arxiv.org/abs/1908.04734",
+      "source_type": "academic formal paper",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "formalizes incentives to tamper with reward functions and reward inputs"
+      ],
+      "limits": "Formal RL assumptions do not prove safety for LLM repository agents."
+    },
+    {
+      "id": "S32",
+      "title": "About code owners",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "source_type": "official documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "branch protection can require code-owner review of changed paths"
+      ],
+      "limits": "CODEOWNERS needs enforcing protection; write access and ownership patterns must be controlled."
+    },
+    {
+      "id": "S33",
+      "title": "Deployments",
+      "publisher_or_author": "Kubernetes project",
+      "publication_or_update_date": "living documentation; date not stated",
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "source_type": "official open-source documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "deployment revisions, rollout status and rollback to previous revision"
+      ],
+      "limits": "Rollback restores Pod template, not external data/schema/IAM side effects."
+    },
+    {
+      "id": "S34",
+      "title": "A High-Level View of TLA+",
+      "publisher_or_author": "Leslie Lamport",
+      "publication_or_update_date": "last modified 2021-08-10",
+      "url": "https://lamport.azurewebsites.net/tla/high-level-view.html",
+      "source_type": "primary project/author documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "execution as state sequence; initial predicate and next-state relation; safety/invariance and liveness/fairness; PlusCal translation"
+      ],
+      "limits": "No model completely describes the real system; checking the abstraction is not implementation proof."
+    },
+    {
+      "id": "S35",
+      "title": "TLA+ Tools",
+      "publisher_or_author": "Leslie Lamport / TLA+ Foundation",
+      "publication_or_update_date": "page last modified 2022-03-18; tools current at access",
+      "url": "https://lamport.azurewebsites.net/tla/tools.html",
+      "source_type": "primary project documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "TLC explicit-state checking/simulation; Apalache symbolic bounded safety and inductive-invariant checking; PlusCal translator"
+      ],
+      "limits": "Exhaustiveness is finite/configuration-bounded; simulation is sampling; state explosion applies."
+    },
+    {
+      "id": "S36",
+      "title": "Hypothesis 6.168.0 release",
+      "publisher_or_author": "HypothesisWorks",
+      "publication_or_update_date": "2026-09-08",
+      "url": "https://github.com/HypothesisWorks/hypothesis/releases/tag/v6.168.0",
+      "source_type": "official versioned repository release",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "version anchor for whole-sequence stateful/property testing used at cutoff"
+      ],
+      "limits": "Release does not prove generated coverage is exhaustive."
+    },
+    {
+      "id": "S37",
+      "title": "Jepsen 0.3.13 repository and release",
+      "publisher_or_author": "Jepsen / Kyle Kingsbury",
+      "publication_or_update_date": "2026-07-31",
+      "url": "https://github.com/jepsen-io/jepsen/releases/tag/v0.3.13",
+      "source_type": "official open-source release",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "controller, concurrent-operation generator, history, fault nemesis and checker architecture"
+      ],
+      "limits": "Destructive tests need isolated systems; selected workload/checker/faults bound coverage."
+    },
+    {
+      "id": "S38",
+      "title": "Jepsen nemesis implementation",
+      "publisher_or_author": "Jepsen project",
+      "publication_or_update_date": "main branch as accessed 2026-09-13",
+      "url": "https://github.com/jepsen-io/jepsen/blob/main/jepsen/src/jepsen/nemesis.clj",
+      "source_type": "official source code",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "partitions, healing, clock manipulation, start/stop/pause, truncation and bit-flip fault primitives"
+      ],
+      "limits": "Main is mutable; fault injection can itself fail and must be healed/teardown-tested."
+    },
+    {
+      "id": "S39",
+      "title": "Build: Verifying artifacts — SLSA v1.2",
+      "publisher_or_author": "SLSA project / OpenSSF",
+      "publication_or_update_date": "v1.2 current at access",
+      "url": "https://slsa.dev/spec/v1.2/verifying-artifacts",
+      "source_type": "open supply-chain specification",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "verify trusted builder, envelope signature, artifact subject digest, predicate type, buildType and expected external parameters; unknown parameters should fail"
+      ],
+      "limits": "SLSA does not prove semantic correctness and does not cover all platform/insider/selection threats."
+    },
+    {
+      "id": "S40",
+      "title": "in-toto Attestation Framework specification v1.2",
+      "publisher_or_author": "in-toto project / CNCF",
+      "publication_or_update_date": "release 1.2.0, 2026-03-18",
+      "url": "https://github.com/in-toto/attestation/blob/v1.2.0/spec/v1/README.md",
+      "source_type": "official versioned specification",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "Envelope authentication, digest-bound Statement, typed Predicate, Bundles and monotonic-versioning policy"
+      ],
+      "limits": "Unknown fields cannot carry deny-critical semantics unless verifier understands them."
+    },
+    {
+      "id": "S41",
+      "title": "in-toto Bundle layer specification v1.2",
+      "publisher_or_author": "in-toto project / CNCF",
+      "publication_or_update_date": "release 1.2.0, 2026-03-18",
+      "url": "https://github.com/in-toto/attestation/blob/v1.2.0/spec/v1/bundle.md",
+      "source_type": "official versioned specification",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "bundle can carry provenance/review/test/scan attestations; each attestation needs authentication"
+      ],
+      "limits": "Bundle itself is unauthenticated; deletion, replay and injection require freshness, required-positive evidence and independent verification."
+    },
+    {
+      "id": "S42",
+      "title": "Rollback Windows — Argo Rollouts",
+      "publisher_or_author": "Argo Rollouts project / CNCF",
+      "publication_or_update_date": "current docs; v1.10.0 at cutoff",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/rollback/",
+      "source_type": "official open-source documentation",
+      "access_date": "2026-09-13",
+      "supported_claims": [
+        "recent revision can be fast-tracked within configured rollback window"
+      ],
+      "limits": "Fast rollback skips rollout steps/analysis and does not undo stateful effects."
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "continuous automated evaluation vs trustworthy ground truth",
+      "evidence": "Vendor guidance recommends continuous/grader-driven eval [S1-S2], while independent benchmark audits find leakage, weak tests and behavioral divergence [S23-S24].",
+      "resolution": "Automate execution, not ownership of truth: protected deterministic invariants, private temporal holdouts, blinded expert calibration and proposer/evaluator separation."
+    },
+    {
+      "topic": "formal/model testing vs exhaustive claim",
+      "evidence": "TLA+/TLC and stateful property tests systematically explore modeled/generated sequences [S3-S5], but only within abstraction and bounds.",
+      "resolution": "Call coverage exhaustive only relative to the declared finite model/transition matrix. Pair model checks with production trace conformance, fault campaigns and explicit unknowns."
+    },
+    {
+      "topic": "automatic progressive delivery vs semantic safety",
+      "evidence": "Argo and SRE support metric-driven canary abort/promotion [S16-S17], but canaries miss rare/delayed/irreversible effects.",
+      "resolution": "Bound automation to reversible low-risk classes; pause inconclusive; keep human authority for high-impact or irreversible actions."
+    },
+    {
+      "topic": "Git-hosted protection vs independent authority",
+      "evidence": "GitHub offers review/check/environment controls [S10-S12], yet bypass actors, plan semantics and privileged workflow chaining can defeat intended separation [S13].",
+      "resolution": "Reconcile effective remote settings, separate identities, negative-test privileges, use external/two-person approval where needed and never execute candidate content in privileged promotion."
+    },
+    {
+      "topic": "self-improvement objective vs specification gaming",
+      "evidence": "Optimization can exploit misspecified proxies [S25-S26]; one score also conflicts with multidimensional productivity evidence [S29].",
+      "resolution": "Candidate cannot edit objective/oracle/authority; use hard invariants plus multiple separately reported outcome dimensions and accountable value decisions."
+    },
+    {
+      "topic": "GitHub required-check satisfaction vs semantic pass",
+      "evidence": "GitHub documents required checks and expected source controls, but successful, skipped or neutral conclusions may satisfy protection and bypass roles may be exempt [S10].",
+      "resolution": "Independent promotion verifies signed explicit PASS, exact evaluator App/SHA/policy and no bypass; skipped/neutral/unknown cannot promote."
+    },
+    {
+      "topic": "authenticated provenance vs truth/correctness",
+      "evidence": "SLSA and in-toto bind claims to artifact digests/signers [S15,S39-S41], but a signature proves key control and a bundle may permit deletion/replay; provenance is not semantic correctness.",
+      "resolution": "Verify trust root, subject, predicate/build type, parameters, freshness and every required positive attestation; use monotonic fail-closed policy plus independent semantic tests."
+    }
+  ],
+  "uncertainties": [
+    "No public evidence establishes safe general recursive self-improvement of repository agents.",
+    "Offline/shadow metrics may not predict long-horizon production outcomes, especially rare or delayed harms.",
+    "Universal thresholds, trial counts, non-inferiority margins and canary windows do not exist; owners must calibrate them from local base rates.",
+    "LLM-judge stability and adversarial robustness after candidates adapt to the rubric remain uncertain.",
+    "TLA+/property coverage is exhaustive only for the declared abstraction, bounds, generator and fault model.",
+    "Provider model aliases and behavior may not be immutable; exact version semantics must be tested.",
+    "Target GitHub plan, environment reviewer semantics, bypass actors and API behavior require live verification.",
+    "Automatic rollback cannot undo all database, privacy, financial, public or other external side effects."
+  ],
+  "confidence": {
+    "overall": "High on governance boundary, identity separation, versioning, state/event contracts, provenance and bounded progressive delivery; medium on agent-specific evaluator design; low on unattended general improvement and universal statistical thresholds.",
+    "claim_level": {
+      "high": [
+        "candidate/evaluator/promotion separation is necessary",
+        "duplicate/crash/reconciliation and authority properties can be systematically tested",
+        "green benchmark/tests alone do not prove correctness",
+        "irreversible/high-risk and control-plane changes cannot safely self-approve"
+      ],
+      "medium": [
+        "narrow reversible low-risk candidates can auto-progress after strong local evidence",
+        "formal plus executable models will materially reduce lifecycle bugs"
+      ],
+      "low": [
+        "finite testing predicts every production interaction",
+        "LLM graders remain reliable under optimization pressure",
+        "net economic benefit across repositories"
+      ]
+    }
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "human_need_policy",
+    "self_improvement_boundary",
+    "validation_strategy",
+    "implementation_recommendation"
+  ]
+}

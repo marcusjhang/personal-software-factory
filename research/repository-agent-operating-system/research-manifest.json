@@ -1,0 +1,1812 @@
+{
+  "schema_version": "1.0",
+  "artifact": "research corpus byte-and-structure manifest",
+  "generated_at_utc": "2026-09-12T17:42:07.624814Z",
+  "corpus_scope": {
+    "selection_rule": [
+      "research/self-managing-software-projects/results/*.json",
+      "research/repository-agent-operating-system/**/results/*.json"
+    ],
+    "expected_result_file_count": 37,
+    "enumerated_result_file_count": 37,
+    "projects": {
+      "self-managing-software-projects": 14,
+      "repository-agent-operating-system": 23
+    },
+    "repository_agent_operating_system_breakdown": {
+      "base": 10,
+      "lifecycle-extension": 8,
+      "domain-extension": 5
+    }
+  },
+  "generation_process_record": {
+    "process": "Local filesystem enumeration, byte hashing, JSON parsing, source-section inspection, and execution of the named field-presence validator against each matching file.",
+    "observed_at_utc": "2026-09-12T17:42:07.624814Z",
+    "network_refetch_performed": false,
+    "source_retrieval_performed": false,
+    "process_record_is_cryptographic_retrieval_attestation": false
+  },
+  "provenance_disclaimer": {
+    "status": "unverified_corpus_provenance",
+    "sha256_scope": "Each SHA-256 identifies the bytes present when this manifest was generated. It does not prove origin, author, retrieval time, or source authenticity.",
+    "filesystem_mtime_scope": "Filesystem mtime is mutable local metadata. It is not retrieved_at and is not a cryptographic retrieval attestation.",
+    "process_record_scope": "The manifest process record reports this local inspection only. It is not a signed or cryptographic retrieval attestation and does not establish collection history.",
+    "stated_as_of_scope": "stated_as_of is copied from each result. It is not independently verified. Every result states 2026-09-13, later than the declared 2026-09-12 UTC decision cutoff.",
+    "access_date_scope": "The earlier UTC+08/local-date explanation is only an unverified legacy process narrative. Labels such as access_date, as_of, accessed, observed, or snapshot accessed establish no host timezone, actual UTC retrieval time, or compliance with the 2026-09-12T23:59:59Z decision cutoff.",
+    "missing_lineage": "The corpus has no retrieved_at, run_id/research_run, snapshot_unavailable_reason, or evidence_family_id keys. One parsed content_digest key exists, which is not corpus-wide source snapshot lineage.",
+    "conclusion": "This manifest establishes local byte identity and field-presence results only. It does not repair or validate source provenance, semantic entailment, or cutoff compliance. A fresh immutable re-fetch plus human semantic review is a PRE-IMPLEMENTATION gate that blocks Increment 1; it is not implementation-time work."
+  },
+  "validation_layers": {
+    "json_syntax": {
+      "status": "pass",
+      "passed_files": 37,
+      "failed_files": 0,
+      "meaning": "All enumerated files parsed with Python json.load."
+    },
+    "structural_completeness": {
+      "status": "pass",
+      "passed_files": 37,
+      "failed_files": 0,
+      "validator_path": "/Users/marcusjhang/.prime/agent/skills/research-deep/scripts/validate_json.py",
+      "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+      "meaning": "The bundled research-deep validator found every required fields.yaml field name somewhere in each JSON object.",
+      "limits": "Presence-only structural coverage. It does not validate source-record shape, value types/nonemptiness, dates, URLs, provenance, claim/source edges, truth, entailment, conflicts, independence, efficacy, safety, compliance, or ROI."
+    },
+    "semantic_evidence_validation": {
+      "status": "not_performed",
+      "meaning": "No semantic or provenance validation may be inferred from structural pass results."
+    },
+    "historical_receipt_note": "research/self-managing-software-projects/validation.txt records a prior 14/14, 19/19-field pass but has no run identity, timestamp, or validator digest. This manifest reran the current bundled validator for all 37 files and records its digest; that rerun remains structural only."
+  },
+  "source_inventory_summary": {
+    "source_record_count": 1537,
+    "source_url_count": 1546,
+    "unique_source_url_count_across_corpus": 884,
+    "source_encoding_counts": {
+      "record_list": 35,
+      "numbered_bibliography_string": 2
+    },
+    "counting_note": "A source record is one list element or one numbered bibliography entry. A source URL is one HTTP(S) occurrence in the record URL field/string. Counts do not represent independent evidence families."
+  },
+  "result_files": [
+    {
+      "relative_path": "research/repository-agent-operating-system/domain-extension/results/01-cross-domain-artifact-factory-abstraction.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "domain-extension",
+      "sha256": "cce4aeb6d47b1aec15047e864de0571e484d800e4e89c265f40a4bf2919eb3ab",
+      "filesystem_mtime_utc": "2026-09-12T17:05:34.038277823Z",
+      "filesystem_mtime_ns": 1789232734038277823,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 59,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 59,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 59,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/domain-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/domain-extension/results/02-gtm-factory-workflows-and-current-systems.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "domain-extension",
+      "sha256": "4a1a0e6d23424a651e83e8c1e909cd2550982323f2f6d23e6d23b93cd28e3eb3",
+      "filesystem_mtime_utc": "2026-09-12T17:06:47.278230997Z",
+      "filesystem_mtime_ns": 1789232807278230997,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 55,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 55,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 55,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/domain-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "domain-extension",
+      "sha256": "baf0686ee02baa880c0e30621ff7f9bce30cdc75a32266dfcec33785943f8df5",
+      "filesystem_mtime_utc": "2026-09-12T17:06:16.419453164Z",
+      "filesystem_mtime_ns": 1789232776419453164,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 55,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 55,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 55,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/domain-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/domain-extension/results/04-engineering-first-extension-and-extraction-gates.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "domain-extension",
+      "sha256": "20a80f2178096986387c8cbbe4a12a72a5459158cf70a38cff3e316f473981e5",
+      "filesystem_mtime_utc": "2026-09-12T17:05:21.461768729Z",
+      "filesystem_mtime_ns": 1789232721461768729,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 40,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 40,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 40,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/domain-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "domain-extension",
+      "sha256": "472e7186c10b768948d8fc12ab583dbf813a84611dfd44267fbd4c23ac78b51a",
+      "filesystem_mtime_utc": "2026-09-12T17:07:34.578592859Z",
+      "filesystem_mtime_ns": 1789232854578592859,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 90,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 90,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 90,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/domain-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/01-warp-factories-and-factory-as-code-model.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "a8bd2db8f33804635b948296f7d7f2fa8af34c5e4b0768eeaa39e16ccf05fd9a",
+      "filesystem_mtime_utc": "2026-09-12T17:03:52.319474666Z",
+      "filesystem_mtime_ns": 1789232632319474666,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 29,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 29,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 29,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/02-conversational-ideation-and-discovery-lifecycle.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "271b6dc74a4c90658995c4df81a2235768f19603affcea55804bf57909151d6e",
+      "filesystem_mtime_utc": "2026-09-12T17:03:43.794726510Z",
+      "filesystem_mtime_ns": 1789232623794726510,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 59,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 59,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 59,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "84177d66f4153c72b4a88ab9963ed5d07c644dcb8ef1b31c8fcfb67580826950",
+      "filesystem_mtime_utc": "2026-09-12T17:06:09.973513434Z",
+      "filesystem_mtime_ns": 1789232769973513434,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 87,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 91,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 91,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/04-maintenance-and-operations-lifecycle.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "93ec75b53d852a240064577e3916b5816b5cf8b48f72c2e264996f9d27e6c5c9",
+      "filesystem_mtime_utc": "2026-09-12T17:01:18.589344168Z",
+      "filesystem_mtime_ns": 1789232478589344168,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 77,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 77,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 77,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/05-deep-research-factory-as-a-reusable-workflow.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "b82637daba692f96b39a444f47a8415d381f63db60d9157d90c4222081bbbf4a",
+      "filesystem_mtime_utc": "2026-09-12T17:02:31.521485541Z",
+      "filesystem_mtime_ns": 1789232551521485541,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 27,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 27,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 27,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 1
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/06-general-factory-dsl-and-orchestrator-runtime.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "227098ce3abcc8bd6da0bd7f9b3f2f46c29fe83d089fbe607e07ce6accaeeae0",
+      "filesystem_mtime_utc": "2026-09-12T17:05:24.240840726Z",
+      "filesystem_mtime_ns": 1789232724240840726,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 42,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 42,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 42,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/07-human-need-decision-engine-and-interaction-contract.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "b548646d29e094639788a06f34a62c0993c0bc34726f175fe58831be2ccc85ae",
+      "filesystem_mtime_utc": "2026-09-12T17:03:32.318870655Z",
+      "filesystem_mtime_ns": 1789232612318870655,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 55,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 55,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 54,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "lifecycle-extension",
+      "sha256": "6e7eb1b7d83bfaaeef383cb079926bc5c722f23b7121a7d43af39920abc76bcf",
+      "filesystem_mtime_utc": "2026-09-12T17:01:36.486124911Z",
+      "filesystem_mtime_ns": 1789232496486124911,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 42,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 42,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 42,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+        "fields_sha256": "fa2315310635f9b65cf75e1e528aac2d0ab2eaaf8f561f1d79a1d000f5a0c0ce",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "ff5473f2eaae5f6fa09ad143680ca9da8e13867f22dd121aa3f30fde93b1369c",
+      "filesystem_mtime_utc": "2026-09-12T16:47:32.339841022Z",
+      "filesystem_mtime_ns": 1789231652339841022,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 29,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 29,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 29,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/02-ticket-planning-and-readiness-gates.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "1bebefc981d2558d26755699517bac535591d1f3afb2265968e58ace752db5dc",
+      "filesystem_mtime_utc": "2026-09-12T16:46:10.175588574Z",
+      "filesystem_mtime_ns": 1789231570175588574,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "numbered_bibliography_string",
+      "source_record_count": 43,
+      "source_record_count_method": "numbered entries matched at line starts in top-level sources bibliography string",
+      "source_url_count": 44,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 44,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/03-agent-bootstrap-and-instant-context.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "6b7137286cc9f4f5689e30e338b384acac6db4e7c936c90d075f0946be7cfecf",
+      "filesystem_mtime_utc": "2026-09-12T16:47:19.234656952Z",
+      "filesystem_mtime_ns": 1789231639234656952,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 37,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 37,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 37,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "1738c321f0091995425d3373caad7cabfe712db19d62568e351d0e7c343c762e",
+      "filesystem_mtime_utc": "2026-09-12T16:45:17.230486742Z",
+      "filesystem_mtime_ns": 1789231517230486742,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 27,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 27,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 27,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/05-implementation-verification-review-and-cleanup.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "160db92f6dd2436e560cca859a5771bc524cde7f8b657723ac0310a5afa95f98",
+      "filesystem_mtime_utc": "2026-09-12T16:47:25.640542350Z",
+      "filesystem_mtime_ns": 1789231645640542350,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "numbered_bibliography_string",
+      "source_record_count": 30,
+      "source_record_count_method": "numbered entries matched at line starts in top-level sources bibliography string",
+      "source_url_count": 34,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 34,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/06-risk-tiered-human-gates-and-merge-policy.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "d34bbbe22692d48e74fc223e4f0ba67f3bba9c937a7c840cb820529a4802fba2",
+      "filesystem_mtime_utc": "2026-09-12T16:44:22.963897789Z",
+      "filesystem_mtime_ns": 1789231462963897789,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 31,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 31,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 31,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/07-observability-driven-issue-creation-and-maintenance.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "0461a50de27c5f7c1a261e9e910edf021335b5fc58ab96b199dfa77dc9004a66",
+      "filesystem_mtime_utc": "2026-09-12T16:44:21.125934201Z",
+      "filesystem_mtime_ns": 1789231461125934201,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 26,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 26,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 26,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/08-governed-self-improvement.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "fcb335648b5515181f054b3a044ba3eb93cdb61a7498378250a09e86977f6743",
+      "filesystem_mtime_utc": "2026-09-12T16:46:05.589913956Z",
+      "filesystem_mtime_ns": 1789231565589913956,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 35,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 35,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 35,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/09-repository-native-configuration-and-reusable-distribution.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "e8ee922ce69b527c348f05a0eb9effafffcf72491737f7ecedb07316a9472da9",
+      "filesystem_mtime_utc": "2026-09-12T16:45:46.065280365Z",
+      "filesystem_mtime_ns": 1789231546065280365,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 39,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 39,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 39,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/repository-agent-operating-system/results/10-end-to-end-reference-implementation-and-rollout.json",
+      "project": "repository-agent-operating-system",
+      "track_group": "base",
+      "sha256": "962b6018e0eb073a0b6aed662b069d56e97b27ec8f6d4653b5375f5bc80b99ec",
+      "filesystem_mtime_utc": "2026-09-12T16:43:25.129925583Z",
+      "filesystem_mtime_ns": 1789231405129925583,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 35,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 35,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 35,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/repository-agent-operating-system/fields.yaml",
+        "fields_sha256": "73d787f254e2e7a562b781ec83c60bf56ef3d8140edc4ec23586507931fa6418",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 20,
+        "covered_field_count": 20,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/01-autonomous-coding-agent-platforms.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "e7491eb054bc1d7ced7188ca3de40bd1f6d658fdd3c95293b4cc017146409b40",
+      "filesystem_mtime_utc": "2026-09-12T15:59:41.851006202Z",
+      "filesystem_mtime_ns": 1789228781851006202,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 34,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 34,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 34,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/02-open-source-agent-frameworks.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "7cd981c986be9ae55888e5cf6db70267e2f218e44413a03bb8fee39f62ea6e92",
+      "filesystem_mtime_utc": "2026-09-12T15:59:09.280972467Z",
+      "filesystem_mtime_ns": 1789228749280972467,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 37,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 37,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 37,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/03-issue-and-specification-driven-development.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "c33584d9b80462c98c46c9975bde2ce888d7b2f17a91e4df7cecd77468c0b227",
+      "filesystem_mtime_utc": "2026-09-12T15:57:56.668128186Z",
+      "filesystem_mtime_ns": 1789228676668128186,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 30,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 30,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 30,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/04-ci-cd-and-agent-execution-integration.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "1fa59fd2e0daed00221e885483530d5bce5361988615c6b47e69879c0ddfb702",
+      "filesystem_mtime_utc": "2026-09-12T15:58:14.344089249Z",
+      "filesystem_mtime_ns": 1789228694344089249,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 44,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 44,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 44,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/05-dependency-and-security-maintenance.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "b09d2722474aae528c43edb7121f9e144c5991cc91bb8fb731c12bcf8684db4e",
+      "filesystem_mtime_utc": "2026-09-12T15:58:15.459821438Z",
+      "filesystem_mtime_ns": 1789228695459821438,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 51,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 51,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 51,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/06-observability-to-autonomous-remediation.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "2de1d778a27bc1cebc557c16ae6c6cfb7ba5d061047421014422b1ff6f68a2d6",
+      "filesystem_mtime_utc": "2026-09-12T15:58:56.974403390Z",
+      "filesystem_mtime_ns": 1789228736974403390,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 52,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 52,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 52,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "600027b9e80bdc6524b317574049f622aa719fa84630fc9c80f555efd2b47644",
+      "filesystem_mtime_utc": "2026-09-12T16:00:20.407978570Z",
+      "filesystem_mtime_ns": 1789228820407978570,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 35,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 35,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 35,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "3799a8aea1dbc3462b5a44a88bfb2f051c7bad175e765781482653dd8a14a4d0",
+      "filesystem_mtime_utc": "2026-09-12T15:57:58.861974861Z",
+      "filesystem_mtime_ns": 1789228678861974861,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 37,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 37,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 37,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/09-academic-autonomous-software-engineering.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "4497a057bd2ad35802a382721e3eb54d712ac6f55d6d62acd2b25ea832ee218b",
+      "filesystem_mtime_utc": "2026-09-12T15:56:17.024771072Z",
+      "filesystem_mtime_ns": 1789228577024771072,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 19,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 19,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 19,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/10-production-case-studies-and-operational-evidence.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "a76ccd0241a2f195ecaf74e79f8525d5bc5c4ab7bd488e1808399da2fb804e59",
+      "filesystem_mtime_utc": "2026-09-12T16:00:08.098158188Z",
+      "filesystem_mtime_ns": 1789228808098158188,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 30,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 30,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 30,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/11-multi-agent-orchestration-and-control-planes.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "eabc8fab7e4adf8de5e2b571d03a43f3f1a639bea66c8909db8d1cefddd1c399",
+      "filesystem_mtime_utc": "2026-09-12T15:58:35.500186911Z",
+      "filesystem_mtime_ns": 1789228715500186911,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 26,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 26,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 26,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/12-self-improvement-and-feedback-loops.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "85b158f5dc4c6299ca722d07070f3bba66e561939778835e98d5f16cd5912a8f",
+      "filesystem_mtime_utc": "2026-09-12T15:57:56.894151935Z",
+      "filesystem_mtime_ns": 1789228676894151935,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 44,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 44,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 44,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "3a391fba5aac17edf35b668697e43ea1f215d141b0bf2e92978ddd54f9f621e5",
+      "filesystem_mtime_utc": "2026-09-12T15:57:15.417383514Z",
+      "filesystem_mtime_ns": 1789228635417383514,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 21,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 21,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 21,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    },
+    {
+      "relative_path": "research/self-managing-software-projects/results/14-adoption-maturity-and-build-vs-buy-landscape.json",
+      "project": "self-managing-software-projects",
+      "track_group": "base",
+      "sha256": "889096aebe7d25f185da6c10a952efcee20407af1f3edb9913d33b8be0dc235a",
+      "filesystem_mtime_utc": "2026-09-12T15:58:51.034762212Z",
+      "filesystem_mtime_ns": 1789228731034762212,
+      "filesystem_mtime_is_retrieval_attestation": false,
+      "json_parse_result": "pass",
+      "stated_as_of": "2026-09-13",
+      "source_encoding": "record_list",
+      "source_record_count": 28,
+      "source_record_count_method": "top-level sources list length",
+      "source_url_count": 28,
+      "source_url_count_method": "HTTP(S) URL occurrences in each source record url field or string; occurrences, not evidence-family count",
+      "unique_source_url_count": 28,
+      "stated_source_access_dates": [
+        "2026-09-13"
+      ],
+      "source_access_date_semantics": "unverified local-calendar stamp per evidence-cutoff.md; not an actual UTC retrieved_at observation",
+      "provenance_schema_observation": {
+        "retrieved_at_key_count": 0,
+        "run_id_key_count": 0,
+        "research_run_key_count": 0,
+        "snapshot_unavailable_reason_key_count": 0,
+        "evidence_family_id_key_count": 0,
+        "content_digest_key_count": 0
+      },
+      "structural_validator": {
+        "id": "research-deep validate_json.py",
+        "validator_sha256": "f69121033cad586e4a4f5e12a9e37ae98dd6d0cbfda5293c180f78e3bda2369d",
+        "fields_path": "research/self-managing-software-projects/fields.yaml",
+        "fields_sha256": "a051f16891035459c3034b653af17c44b2b4cbf399966fe3ca04434662a35db4",
+        "semantics": "recursive field-name presence against fields.yaml required fields; does not require useful types or nonempty values"
+      },
+      "structural_validation_result": {
+        "status": "pass",
+        "required_field_count": 19,
+        "covered_field_count": 19,
+        "coverage_percent": 100.0,
+        "missing_required_fields": []
+      },
+      "semantic_evidence_validation_result": {
+        "status": "not_performed",
+        "reason": "No source refetch, snapshot/digest lineage check, claim-entailment review, evidence-family independence check, or truth/effectiveness validation was performed by this manifest process."
+      }
+    }
+  ]
+}

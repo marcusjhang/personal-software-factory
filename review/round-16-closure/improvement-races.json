@@ -1,0 +1,128 @@
+{
+  "reviewer": "round-16 independent improvement-race closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-15 correction",
+    "specialty": "Cancellation versus release-attempt failure cleanup, control degradation, revocation, Effect settlement/reconciliation, rollback, and cleanup, including adversarial orderings and ownership.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-15-resolution.md",
+      "review/round-15-closure/formal-model.json",
+      "review/round-15-closure/improvement-races.json",
+      "review/round-15-closure/cross-consistency.json",
+      "review/round-15-closure/recovery-remediation.json",
+      "review/round-15-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_boundary_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md states that the repository intentionally contains a plan, not a working controller or deployed factory, and explicitly leaves implementation, full reachable-product checking, fresh semantic evidence, production validation, and independent closure pending.",
+        "Recomputed PLAN.md SHA-256 is 9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d.",
+        "Both digests match review/round-15-resolution.md and material-claims.json generated_against."
+      ]
+    },
+    {
+      "area": "round_15_inventory_manifest_and_schema_3_boundary",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-15-closure JSON files parse and contain exactly 0 critical and 6 high findings; review/round-15-resolution.md maps their six IDs to four unique defects.",
+        "Independent literal first-column parsing reproduces 799 unique normative-manifest edge IDs with no duplicate: 96 canonical and 703 private/product rows.",
+        "material-claims.json is schema_version 3.0.0, binds the current PLAN and manifest digests at regeneration_checkpoint round-15, and reports 25 source observations, 20 claims, 36 edges, 23 candidate_support edges, 5 candidate_refute edges, 8 context_only edges, 0 supports edges, and 0 refutes edges.",
+        "The schema-3 graph remains explicitly editorial candidate associations with legacy-unverified provenance; fresh retrieval and human semantic review remain unperformed accepted gates."
+      ]
+    },
+    {
+      "area": "release_attempt_failure_cleanup_cancellation_orderings",
+      "result": "pass",
+      "exact_text": [
+        "IA16 and IA17 now require work_cancel_state=NONE, so an IX01 winner excludes ordinary failure continuation by the shared tuple-version CAS.",
+        "IA18-F covers failure-origin FAILURE_PENDING_CLEANUP under REQUESTED, QUIESCING, or CLEANING and preserves the one IA07/IA08 CleanupManifest; IA18-C covers failure-origin CLEANING under the same IX states and requires attempt-local clean receipts.",
+        "IA15 and IA18-C are disjoint by cleanup origin. IA18-F/IA18-C create no parent cleanup or parent terminal, IX03 remains the sole cancellation-cleanup scheduler, and IX04 remains the sole parent CANCELLED owner.",
+        "The authored paths cover IX01 immediately before IA16, after IA16, and before IA17, with IX05 able to adopt a parent already canonical CLEANING without settling the attempt or duplicating cleanup."
+      ]
+    },
+    {
+      "area": "cancellation_side_degradation_and_settlement_ownership",
+      "result": "pass",
+      "exact_text": [
+        "IXH01-R, IXH01-Q, and IXH01-C cover generated reachable nonterminal HEALTHY cancellation tuples at REQUESTED, QUIESCING, and CLEANING; each changes only health and its bound receipt while preserving Effect, rollout, rollback, attempt, and cleanup ownership.",
+        "Every IH01 and IH06 row requires cancellation NONE where relevant; after IX01/IX02, IXH records degradation and IX06 owns protected X/N/UNSETTLED Effect handling without a second rollback or CleanupManifest.",
+        "IX03 requires settled effects and either a complete all-target NoExposureReceipt with rollback IDLE or exact ROLLED_BACK after exposure; IX04 additionally requires no live child, authority, effect, rollback, or attempt.",
+        "CANCELLED is immutable, so a degradation event losing the IX04 CAS cannot reopen the terminal."
+      ]
+    },
+    {
+      "area": "round_15_revocation_extension",
+      "result": "fail",
+      "exact_text": [
+        "IX06-UR/UQ now name SHADOW_PASSED|FROZEN|EVIDENCE_STALE->REVOKED, but their authored unsettled source requires rollout WIDENING_EFFECT|PROMOTING and moves it to WIDENING_RECONCILING|PROMOTION_RECONCILING.",
+        "There is no IX counterpart of IC32-HU for a revocation that arrives after the exact original Effect is already in WIDENING_RECONCILING|PROMOTION_RECONCILING and remains unsettled.",
+        "That omitted coordinate is directly reachable after IC24-A followed by IX01, or after IX01 followed by a non-revocation IX06-UR/UQ, so the claimed exact CancellationRevocationCoordinatesV1 equality is not reproduced from the authored rows."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "R16-IR-001",
+      "severity": "high",
+      "title": "IX cancellation still has no unsettled revocation edge after Effect reconciliation has already begun",
+      "requirement": "PLAN \u00a78.4 and manifest \u00a7\u00a715.2 and 15.5 require the IX revocation relation to accept SHADOW_PASSED|FROZEN|EVIDENCE_STALE at every reachable REQUESTED|QUIESCING protected X/N/UNSETTLED coordinate, with exact equality to the six IX06 revocation guards and no inferred edge.",
+      "evidence": [
+        "Manifest row IC24-A can produce candidate EVIDENCE_STALE with rollout WIDENING_RECONCILING or PROMOTION_RECONCILING while the exact original Effect remains unsettled.",
+        "IX01 is authorized for every reachable nonterminal tuple and can then change work_cancel_state NONE->REQUESTED without changing that already-reconciling rollout or unsettled Effect.",
+        "Manifest \u00a715.5 rejects ordinary candidate rows, including IC32-E, while cancellation is not NONE.",
+        "IX06-UR/UQ require the unsettled source rollout WIDENING_EFFECT|PROMOTING and synchronize it to WIDENING_RECONCILING|PROMOTION_RECONCILING; they do not accept a source already in either reconciliation rollout.",
+        "IX06-NR/NQ require protected N and IX06-XR/XQ require protected X, so none applies while the already-reconciling Effect is still unsettled.",
+        "Manifest has IC32-HU for this exact already-reconciling unsettled revocation ordering when cancellation is NONE, but no corresponding IX row for REQUESTED or QUIESCING."
+      ],
+      "adversarial_trace": [
+        "Reach SHADOW_PASSED + WIDENING_EFFECT + an unsettled original Effect + rollback IDLE + cancellation NONE.",
+        "Commit IC24-A on a bound-digest change: candidate becomes EVIDENCE_STALE and rollout becomes WIDENING_RECONCILING while the original Effect identity remains unsettled.",
+        "Commit IX01 before Effect settlement: cancellation becomes REQUESTED and ordinary IC32-E is now forbidden.",
+        "Deliver an authenticated revocation before the Effect obtains protected X or N classification.",
+        "IX06-UR rejects because the rollout source is already WIDENING_RECONCILING; IX06-NR and IX06-XR reject because N/X is not yet available; no authored row records EVIDENCE_STALE->REVOKED.",
+        "The same missing owner exists at QUIESCING and for PROMOTION_RECONCILING. A second reachable ordering is IX01 then non-revocation IX06-UR/UQ, followed by revocation before settlement."
+      ],
+      "impact": "A valid revocation in a reachable cancellation tuple must be deferred without an authored revocation transition, dropped, or applied through an inferred edge. This contradicts the claimed exact and total UNSETTLED revocation partition and leaves the candidate disposition undefined until a later X/N receipt that may itself require bounded reconciliation.",
+      "required_correction": "Add exact REQUESTED and QUIESCING IX unsettled-reconciliation revocation rows, analogous to IC32-HU, for WIDENING_RECONCILING|PROMOTION_RECONCILING with candidate SHADOW_PASSED|FROZEN|EVIDENCE_STALE. They must atomically record REVOKED, preserve the exact Effect/reconciliation/rollback/cleanup identities, keep the existing fence, create no saga or cleanup, and remain pairwise exclusive with IX06 X/N and IC32 by classifier, cancellation state, and tuple-version CAS. Extend CancellationRevocationCoordinatesV1 equality and witnesses to revocation before versus after IX06-U and before versus after settlement."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1,
+    "manifest_rows_reproduced": 799,
+    "canonical_rows_reproduced": 96,
+    "private_and_product_rows_reproduced": 703,
+    "round_15_review_files_reviewed": 5,
+    "round_15_raw_high_findings_reviewed": 6,
+    "round_15_unique_defects_reviewed": 4,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_evidence_edges_checked": 36
+  },
+  "residual_uncertainty": [
+    "This is a plan-contract audit, not implementation or exhaustive reachable-product execution.",
+    "Fresh immutable source retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation remain accepted future gates.",
+    "The reported high finding is based on an explicit two-transaction reachable ordering and missing authored IX edge; it does not depend on executing the accepted future full-product gate."
+  ],
+  "closure_criteria_pass": false
+}

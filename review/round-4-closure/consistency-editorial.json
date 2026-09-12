@@ -1,0 +1,132 @@
+{
+  "reviewer": "round-4-closure-consistency-editorial",
+  "scope": "Final plan-only repository-wide consistency audit of PLAN.md, README.md, the normative state-transition manifest, requirements traceability, all round-2 and round-3 reviews/resolution material, relevant round-1 resolutions, and the current repository-agent-operating-system evidence artifacts. No implementation exists by explicit scope; future implementation, model-checking, fresh retrieval, semantic review, and pilot gates were not required to have passed.",
+  "strengths": [
+    "PLAN.md clearly states plan-only scope, separates present facts from future gates, and makes the state-transition manifest normative without claiming implementation proof.",
+    "Conditional repository identity is now consistent in the durable-record, artifact-envelope, signed-context, tenant/scope, and release contracts: tenant plus typed ScopeRef is universal, while repository identity is required only for engineering/repository variants.",
+    "The round-2 and round-3 registers have correct counts: round 2 maps 25 findings (15 high, 10 medium); round 3 maps 24 findings (15 high, 6 medium, 3 low) into 15 groups. Requirements traceability has 16 unique requirement rows and 52 unique round-1 root rows (6 EE, 11 SO, 17 SI, 18 FC).",
+    "All explicit local Markdown paths and anchors checked in the requested core documents resolve. The research inventory contains exactly 37 result JSON files with the stated 14+10+8+5 split, and the recorded file hashes match the checkout.",
+    "material-claims.json is digest-bound to the current PLAN.md and normative manifest, distinguishes legacy provenance from semantic support, and does not claim that the future immutable re-fetch or human semantic gate passed."
+  ],
+  "findings": [
+    {
+      "id": "R4-CONS-001",
+      "severity": "high",
+      "title": "The normative factory manifest still contradicts its own canonical projection index and reachability gate",
+      "requirement": "R-08/P-08 requires a complete, deterministic status model with every private edge mapped to a legal canonical edge, stutter, or declared atomic sequence and with no unreachable non-migration states.",
+      "evidence": [
+        "PLAN.md:359-367 says the manifest is the complete normative legal-edge source, defines S as a stutter through the incorporated manifest, and maps IDEATION ACCEPTED->READY and HANDOFF->PLANNING.",
+        "docs/state-transition-manifests.md:129 (I09) declares ACCEPTED->HANDOFF as S even though those states map READY->PLANNING; line 130 (I10) starts its projection at READY although HANDOFF maps to PLANNING; line 141 (I21) declares HANDOFF->CANCEL_REQUESTED as S although those states map PLANNING->CANCEL_REQUESTED.",
+        "PLAN.md:368 maps BUILD UNKNOWN_EFFECT->QUARANTINED and CANCEL_REQUESTED->CANCEL_REQUESTED, but docs/state-transition-manifests.md:213 (B58) targets private CANCEL_REQUESTED while projecting QUARANTINED>CLEANING>CANCELLED and marks the row terminal cancelled.",
+        "The DEEP-RESEARCH table declares QUARANTINED only as a source (D28 and D45 at manifest lines 308 and 325); no row targets it. This violates manifest §16's required reachability check."
+      ],
+      "reproduction": "Parse PLAN §14.0 into private-state-to-canonical-state maps. For every factory row, require an S row to have equal source/target mappings and every explicit path to start/end at the source/target mappings. I09, I10, I21, and B58 fail. Separately compute target reachability in DEEP-RESEARCH: QUARANTINED has out-edges but no in-edge and is not the initial SCOPING state.",
+      "impact": "The claimed single source of truth cannot be compiled under its own rules. An implementer must guess whether the private target, canonical path, terminal flag, or readable mapping wins. B58 in particular disagrees on whether cancellation has merely been requested or is already terminal, which can affect authority, effect settlement, and cleanup.",
+      "recommendation": "Correct the four rows or the canonical mappings so source and target projections agree, make B58 use the explicit private cancellation/quiescence/cleanup sequence with a consistent target and terminal result, and either add guarded incoming DEEP-RESEARCH quarantine edges or remove the unreachable state. Keep one authoritative representation and generate the readable index from it.",
+      "verification": "Run a static manifest check now (not a future implementation gate): all S rows preserve canonical state; explicit paths begin/end at mapped endpoints; terminal labels agree with private targets/predicates; every declared non-migration state is reachable from its machine initial state; no nonterminal sink exists.",
+      "confidence": "high",
+      "prior": [
+        "CEC-R3-001",
+        "R3-STATESEC-001",
+        "R3-STATESEC-009",
+        "G1"
+      ]
+    },
+    {
+      "id": "R4-CONS-002",
+      "severity": "high",
+      "title": "The closed Wait aggregate omits cancellation from six reachable nonterminal states",
+      "requirement": "R-08/P-08 and the round-3 G9 closure require explicit wait answer, expiry, withdrawal, cancellation, stale, retry/exhaustion, and terminal relations with no implementation-defined cancellation path.",
+      "evidence": [
+        "docs/state-transition-manifests.md §1 says answer/resume, expiry, withdrawal, cancellation, and stale input can occur only through explicit Wait edges.",
+        "Wait rows W01-W03 reach ANSWERED, EXPIRED, and WITHDRAWN; W05, W08, and W12 make STALE and ESCALATED reachable/nonterminal.",
+        "The only cancellation row is W04 OPEN->CANCELLED (manifest line 446). There is no cancellation edge from ANSWERED, STALE, EXPIRED, WITHDRAWN, or ESCALATED.",
+        "Manifest §16 says wait-cancel tests are generated from these rows, while round-3-resolution.md finding 9 claims all explicit answer/expiry/withdraw/cancel relations were added."
+      ],
+      "reproduction": "Build the Wait graph from W01-W13. Subtract declared terminal states {CONSUMED, CLOSED_SAFE_DEFAULT, CLOSED_BLOCKED, CANCELLED}. For each reachable nonterminal state, look for a parent-cancellation-epoch edge. Only OPEN has one; ANSWERED, STALE, EXPIRED, WITHDRAWN, and ESCALATED do not.",
+      "impact": "A parent can be cancelled after a reply, expiry, withdrawal, staleness, or escalation but before the follow-on transition. The plan provides no legal Wait transition to consume that cancellation, so implementations can diverge or leave a wait nonterminal during parent quiescence/cleanup.",
+      "recommendation": "Add explicit cancellation edges from every reachable nonterminal Wait state to CANCELLED, with CAS/epoch ordering that resolves answer-versus-cancel races deterministically. State whether already closed terminal waits remain immutable and irrelevant to parent terminal predicates.",
+      "verification": "Enumerate all reachable Wait states and prove that every nonterminal state has exactly one valid parent-cancellation outcome; add static race cases for answer/expire/withdraw/escalate versus cancellation at the same aggregate version.",
+      "confidence": "high",
+      "prior": [
+        "R3-STATESEC-009",
+        "G9",
+        "SO-RC-2",
+        "EE-RC-5"
+      ]
+    },
+    {
+      "id": "R4-CONS-003",
+      "severity": "medium",
+      "title": "One current evidence artifact still states the disclaimed UTC+08 retrieval explanation as fact",
+      "requirement": "Evidence claims must be honest about the unverified legacy retrieval timeline and must not turn a plausible process narrative into provenance.",
+      "evidence": [
+        "evidence-cutoff.md says the UTC+08 account is an unverified process narrative and that no actual UTC retrieval time or pre-cutoff compliance is asserted.",
+        "research-manifest.json similarly calls the local-date interpretation intended rather than verified.",
+        "synthesis-coverage.md:11 says many records use 2026-09-13 'because that is the UTC+08 host’s local calendar date' without qualifying the causal account as unverified, although the same bullet later disclaims cryptographic attestation."
+      ],
+      "reproduction": "Compare the time/provenance sentence in synthesis-coverage.md with evidence-cutoff.md paragraphs 1-3 and research-manifest.json provenance_disclaimer.access_date_scope. The former asserts the reason; the controlling artifacts say that reason is only an unverified account.",
+      "impact": "The repository remains internally inconsistent about the one evidence-history statement that round 3 explicitly required it to disclaim. The nearby caveat limits harm, so this is not treated as a material high-severity overclaim.",
+      "recommendation": "Change the synthesis sentence to say the values were 'previously described as' or 'are intended to represent' a UTC+08 local date, and explicitly label that explanation unverified.",
+      "verification": "Search all current evidence summaries for causal assertions about UTC+08, access_date, retrieval, observation, and cutoff compliance; require each to match evidence-cutoff.md's unverified wording.",
+      "confidence": "high",
+      "prior": [
+        "CEC-R3-003",
+        "ROAD-EVID-R3-001",
+        "G15"
+      ]
+    },
+    {
+      "id": "R4-CONS-004",
+      "severity": "medium",
+      "title": "The generated evidence index is unreadable for two research tracks",
+      "requirement": "The plan's evidence inventory must remain readable and auditable; source lists must identify records rather than silently corrupt their representation.",
+      "evidence": [
+        "evidence-index.md begins core track 02 at line 41 with bullets '- 1', '- .', '-  ', '- G', '- i', etc.; the section is approximately 10,000 character-level bullets.",
+        "The same corruption begins for core track 05 at evidence-index.md line 10211 with '- A', '- c', '- c', etc. Approximately 6,600 lines are character-level bullets.",
+        "Other track sections contain normal source-title/URL bullets, and the underlying result JSON remains available."
+      ],
+      "reproduction": "Split evidence-index.md by '## core:' headings and count bullets matching a single character. core 02 has about 10,055 such bullets and core 05 about 6,637, unlike the normal list records in other sections.",
+      "impact": "Readers cannot use the claimed evidence index as a practical source inventory for two of the ten base tracks. It also hides whether numbered bibliography strings were parsed into complete source records.",
+      "recommendation": "Regenerate those two sections by parsing numbered bibliography strings into whole entries, or replace them with explicit pointers to the underlying result fields. Add a generator check that rejects single-character bullet explosions and requires at least a title or URL per source entry.",
+      "verification": "Confirm every track section has a bounded source-entry count and zero unintended one-character bullets; manually compare the repaired core 02 and core 05 lists with their result JSON source fields.",
+      "confidence": "high",
+      "prior": [
+        "CEC-R3-003",
+        "ROAD-EVID-R3-002",
+        "G15"
+      ]
+    },
+    {
+      "id": "R4-CONS-005",
+      "severity": "low",
+      "title": "Supporting status and traceability text retains several stale references and completed tasks",
+      "requirement": "Stable references, roadmap instructions, and status labels should match the current plan-only checkout and must not send a future builder toward nonexistent sections or already-completed editorial work.",
+      "evidence": [
+        "PLAN.md:484 still tells Increment 0 to 'Archive prototype as non-shipping', while PLAN §24 says to verify absence and explicitly says no external prototype archive is required.",
+        "synthesis-coverage.md:121 and :214 cite nonexistent PLAN §8.6; current PLAN has §8.1-§8.5.",
+        "evidence-repair.md:76-78 still instructs a later PLAN edit that has already occurred, and line 104 describes MC-001 through MC-020 although the current active graph includes MC-021-MC-024 and explicitly supersedes MC-001.",
+        "round-3-resolution.md:44 and requirements-traceability.md §6 still say final material-claim regeneration is required, although material-claims.json matches the current PLAN and manifest digests; the distinct immutable re-fetch and semantic gate correctly remains future.",
+        "README.md:15 calls the review directory 'verified resolutions' although README status and round-3-resolution.md say the mappings are not independent closure proof."
+      ],
+      "reproduction": "List PLAN subsection headings and grep supporting artifacts for '§8.6', 'Archive prototype', 'later docs-only commit', 'MC-001 through MC-020', 'final generated artifact required', 'final regenerated material-claim', and 'verified resolutions'. Compare material-claims.json generated_against hashes to SHA-256 of current PLAN.md and manifest; both match.",
+      "impact": "These do not create an unsafe implementation path, but they reduce readability and can cause redundant or impossible editorial work and overstate review status.",
+      "recommendation": "Align Increment 0 with §24's checkout-verifiable absence instruction; replace §8.6 with the intended current section; mark old evidence-repair instructions historical/superseded and correct claim-ID language; mark current claim regeneration complete while preserving the future re-fetch/semantic gate; call review artifacts plan-contract resolution registers rather than verified resolutions.",
+      "verification": "Repeat the grep, confirm all section references exist, confirm no current instruction requests an external prototype archive or already-completed regeneration, and ensure status wording never implies independent closure.",
+      "confidence": "high",
+      "prior": [
+        "CEC-R3-004",
+        "CEC-R3-005",
+        "ROAD-EVID-R3-002",
+        "G14",
+        "G15"
+      ]
+    }
+  ],
+  "residual_uncertainty": [
+    "This was a static plan-contract audit. It did not execute the future compiler/model checker, perform the future immutable source re-fetch, judge source entailment, or validate implementation because those artifacts and gates do not yet exist.",
+    "The two high findings are reproducible directly from current normative tables and do not depend on future gate outcomes.",
+    "External HTTP content can change; this audit relied on checked-in evidence and the repository's recorded reachability result rather than treating live pages as provenance."
+  ],
+  "closure_criteria_pass": false
+}

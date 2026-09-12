@@ -1,0 +1,1490 @@
+{
+  "scope": {
+    "question": "Define an implementable, durable conversational factory from an authenticated raw software/product idea to an exact-version READY decision, including research, alternatives, product decisions, specifications, disposable prototypes, pause/resume, deferral, cancellation, rejection and reopening.",
+    "system_boundary": "Git contains desired schemas, policy, prompts, rubrics and reusable factory definition. A transactional/event-sourced control plane is authoritative for conversation order, artifact revisions, actor identity, approvals and lifecycle state. GitHub Issues/Projects are intake and human projection surfaces, not authorization. An agent runtime or durable workflow engine executes bounded work but is not the policy engine.",
+    "included": [
+      "multi-channel intake and deduplication",
+      "durable user-agent turns, questions, answers, amendments and decisions",
+      "research plans, source/claim evidence, alternative comparison and experiment/prototype loops",
+      "versioned problem, opportunity, appetite, scope/non-goals, acceptance, risk, plan and READY packet",
+      "resume/fork/supersede/stale/reconcile behavior",
+      "human-need triggers, budgets, safety boundaries and governed workflow improvement"
+    ],
+    "excluded": [
+      "production implementation, merge and deployment except for their READY inputs",
+      "autonomous product purpose, priority, value tradeoffs, legal/privacy/security acceptance or architecture exceptions",
+      "treating chat summaries, labels, model confidence, test generation or prototypes as approval",
+      "allowing an improvement candidate to modify protected tests, graders, permissions, policy, audit history or promotion authority"
+    ],
+    "key_conclusion": "Conversational discovery can be highly automated as evidence generation and proposal drafting. Durable authority must be expressed as attributable, immutable, version-bound decision artifacts. No cited framework or study establishes safe unattended ownership of ambiguous product discovery or self-governing end-to-end improvement."
+  },
+  "verified_capabilities": [
+    {
+      "claim": "C01",
+      "finding": "GitHub issue forms can require structured fields, but the schema remains public preview and required presence is not semantic completeness. Sub-issues and dependencies can project decomposition, subject to documented limits; they do not execute or validate a DAG.",
+      "sources": [
+        "S01",
+        "S02",
+        "S03"
+      ]
+    },
+    {
+      "claim": "C05",
+      "finding": "GitHub Spec Kit supplies a repository artifact sequence around constitution, specification, clarification, plan, tasks, analysis/checklists and implementation. Shape Up supplies problem, appetite, solution, risks and no-gos. These are useful artifact patterns, not durable workflow/authority engines or independent effectiveness evidence.",
+      "sources": [
+        "S06",
+        "S07"
+      ]
+    },
+    {
+      "claim": "C07-C10",
+      "finding": "LangGraph documents persistent thread checkpoints, interrupts, resume/time travel and multi-agent patterns. Microsoft Agent Framework advertises graph workflows, checkpoints, human-in-loop and time travel. Persistence backends, retention, identity, authorization, idempotent effects and product decisions remain application responsibilities.",
+      "sources": [
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ]
+    },
+    {
+      "claim": "C11-C12",
+      "finding": "OpenAI Agents SDK supports handoffs, filtered context and guardrails. Handoffs are tool calls and guardrail timing can be parallel; neither primitive is a durable permission or approval record.",
+      "sources": [
+        "S12",
+        "S13"
+      ]
+    },
+    {
+      "claim": "C13-C16",
+      "finding": "Temporal provides replayable event history and retry semantics; A2A 1.0 provides task/message/artifact and long-running interaction primitives. At-least-once activity effects require dedupe and workflow histories require lifecycle management. Protocol/runtime support does not supply repository-specific product governance.",
+      "sources": [
+        "S14",
+        "S15",
+        "S16",
+        "S17"
+      ]
+    },
+    {
+      "claim": "C17-C23",
+      "finding": "CloudEvents, W3C PROV, JSON Schema, JCS, GitOps, SSDF and SLSA provide useful event, provenance, schema, canonical digest, reconciliation, separation and attestation building blocks. They do not validate the truth or desirability of a product decision.",
+      "sources": [
+        "S18",
+        "S19",
+        "S20",
+        "S21",
+        "S23",
+        "S24",
+        "S25"
+      ]
+    },
+    {
+      "claim": "C24-C30",
+      "finding": "Independent and standards evidence limits autonomy: prompt injection and excessive agency remain material risks; weak/leaked tests overstate correctness; one RCT found slower experienced developers in its studied setting; multi-agent traces show recurring coordination failures. Vendor eval guidance supports continuous and human-calibrated evaluation but is not proof of this lifecycle.",
+      "sources": [
+        "S26",
+        "S27",
+        "S28",
+        "S29",
+        "S30",
+        "S31",
+        "S32"
+      ]
+    }
+  ],
+  "evidence_and_limits": {
+    "evidence_grade": {
+      "high": "Documented API/runtime/standard semantics: structured forms, checkpoints, interrupts, event history, schema/canonicalization and provenance primitives.",
+      "moderate": "The proposed two-plane event-sourced architecture and artifact decomposition follow established patterns and the prior validated repository-agent-OS corpus, but need local operational proof.",
+      "low": "Causal productivity benefit, optimum number/timing of questions, automatic prioritization quality, ideal confidence thresholds and comparative superiority of any spec framework."
+    },
+    "denominator_limits": [
+      "Framework documentation proves exposed features, not crash-free production behavior, governance completeness or improved product outcomes.",
+      "Methodology/vendor sources describe recommended practice without controlled comparisons.",
+      "Benchmarks and papers concern bounded coding or multi-agent tasks, not longitudinal ambiguous product discovery.",
+      "The METR result is precise for 16 developers/246 tasks in its studied early-2025 environment and is not a universal forecast.",
+      "No normalized source reports idea-to-outcome denominators including cancelled/deferred ideas, user time, wrong product decisions, escaped harms and total compute/reviewer cost."
+    ],
+    "negative_result": "No reviewed source demonstrates reliable general autonomous progression from raw ambiguous intent through priority/value choices, research, specification, production promotion and recursive policy improvement while preserving accountable authority.",
+    "design_implication": "Use documented primitives as replaceable adapters. Evaluate the complete local workflow in shadow mode against explicit human decisions and outcome measures before any narrow auto-advance."
+  },
+  "actors_and_authority": {
+    "principals": [
+      {
+        "actor": "idea contributor",
+        "may": "submit context, correct facts, answer questions, withdraw own proposal",
+        "may_not": "approve organizational priority, risk or READY unless separately assigned an authorized role"
+      },
+      {
+        "actor": "product decision owner",
+        "may": "approve problem, target user/outcome, appetite, priority, scope/non-goals, defer/cancel and final behavior",
+        "may_not": "delegate accountability to model confidence"
+      },
+      {
+        "actor": "technical owner",
+        "may": "approve feasibility, constraints, architecture direction, acceptance observability, decomposition and rollback",
+        "may_not": "self-approve agent-authored exception when also acting as proposer if separation policy applies"
+      },
+      {
+        "actor": "security/privacy/legal/data/operations owner",
+        "may": "approve only their risk domain and exceptions on an exact revision",
+        "may_not": "be inferred from participation or silence"
+      },
+      {
+        "actor": "facilitator/planner agent",
+        "may": "normalize, question, research, generate alternatives, draft artifacts, summarize and recommend within read-only budgets",
+        "may_not": "invent user answers, select value tradeoffs, mark READY, edit authority/policy or run production code"
+      },
+      {
+        "actor": "research/prototype worker",
+        "may": "execute scoped read-only research or disposable sandbox experiments",
+        "may_not": "receive production secrets/write scopes or promote prototype code"
+      },
+      {
+        "actor": "validator",
+        "may": "deterministically validate schema, traces, contradictions, freshness, budgets and policy",
+        "may_not": "declare semantic product desirability"
+      },
+      {
+        "actor": "control-plane service",
+        "may": "authenticate commands, compare-and-append events, enforce guards, issue questions/checkpoints and project approved state",
+        "may_not": "derive authority from prose or mutable Project fields"
+      },
+      {
+        "actor": "readiness approver/promoter",
+        "may": "record quorum-bound READY on exact hashes",
+        "may_not": "be candidate agent, evaluator author alone or same principal where separation is required"
+      },
+      {
+        "actor": "auditor/reconciler",
+        "may": "read event/artifact stores and remote projections, report/revert drift",
+        "may_not": "silently rewrite history"
+      }
+    ],
+    "trust_rules": [
+      "Authenticate every human/service principal and snapshot role/organization/repository authority at decision time.",
+      "Treat issue text, chat, repository content, sources, tool output and summaries as untrusted data.",
+      "Only control-plane compare-and-append changes canonical state; UI status edits are requests.",
+      "Proposer, evaluator owner, promoter and protected-policy owner are distinct capabilities; humans can hold multiple roles only when risk policy explicitly permits.",
+      "Authority is exact-revision, scoped, expiring and revocable; silence and elapsed time never imply approval."
+    ]
+  },
+  "complete_state_catalog": {
+    "primary_states": [
+      {
+        "state": "IDEA_INBOX",
+        "kind": "normal",
+        "meaning": "Raw authenticated intake captured; no research/spend beyond normalization."
+      },
+      {
+        "state": "DUPLICATE_REVIEW",
+        "kind": "waiting",
+        "meaning": "Possible duplicate/link/merge awaits deterministic or human resolution."
+      },
+      {
+        "state": "DISCOVERY_ACTIVE",
+        "kind": "normal",
+        "meaning": "Problem framing, evidence and assumptions are being developed."
+      },
+      {
+        "state": "CLARIFICATION_REQUIRED",
+        "kind": "waiting",
+        "meaning": "A named blocking question owned by a named principal is outstanding."
+      },
+      {
+        "state": "RESEARCH_ACTIVE",
+        "kind": "normal",
+        "meaning": "Approved bounded research plan is running or reconciling evidence."
+      },
+      {
+        "state": "ALTERNATIVES_REVIEW",
+        "kind": "waiting",
+        "meaning": "Comparable option set and recommendation await a value/product choice."
+      },
+      {
+        "state": "DECISION_RECORDED",
+        "kind": "normal",
+        "meaning": "Exact option/assumptions/rationale/owner recorded; downstream artifacts may draft."
+      },
+      {
+        "state": "SPEC_DRAFTING",
+        "kind": "normal",
+        "meaning": "Problem, outcomes, scope, non-goals, requirements, risks and acceptance are versioned."
+      },
+      {
+        "state": "PROTOTYPE_AUTH_REQUIRED",
+        "kind": "waiting",
+        "meaning": "A sandbox experiment needs cost/data/tool approval."
+      },
+      {
+        "state": "PROTOTYPE_ACTIVE",
+        "kind": "normal",
+        "meaning": "Disposable experiment runs under charter and expiry."
+      },
+      {
+        "state": "PROTOTYPE_REVIEW",
+        "kind": "waiting",
+        "meaning": "Result, failures and learning await interpretation; prototype is non-production."
+      },
+      {
+        "state": "READY_REVIEW",
+        "kind": "waiting",
+        "meaning": "Complete candidate packet awaits exact-revision quorum."
+      },
+      {
+        "state": "READY",
+        "kind": "terminal-for-discovery",
+        "meaning": "Immutable readiness token exists; build admission must revalidate it."
+      },
+      {
+        "state": "PAUSED",
+        "kind": "waiting",
+        "meaning": "Explicit short pause with owner, reason, wake condition and deadline."
+      },
+      {
+        "state": "DEFERRED",
+        "kind": "terminal-revivable",
+        "meaning": "Not now; rationale, revisit trigger/date and freshness policy recorded."
+      },
+      {
+        "state": "STALE",
+        "kind": "failure/waiting",
+        "meaning": "Evidence, answer, authority, dependency or policy freshness expired; revalidation required."
+      },
+      {
+        "state": "BLOCKED",
+        "kind": "failure/waiting",
+        "meaning": "Access, conflict, budget, provider or safety block has no current safe path."
+      },
+      {
+        "state": "CANCELLED",
+        "kind": "terminal-revivable",
+        "meaning": "Authorized owner stopped effort; tombstone and cleanup complete."
+      },
+      {
+        "state": "REJECTED",
+        "kind": "terminal",
+        "meaning": "Invalid, disallowed, strategically declined or infeasible with reason/owner."
+      },
+      {
+        "state": "SUPERSEDED",
+        "kind": "terminal-linked",
+        "meaning": "A new aggregate/revision replaces this one; successor link is immutable."
+      },
+      {
+        "state": "ERROR_RECONCILIATION",
+        "kind": "failure",
+        "meaning": "Unknown side effect, corrupt projection or version conflict requires reconciliation."
+      }
+    ],
+    "orthogonal_run_status": [
+      "NOT_STARTED",
+      "QUEUED",
+      "RUNNING",
+      "WAITING_TOOL",
+      "WAITING_HUMAN",
+      "SUCCEEDED",
+      "FAILED_RETRYABLE",
+      "FAILED_TERMINAL",
+      "TIMED_OUT",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "ORPHANED",
+      "RECONCILING"
+    ],
+    "invariants": [
+      "Exactly one primary state and aggregate version is current; history is append-only.",
+      "Every waiting state has owner, reason, requested action, wake event and deadline/expiry.",
+      "Every terminal state has disposition, attribution, retained evidence and completed cleanup receipt.",
+      "READY never coexists with unresolved blocking decisions, active prototypes, invalidated evidence or unaccepted material assumptions.",
+      "Reopen creates a new revision/event and never erases the prior disposition."
+    ]
+  },
+  "transition_contract": {
+    "event_envelope": "event_id UUID; type and schema_version; aggregate_id; aggregate_version; expected_prior_version; occurred_at and recorded_at; actor principal/role; correlation_id; causation_id; idempotency_key; from_state/to_state; artifact_refs with digest; policy_commit; source channel; payload_digest/signature; redaction class.",
+    "legal_paths": [
+      "IDEA_INBOX -> DUPLICATE_REVIEW | DISCOVERY_ACTIVE | REJECTED | CANCELLED after authentication/normalization.",
+      "DUPLICATE_REVIEW -> SUPERSEDED when merged/link approved, or -> DISCOVERY_ACTIVE when distinct.",
+      "DISCOVERY_ACTIVE -> CLARIFICATION_REQUIRED for a blocking unknown; -> RESEARCH_ACTIVE for approved research; -> ALTERNATIVES_REVIEW when option contract complete; -> PAUSED/DEFERRED/CANCELLED/REJECTED.",
+      "CLARIFICATION_REQUIRED -> DISCOVERY_ACTIVE on attributable answer/default acceptance; -> DEFERRED/BLOCKED on deadline or refusal; any answer creates a revision.",
+      "RESEARCH_ACTIVE -> DISCOVERY_ACTIVE on failed/inconclusive research; -> ALTERNATIVES_REVIEW on evidence join; -> BLOCKED/PAUSED/CANCELLED on controls.",
+      "ALTERNATIVES_REVIEW -> DECISION_RECORDED on authorized exact option decision; -> DISCOVERY_ACTIVE/RESEARCH_ACTIVE for requested evidence; -> DEFERRED/CANCELLED/REJECTED.",
+      "DECISION_RECORDED -> SPEC_DRAFTING; material premise/choice change returns to DISCOVERY_ACTIVE or ALTERNATIVES_REVIEW and supersedes dependent artifacts.",
+      "SPEC_DRAFTING -> PROTOTYPE_AUTH_REQUIRED when empirical uncertainty requires mutation/spend; -> READY_REVIEW when DoR validator passes; -> CLARIFICATION_REQUIRED/DISCOVERY_ACTIVE on blockers.",
+      "PROTOTYPE_AUTH_REQUIRED -> PROTOTYPE_ACTIVE on exact charter/capability approval; -> SPEC_DRAFTING/DEFERRED/CANCELLED on deny/expiry.",
+      "PROTOTYPE_ACTIVE -> PROTOTYPE_REVIEW on result/timeout/failure/cancel plus cleanup; PROTOTYPE_REVIEW -> SPEC_DRAFTING | RESEARCH_ACTIVE | ALTERNATIVES_REVIEW.",
+      "READY_REVIEW -> READY on exact hashes/quorum; -> SPEC_DRAFTING on reject/change; READY -> SPEC_DRAFTING or STALE on any material invalidation before build admission.",
+      "PAUSED/DEFERRED/BLOCKED/STALE/CANCELLED -> DISCOVERY_ACTIVE or SPEC_DRAFTING only through authorized reopen/revalidate; REJECTED may be superseded by a new aggregate, not silently reopened."
+    ],
+    "guards": [
+      "Expected aggregate version matches (optimistic concurrency).",
+      "Actor role is authorized at current policy version and separation/quorum holds.",
+      "Referenced artifact schemas validate and digests resolve.",
+      "Required decisions/claims are not contradicted, expired or open.",
+      "Budget, capability profile, data class and tool scopes allow the effect.",
+      "READY guard binds work_item_id + repository_id + base_sha + problem/spec/decision/acceptance/plan hashes + risk tier + dependency snapshot + policy commit + approver set + issue/expiry times."
+    ],
+    "effects_and_reconciliation": [
+      "Append transition and outbox atomically; execute each external effect with stable idempotency key; save request/response receipt.",
+      "On duplicate command return original result. On expected-version conflict reload and recompute; never last-write-wins.",
+      "Webhook/comment delivery is only a trigger: verify signature, dedupe delivery ID, read authoritative remote state, then decide.",
+      "Scheduled full scan repairs missed/reordered projections. Ambiguous binding or unknown result enters ERROR_RECONCILIATION.",
+      "Material inputs invalidate all downstream derived artifacts by dependency graph; cosmetic edits are only schema-defined canonicalization exclusions.",
+      "Cancellation is cooperative first, then credential revocation/worker termination; reconcile effects and attest cleanup before terminal state."
+    ]
+  },
+  "artifact_contracts": {
+    "common_envelope": [
+      "artifact_id/type/schema_version",
+      "aggregate_id/revision/parent_revision/supersedes",
+      "created_at/created_by principal and role",
+      "content_media_type/canonicalization_version/content_digest",
+      "policy_commit/base_sha/dependency digests",
+      "provenance: inputs, source locators, retrieval time, tool/model/runtime/prompt versions and transformations",
+      "sensitivity/retention/redaction/visibility",
+      "validation results, signatures/attestations and invalidation status"
+    ],
+    "artifacts": [
+      {
+        "name": "idea_record",
+        "required": "raw immutable submission ref; normalized problem signal; affected user/system; desired outcome; channel; contributor; duplicate keys; consent/visibility."
+      },
+      {
+        "name": "conversation_turn",
+        "required": "turn_id; thread/branch; predecessor; speaker principal; verb (ask/answer/correct/propose/approve/reject/withdraw); content ref; attachments; reply_to; occurred/recorded time; client idempotency key."
+      },
+      {
+        "name": "question_record",
+        "required": "one decision/blocker; why needed now; type empirical/value/policy/permission; options including other; recommended default; consequence of default; owner; deadline; status and answer_turn."
+      },
+      {
+        "name": "assumption_register",
+        "required": "stable assumption IDs; statement; source; confidence; materiality; validation method; owner; expiry; accepted/rejected/unknown; dependent artifacts."
+      },
+      {
+        "name": "research_plan_and_report",
+        "required": "questions; scope/time range; search routes; budgets/stop conditions; source policy; claim-evidence matrix; conflicts; negative results; freshness; uncertainties. Claims cite direct source locators."
+      },
+      {
+        "name": "option_set",
+        "required": "at least status quo plus viable alternatives; common decision criteria; evidence; benefits/costs/risks/reversibility/time; assumptions; disqualifiers; recommendation separated from owner choice."
+      },
+      {
+        "name": "decision_record",
+        "required": "decision_id; exact option/version; owner/role; rationale; evidence/assumptions; alternatives rejected; consequences; dissent; effective/expiry/revisit triggers; supersession link. Never reconstruct from chat summary."
+      },
+      {
+        "name": "prototype_charter",
+        "required": "question/hypothesis; success/failure/inconclusive criteria; sandbox/data/tools; capability/budget/timebox; prohibited reuse; cleanup; approver; expiry."
+      },
+      {
+        "name": "prototype_report",
+        "required": "charter digest; method; environment/version; observations/raw evidence; failures; criterion outcome; limitations; learning; code/data digests; disposal/cleanup receipt. It is evidence, not production code."
+      },
+      {
+        "name": "product_spec",
+        "required": "problem and evidence; target users/outcomes; appetite/priority; scope/non-goals; normative functional/nonfunctional requirements; interfaces/data; constraints; open questions; decision refs; risks; rollout/rollback expectations."
+      },
+      {
+        "name": "acceptance_contract",
+        "required": "stable criterion IDs with Given/When/Then or equivalent observable oracle; positive, negative, authorization, accessibility, privacy/security, performance and operability cases as applicable; independent owner; trace to requirement/decision."
+      },
+      {
+        "name": "plan_dag",
+        "required": "stable nodes; dependencies; acceptance IDs; repository/write-set; deliverables; capability profile; budget; stop rule; owner; integration points. Must be acyclic even if GitHub dependency UI is not."
+      },
+      {
+        "name": "ready_review_packet",
+        "required": "human-readable diff and machine manifest of all exact hashes; unresolved/nonblocking uncertainty; risks/exceptions; provenance/freshness; decision and acceptance trace; requested approvers."
+      },
+      {
+        "name": "readiness_token",
+        "required": "exact bound tuple from transition guard; verified principals/roles/quorum; decisions; issue/expiry; signature. Token is admission evidence, not permanent authority."
+      },
+      {
+        "name": "checkpoint_context_bundle",
+        "required": "current state/version; objective; compact summary marked derived; recent verbatim turns; open questions/assumptions/decisions; artifacts/digests; budgets/capabilities; next legal actions. Summary links originals."
+      },
+      {
+        "name": "disposition_tombstone",
+        "required": "deferred/cancelled/rejected/superseded reason; owner; time; successor or revisit date/trigger; retained artifacts; cleanup and notification receipts."
+      },
+      {
+        "name": "state_event_and_side_effect_receipt",
+        "required": "event envelope plus command/tool, scoped credential identity, request digest, status/remote ID, attempts, response digest, started/finished time and reconciliation status."
+      }
+    ],
+    "storage": "Store canonical artifacts in immutable content-addressed object storage or protected Git where review is useful; store event order, turns, approvals and receipts transactionally. Encrypt sensitive content and keep redacted projections. Never depend on an LLM transcript window as storage."
+  },
+  "conversation_and_handoffs": {
+    "durable_dialogue_protocol": [
+      "Every user or agent utterance is an append-only conversation_turn. UI edits append correction/retraction events that supersede prior meaning; original bytes remain under retention policy.",
+      "A reply becomes authority only through a typed command/decision record validated against actor role. Free prose can propose but cannot approve READY, risk or spend.",
+      "Ask one bounded blocking decision at a time in the state model, but batch up to three related questions in the UI. Include why, 2-4 concrete options, tradeoffs, recommendation/default, impact of no answer, owner and deadline. Always allow free-form/none-of-the-above.",
+      "Classify claims as user-stated, source-verified, agent-inferred or unknown. Do not silently convert inference into a requirement. Detect contradictions against prior decisions and request correction or explicit supersession.",
+      "After each material answer append a new artifact revision, show the semantic diff and dependencies invalidated, then ask for confirmation only when policy says the interpretation is consequential.",
+      "Users may pause, resume, fork an alternative, request more research, amend, defer, cancel or reopen. Forks have separate aggregate IDs and share immutable ancestor artifacts; merges require explicit conflict decisions."
+    ],
+    "compaction_and_resume": [
+      "Compact only as a derived checkpoint. Preserve exact decision records, open questions, sources and relevant raw turns by digest; record summarizer model/prompt and coverage range.",
+      "On resume, controller loads authoritative state/artifacts, not model memory; agent presents objective, changes since last interaction, unresolved items, budget and next legal choices. User acknowledges only if a material stale/conflict condition exists.",
+      "A handoff manifest specifies sender/receiver identity, task contract, allowed context/artifacts, data classification, capabilities, budget, deadline, expected output schema, stop/escalation conditions and correlation ID. Receiver acceptance creates an event.",
+      "A2A/LangGraph/OpenAI/MAF messages or checkpoints are transport/runtime projections. The control-plane manifest and event ledger remain canonical. Context filters default-deny secrets and unrelated conversation.",
+      "Lost/late replies are correlated to question ID and expected artifact revision. A late answer to a superseded question is stored but cannot mutate current state without reconciliation."
+    ],
+    "user_experience": "Show a timeline with current state, exact pending owner/action, decision and assumption registers, evidence conflicts, alternatives, artifact diffs, budget, freshness and undo-by-supersession. Avoid fake real-time continuity: disclose when a different worker/model resumes."
+  },
+  "orchestration_and_composition": {
+    "workflow_shape": [
+      "Single facilitator/control-plane session owns synthesis; specialist workers never independently move lifecycle state.",
+      "Fan out only independent research questions, source verification or mutually isolated prototypes with explicit schemas, read-only scopes and per-child budget.",
+      "Join requires every mandatory child terminal or explicitly waived, schema-valid outputs, provenance, deduped claims, surfaced conflicts and no unresolved high-materiality contradiction. Missing output is not negative evidence.",
+      "Use one-agent-first. Escalate to parallel/multi-agent only when separability and expected latency/information gain justify coordination cost; MAST evidence makes unconditional multi-agent claims unsafe [S30].",
+      "Subfactories: intake_normalize, duplicate_check, discovery_interview, deep_research, option_compare, prototype_experiment, spec_compile, dor_validate, ready_review, defer_cancel_cleanup. Each has versioned input/output and terminal mapping."
+    ],
+    "dependency_and_budget": [
+      "Artifact dependency graph determines invalidation and recomputation. Stable claim/decision/criterion IDs survive revisions where meaning is unchanged.",
+      "Budgets exist for tokens, money, elapsed/worker time, tool calls, sources, prototype compute/data and human questions. Reserve cleanup/reconciliation budget.",
+      "Retries are typed: deterministic schema errors do not retry unchanged; transient tools use bounded backoff/jitter; safety/permission denial never retries by model improvisation; unclear side effect reconciles before retry.",
+      "Deadline behavior is explicit per state: remind, pause, defer or escalate. Never convert timeout to approval."
+    ],
+    "cleanup": [
+      "Revoke prototype credentials, terminate compute, remove transient branches/workspaces, inventory/delete sensitive data per policy, retain immutable allowed evidence, complete receipts and notify owner.",
+      "Orphan sweeper finds expired runs/questions/leases and reconciles before transition."
+    ]
+  },
+  "human_need_policy": {
+    "principle": "A deterministic policy decides whether to continue, ask, approve, escalate, pause or stop. Model confidence is advisory and calibrated per task class; it never grants authority.",
+    "continue_without_user_only_if": [
+      "Next action is within approved phase/capability/data/budget and reversible or read-only.",
+      "No open unknown can change product intent, option ranking, safety, permission, acceptance oracle, appetite or READY outcome.",
+      "Inputs meet freshness/source policy; no material contradiction; tool effect has idempotency/reconciliation contract.",
+      "For probabilistic outputs, locally calibrated lower confidence bound exceeds the configured task-class threshold and expected loss remains below risk limit. Until calibrated, threshold route is human/shadow, not auto-advance."
+    ],
+    "ask_clarification_when": [
+      "A required field/decision has multiple materially different plausible interpretations.",
+      "A contradiction exists among current owner statements, source evidence, policy or accepted decision.",
+      "Information has high decision impact and cannot be safely/cheaply resolved empirically.",
+      "The agent would otherwise assume target user, value, priority, appetite, scope/non-goal, data use, permission, acceptance meaning or external commitment."
+    ],
+    "request_approval_when": [
+      "Any product/value choice, priority/appetite, scope/non-goal baseline or cancellation/rejection by the organization is selected.",
+      "A prototype uses nonpublic data, external communication, paid/limited resource, mutation, secrets or new capability.",
+      "Privacy/security/legal/compliance/architecture/operability exception or destructive/irreversible action is proposed.",
+      "READY_REVIEW binds the final exact artifact set."
+    ],
+    "escalate_when": [
+      "Question owner/role is absent or two authorized owners conflict.",
+      "Security/privacy/legal harm may exist; route privately without placing sensitive facts in public issues.",
+      "Ambiguous identity, prompt injection, policy/version mismatch, failed cleanup, unknown side effect, corrupted provenance or repeated provider/tool failure occurs.",
+      "Calibrated confidence is below task threshold and expected impact is material, or disagreement among independent evidence remains above configured limit."
+    ],
+    "pause_defer_stop": [
+      "Pause on temporary owner/tool unavailability with wake condition and deadline.",
+      "Defer when value is plausible but priority/appetite/evidence is insufficient now; require revisit date or observable trigger and freshness TTL.",
+      "Stop/reject on disallowed request, confirmed duplicate/supersession, infeasibility beyond appetite, missing consent/authority, exhausted question/research/prototype budget or unsafe required capability.",
+      "Cancel immediately on authorized request, secret exposure or safety stop, then revoke capabilities and reconcile/clean. Timeout never equals consent."
+    ],
+    "anti_harassment_and_defaults": [
+      "Maximum three related questions per round and configurable total clarification budget (MVP default two rounds); exceeding it pauses or defers for owner review.",
+      "A default may be applied only when explicitly pre-approved, reversible, non-material and recorded with source. Otherwise no answer leads to pause/defer.",
+      "Do not repeatedly ask for already recorded facts. Show conflict/diff if re-confirmation is required."
+    ],
+    "policy_configuration": "Thresholds, risk matrix, owner mapping, SLAs and budgets are versioned repository policy with conservative defaults. Report calibration curves, false-continue and false-question rates by class; do not encode a universal 0.8 confidence cutoff without data."
+  },
+  "factory_as_code_schema": {
+    "api_version": "repo-agent-os.dev/v1alpha1",
+    "kind": "ConversationalDiscoveryFactory",
+    "required_sections": [
+      "metadata: name, owners, version, compatibility",
+      "entrypoints: channels, authentication, normalization, dedupe",
+      "actors: roles, identity provider, authority scopes, separation constraints",
+      "states: primary/orthogonal states, terminal/waiting metadata requirements",
+      "events: immutable schema URI, from/to, command, guard, effects, invalidations",
+      "artifacts: schema URI, producer/consumer, provenance, sensitivity, retention, canonicalization",
+      "phases: inputs, outputs, worker profile, tools/data, budgets, retry/timeout/compensation",
+      "questions: classifier, mandatory triggers, batching/default/deadline/escalation",
+      "decisions: authorized roles, quorum, TTL, supersession and exact digest binding",
+      "fanout_join: dependency expression, concurrency, required/optional results, conflict policy",
+      "gates: deterministic validators, human approvals, calibrated evaluators and fail-closed behavior",
+      "projections: GitHub mappings, authority mode=projection, reconciliation interval",
+      "improvement: candidate-editable paths, protected assets, eval sets, shadow/canary/promotion/rollback",
+      "tests: schema/transition/property/fault/security/eval/acceptance suites"
+    ],
+    "minimal_example": {
+      "apiVersion": "repo-agent-os.dev/v1alpha1",
+      "kind": "ConversationalDiscoveryFactory",
+      "metadata": {
+        "name": "feature-discovery",
+        "version": "1.0.0"
+      },
+      "spec": {
+        "initial": "IDEA_INBOX",
+        "canonicalStore": "postgres-event-log",
+        "artifactStore": "content-addressed",
+        "transition": {
+          "from": "READY_REVIEW",
+          "on": "approve_ready",
+          "to": "READY",
+          "guards": [
+            "dor.valid",
+            "artifact_hashes.match",
+            "quorum(product,technical,risk)",
+            "no_blocking_unknowns",
+            "freshness.valid"
+          ],
+          "emit": "readiness.approved.v1"
+        },
+        "questionPolicy": {
+          "maxPerRound": 3,
+          "noAnswer": "DEFERRED",
+          "timeoutIsApproval": false
+        },
+        "prototype": {
+          "productionReuse": false,
+          "defaultNetwork": "deny"
+        },
+        "githubProject": {
+          "mode": "projection",
+          "reconcile": "15m"
+        },
+        "selfImprovement": {
+          "mode": "proposal-shadow-canary",
+          "protected": [
+            "tests/holdout/**",
+            "graders/**",
+            "policy/**",
+            "permissions/**",
+            "promotion/**"
+          ]
+        }
+      }
+    },
+    "versioning": "Pin JSON Schema dialect/URI and factory version. Validate old fixtures; classify changes as backward-compatible, migration-required or rejected. Upcast events only with deterministic tested functions while retaining original bytes. Sign release manifest and record digest/policy commit on every run.",
+    "repository_layout": [
+      ".repo-os/factories/ideation.yaml",
+      ".repo-os/schemas/{event,turn,question,assumption,research,option,decision,prototype,spec,acceptance,plan,ready-token,checkpoint,disposition}.schema.json",
+      ".repo-os/policies/{authority,human-need,risk,retention,capabilities,improvement}.yaml",
+      ".repo-os/prompts/ideation/**",
+      ".repo-os/evals/ideation/{public,protected-manifest}.yaml",
+      ".repo-os/tests/{transitions,fixtures,chaos,security}/**",
+      "discovery/<work-item-id>/{problem,decisions,spec,acceptance,plan}.yaml",
+      "docs/runbooks/{resume,reconcile,cancel,privacy-delete}.md"
+    ]
+  },
+  "end_to_end_workflows": {
+    "new_idea": [
+      "Authenticate channel; store raw turn/attachments; privacy scan; normalize without losing raw text; fingerprint against open/closed/deferred work.",
+      "If possible duplicate, show evidence and ask merge/link/distinct. If distinct, create aggregate and assign contributor/product/technical owners plus initial risk floor.",
+      "Facilitator drafts problem signal, target user/system, outcome, appetite placeholder, scope/non-goals and assumption register. It asks only blocking value questions.",
+      "Create bounded research questions and plan. Fan out primary-source collection and independent challenge; store claim-level provenance, conflicts, negative results and freshness.",
+      "Construct option set including status quo/do nothing and at least one meaningfully different alternative. Apply common criteria and show recommendation as agent advice, not decision.",
+      "Authorized product owner selects/rejects/defers or requests research. Record exact decision and consequences; invalidate dependent work if later superseded.",
+      "Compile spec and acceptance trace. Validator identifies contradictions, unobservable criteria, missing risks/owners/budgets and invalid dependencies."
+    ],
+    "prototype_loop": [
+      "Use a prototype only for a named empirical uncertainty whose information can change a decision. Draft charter with success/failure/inconclusive criteria before execution.",
+      "Require authorization based on data/tools/cost. Run in disposable sandbox, no production credentials/data by default, watermark output and prohibit direct promotion.",
+      "Capture raw observations, limitations and cleanup. Human/technical owner interprets result; update assumptions, option/decision/spec revisions. Failure or inconclusive outcome is retained, not hidden."
+    ],
+    "ready_review": [
+      "Freeze review manifest; canonicalize and hash problem, decisions, spec, acceptance, plan, risks, dependencies/base/policy and evidence freshness.",
+      "Present semantic diff, decision/acceptance trace, prototypes, open nonblocking uncertainties, exceptions, estimated appetite and capability profile.",
+      "Product owner approves intended behavior/non-goals/value; technical owner approves feasibility/oracles/decomposition; specialists approve applicable risks.",
+      "Control plane verifies current roles, exact hashes, quorum/separation and TTL, appends approval and creates readiness token. GitHub Project becomes READY as projection.",
+      "Build admission re-reads all bound inputs. Any change/expiry/dependency or policy drift invalidates token and returns to SPEC_DRAFTING/STALE."
+    ],
+    "deferral_cancellation_reopen": [
+      "Deferral records who, why, trigger/date, freshness TTL, next owner and notification. Stop workers and preserve artifacts. Revisit starts freshness/diff validation.",
+      "Cancellation records authority/reason, revokes capabilities, terminates workers, reconciles unknown effects, deletes transient sensitive data, emits cleanup receipt and terminal projection.",
+      "Reopen never edits history. Append event, create new revision, revalidate role/policy/sources/decisions and show what changed. A rejected item normally produces a successor aggregate if reconsidered."
+    ],
+    "failure_paths": [
+      "Unavailable research provider: retry within typed budget, switch approved route, then BLOCKED with missing evidence—not fabricated confidence.",
+      "Conflicting owners/evidence: store both, do not average; escalate to named decision owner.",
+      "Late answer: attach to original question; if stale, propose reconciliation without state mutation.",
+      "Crash after effect: inspect side-effect receipt/remote state before retry.",
+      "Prompt injection/secret request: quarantine content, deny capability expansion and escalate privately."
+    ]
+  },
+  "self_improvement_boundary": {
+    "maximum_safe_automation": [
+      "Collect redacted outcome/interaction metrics and propose candidate edits to prompts, routing, question wording, templates or non-protected code.",
+      "Create reviewed failure cases from cancellations, reversals, stale READY, wrong assumptions, escaped rework and user corrections.",
+      "Run candidates offline on versioned train/public regression plus protected holdouts controlled outside candidate.",
+      "Automatically reject regressions and run non-authoritative shadow traffic. After independent approval, allow a bounded canary for pre-approved low-risk traffic with automatic rollback thresholds.",
+      "Promote only through a separate identity/policy service; retain exact candidate/config/model/data/eval digests and rollback pointer."
+    ],
+    "protected_outside_candidate": [
+      "product intent, roadmap and priority",
+      "raw feedback/evidence retention and audit events",
+      "protected tests, holdout cases, graders, grading prompts and acceptance oracles",
+      "risk/human-need policy, thresholds and promotion criteria",
+      "permissions, credentials, sandbox/network/data policy",
+      "CODEOWNERS/rulesets, promoter/deployer identity and rollback controller",
+      "metric definitions and sampling policy"
+    ],
+    "not_safely_autonomous": [
+      "Choosing whose needs matter, product purpose, acceptable harm, budget/appetite or strategic priority from raw conversations.",
+      "Treating absence/silence as consent; inventing requirements or accepting material assumptions.",
+      "Approving READY, privacy/legal/security exceptions, external commitments or irreversible prototypes without accountable authority.",
+      "Using its own prototype as production implementation or writing/choosing the only acceptance oracle for its output.",
+      "Changing the protected evaluators, policy, permissions or promotion authority that judge it; recursively self-modifying without independent control.",
+      "Claiming fully autonomous general product discovery or unattended idea-to-production operation. Current evidence supports proposal/evaluation/shadow/canary/rollback, not self-governance."
+    ],
+    "rollback": "Independent controller compares predeclared quality, safety, question burden, decision-reversal and cost thresholds. Canary failure or inconclusive telemetry immediately restores signed prior version, terminates new runs where safe, preserves evidence and opens reviewed incident/postmortem. Never let candidate suppress telemetry or rollback."
+  },
+  "validation_strategy": {
+    "schema_contract": [
+      "Validate every factory/event/artifact against pinned JSON Schema dialect and reject unknown required versions/vocabularies.",
+      "Golden canonicalization/JCS tests prove stable digests; semantic mutations to decision, scope, acceptance, permission, risk, evidence or policy must change digest/invalidate dependents.",
+      "Backward/forward compatibility fixtures and deterministic event upcaster tests retain original bytes."
+    ],
+    "state_and_property": [
+      "Generate all state x event x actor x guard combinations; accept only declared transitions. Model-check or property-test safety invariants, including no READY without exact quorum and no prototype reuse.",
+      "Properties: monotonic aggregate version; duplicate command has one outcome; replay yields identical state; terminal cleanup eventually completes; every wait has deadline; every accepted decision has authorized principal; every READY criterion traces to current decision/spec and oracle.",
+      "Concurrency tests: simultaneous answer/edit/cancel/approve, late answer, fork/merge conflict, policy/role change during approval and compare-and-append conflict."
+    ],
+    "fault_and_recovery": [
+      "Crash before/after append, outbox send, external side effect and checkpoint; duplicate/reorder/drop webhooks; provider 429/5xx/timeouts; partial fanout; corrupt checkpoint; database failover; expired credentials; cancellation race.",
+      "Replay/continue-as-new tests ensure no emails, tool mutations or spend repeat during historical replay. Rebuild projections and compare digests.",
+      "Backup/restore, encryption-key loss/privacy deletion, retention expiry, orphan sweep and reconciliation drills."
+    ],
+    "security_privacy": [
+      "Inject hostile instructions, URLs, repository text, attachments and tool output into every untrusted field; prove no secret/permission/policy/approval expansion.",
+      "Authorization matrix tests for forged/replayed/expired approval, wrong aggregate/revision/repository, role removal, same-principal separation breach and confused-deputy handoff.",
+      "Sandbox exfiltration, SSRF, path traversal, dependency poisoning, PII redaction, private security routing and audit-integrity tests."
+    ],
+    "evaluation_acceptance": [
+      "Before automation, run shadow study on at least 30 representative ideas across types/risks and report denominator including defer/cancel. Pre-register rubric and thresholds locally.",
+      "Measure false READY (critical), false block/defer, decision reversal after READY, missed material assumption, evidence citation correctness, clarification usefulness/repetition, user time, discovery lead time, prototype waste, downstream rework/escaped defect, cost and satisfaction by task class.",
+      "Blind/sample human review, inter-rater agreement and calibration curves. Compare one-agent baseline before fanout. Protected holdouts and graders are not visible/editable by candidate.",
+      "MVP exit: 100% replay/idempotency and unauthorized-action tests pass; zero unexplained lost events after reconciliation; every READY token exact-hash valid; all cancels clean up; reviewers judge >=80% packets useful with false-READY target explicitly zero in pilot. Numbers are proposed local gates, not literature-derived universal constants."
+    ]
+  },
+  "implementation_recommendation": {
+    "core_decision": "Build a domain event/artifact control plane, not a long chat. Use PostgreSQL event/inbox/outbox/approval tables plus content-addressed artifact storage, a GitHub App projection/reconciler, and one replaceable facilitator. Use LangGraph + Postgres for an agent-native MVP or Temporal outside the agent runtime when crash/retry/long-wait volume justifies it; do not equate framework checkpoints with audit or authority.",
+    "stage_0_shadow_2_4_weeks": [
+      "Commit v1alpha1 factory, schemas, authority/human-need/risk/capability/retention policy and transition fixtures. Protect them with CODEOWNERS/rulesets.",
+      "Build authenticated intake, append-only turn/event store, artifact digests, deterministic projections and read-only GitHub inventory. Import historic ideas without asserting missing decisions.",
+      "Replay/chaos/security tests; shadow-state current ideas for 14 days. No automated questioning or remote status writes. Exit with zero unexplained event loss, deterministic replay and all invalid transitions rejected."
+    ],
+    "stage_1_assisted_4_8_weeks": [
+      "Enable facilitator for problem framing, bounded questions, source-backed research, alternatives, ADR-like decisions and spec drafts. All decisions and READY approvals remain human.",
+      "Add disposable no-production-data prototype subfactory and cleanup attestation. Add exact ready packet/token and admission-time invalidation.",
+      "Pilot at least 30 representative ideas. Report every intake including defer/cancel/reject; compare user time, question utility, reversal, rework and cost to baseline."
+    ],
+    "stage_2_bounded_automation": [
+      "Auto-advance only deterministic normalization, dedupe suggestions, schema checks, read-only evidence collection and artifact refresh. Keep conflicting evidence visible.",
+      "After local evidence, auto-run allowlisted low-risk read-only research/prototypes within pre-approved budget; never real-user experiments or external commitments. Sample for audit and stop on threshold breach.",
+      "Add Temporal only if long waits/retries/history/scale warrant operational complexity; otherwise keep simpler controller/checkpointer."
+    ],
+    "stage_3_governed_improvement": [
+      "Collect reviewed failure cases; candidates may propose prompt/routing/template code changes. Offline eval -> independent shadow -> approved narrow canary -> independent promotion/rollback.",
+      "Keep protected tests, graders, permissions, policy, audit and promotion identity outside candidate permanently. There is no safe final stage granting autonomous product purpose, READY approval or recursive self-governance."
+    ],
+    "build_vs_buy": "Reuse GitHub collaboration, a maintained agent framework, JSON Schema, content-addressed storage and optionally Temporal. Build the repository-specific authority, lifecycle, decision/artifact graph, human-need policy, exact READY token and reconciliation layer because no cited product supplies them as one trustworthy system."
+  },
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Syntax for GitHub issue forms",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema",
+      "publication_or_update_date": "undated; live documentation, public preview",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "C01: structured required intake exists but does not establish semantic completeness."
+      ]
+    },
+    {
+      "id": "S02",
+      "title": "Adding sub-issues",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "C02: issue decomposition exists; documented limit is 100 direct children and eight levels."
+      ]
+    },
+    {
+      "id": "S03",
+      "title": "Creating issue dependencies",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-issue-dependencies",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "C02: blocked-by relationships are available but are not a validated executable DAG."
+      ]
+    },
+    {
+      "id": "S04",
+      "title": "Best practices for using Copilot to work on tasks",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/coding-agent/best-practices-for-using-copilot-to-work-on-tasks",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor guidance",
+      "supported_claims": [
+        "C03: agents benefit from clear scope, acceptance criteria and relevant file direction; this is guidance, not effectiveness proof."
+      ]
+    },
+    {
+      "id": "S05",
+      "title": "Reviewing a pull request created by Copilot",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/coding-agent/reviewing-a-pull-request-created-by-copilot",
+      "publication_or_update_date": "undated; live documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor guidance",
+      "supported_claims": [
+        "C04: agent output requires normal human review; assignment approval does not equal PR approval."
+      ]
+    },
+    {
+      "id": "S06",
+      "title": "Spec Kit repository README",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.com/github/spec-kit",
+      "publication_or_update_date": "repository snapshot; README announced 1.0.0 by access",
+      "access_date": "2026-09-13",
+      "source_type": "first-party source repository",
+      "supported_claims": [
+        "C05: repository workflow supplies constitution, specify, clarify, plan, tasks, analysis/checklist and implementation artifacts; it is not a durable authority ledger or causal evidence of better outcomes."
+      ]
+    },
+    {
+      "id": "S07",
+      "title": "Write the Pitch (Shape Up, Chapter 6)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/1.5-chapter-06",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology/book",
+      "supported_claims": [
+        "C06: a shaped pitch records problem, appetite, solution, rabbit holes and no-gos; methodology is not controlled evidence."
+      ]
+    },
+    {
+      "id": "S08",
+      "title": "Persistence",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official framework documentation",
+      "supported_claims": [
+        "C07: thread checkpoints support continuity, fault recovery and time travel; persistent production savers and retention are operator duties."
+      ]
+    },
+    {
+      "id": "S09",
+      "title": "Interrupts",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official framework documentation",
+      "supported_claims": [
+        "C08: interrupt/resume supports durable human pauses when paired with a checkpointer; resumed node code restarts, so pre-interrupt effects must be idempotent."
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Multi-agent",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langchain/multi-agent",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official framework documentation",
+      "supported_claims": [
+        "C09: subagents, handoffs, routers and custom workflows are supported; documentation warns one agent with tools can often suffice."
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Microsoft Agent Framework repository README",
+      "publisher_or_author": "Microsoft",
+      "url": "https://github.com/microsoft/agent-framework",
+      "publication_or_update_date": "repository active at access",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "C10: graph workflows advertise sequential/concurrent/handoff/group patterns, checkpointing, human-in-loop and time travel; durable extension does not decide product intent."
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Handoffs",
+      "publisher_or_author": "OpenAI",
+      "url": "https://openai.github.io/openai-agents-python/handoffs/",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "C11: handoffs are model-visible tools with filters/customization; the SDK primitive is not an authorization or durable work ledger."
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "Guardrails",
+      "publisher_or_author": "OpenAI",
+      "url": "https://openai.github.io/openai-agents-python/guardrails/",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "C12: guardrails can trip a run, but parallel input checks may occur after model work begins; enforce hard gates outside the model run."
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "Events and Event History",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution/event",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official durable-workflow documentation",
+      "supported_claims": [
+        "C13: append-only event history and deterministic replay recover workflows after failure."
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "Error handling: Python SDK",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/develop/python/failure-detection",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official durable-workflow documentation",
+      "supported_claims": [
+        "C14: activities can execute at least once; external effects require idempotency keys/receipts."
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "Workflow Execution limits",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution/limits",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official durable-workflow documentation",
+      "supported_claims": [
+        "C15: long conversations need continue-as-new/compaction because event histories have finite size limits."
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "Agent2Agent Protocol Specification 1.0.0",
+      "publisher_or_author": "A2A Project / Linux Foundation Agentic AI Foundation",
+      "url": "https://a2a-protocol.org/latest/specification/",
+      "publication_or_update_date": "version 1.0.0 current at access",
+      "access_date": "2026-09-13",
+      "source_type": "open protocol specification",
+      "supported_claims": [
+        "C16: task/message/artifact lifecycle supports polling, streaming, push and long-running human interaction across agents; protocol interoperability is not policy."
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "CloudEvents Specification 1.0.2",
+      "publisher_or_author": "Cloud Native Computing Foundation",
+      "url": "https://github.com/cloudevents/spec/blob/ce%40v1.0.2/cloudevents/spec.md",
+      "publication_or_update_date": "v1.0.2, 2022-02-05",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification",
+      "supported_claims": [
+        "C17: standard event envelope fields and extension attributes inform interoperable lifecycle events; CloudEvents does not guarantee exactly-once processing."
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "PROV-O: The PROV Ontology",
+      "publisher_or_author": "W3C Provenance Working Group",
+      "url": "https://www.w3.org/TR/2013/REC-prov-o-20130430/",
+      "publication_or_update_date": "W3C Recommendation, 2013-04-30",
+      "access_date": "2026-09-13",
+      "source_type": "web standard",
+      "supported_claims": [
+        "C18: entity/activity/agent relations support provenance for sources, transformations, decisions and agents."
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "JSON Schema Draft 2020-12",
+      "publisher_or_author": "JSON Schema project",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "publication_or_update_date": "2022-06-16 publication of draft meta-schema family",
+      "access_date": "2026-09-13",
+      "source_type": "open schema specification",
+      "supported_claims": [
+        "C19: versioned schemas can validate structure and vocabularies; schema validity does not prove truth or fitness."
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "RFC 8785: JSON Canonicalization Scheme",
+      "publisher_or_author": "A. Rundgren et al. / IETF",
+      "url": "https://www.rfc-editor.org/rfc/rfc8785",
+      "publication_or_update_date": "2020-06",
+      "access_date": "2026-09-13",
+      "source_type": "Internet standard-track RFC",
+      "supported_claims": [
+        "C20: canonical JSON supports stable hashing/signing of exact decision artifacts."
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "RFC 9110 section 9.2.2: Idempotent Methods",
+      "publisher_or_author": "R. Fielding et al. / IETF",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2",
+      "publication_or_update_date": "2022-06",
+      "access_date": "2026-09-13",
+      "source_type": "Internet Standard",
+      "supported_claims": [
+        "C14: safe retries depend on idempotent semantics; non-idempotent side effects need application-level dedupe."
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "OpenGitOps Principles",
+      "publisher_or_author": "OpenGitOps / CNCF",
+      "url": "https://opengitops.dev/",
+      "publication_or_update_date": "current site at access",
+      "access_date": "2026-09-13",
+      "source_type": "community standard",
+      "supported_claims": [
+        "C21: declarative versioned desired state plus continuous reconciliation is a useful configuration pattern; live conversation/event truth still needs a runtime store."
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "NIST SP 800-218 Secure Software Development Framework",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "US government standard",
+      "supported_claims": [
+        "C22: protected roles, criteria, provenance and review should span the lifecycle."
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "SLSA v1.2 Requirements",
+      "publisher_or_author": "OpenSSF / SLSA",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "publication_or_update_date": "2025-04-23",
+      "access_date": "2026-09-13",
+      "source_type": "open supply-chain standard",
+      "supported_claims": [
+        "C23: immutable digest-linked provenance motivates exact revision/evidence binding."
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "LLM01: Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "publication_or_update_date": "2025 edition; live page",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "supported_claims": [
+        "C24: untrusted issue, document and web content can manipulate agents; robust prevention is not established."
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "LLM06: Excessive Agency",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "publication_or_update_date": "2025 edition; live page",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "supported_claims": [
+        "C25: minimize tools, permissions, autonomy and blast radius."
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Aleithan et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed/independent empirical paper",
+      "supported_claims": [
+        "C26: leakage and weak tests can overstate patch correctness; candidate-controlled oracles are unsafe."
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Becker, Rush, Barnes and Rein / METR",
+      "url": "https://arxiv.org/abs/2507.09089",
+      "publication_or_update_date": "v2, 2025-07-25",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled study/preprint",
+      "supported_claims": [
+        "C27: 16 experienced developers across 246 tasks were 19% slower in the studied early-2025 setting; automation value is context-dependent."
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "Why Do Multi-Agent LLM Systems Fail?",
+      "publisher_or_author": "Mauran et al.",
+      "url": "https://arxiv.org/abs/2503.13657",
+      "publication_or_update_date": "v2, 2025-08-21",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical preprint",
+      "supported_claims": [
+        "C28: 1,600+ traces across seven frameworks expose 14 recurring coordination/failure modes; fanout needs objective contracts and measured benefit."
+      ]
+    },
+    {
+      "id": "S31",
+      "title": "Evaluation best practices",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor guidance",
+      "supported_claims": [
+        "C29: continuous evals should mix production, historical, expert and synthetic cases and calibrate automated graders with humans; not independent evidence."
+      ]
+    },
+    {
+      "id": "S32",
+      "title": "Demystifying evals for AI agents",
+      "publisher_or_author": "Anthropic",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "publication_or_update_date": "2026-01-09",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering guidance",
+      "supported_claims": [
+        "C30: evaluate outcomes and traces with deterministic plus human-calibrated grading; vendor guidance requires local validation."
+      ]
+    },
+    {
+      "id": "S33",
+      "title": "CloudEvents Specification 1.0.2 release",
+      "publisher_or_author": "Cloud Native Computing Foundation",
+      "url": "https://github.com/cloudevents/spec/releases/tag/ce%40v1.0.2",
+      "publication_or_update_date": "2022-02-06",
+      "access_date": "2026-09-13",
+      "source_type": "official release metadata",
+      "supported_claims": [
+        "C17: 1.0.2 is the released stable version; main is not a version pin."
+      ]
+    },
+    {
+      "id": "S34",
+      "title": "PROV-DM: The PROV Data Model",
+      "publisher_or_author": "W3C Provenance Working Group",
+      "url": "https://www.w3.org/TR/prov-dm/",
+      "publication_or_update_date": "W3C Recommendation, 2013-04-30",
+      "access_date": "2026-09-13",
+      "source_type": "web standard",
+      "supported_claims": [
+        "C18: provenance has Entity, Activity and Agent plus generation/use/derivation/association; derivation does not prove truth."
+      ]
+    },
+    {
+      "id": "S35",
+      "title": "State Chart XML (SCXML) 1.0",
+      "publisher_or_author": "W3C Voice Browser Working Group",
+      "url": "https://www.w3.org/TR/scxml/",
+      "publication_or_update_date": "W3C Recommendation, 2015-09-01",
+      "access_date": "2026-09-13",
+      "source_type": "web standard",
+      "supported_claims": [
+        "C31: hierarchical, parallel, final/history states, events, guards and defined execution semantics support executable lifecycle models; persistence/governance are out of scope."
+      ]
+    },
+    {
+      "id": "S36",
+      "title": "Git Internals: Git Objects",
+      "publisher_or_author": "Scott Chacon and Ben Straub / Git project",
+      "url": "https://git-scm.com/book/en/v2/Git-Internals-Git-Objects",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official project book",
+      "supported_claims": [
+        "C32: content-addressed blobs, trees and commits motivate immutable revisions; identity does not prove semantic correctness."
+      ]
+    },
+    {
+      "id": "S37",
+      "title": "Git Internals: Git References",
+      "publisher_or_author": "Scott Chacon and Ben Straub / Git project",
+      "url": "https://git-scm.com/book/en/v2/Git-Internals-Git-References",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official project book",
+      "supported_claims": [
+        "C32: refs are mutable pointers, so current projection must not be confused with immutable revision history."
+      ]
+    },
+    {
+      "id": "S38",
+      "title": "About Projects",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "C33: Projects provide flexible views, custom fields and automation rather than a fixed methodology or append-only authority ledger."
+      ]
+    },
+    {
+      "id": "S39",
+      "title": "Best practices for using webhooks",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "publication_or_update_date": "undated; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "C34: verify signatures, respond quickly, queue processing and handle redelivery/deduplication; webhooks trigger reconciliation rather than constitute durable truth."
+      ]
+    },
+    {
+      "id": "S40",
+      "title": "Documenting Architecture Decisions",
+      "publisher_or_author": "Michael Nygard / Cognitect",
+      "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
+      "publication_or_update_date": "2011-11-15",
+      "access_date": "2026-09-13",
+      "source_type": "seminal practitioner convention",
+      "supported_claims": [
+        "C35: ADRs record title, status, context, decision and consequences and supersede rather than overwrite; there is no single formal ADR standard."
+      ]
+    },
+    {
+      "id": "S41",
+      "title": "Set Boundaries (Shape Up, Chapter 3)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/1.2-chapter-03",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology/book",
+      "supported_claims": [
+        "C36: shaping starts from raw idea, sets appetite/boundaries and narrows the problem; not controlled effectiveness evidence."
+      ]
+    },
+    {
+      "id": "S42",
+      "title": "Find the Elements (Shape Up, Chapter 4)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/1.3-chapter-04",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology/book",
+      "supported_claims": [
+        "C37: rough breadboards explore alternative approaches before premature detail."
+      ]
+    },
+    {
+      "id": "S43",
+      "title": "Bet Six Weeks (Shape Up, Chapter 7)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/2.1-chapter-07",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology/book",
+      "supported_claims": [
+        "C38: Basecamp rejects a permanent backlog; this is opinionated process, not universal evidence."
+      ]
+    },
+    {
+      "id": "S44",
+      "title": "The Betting Table (Shape Up, Chapter 8)",
+      "publisher_or_author": "Ryan Singer / Basecamp",
+      "url": "https://basecamp.com/shapeup/2.2-chapter-08",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "first-party methodology/book",
+      "supported_claims": [
+        "C39: explicit selection/betting and circuit-breaker concepts support accountable go/no-go."
+      ]
+    },
+    {
+      "id": "S45",
+      "title": "Spec Kit README at d848fb4",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.com/github/spec-kit/blob/d848fb4e18f44640ad6b42e60a280551ee90cdce/README.md",
+      "publication_or_update_date": "commit snapshot 2026-09-11",
+      "access_date": "2026-09-13",
+      "source_type": "first-party source repository, immutable revision",
+      "supported_claims": [
+        "C05: pinned workflow documentation supports principles/specify/plan/tasks/implement; product workflow, not independent outcome evidence."
+      ]
+    },
+    {
+      "id": "S46",
+      "title": "The Anatomy of Prototypes: Prototypes as Filters, Prototypes as Manifestations of Design Ideas",
+      "publisher_or_author": "Youn-Kyung Lim, Erik Stolterman and Josh Tenenberg / ACM TOCHI",
+      "url": "https://doi.org/10.1145/1375761.1375762",
+      "publication_or_update_date": "2008",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed research paper; two case studies",
+      "supported_claims": [
+        "C40: prototypes support design-space exploration as filters and manifestations; they do not establish all dimensions of desirability/safety."
+      ]
+    },
+    {
+      "id": "S47",
+      "title": "The RIGHT model for Continuous Experimentation",
+      "publisher_or_author": "Fagerholm et al. / Journal of Systems and Software",
+      "url": "https://doi.org/10.1016/j.jss.2016.03.034",
+      "publication_or_update_date": "2017",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed industrial process study",
+      "supported_claims": [
+        "C41: industrial experimentation can connect hypotheses, implementation and learning; context-bound rather than universal causal proof."
+      ]
+    },
+    {
+      "id": "S48",
+      "title": "Controlled experiments on the web: survey and practical guide",
+      "publisher_or_author": "Ron Kohavi et al. / Data Mining and Knowledge Discovery",
+      "url": "https://doi.org/10.1007/s10618-008-0114-1",
+      "publication_or_update_date": "2009",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed research/practitioner paper",
+      "supported_claims": [
+        "C42: deployed experiments require valid assignment, metrics, power and guardrails; real-user experimentation is outside unattended prototype authority."
+      ]
+    },
+    {
+      "id": "S49",
+      "title": "The Scrum Guide",
+      "publisher_or_author": "Ken Schwaber and Jeff Sutherland",
+      "url": "https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-US.pdf",
+      "publication_or_update_date": "2020-11",
+      "access_date": "2026-09-13",
+      "source_type": "official framework guide",
+      "supported_claims": [
+        "C43: backlog items may be deemed ready for selection through refinement; Scrum does not define this proposed universal DoR checklist."
+      ]
+    },
+    {
+      "id": "S50",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher_or_author": "Debenedetti et al. / NeurIPS 2024",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "publication_or_update_date": "v3, 2024-11-07; NeurIPS 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed security benchmark paper",
+      "supported_claims": [
+        "C44: 97 tasks/629 security cases show tool-agent prompt-injection and utility/security failures; defenses remain incomplete."
+      ]
+    },
+    {
+      "id": "S51",
+      "title": "NIST AI 600-1: Artificial Intelligence Risk Management Framework, Generative Artificial Intelligence Profile",
+      "publisher_or_author": "Autio et al. / NIST",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "publication_or_update_date": "2024-07",
+      "access_date": "2026-09-13",
+      "source_type": "US government guidance, DOI 10.6028/NIST.AI.600-1",
+      "supported_claims": [
+        "C45: document human oversight, halt unacceptable-risk work, test with human/ground-truth/adversarial evidence, check sources and fail safely."
+      ]
+    },
+    {
+      "id": "S52",
+      "title": "ISO/IEC/IEEE 29148:2018 Systems and software engineering — Life cycle processes — Requirements engineering",
+      "publisher_or_author": "ISO/IEC/IEEE",
+      "url": "https://www.iso.org/standard/72089.html",
+      "publication_or_update_date": "2018-11",
+      "access_date": "2026-09-13",
+      "source_type": "official standards catalog; normative text paywalled",
+      "supported_claims": [
+        "C46: a requirements-engineering standard exists, but only catalog metadata was inspected; no claim that it mandates this lifecycle."
+      ]
+    },
+    {
+      "id": "S53",
+      "title": "Use time travel",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/use-time-travel",
+      "publication_or_update_date": "undated; living documentation; repository evidence checked at e539ac122f4126f6dd850581c1494948cf620e31 (2026-09-09)",
+      "access_date": "2026-09-13",
+      "source_type": "official framework documentation",
+      "supported_claims": [
+        "C47: replay/fork from a prior checkpoint reruns downstream LLM/API/interrupt work; it is not cached playback."
+      ]
+    },
+    {
+      "id": "S54",
+      "title": "Human-in-the-loop",
+      "publisher_or_author": "OpenAI Agents SDK",
+      "url": "https://github.com/openai/openai-agents-python/blob/fbd2dbcaaf74a2c447c6d3fa9d5645d83fd7e292/docs/human_in_the_loop.md",
+      "publication_or_update_date": "source commit 2026-09-11",
+      "access_date": "2026-09-13",
+      "source_type": "official source documentation, immutable revision",
+      "supported_claims": [
+        "C48: tool approvals serialize as RunState and resume later; scope is tool approval/run snapshot, not a general domain authority ledger."
+      ]
+    },
+    {
+      "id": "S55",
+      "title": "Durable execution integrations and HITL",
+      "publisher_or_author": "OpenAI Agents SDK",
+      "url": "https://openai.github.io/openai-agents-python/running_agents/#durable-execution-integrations-and-human-in-the-loop",
+      "publication_or_update_date": "undated; living documentation; source checked at fbd2dbcaaf74a2c447c6d3fa9d5645d83fd7e292",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "C49: SDK points to Temporal, Dapr/Diagrid, Restate and DBOS for durable execution, limiting claims about core SDK durability."
+      ]
+    },
+    {
+      "id": "S56",
+      "title": "Microsoft Agent Framework workflow checkpoint model",
+      "publisher_or_author": "Microsoft",
+      "url": "https://github.com/microsoft/agent-framework/blob/3c670707766a8455da6491a9049cc9d575e019f0/python/packages/core/agent_framework/_workflows/_checkpoint.py",
+      "publication_or_update_date": "source commit 2026-09-11",
+      "access_date": "2026-09-13",
+      "source_type": "official source code, immutable revision",
+      "supported_claims": [
+        "C50: checkpoint source records workflow/message/executor/edge state, pending HITL and lineage; full LangGraph-like editable fork UX was not verified."
+      ]
+    },
+    {
+      "id": "S57",
+      "title": "AutoGen repository README maintenance notice",
+      "publisher_or_author": "Microsoft",
+      "url": "https://github.com/microsoft/autogen/blob/027ecf0a379bcc1d09956d46d12d44a3ad9cee14/README.md",
+      "publication_or_update_date": "source commit 2026-04-06",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository, immutable revision",
+      "supported_claims": [
+        "C51: AutoGen is in maintenance mode and directs new users to Microsoft Agent Framework; do not select it for a new long-lived platform."
+      ]
+    },
+    {
+      "id": "S58",
+      "title": "Workflow messaging patterns",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/design-patterns/workflow-messaging-patterns",
+      "publication_or_update_date": "undated; living documentation; docs source checked at 13205cdb299b8ae88b77a7c7f16f0ccb8b526926 (2026-09-11)",
+      "access_date": "2026-09-13",
+      "source_type": "official durable-workflow documentation",
+      "supported_claims": [
+        "C52: Signals and Updates provide durable asynchronous/validated workflow input for long human waits."
+      ]
+    },
+    {
+      "id": "S59",
+      "title": "Continue-As-New",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution/continue-as-new",
+      "publication_or_update_date": "undated; living documentation; docs source checked at 13205cdb299b8ae88b77a7c7f16f0ccb8b526926 (2026-09-11)",
+      "access_date": "2026-09-13",
+      "source_type": "official durable-workflow documentation",
+      "supported_claims": [
+        "C53: long-running workflow can retain Workflow ID while starting new run/history with explicit carried state."
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict": "Agent frameworks market/checklist persistence, HITL, time travel and handoffs, but semantics differ.",
+      "resolution": "Treat transcript, framework checkpoint, domain event log and semantic memory as four distinct stores. LangGraph replay/fork reruns downstream calls; OpenAI RunState is resumable serialization rather than arbitrary history; MAF rich fork semantics are not fully verified; Temporal reset is operational recovery."
+    },
+    {
+      "conflict": "GitHub Projects and issue status are easy for humans/automation to mutate, while exact revision authority must be immutable.",
+      "resolution": "Make them projections/transition requests. Only authenticated compare-and-append plus exact decision/approval artifacts changes canonical state; reconcile drift [S38,S39]."
+    },
+    {
+      "conflict": "Git/immutable artifacts are attractive as source of truth, while refs and reachable history can change and conversations are high-volume/concurrent.",
+      "resolution": "Use protected/content-addressed Git for desired configuration/review artifacts; use transactional event storage for order/approvals/turns. A ref/current document is a projection, not audit history [S36,S37]."
+    },
+    {
+      "conflict": "Spec Kit and Shape Up suggest useful sequences, but neither independently proves improved outcomes and their philosophies differ on backlog/detail.",
+      "resolution": "Borrow artifact ingredients and exact pinned workflow only as hypotheses. Preserve defer/cancel evidence rather than adopting “no backlog” dogma; validate locally [S07,S41-S45]."
+    },
+    {
+      "conflict": "Prototype/experimentation research supports learning, but prototypes can create false certainty or harm real users.",
+      "resolution": "Prototype one named uncertainty under predeclared criteria, isolation and human-approved real-user experimentation. Retain inconclusive/negative outcomes; never promote prototype directly [S46-S48]."
+    },
+    {
+      "conflict": "Multi-agent/vendor guidance promises scale, while independent traces show coordination failure and the single-agent baseline may match it.",
+      "resolution": "One facilitator by default; fan out separable evidence tasks with schema joins and compare measured benefit [S10,S30]."
+    },
+    {
+      "conflict": "CloudEvents/JSON Schema/PROV/SCXML appear comprehensive but cover different layers.",
+      "resolution": "CloudEvents=envelope, JSON Schema=shape, PROV=lineage, SCXML-like model=transition semantics, application policy=authority/history invariants. None proves truth, safety or exactly-once execution [S18-S22,S34,S35]."
+    },
+    {
+      "conflict": "“Fully self-improving” requests imply self-governance, while eval/security evidence shows circular graders and excessive agency risks.",
+      "resolution": "Interpret maximum safe automation as automatic proposal/evaluation/shadow/canary/rollback with independent protected graders, policy, permissions and promotion. Autonomous modification of those controls is unsupported [S26-S32,S50,S51]."
+    }
+  ],
+  "uncertainties": [
+    {
+      "field": "verified_capabilities",
+      "unknown": "Warp Factories-specific ideation semantics were not needed to prove the domain design and were not independently verified in this track; the sibling Warp track should supply version-pinned facts.",
+      "impact": "Do not claim feature parity or native Warp support from this file."
+    },
+    {
+      "field": "human_need_policy",
+      "unknown": "No evidence establishes universal optimal question count, confidence threshold, timeout or readiness quorum.",
+      "impact": "Defaults are conservative hypotheses requiring repository-specific calibration."
+    },
+    {
+      "field": "implementation_recommendation",
+      "unknown": "Comparative operating cost/reliability of LangGraph+Postgres, Temporal+agent SDK and MAF durable extension for years-long ideation histories is not independently benchmarked here.",
+      "impact": "Prototype crash/resume/fork/security semantics before platform commitment."
+    },
+    {
+      "field": "evidence_and_limits",
+      "unknown": "No controlled evaluation validates the complete proposed raw-idea-to-READY lifecycle or causal benefit of Spec Kit/Shape Up artifacts.",
+      "impact": "Use shadow pilot with full denominators; avoid productivity promises."
+    },
+    {
+      "field": "conversation_and_handoffs",
+      "unknown": "Reliable semantic compaction without losing rare but material context remains model- and domain-dependent.",
+      "impact": "Preserve originals and exact decisions; summary can never be sole authority."
+    },
+    {
+      "field": "self_improvement_boundary",
+      "unknown": "Protected holdouts can still age or miss new harms, and human evaluators/owners can disagree.",
+      "impact": "Continuous refresh, dissent records and independent governance remain necessary; canary does not prove global safety."
+    },
+    {
+      "field": "sources",
+      "unknown": "Serper general web search was unavailable; research used direct official URLs, repositories, standards and prior validated corpus. ISO 29148 normative content was paywalled/catalog-only.",
+      "impact": "Negative “no other system exists” claims are moderate confidence and ISO-specific claims stay minimal."
+    }
+  ],
+  "confidence": {
+    "overall": "moderate-high for implementable architecture and safety boundary; moderate for workflow effectiveness; low for universal thresholds or productivity gain.",
+    "high": [
+      "Documented GitHub form/project/webhook limitations; framework checkpoint/interrupt/event-history primitives; schema/canonicalization/provenance standards; need for exact identity, idempotency and separate authority."
+    ],
+    "moderate": [
+      "State/artifact catalog, two-plane storage, question/decision protocol, DoR tuple, phased rollout and one-agent-first orchestration; synthesized from evidence and prior validated results but not end-to-end experimentally validated."
+    ],
+    "low": [
+      "Causal product quality/productivity improvement, optimum tool/framework, universal user-question tolerance, automated option ranking and safe general semantic compaction."
+    ],
+    "claim_notes": "Vendor and methodology claims are labeled as capability/pattern evidence. Independent studies challenge generalization but do not directly test this complete design."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "human_need_policy",
+    "implementation_recommendation",
+    "evidence_and_limits",
+    "conversation_and_handoffs",
+    "self_improvement_boundary",
+    "sources"
+  ]
+}

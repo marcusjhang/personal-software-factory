@@ -1,0 +1,103 @@
+{
+  "reviewer": "round-12 independent recovery/remediation closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-11 combined correction and schema-3 candidate-only regeneration",
+    "specialty": "Remediation creation purposes, replay, revocation, closure, block release, and BUILD/MAINTENANCE/improvement rollback cleanup and cancellation.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-11-resolution.md",
+      "review/round-11-closure/cross-consistency.json",
+      "review/round-11-closure/evidence-requirements.json",
+      "review/round-11-closure/formal-state.json",
+      "review/round-11-closure/improvement-races.json",
+      "review/round-11-closure/recovery-cleanup.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation are accepted as unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_status",
+      "result": "pass",
+      "exact_text": [
+        "README.md identifies docs/state-transition-manifests.md as the normative legal-edge manifest incorporated by PLAN.md and states that this repository is a plan, not a working controller or deployed factory.",
+        "review/round-11-resolution.md states that it does not claim independent closure, implementation, full reachable-product proof, semantic evidence validation, or production safety."
+      ]
+    },
+    {
+      "area": "remediation_creation_identity_replay_and_revocation",
+      "result": "pass",
+      "exact_text": [
+        "Manifest \u00a713.1 RO00-B/RO00-M/RO00-I are exact absent-to-OPEN transactions synchronized with B37/M28/IRB06; each atomically changes the parent Work or rollback tuple and creates the obligation, link, MAINTENANCE child, deterministic event, and creation receipt without CleanupItem or C11.",
+        "The creation rows require deterministic generation, absent-or-same/version CAS, byte-identical replay, and conflict or out-of-order rejection.",
+        "RO01/RO02 remain the cleanup-resurface C11 creation path; RO01-R/RO02-R create absent/post-close revocation generations directly as REVOKED; RO11-RO13 fence and quiesce existing OPEN/IN_PROGRESS/VERIFYING generations; RO14 is the sole reauthorization path."
+      ]
+    },
+    {
+      "area": "purpose_specific_closure_and_build_maintenance_release",
+      "result": "pass",
+      "exact_text": [
+        "RO09 is purpose-specific: cleanup-resurface may remove only exact proved-remediated keys, while rollback-safety closes the remediation child and retains exposure/resource blocks.",
+        "BUILD orders RO09 -> B74 -> B34 -> B38, and MAINTENANCE orders RO09 -> M62 -> M25 -> M29; only B38/M29 remove exact rollback-safety blocks while sealing ROLLED_BACK.",
+        "B39/M30 require no persisted cancellation, whereas B71/M59 require the authenticated persisted cancellation disposition; exact-version CAS and replay make the branches exclusive."
+      ]
+    },
+    {
+      "area": "improvement_post_remediation_release",
+      "result": "fail",
+      "exact_text": [
+        "RO00-I creates exact exposure/resource blocks for the improvement rollback-safety obligation, and RO09 expressly retains every rollback-safety block.",
+        "IRB09, IRB03, and IRB07-N/R/Q provide the improvement restoration, verification, and ROLLED_BACK sequence, but none removes or transfers ownership of the exact RO00-I blocks.",
+        "The manifest names only B38/M29 as rollback-safety block-removal transactions, although IRB06 is in the same closed rollback-safety purpose partition."
+      ]
+    },
+    {
+      "area": "improvement_cleanup_and_cancellation_ownership",
+      "result": "pass_except_for_block_release_finding",
+      "exact_text": [
+        "IRB07-N/R/Q partition settlement by NONE/REQUESTED/QUIESCING; with NONE, WIDENING_ABORT uses IR13C-X and other origins use IRB08, while pending cancellation uses IX03 alone.",
+        "IRB06 cannot settle falsely; only RO09, IRB09, IRB03, and IRB07 can reach ROLLED_BACK before cleanup. The missing RO00-I block-release mutation is reported below."
+      ]
+    },
+    {
+      "area": "schema_3_identity_and_claim_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema 3.0.0 with regeneration checkpoint round-11.",
+        "Its generated PLAN SHA-256 is 5b320a71b86912845960ad67081137ed270bdf83d4ea019a32923df041d917ab and normative-manifest SHA-256 is 8186b5724f24a60342a40e89d6e8ebb1795cdcbac0700a7dbc0723495dfd2f29; both reproduce current bytes.",
+        "The artifact remains editorial_candidate_associations_only with legacy_unverified provenance and does not claim reviewed semantic support."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "R12-REC-001",
+      "severity": "high",
+      "title": "Improvement rollback remediation has no legal transaction that releases its RO00-I safety blocks",
+      "requirement": "Every rollback-safety obligation must retain its exact exposure/resource-reuse blocks through genuine restoration and independent verification, then release those exact blocks atomically with the corresponding verified ROLLED_BACK settlement before cleanup or cancellation can close.",
+      "evidence": [
+        "RO00-I atomically creates and blocks the exact exposure/resource keys when IRB06 enters REMEDIATION_WAIT.",
+        "RO09 says rollback-safety retains every exposure/resource block and its result names only the BUILD B74/B34/B38 or MAINTENANCE M62/M25/M29 continuations.",
+        "The \u00a713.1 closure prose says only B38/M29 atomically remove rollback-safety blocks; PLAN \u00a7\u00a713 and 14.0 likewise enumerate B38/M29 despite including IRB06 in the rollback-safety creation partition.",
+        "The improvement continuation IRB09 -> IRB03 -> IRB07-N/R/Q reaches ROLLED_BACK, then IRB08/IR13C-X/IX03 may schedule cleanup, but none of those rows removes or adopts the RO00-I block set.",
+        "The round-11 witness inventory tests block removal only for B38/M29 and supplies no improvement block-release witness."
+      ],
+      "impact": "A literal implementation either leaves the improvement candidate's exposure/resource keys blocked indefinitely after verified rollback, causing a durable resource leak and undefined cleanup/terminal release semantics, or invents an unlisted unblock mutation. Releasing at RO09 would instead violate the required restoration-and-verification ordering.",
+      "required_correction": "Add an exact improvement rollback-safety block-release mutation, preferably to each mutually exclusive IRB07-N/R/Q settlement or to a named synchronized row immediately after it. It must require the current RO09 closure receipt, genuine restoration, fresh independent verification, exact RO00-I key-set digest and generation, atomically seal/adopt ROLLED_BACK and remove only those keys, preserve IRB08/IR13C-X/IX03 sole cleanup ownership, and define version CAS, byte-identical replay, conflict rejection, and cancellation race witnesses. Align PLAN \u00a713/\u00a714.0, RO09/\u00a713.1 prose, and the generated witness inventory."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "Implementation and exhaustive generated reachable-product/model execution remain future gates and were not treated as findings.",
+    "Fresh immutable evidence retrieval, same-run human semantic review, reviewed-edge regeneration, and production validation remain future gates and were not treated as findings."
+  ],
+  "closure_criteria_pass": false
+}

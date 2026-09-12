@@ -1,0 +1,93 @@
+{
+  "reviewer": "root-integration-smoke",
+  "scope": [
+    "Python CLI",
+    ".agent-os desired contract"
+  ],
+  "strengths": [
+    "standalone Python tests pass",
+    "JSON-schema validator passes"
+  ],
+  "findings": [
+    {
+      "id": "ROOT-R1-001",
+      "severity": "critical",
+      "title": "Python factory model is incompatible with repository factory-as-code schema",
+      "requirement": "The CLI must load and execute the factories declared in .agent-os/factories.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py",
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/factories/build.yaml"
+        ],
+        "urls": []
+      },
+      "reproduction": "uv run agent-os factory-validate .agent-os/factories/build.yaml exits 1 with Pydantic errors because Python expects name/version/runner/capabilities while the repository schema defines id/roles/phases/transitions/artifacts/tools/budgets/gates/escalation/retry/cleanup.",
+      "impact": "The advertised factory selection and factory-aware demo do not work with any shipped factory.",
+      "recommendation": "Use one canonical factory model/schema, generate or cross-validate it, and add a parametrized test that loads every registered enabled factory through both validators and runs demo for each.",
+      "verification": "All registry entries load through agent-os and jsonschema; demo --factory build succeeds.",
+      "confidence": "high"
+    },
+    {
+      "id": "ROOT-R1-002",
+      "severity": "critical",
+      "title": "Python config and conversation models are incompatible with shipped desired configuration",
+      "requirement": "The agent-os CLI must validate the repository's own canonical configuration and conversation artifacts.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py",
+          ".agent-os/config.yaml",
+          ".agent-os/schemas/config.schema.json",
+          ".agent-os/factories/example.conversation-decision.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "uv run agent-os config-validate exits 1 against .agent-os/config.yaml; uv run agent-os decision-validate .agent-os/factories/example.conversation-decision.json exits 1. The separate validators accept the same files.",
+      "impact": "Two incompatible contract systems exist; the repo cannot dogfood its CLI and fresh agents cannot rely on a single schema.",
+      "recommendation": "Unify Python and JSON Schema structures and add tests loading every canonical example/config via both validation paths.",
+      "verification": "agent-os config-validate and decision-validate succeed on shipped artifacts and reject shared negative fixtures.",
+      "confidence": "high"
+    },
+    {
+      "id": "ROOT-R1-003",
+      "severity": "high",
+      "title": "READY validator can approve the wrong lifecycle and underspecifies required evidence",
+      "requirement": "READY must be derived only from READY_REVIEW with full DoR and structured evidence.",
+      "evidence": {
+        "files": [
+          "src/agent_os/readiness.py",
+          "src/agent_os/models.py",
+          ".agent-os/lifecycle.yaml",
+          "docs/architecture.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Ticket.lifecycle is never checked by validate_definition_of_ready; a digest-bound ticket in INBOX can return ready=true if other minimal string lists are populated. Acceptance criteria have no evidence mapping; dependencies are unstructured strings and any nonempty list is treated unresolved.",
+      "impact": "Implementation admission can violate the architecture's core planning gate or block valid tickets with resolved dependencies.",
+      "recommendation": "Require READY_REVIEW, structured acceptance/evidence and dependency status, relevant product/technical owners and blocking questions; add state-specific negative tests.",
+      "verification": "INBOX/PLANNING cannot become ready; unresolved dependency blocks while resolved dependency does not; each criterion requires evidence.",
+      "confidence": "high"
+    },
+    {
+      "id": "ROOT-R1-004",
+      "severity": "high",
+      "title": "Run context API permits contradictory ticket and top-level base revisions",
+      "requirement": "A context bundle must be internally consistent and bound to one exact repository base.",
+      "evidence": {
+        "files": [
+          "src/agent_os/context.py",
+          "src/agent_os/digest.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "create_run_context accepts base_revision separately and does not compare it with ticket.base_revision; a caller can approve and emit a bundle containing two different bases.",
+      "impact": "A worker or verifier can operate on a base different from the ticket record while the bundle still passes its own approval validation.",
+      "recommendation": "Remove the redundant argument or enforce exact equality before digesting; test mismatch rejection.",
+      "verification": "Context creation raises on any base mismatch.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "Additional cross-contract mismatches likely exist and are under independent review."
+  ]
+}

@@ -1,0 +1,589 @@
+{
+  "scope": {
+    "definition": "Architecture for coordinating multiple software-building or maintenance agents: intake/routing, durable scheduling, workflow state, retries, short/long-term memory, event transport, supervision, human approval, observability, and recovery. An agent is a model-driven decision component; the control plane is deterministic infrastructure that owns authorization and lifecycle. A durable workflow engine is distinct from an in-process agent conversation framework.",
+    "included": "Issue-to-plan-to-patch/test/review/merge/deploy/remediate flows; centralized supervisors, explicit graphs, blackboard/event-driven workers, and hybrid single/multi-agent routing; interoperability through MCP (agent-to-tool) and A2A (agent-to-agent).",
+    "excluded": "Model training and detailed coding-agent quality except where orchestration evidence depends on them."
+  },
+  "current_state": [
+    {
+      "status": "verified",
+      "claim": "Production-grade deterministic primitives already exist: persisted event history/state, worker queues, leases, retries/backoff, timeouts, compensation, and event triggers. Temporal records history for crash recovery [S1-S5]; Kubernetes controllers reconcile desired and actual state [S15-S16]; AWS and Prefect expose explicit retry policies [S18-S19,S26]."
+    },
+    {
+      "status": "verified",
+      "claim": "Agent frameworks now expose graph routing, checkpoints, handoffs, interrupts/human-in-loop, stores, and tracing [S6-S13]. A2A 1.0 standardizes discovery and remote asynchronous task exchange [S14]."
+    },
+    {
+      "status": "inference",
+      "claim": "The reliable architecture is therefore a conventional distributed workflow/control plane containing probabilistic agents, not an LLM supervisor acting as its own scheduler/database/security boundary. The inference follows from delivery and replay semantics [S3-S5,S17-S19] and documented MAS failures [S20]."
+    },
+    {
+      "status": "unknown",
+      "claim": "No neutral, cross-framework evidence establishes end-to-end unattended issue-to-production reliability, total cost, or safety for long-lived multi-agent software projects."
+    }
+  ],
+  "representative_systems": [
+    {
+      "layer": "durable orchestration",
+      "systems": [
+        "Temporal (event-sourced durable workflows, task queues, retries)",
+        "AWS Step Functions Standard/Express (managed state machines)",
+        "Prefect 3 (Python workflow/task retries)"
+      ]
+    },
+    {
+      "layer": "message/event transport",
+      "systems": [
+        "NATS JetStream (persistent at-least-once streams/consumers)",
+        "cloud queues/EventBridge/Kafka equivalents"
+      ],
+      "note": "A broker transports events; it does not replace workflow history, joins, compensation, or policy."
+    },
+    {
+      "layer": "agent graph/runtime",
+      "systems": [
+        "LangGraph (checkpointed graph and stores)",
+        "Microsoft Agent Framework 1.0 (successor to AutoGen; workflows/checkpoint/HITL/telemetry)",
+        "OpenAI Agents SDK (handoffs, guardrails, tracing)",
+        "AutoGen (maintenance mode as of access, so migrate rather than start new)"
+      ],
+      "sources": "[S6-S13]"
+    },
+    {
+      "layer": "interoperability",
+      "systems": [
+        "A2A 1.0 for remote agent discovery/task lifecycle",
+        "MCP for tools/context, with explicit security hazards"
+      ],
+      "sources": "[S14,S23]"
+    },
+    {
+      "layer": "control pattern",
+      "systems": [
+        "Kubernetes-style reconciliation plus leases/leader election"
+      ],
+      "sources": "[S15,S16]"
+    }
+  ],
+  "primary_evidence": [
+    "Temporal explicitly persists append-only workflow event history used for recovery, has worker-polled task queues, and defaults failed Activities to declarative retries [S1-S3]. It also documents hard history limits and at-least-once Activity execution, proving that durability still requires Continue-As-New/history management and idempotent effects [S4,S5].",
+    "LangGraph separates thread checkpoints from cross-thread stores and warns that RAM savers lose state and checkpoints grow without retention [S6]. Its own multi-agent guide says single-agent designs can often suffice [S7].",
+    "Microsoft's repository declares AutoGen maintenance mode and MAF 1.0 its production-ready successor; MAF documents graph workflows, checkpointing, streaming, human-in-loop, time travel, OpenTelemetry, and a separate durable extension [S8-S10]. This supports capability/status only, not independent reliability.",
+    "OpenAI SDK handoffs are tools selected by the model; its boundary guardrails and tracing are useful but guardrails can race with model work and ZDR disables OpenAI-hosted tracing [S11-S13].",
+    "A2A 1.0 defines Agent Cards and async tasks with polling, SSE streaming, push notification, artifacts, input-required state, authentication, and opaque execution [S14]. It standardizes the wire contract, not scheduler reliability, authorization policy, or agent correctness.",
+    "NATS documents at-least-once persistent delivery, while AWS distinguishes Standard exactly-once state execution claims from Express at-least-once execution [S17-S19]. These differences require an explicit delivery contract rather than assuming exactly once.",
+    "MCP's security guidance enumerates confused deputy, token passthrough, SSRF, local compromise, session hijacking, and minimal-scope concerns [S23]; GitHub documents both rich event triggers and the danger of untrusted input/secrets in workflows [S24,S25]."
+  ],
+  "independent_evidence": [
+    {
+      "finding": "MAST studied 1,600+ annotated traces from seven MAS frameworks. Its taxonomy found 14 modes across system-design, inter-agent-misalignment, and task-verification categories; taxonomy validation reports kappa 0.88. Authors say gains on popular benchmarks are often minimal [S20].",
+      "caveat": "Preprint; trace selection, frameworks, tasks, and judge pipeline limit generalization, but human agreement and released taxonomy make it strong diagnostic evidence."
+    },
+    {
+      "finding": "A 2025 empirical comparison reports that MAS advantage shrinks as base models improve; its hybrid SAS/MAS cascade improved tested accuracy by 1.1-12% and cut deployment cost by up to 20% [S21].",
+      "caveat": "Preprint and workload-specific; percentage ranges should not be projected to software maintenance without replication."
+    },
+    {
+      "finding": "Agent Forest reports sampling-and-voting accuracy scaling with more agents [S22].",
+      "caveat": "This supports parallel independent sampling plus aggregation under tested benchmarks, not conversational role-play, durable operations, or monotonic value after latency/token costs."
+    },
+    {
+      "synthesis": "Evidence conflicts only superficially: parallel diversity and voting can help hard tasks [S22], while unconstrained collaboration introduces coordination/verification failures [S20] and strong single agents narrow the gap [S21]. Route selectively and require measurable marginal value."
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "Temporal history ceiling",
+      "value": "51,200 events or 50 MB; warnings after 10,240 events or 10 MB",
+      "interpretation": "Long-lived projects must shard per work item and roll/continue executions; one immortal project workflow is unsafe.",
+      "source": "S4"
+    },
+    {
+      "metric": "Delivery",
+      "value": "Temporal Activities and NATS JetStream are at least once; AWS Express is at least once; AWS states Standard state executions are exactly once unless Retry is configured",
+      "interpretation": "Every external mutation still needs an idempotency key/outbox or dedupe record; do not infer global exactly-once side effects.",
+      "sources": "S5,S17,S18"
+    },
+    {
+      "metric": "AWS Express duration",
+      "value": "up to five minutes",
+      "interpretation": "Unsuitable as the sole durable host for days-long approvals; use Standard or another durable workflow.",
+      "source": "S18"
+    },
+    {
+      "metric": "MAST evidence size",
+      "value": "1,600+ traces, 7 frameworks; 150 traces used to derive taxonomy; 14 modes/3 categories; Cohen's kappa 0.88",
+      "source": "S20"
+    },
+    {
+      "metric": "Hybrid SAS/MAS paper",
+      "value": "1.1-12% accuracy improvement and up to 20% deployment-cost reduction on tested applications",
+      "source": "S21",
+      "caveat": "authors' preprint results, not a production SLO"
+    },
+    {
+      "metric": "Required local SLOs",
+      "value": "Measure queue age p50/p95, run success without human rescue, retries per step, duplicate-effect rate, escalation rate, tokens/$/wall time per accepted change, revert rate, escaped defects, security-policy denials, and marginal quality versus a single-agent baseline.",
+      "status": "recommendation; no universal targets"
+    }
+  ],
+  "reference_workflow": [
+    "1. Normalize triggers from issue/PR/comment/schedule/alert/webhook [S24] into an immutable work_item with tenant, repo, commit/base SHA, requested outcome, risk class, budget, provenance, and idempotency key. Validate signatures and treat text as untrusted [S23,S25].",
+    "2. A deterministic admission service applies allowlists, concurrency quotas, cost/risk limits, dependency locks, and deduplication. Reject, quarantine, or request clarification before any model/tool call.",
+    "3. Persist desired state and append an audit event; start one durable workflow per work item. Store payloads/artifacts in object storage and references/hashes in workflow state to avoid history growth [S3,S4].",
+    "4. Route first to the cheapest capable single agent. Invoke a multi-agent branch only for predefined reasons: independent decomposition, specialist boundary, adversarial review, uncertainty threshold, or failed single-agent attempt [S7,S21]. The router emits reason, candidates, confidence, and budget—not only free text.",
+    "5. Planner produces a typed DAG: steps, owners/capabilities, inputs/outputs schemas, dependencies, acceptance tests, maximum attempts, timeout/heartbeat, side-effect class, and approval requirement. Deterministic code validates graph acyclicity and policy.",
+    "6. Dispatch ready nodes through capability/version-specific queues [S1]. Pin model, prompt, tool/image, repository SHA, dependency lockfile, and policy versions. Use leases/heartbeats so only one active supervisor owns a partition [S16].",
+    "7. Worker runs in an ephemeral least-privilege sandbox. It receives only scoped credentials and a clean checkout. All network, shell, file, and remote-agent calls pass a policy proxy. MCP/A2A identity is mapped to local authorization, not trusted from prose [S14,S23].",
+    "8. Save structured outputs and artifacts separately. Checkpoint only minimal thread state; keep cross-run memory in a governed store with namespace, provenance, confidence, TTL, ACL, and deletion [S6]. Never use raw chat transcript as authoritative project state.",
+    "9. At each external side effect, use work_item/step/attempt idempotency keys. Write an intent/outbox before dispatch, record the remote receipt/result, and reconcile unknown outcomes before retry because acknowledged execution can be lost [S5,S17].",
+    "10. Retry only classified transient failures with capped exponential backoff and jitter; send invalid input, policy denial, deterministic test failure, budget exhaustion, and repeated model failure to clarification, replan, quarantine, or dead-letter paths [S2,S19,S26]. Compensate reversible effects; never blindly replay merge/deploy/payment/secret rotation.",
+    "11. Join branches in deterministic code. Require schema checks, tests, static/security scans, diff limits, provenance, and an independent reviewer. Voting is useful only when answers are independently sampled and an objective verifier exists [S20,S22].",
+    "12. Interrupt for a human at ambiguous requirements, privileged tool expansion, high-risk/security/dependency/license change, failing/non-deterministic verification, production deploy, destructive migration, or exceeded budget. Persist the approval principal, exact artifact hash, scope, and expiry; changing the artifact invalidates approval.",
+    "13. Submit PR rather than direct push. Reconcile desired state ('approved SHA deployed and healthy') with actual repository/CI/deployment state in a controller loop [S15]. Rebase and rerun checks if base SHA changes.",
+    "14. Deploy canary after approval; observe error/latency/security/business SLOs. On breach, halt downstream work, rollback, open an incident, and attach trace/event history. Do not ask a compromised or failing agent to approve itself.",
+    "15. Close with immutable outcome labels and cost/latency/retry/escalation metrics. Curate only reviewed facts into long-term memory. Replay traces in offline evals before changing router/prompts/policies, then canary the control-plane version."
+  ],
+  "integration_points": {
+    "intake": "GitHub/GitLab issue, PR, review, comment and Actions/webhook events; observability alert/incident bus; scheduled dependency/security work [S24].",
+    "orchestration": "Temporal SDK/service and task queues, Step Functions API/EventBridge, or equivalent durable workflow; Prefect for lower-criticality Python-native flows [S1-S5,S18,S19,S26].",
+    "transport": "NATS JetStream/Kafka/cloud queues using envelope fields event_id, correlation_id, causation_id, tenant, schema_version, producer, timestamp, trace context, payload hash and delivery attempt [S17].",
+    "agents": "LangGraph/MAF/OpenAI SDK embedded as bounded decision activities; A2A 1.0 for remote agents and MCP for scoped tools [S6-S14,S23].",
+    "state": "SQL/transactional workflow store for canonical lifecycle; object/artifact store for patches/logs; vector/search store only as derived memory; secrets manager; policy engine; dedupe/outbox table.",
+    "engineering": "Git hosting API, CI checks, code scanners, package registries, sandbox/container service, deployment controller, feature flags and rollback system.",
+    "observability": "OpenTelemetry-style traces keyed by work item/attempt plus immutable workflow history. Capture routing, model/prompt/tool versions, token/cost, queue time, handoffs, policy decisions, approvals and artifact hashes; redact prompts/secrets. OpenAI built-in traces omit ZDR organizations [S13]."
+  },
+  "human_gates": [
+    {
+      "gate": "admission/clarification",
+      "when": "missing acceptance criteria, ambiguous target, external request, or low-confidence risk classification",
+      "why": "prevents an incorrect plan from multiplying across agents"
+    },
+    {
+      "gate": "capability escalation",
+      "when": "new repository, write scope, network domain, secret, production role, MCP/A2A peer, or sandbox exception",
+      "why": "model routing must not grant authority; MCP lists confused-deputy/token/session risks [S23]"
+    },
+    {
+      "gate": "change approval",
+      "when": "security/auth/billing/data migration/dependency-license/public API or large/high-blast-radius diff",
+      "why": "objective impact cannot be inferred reliably from agent consensus [S20]"
+    },
+    {
+      "gate": "merge/deploy",
+      "when": "protected branch and any production deployment until local evidence proves bounded auto-merge risk",
+      "why": "approval binds a reviewed artifact hash; new commit invalidates it"
+    },
+    {
+      "gate": "exception/escalation",
+      "when": "dead-letter, conflicting agent conclusions, flaky test, repeated retry, budget/time cap, unknown side-effect result or SLO regression",
+      "why": "break retry loops and protect external state"
+    },
+    {
+      "gate": "policy evolution",
+      "when": "changing prompt/model/router/tool permissions, retry limits, eval threshold or memory schema",
+      "why": "control-plane change can affect every future task; use offline replay plus canary"
+    }
+  ],
+  "failure_modes": [
+    "Supervisor single point of semantic failure: wrong decomposition/routing or premature stop propagates to every worker; recursive delegation can create cycles or unbounded fan-out [S20].",
+    "Coordination failures: ambiguous roles, context loss at handoff, agents ignoring others, conformity/groupthink, conflicting edits, stale base SHA, lock contention, and no objective termination/verification [S20-S22].",
+    "Distributed-systems failures: duplicate/redelivered jobs, lost acknowledgment after effect, poison messages, out-of-order events, split-brain supervisors, lease expiry during a long call, retry storms, queue starvation, dead-letter neglect, partial joins and compensation failure [S5,S16-S19].",
+    "Replay/state failures: non-deterministic workflow code, oversized histories, schema/version mismatch, corrupt checkpoint, incompatible deployment, in-memory checkpoint loss, unbounded retention [S3,S4,S6].",
+    "Memory failures: stale/poisoned/private facts, cross-tenant leakage, retrieval amplifying earlier mistakes, no provenance/deletion, vector store treated as truth.",
+    "Security failures: prompt injection through issues/repos/tool output, confused deputy, credential/token forwarding, SSRF, malicious MCP/A2A peer or GitHub Action, secret leakage in traces, tool-call argument substitution, supply-chain code execution [S23,S25].",
+    "Control/economic failures: runaway model/tool loops, correlated reviewers sharing the same blind spot, expensive multi-agent work on easy tasks, rate limits, vendor outage/lock-in, trace gaps under ZDR, and framework churn (AutoGen entered maintenance mode) [S7,S9,S13,S20,S21].",
+    "Product failures: technically passing but unwanted change, benchmark gaming, silent behavior regression, noisy autonomous PRs, ownership diffusion, and reviewers habituated to approving agent output."
+  ],
+  "controls_and_mitigations": [
+    "Separate planes: deterministic scheduler/policy/state/authorization/reconciliation in the control plane; LLMs only propose typed plans, routing hints, patches, reviews, and explanations.",
+    "Use durable per-item workflow history, versioned schemas, transactional outbox/inbox, idempotency keys, dedupe TTL, capped backoff+jitter, explicit retryable error taxonomy, dead-letter ownership, timeouts/heartbeats, and reconciliation of unknown effects [S2-S5,S17-S19,S26].",
+    "Enforce least-privilege short-lived credentials per step, sandbox isolation, egress/domain allowlists, read/write separation, protected branches, signed artifacts, dependency/action pinning, two-person approval for sensitive changes, and no token passthrough [S23,S25].",
+    "Bound recursion, fan-out, wall time, tokens, dollars, files/lines changed, tool calls, concurrent jobs and memory retrieval. Circuit-break by repo/model/provider/tool and provide a global kill switch.",
+    "Require machine-verifiable contracts: JSON schemas, acceptance tests, static/type/security/license scans, deterministic joins, independent review, confidence/calibration thresholds and fail-closed policies. Agent agreement is evidence, not authorization [S20-S22].",
+    "Keep canonical state relational/event-sourced. For memory, require tenant/user namespace, source URI/artifact hash, observation time, confidence, TTL, ACL, PII class, review status and deletion. Quarantine untrusted content; never execute retrieved instructions.",
+    "Trace every state transition, routing/handoff/tool/policy decision and approval with correlation/causation IDs, while redacting and limiting retention. Maintain an alternate local audit path when vendor tracing is incompatible with ZDR [S13].",
+    "Use Kubernetes-style reconciliation and leased leader election rather than one-shot agents [S15,S16]. Merge only reviewed SHA; deploy canary; auto-rollback and freeze on SLO/security regressions."
+  ],
+  "maturity_assessment": {
+    "production_ready": "Durable workflow engines, queues, idempotent activities, retry/backoff, event triggers, checkpoint stores, controller reconciliation, leases, sandboxed CI, audit and human approval are mature when operated as normal distributed systems [S1-S6,S15-S19,S24,S25].",
+    "conditionally_useful": "Explicit agent graphs, specialist handoffs, parallel independent review, and A2A 1.0 are useful for bounded, observable tasks with objective verification and budgets [S7-S14,S22]. Framework capability is verified; reliability remains application-specific.",
+    "emerging": "Learned/dynamic routing, shared long-term agent memory, cross-vendor remote-agent ecosystems, automatic plan repair and hybrid SAS/MAS cascades. Evidence is mainly documentation and preprints [S14,S20,S21].",
+    "speculative": "An open-ended LLM supervisor safely owning backlog, permissions, merge, deploy and self-modification with minimal human oversight. MAST failure evidence and missing neutral longitudinal SLOs argue against production trust [S20]."
+  },
+  "build_vs_buy": {
+    "buy_managed": "Use Temporal Cloud or AWS Step Functions where operational burden and compliance fit; managed Git/CI, secrets, policy, artifact storage and observability reduce undifferentiated work. Validate tenancy, history/retention, egress, regional, ZDR and cost constraints [S4,S13,S18].",
+    "build_on_open_source": "Self-host Temporal plus LangGraph or MAF when portability/custom execution or data control matters. Prefer MAF for new Microsoft-stack work because AutoGen is maintenance-only [S8-S10]. Use NATS/Kafka only as transport, not as the whole orchestrator [S17].",
+    "custom_required": "Admission/risk model, typed work-item schema, repo capability registry, router policy, idempotency/outbox integration, artifact approval binding, memory governance, eval corpus, SLO dashboards, kill switches and organization-specific gates.",
+    "avoid": "A new bespoke scheduler/retry database unless scale/compliance makes established engines impossible; chat-only multi-agent frameworks as the system of record; direct autonomous production credentials; starting new AutoGen projects [S9]."
+  },
+  "recommended_pattern": {
+    "name": "Durable controller with bounded agent activities and selective fan-out",
+    "architecture": "One authoritative durable workflow per work item; conventional queue workers; canonical SQL/event history; immutable artifact store; Kubernetes-style reconciler for repository/deploy desired state; sandbox/policy proxy; checkpointed agent graph only inside bounded activities; governed memory; complete audit and evaluation plane.",
+    "routing": "Single-agent first. Fan out only when predicted uncertainty/risk/complexity exceeds a calibrated threshold or when independent verification has known value. Cap branches and use deterministic aggregation. Fall back to human, not endless agent debate [S7,S20-S22].",
+    "rollout": "Phase 1 read-only triage and plans. Phase 2 agent PRs with mandatory review. Phase 3 low-risk auto-merge after local SLO/eval thresholds. Phase 4 canary deploy and reversible remediation. Never grant broader rights merely because benchmark score improves.",
+    "technology_choice": "Choose the durable engine before the agent framework. As of 2026-09-13, Temporal is the strongest general fit for long waits/recovery/custom workers; Step Functions fits AWS-native workflows; LangGraph/MAF add agent-local graphs and checkpoint/HITL. Use A2A at trust boundaries only with authenticated peers and local policy [S1-S14,S18-S19].",
+    "decision_rule": "Keep a multi-agent path only if an A/B comparison against the best single-agent baseline improves accepted-change rate or reduces escapes enough to cover added token, latency, coordination failures and operations."
+  },
+  "open_questions": [
+    "What accepted-change, rollback, escaped-defect, security and human-minutes SLOs do these architectures sustain over 6-12 months on real repositories? No neutral longitudinal comparison was found.",
+    "How should routers be calibrated under model drift, task distribution shift and sparse ground truth, and how much of [S21]'s hybrid gain transfers to software maintenance?",
+    "Can A2A 1.0 implementations deliver consistent idempotency, authorization, cancellation, retention, provenance and conformance across vendors, beyond wire-level interoperability [S14]?",
+    "How can memory poisoning, provenance, revocation/right-to-delete and cross-agent/tenant access be evaluated with standard benchmarks?",
+    "What is the safest migration and replay/versioning method for in-flight workflows when prompts, models, tools, schemas or workflow code change [S3,S6]?",
+    "Which failures are decorrelated by independent agents versus repeated because models share training data, prompts, tools and evaluators [S20,S22]?",
+    "What cost/latency frontier justifies a durable multi-agent branch versus a stronger single model, and how stable are vendor-reported delivery/exactly-once semantics end to end [S5,S17,S18]?"
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Task Queues",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/task-queue",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Temporal task queues are dynamically allocated and polled by workers; activity, workflow, and Nexus task queues separate dispatch from workers."
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "What is a Temporal Retry Policy?",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/encyclopedia/retry-policies",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Activity retries are automatic by default and retry behavior is declarative; workflow failures are treated differently."
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Events and Event History",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution/event",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Temporal appends workflow events to history and uses replay to recover after crashes."
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Workflow Execution limits",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution/limits",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "A workflow history is limited to 51,200 events or 50 MB, with warnings at 10,240 events or 10 MB."
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Error handling - Python SDK",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/develop/python/failure-detection",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Activities follow at-least-once execution and therefore should use idempotency keys; a worker can finish an action then crash before acknowledgment, causing retry."
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Persistence",
+      "publisher_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "LangGraph checkpointers store thread-scoped checkpoints for continuity, interruption, time travel, and fault tolerance; stores hold cross-thread long-term memory.",
+        "In-memory savers do not survive restarts and production needs a persistent saver; checkpoints need retention."
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "Multi-agent",
+      "publisher_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langchain/multi-agent",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "LangChain documents subagents, handoffs, skills, router, and custom workflows, while warning that a single agent with suitable tools can often produce similar results."
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "Microsoft Agent Framework repository README",
+      "publisher_author": "Microsoft",
+      "url": "https://github.com/microsoft/agent-framework",
+      "publication_update_date": "repository active as of 2026-09-12",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "MAF provides Python/.NET graph workflows with sequential, concurrent, handoff, and group patterns plus checkpointing, streaming, human-in-loop, time travel, OpenTelemetry, and a separate durable extension."
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "AutoGen repository README",
+      "publisher_author": "Microsoft",
+      "url": "https://github.com/microsoft/autogen",
+      "publication_update_date": "repository active as of 2026-09-12; maintenance-mode notice current at access",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "AutoGen is in maintenance mode, gets no new features, and directs new users to Microsoft Agent Framework 1.0 and existing users to migrate."
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Agent Runtime Environments",
+      "publisher_author": "Microsoft AutoGen",
+      "url": "https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/core-concepts/architecture.html",
+      "publication_update_date": "unknown; stable documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "AutoGen Core defines standalone and distributed runtimes for communication, identities, lifecycle, and security/privacy boundaries."
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Handoffs",
+      "publisher_author": "OpenAI",
+      "url": "https://openai.github.io/openai-agents-python/handoffs/",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "OpenAI Agents SDK represents delegation handoffs as model-visible tools and permits input filtering/customization."
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Guardrails",
+      "publisher_author": "OpenAI",
+      "url": "https://openai.github.io/openai-agents-python/guardrails/",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "Input and output guardrails can block a run, but parallel input checks may finish after the expensive model has started; workflow boundary semantics matter."
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "Tracing",
+      "publisher_author": "OpenAI",
+      "url": "https://openai.github.io/openai-agents-python/tracing/",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official SDK documentation",
+      "supported_claims": [
+        "The SDK traces generations, tool calls, handoffs, guardrails, and custom events by default; tracing is unavailable under OpenAI Zero Data Retention policy."
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "Agent2Agent (A2A) Protocol Specification 1.0.0",
+      "publisher_author": "A2A Project / Linux Foundation Agentic AI Foundation",
+      "url": "https://a2a-protocol.org/latest/specification/",
+      "publication_update_date": "version 1.0.0 current at 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "open standard specification",
+      "supported_claims": [
+        "A2A 1.0 supplies Agent Cards, task/message/artifact data models, task lifecycle, polling/streaming/push updates, authenticated discovery, and long-running human-in-loop interactions across opaque agents."
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "Controllers",
+      "publisher_author": "Kubernetes Authors / CNCF",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation / foundational pattern",
+      "supported_claims": [
+        "Kubernetes controllers continuously compare actual with desired state and act to reconcile differences."
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "Leases",
+      "publisher_author": "Kubernetes Authors / CNCF",
+      "url": "https://kubernetes.io/docs/concepts/architecture/leases/",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation / foundational pattern",
+      "supported_claims": [
+        "Lease objects support heartbeats and leader election, a useful mechanism for singleton supervisors and liveness."
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "JetStream",
+      "publisher_author": "Synadia / NATS Authors",
+      "url": "https://docs.nats.io/nats-concepts/jetstream",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "JetStream persists and replays messages and provides at-least-once delivery with server-side streams and stateful consumers."
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "Choosing workflow type in Step Functions",
+      "publisher_author": "Amazon Web Services",
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor documentation",
+      "supported_claims": [
+        "AWS states Standard workflows have exactly-once state execution unless Retry is configured and retained history, whereas Express workflows can run up to five minutes and use at-least-once execution."
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "Handling errors in Step Functions workflows",
+      "publisher_author": "Amazon Web Services",
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor documentation",
+      "supported_claims": [
+        "Step Functions supports typed retry/catch policies with interval, maximum attempts, backoff, and jitter controls."
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "Why Do Multi-Agent LLM Systems Fail?",
+      "publisher_author": "Mauran et al.",
+      "url": "https://arxiv.org/abs/2503.13657",
+      "publication_update_date": "2025-03-17 v1; revised 2025-08-21 v2",
+      "access_date": "2026-09-13",
+      "source_type": "independent academic preprint; annotated empirical study",
+      "supported_claims": [
+        "MAST-Data contains 1,600+ traces across seven frameworks; taxonomy development used 150 traces, found 14 failure modes in three categories, and reported inter-annotator kappa 0.88.",
+        "Reported benchmark gains from MAS are often minimal and failures cluster in system design, inter-agent misalignment, and task verification."
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "Single-agent or Multi-agent Systems? Why Not Both?",
+      "publisher_author": "Chen et al.",
+      "url": "https://arxiv.org/abs/2505.18286",
+      "publication_update_date": "2025-05-24 v1",
+      "access_date": "2026-09-13",
+      "source_type": "independent academic preprint / empirical comparison",
+      "supported_claims": [
+        "The study reports diminishing MAS benefits with stronger frontier models and a hybrid request-cascading design yielding 1.1-12% accuracy improvement while reducing deployment costs by up to 20% across its tested applications."
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "More Agents Is All You Need",
+      "publisher_author": "Wang et al.",
+      "url": "https://arxiv.org/abs/2402.05120",
+      "publication_update_date": "2024-02-07 v1; revised 2024-03-13 v2",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint / experimental vendor-neutral claim",
+      "supported_claims": [
+        "Sampling-and-voting performance increased with agent count in tested benchmarks, with gains related to task difficulty; this is a narrow ensemble result, not proof that arbitrary collaborative topologies improve."
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "Security Best Practices",
+      "publisher_author": "Model Context Protocol project",
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "publication_update_date": "2025-11-25 specification documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official protocol security guidance",
+      "supported_claims": [
+        "MCP guidance identifies confused-deputy risks, token passthrough, SSRF, local server compromise, session hijacking, and scope-minimization requirements."
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "Events that trigger workflows",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Repository events such as issues, pull requests, comments, schedules, and workflow dispatch can trigger control-plane intake."
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "Secure use reference",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "publication_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "GitHub warns that untrusted workflow input and compromised actions can expose secrets and recommends least privilege, pinning actions, and review controls."
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "How to automatically rerun your workflow when it fails",
+      "publisher_author": "Prefect Technologies",
+      "url": "https://docs.prefect.io/v3/how-to-guides/workflows/retries",
+      "publication_update_date": "unknown; Prefect 3 documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Prefect flows and tasks expose retry count, delays, exponential backoff, jitter, and conditional retry controls."
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "High for distributed-systems/control-plane primitives and current official framework/protocol status; medium for recommended composition; low-to-medium for claims of multi-agent performance and economics.",
+    "high": "Temporal/NATS/AWS delivery and limits, LangGraph persistence semantics, A2A 1.0 surface, Kubernetes controller/lease patterns, AutoGen maintenance status—direct specifications/docs/repositories [S1-S19].",
+    "medium": "That a deterministic durable controller plus bounded agents is the best reference pattern. It is an engineering synthesis strongly supported by mature primitives and observed failure classes but lacks a neutral head-to-head production trial.",
+    "low_medium": "Transfer of MAST, hybrid cascade and Agent Forest results to long-running software projects because [S20-S22] are preprints/benchmark studies and not longitudinal production evidence.",
+    "claim_labels": "Entries explicitly label verified documentation, vendor claims, independent findings, inference and unknowns; vendor 'production-ready' and 'exactly-once' language is not treated as independent proof."
+  },
+  "conflicts": [
+    {
+      "claim_a": "More agents/sampling-and-voting improves accuracy with scale [S22].",
+      "claim_b": "MAS gains are often minimal and have 14 recurrent failure modes [S20]; benefits diminish with stronger base models [S21].",
+      "resolution": "Topology and verification explain much of the difference. Independent samples with objective voting differ from conversational dependency chains. Use selective fan-out and local A/B evidence."
+    },
+    {
+      "claim_a": "Microsoft calls MAF 1.0 production-ready and successor to AutoGen [S8,S9].",
+      "claim_b": "Feature presence and repository activity do not prove application SLOs; its durable execution is partly a separate extension [S8].",
+      "resolution": "Treat release/status as verified vendor facts but operational reliability as unverified; pair with a proven durable engine until tested."
+    },
+    {
+      "claim_a": "AWS calls Standard workflows exactly once [S18].",
+      "claim_b": "Temporal/NATS document at-least-once execution and duplicate-effect scenarios [S5,S17].",
+      "resolution": "These refer to different boundaries. A state transition can be exactly-once while an external API outcome remains unknown. Design all effects idempotently and reconcile."
+    },
+    {
+      "claim_a": "Agent SDK guardrails can terminate unsafe runs [S12].",
+      "claim_b": "Parallel guardrails may allow costly work to start and boundary guardrails do not replace per-tool authorization [S12,S23].",
+      "resolution": "Use blocking admission for high-risk input and deterministic authorization on every capability/tool call."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "current_state",
+    "metrics",
+    "maturity_assessment",
+    "open_questions"
+  ]
+}

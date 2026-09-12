@@ -1,0 +1,60 @@
+{
+  "reviewer": "round-6 independent evidence-semantics closure auditor",
+  "scope": "Final plan-only closure audit after round-5 corrections. Reviewed current PLAN.md, README.md, docs/state-transition-manifests.md, review/requirements-traceability.md, review/round-5-resolution.md, all five review/round-5-closure JSON files, and the current evidence package, including research-manifest.json, synthesis-coverage.md, evidence-repair.md, evidence-index.md, evidence-cutoff.md, structural-validation.md, evidence-matrix.md, report.md, plan-link-check.json, and schema-3 material-claims.json. Reproduced local digests, corpus inventory, JSON pointers, observation IDs, hashes, edge references/types/statuses, excerpts, and 37/23 coverage. Did not require implementation, a full model proof, external source truth, or completion of the fresh immutable evidence gate.",
+  "strengths": [
+    "Schema-3 material-claims.json is byte-bound to the current PLAN.md and normative manifest: both stored SHA-256 digests reproduce exactly.",
+    "The claim graph mechanics reproduce: 25 unique legacy-corpus projections, 20 unique current claims, and 36 unique resolved edges. Relations are exactly 23 candidate_support, 5 candidate_refute, and 8 context_only; supports/refutes are unused. Every edge has semantic_disposition=unreviewed_candidate, every observation is used, every pointer/value/file hash and derived observation ID reproduces, and the claim statuses distinguish candidate_unreviewed, verified_local_structural, and proposed_not_observed.",
+    "The declared corpus reproduces as 37 parsed result files in the 14/10/8/5 split, with all inventory paths and byte hashes matching. synthesis-coverage.md contains 37 track entries, and evidence-index.md declares and enumerates the 23 focused RAOS/lifecycle/domain tracks in the 10/8/5 split.",
+    "PLAN §4, README status, traceability, round-5 resolution, research-manifest.json, evidence-repair.md, evidence-cutoff.md, and the schema-3 graph correctly keep legacy retrieval history and semantic entailment unverified and keep the fresh same-run retrieval/human review gate pending."
+  ],
+  "findings": [
+    {
+      "id": "R6-EVID-001",
+      "severity": "high",
+      "title": "Material PLAN propositions remain categorical facts while their schema-3 claims and edges are candidate-only",
+      "requirement": "PLAN §4 and round-5 clause R5-C01 require current legacy external propositions to remain candidate/unreviewed editorial associations until a fresh same-run observation receives human semantic acceptance. Material plan reasoning must not state the same propositions as verified current facts.",
+      "evidence": [
+        "PLAN.md:79-82 says every external legacy edge is unreviewed, only candidate_support|candidate_refute|context_only is current, and semantic support has not been established. review/round-5-resolution.md:R5-C01 also says categorical platform/research prose is candidate attribution.",
+        "PLAN.md:192 nevertheless states 'GitHub environment reviewers are one-of, so R3 quorum needs an external signed gate.' material-claims.json MC-022 marks the one-listed-reviewer proposition status=candidate_unreviewed and its sole edge relation=candidate_support with semantic_disposition=unreviewed_candidate; MC-023 makes the external-quorum conclusion an architecture inference.",
+        "PLAN.md:317 states 'Installation tokens are short-lived and permission-scoped', while MC-006 labels those GitHub capabilities candidate_unreviewed and says tenant-specific permissions and behavior still require probes and tests.",
+        "PLAN.md:440 states 'SLSA defines relevant provenance requirements' and line 441 states 'OWASP identifies prompt injection and excessive agency risks'; MC-009 and MC-010 convert those exact excerpts into candidate_standard_proposition claims backed only by unreviewed candidate_support edges.",
+        "The global disclaimer does not make the later declarative sentences explicit candidate attributions, and the schema graph silently weakens the exact PLAN excerpts rather than reproducing their asserted status. The R3 quorum sentence is decision-driving, not incidental bibliography."
+      ],
+      "reproduction": "Compare PLAN.md lines 79-82 with lines 192, 317, 440, and 441. Then inspect MC-006, MC-009, MC-010, MC-022, and MC-023 status, claim_type, claim_text, relation, semantic_disposition, and unresolved_uncertainty in schema-3 material-claims.json. The PLAN uses present factual grammar where the graph says only an unreviewed candidate proposition or architecture inference exists.",
+      "impact": "A plan approver or implementer can treat unreviewed mutable-platform and standards propositions as established premises, especially the premise that selects the R3 external quorum mechanism. This is a material evidence overclaim and contradicts the stated round-5 correction.",
+      "recommendation": "Do not complete the future evidence gate for this repair. Instead, rewrite each affected sentence as an explicit legacy-record candidate attribution and keep the design requirement as a conservative local proposal that fails closed until the target-tenant probe/review. Re-scan all exact PLAN excerpts represented by candidate schema-3 claims and regenerate the graph digests after the PLAN edit.",
+      "verification": "Every PLAN excerpt represented by status=candidate_unreviewed uses explicit candidate/legacy attribution or clearly separates the conservative normative proposal from the unverified external premise. The schema-3 claim text no longer has to downgrade categorical PLAN wording, and PLAN/manifest digests are regenerated without changing the pending future-gate status.",
+      "confidence": "high",
+      "prior": "R5-EVID-001 / R5-C01 incomplete for categorical PLAN prose"
+    },
+    {
+      "id": "R6-EVID-002",
+      "severity": "high",
+      "title": "Current evidence prose outside the schema-3 graph still presents unreviewed legacy records as support, current facts, and high-confidence evidence",
+      "requirement": "The current evidence package must preserve the round-5 candidate-only provenance boundary throughout reader-facing evidence prose. Structural validation, checked-in links, and editorial associations cannot be described as semantic support, verified current platform behavior, or confidence in the proposed architecture before the separate immutable same-run human review.",
+      "evidence": [
+        "PLAN.md:79-84 and review/round-5-resolution.md:R5-C01 define every current external legacy edge as an unreviewed candidate_support|candidate_refute|context_only association and reserve supports|refutes for a future accepted same-run observation.",
+        "research/repository-agent-operating-system/report.md:30 says 'The source set supports the component mechanisms and the safety boundary'; line 36 calls the ten results an evidence set; lines 42-51 and the detailed sections state mutable platform behavior and empirical numbers categorically, including current GitHub semantics and a 19% METR slowdown. The report has no prominent legacy/candidate-only or superseded status and still declares a 2026-09-13 research cutoff rather than the current 2026-09-12 decision-scope boundary.",
+        "research/repository-agent-operating-system/evidence-matrix.md:3 says confidence applies to documented primitives and the proposed architecture, labels sources 'Strongest direct evidence', and assigns High/Medium-high confidence to platform mechanics, durable fenced leases, lifecycle design, the control-plane split, and system boundaries. Its production-readiness caveat does not say provenance and entailment are unreviewed candidates.",
+        "research/repository-agent-operating-system/synthesis-coverage.md:10 and 15 disclaim source truth and make central conclusions candidates, but lines 426 and 430 then call legacy families 'Strong first-party evidence for current primitives' and say they 'support capability or deployment existence'. Those semantic-support/currentness statements exceed the file's declared structural-only boundary.",
+        "research/repository-agent-operating-system/evidence-repair.md:20, 24, and 36-46 expressly say the current artifacts establish only local structure/editorial linkage and do not establish source truth, semantic entailment, current product behavior, or complete behavior of mutable products."
+      ],
+      "reproduction": "Read the candidate-only rule in PLAN §4 and schema-3 scope_and_method/provenance_policy. Then search the reader-facing evidence Markdown for 'supports', 'Strongest direct evidence', 'High', 'current primitives', and categorical platform/empirical statements. Compare report.md:30-51, evidence-matrix.md:3-16, and synthesis-coverage.md:426-436 with evidence-repair.md:20-24 and material-claims.json, where the corresponding propositions and all legacy edges are explicitly candidate/unreviewed.",
+      "impact": "A plan approver can treat the still-current report and matrix as semantically validated evidence or current platform truth despite the graph and governing plan saying only editorial candidate associations exist. The conflicting cutoff and confidence language can materially bias Increment 0 evidence decisions and defeats the requested no-overclaim closure condition.",
+      "recommendation": "Without performing the future evidence gate, either mark report.md and evidence-matrix.md prominently as superseded legacy synthesis that is not part of current decision evidence, or revise their headings, claims, confidence labels, cutoff text, and source-family prose to candidate/unreviewed semantics. Change the synthesis family phrases to candidate associations. Link all three files to the schema-3 provenance boundary and regenerate only affected local digests/pointers if their bytes are covered.",
+      "verification": "A repository-wide review of current evidence prose shows no unqualified supports/refutes, direct-evidence/high-confidence, verified-current-platform, or cutoff-compliance language derived from legacy records. Any retained historical prose is unmistakably marked superseded/non-authoritative. The schema-3 graph remains candidate-only with 37/23 coverage and unchanged future-gate status.",
+      "confidence": "high",
+      "prior": "R5-EVID-001 was corrected in PLAN.md and schema-3 material-claims.json but not across all current evidence prose."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2,
+    "total": 2
+  },
+  "residual_uncertainty": [
+    "No fresh retrieval or human entailment review was performed. Its pending status is not a finding.",
+    "The audit reproduces deterministic local evidence-graph and coverage contracts but does not assert external source truth or implementation correctness."
+  ],
+  "closure_criteria_pass": false
+}

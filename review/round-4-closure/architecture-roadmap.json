@@ -1,0 +1,112 @@
+{
+  "reviewer": "round-4 architecture and roadmap closure auditor",
+  "scope": "Final plan-only closure audit of the current repository snapshot, with implementation explicitly out of scope. Reviewed PLAN.md, README.md, docs/state-transition-manifests.md, requirements traceability, round-3 resolution and all four round-3 closure reviews, all round-2 reviews and resolution, relevant round-1 resolution memos, and the named current evidence artifacts. Reproduced the architecture, authority, persistence, rollout, consumer, cross-scope, and roadmap closure claims without requiring future gates to have passed.",
+  "strengths": [
+    "The plan now defines one protected Factory IR/schema registry and one compiler path. Built-ins, aggregate manifests, generated models, database projections, fixtures, and documentation are required to conform to the same versioned contract and digest.",
+    "Authority boundaries are explicit. Approval issuance, approval custody, runtime validation, actuation, durable controller facts, external resources, and disposable workers have separate ownership and prohibited powers, with database roles, keys, APIs, and audit subjects preserving those boundaries even when one process hosts components.",
+    "Release 0 is a coherent no-write recovery envelope: no external-write credential, deterministic local journal replay, torn-tail quarantine and signed repair, fail-closed interior corruption, and tested export/reinstall/rollback. Host loss and in-flight real-effect recovery are correctly excluded because Release 0 cannot send effects.",
+    "PostgreSQL is an unambiguous prerequisite to every controller/actuator external writer. The gate covers restricted roles, immutable history, CAS/outbox atomicity, database-time leases, backup/restore/replay, send-crash cases, and real two-session races. A second repository is separately blocked on FORCE RLS or stronger isolation plus hostile-role and substitution tests.",
+    "Cross-scope data, evidence, and approval dependencies require exact source/destination typed scopes, dual-owner signatures, typed ports/classes, purpose and legal basis, expiry/revocation, artifact digests, and an exact import receipt. Ordering edges must prove non-disclosure or use the same envelope.",
+    "Consumer delivery is closed over a signed complete installation manifest. Install, verification, upgrade, and rollback re-enumerate and rehash the managed set, emit signed receipts, use isolated dogfood before opt-in canaries, pause on telemetry loss, and use a previously verified compatible rollback manifest.",
+    "The sole roadmap uses explicit predecessor dependencies and signed, predeclared IncrementAdmissionDecision records for Increments 3-10. It keeps engineering first, blocks governed improvement when independent principals do not exist, admits a second repository only after isolation evidence, and limits the future GTM branch to separately owned read-only discovery with no-go and rollback rules."
+  ],
+  "findings": [
+    {
+      "id": "ARCH-R4-003",
+      "severity": "high",
+      "title": "Cross-scope hard-success dependencies bypass both transfer authorization paths",
+      "requirement": "Every cross-tenant, cross-repository, or cross-scope dependency must have explicit dual-owner authorization or a closed non-disclosure contract. A dependency type must not become a relabeling bypass around the cross-scope authority boundary.",
+      "evidence": [
+        "PLAN.md \u00a713 defines the closed dependency types as hard_success, ordering, data, and approval.",
+        "The same clause requires a signed dual-owner ExportImportEnvelope only for cross-boundary data|evidence|approval edges. It separately requires an ordering edge to carry a signed non-disclosure proof or use that envelope. It states no envelope or non-disclosure rule for hard_success.",
+        "A hard_success edge necessarily communicates an upstream outcome and gates downstream execution. Across scopes it therefore crosses the same authority boundary while matching neither protected branch.",
+        "PLAN.md \u00a718 says a cross-scope read or export needs a signed envelope, and \u00a721.3 tests relabeling an ordering edge but does not test relabeling a cross-scope dependency as hard_success.",
+        "review/round-3-resolution.md G6 says cross-scope ordering must prove non-disclosure or use the envelope, but does not close the hard_success branch."
+      ],
+      "reproduction": [
+        "Construct a DependencyEdge with type=hard_success whose source and target have different tenant_id or ScopeRef values and whose required outcome is upstream success.",
+        "Evaluate the literal conditions in PLAN.md \u00a713: the edge is not data, evidence, or approval, so the mandatory ExportImportEnvelope condition does not match; it is not ordering, so the non-disclosure branch also does not match.",
+        "Observe that admission may pin and consume the dependency snapshot even though neither side supplied a transfer authorization and the downstream scope learns and acts on the upstream outcome."
+      ],
+      "impact": "An implementer following the closed type dispatch can create an unauthorized cross-scope outcome oracle and execution gate. Relabeling a dependency as hard_success bypasses the dual-owner envelope that is meant to prevent cross-tenant/repository/scope disclosure and authority substitution.",
+      "recommendation": "Apply the dual-owner ExportImportEnvelope to every cross-boundary dependency type, including hard_success, or define for hard_success an equally precise signed non-disclosure authorization that both owners approve. State whether timing and success/failure are permitted fields. Add adversarial relabeling and admission fixtures for all four closed types.",
+      "verification": "A table or total dispatch covers hard_success, ordering, data, and approval for same-scope and cross-boundary cases. No cross-boundary case reaches admission without either the exact dual-owner envelope or a type-specific signed authorization whose disclosed fields are closed. Tests reject relabeling data/status as hard_success or ordering.",
+      "confidence": "high",
+      "prior": "R3-STATESEC-006 / G6 (reproduced edge case, not fully closed)"
+    },
+    {
+      "id": "ARCH-R4-004",
+      "severity": "high",
+      "title": "The authority catalog forbids the runtime from appending the admission receipt it must derive",
+      "requirement": "The R0/R1 delegated-admission path must assign one narrow, explicit authority to derive, sign, persist, and revoke or invalidate PolicyAdmissionReceipt records without granting the scheduler human approval issuance power.",
+      "evidence": [
+        "PLAN.md \u00a75 authority table defines the scheduler/runtime validator as a consumer that validates stored authority and must not manufacture it.",
+        "PLAN.md \u00a75.1 places PolicyAdmissionReceipt in Work and decisions, then says only the authenticated human decision/issuance gateway may append issue/deny/revoke events and that runtime is read/validate/consume only.",
+        "PLAN.md \u00a710 says the runtime validator derives and signs a deterministic PolicyAdmissionReceipt, and that this receipt authorizes READY_REVIEW -> READY without a per-item human.",
+        "PLAN.md \u00a713 admission consumes that receipt. The manifest universal ready guard also accepts it.",
+        "PLAN.md \u00a710 distinguishes human issuance and controller derivation by event type, key, database role, and audit subject, but it never names the derived-receipt issuer, grants its append operation, or reconciles that grant with the catalog's runtime-read-only rule."
+      ],
+      "reproduction": [
+        "Follow an eligible delegated R0/R1 item with all human-needed predicates false.",
+        "At PLAN.md \u00a710, the runtime validator must derive, sign, and make a PolicyAdmissionReceipt durable so the \u00a713 admission transaction and manifest ready guard can validate it.",
+        "Apply PLAN.md \u00a75.1 literally: runtime may only read, validate, and consume this record family, while the only writer described acts for qualified humans. The required receipt cannot be appended without violating a normative authority boundary."
+      ],
+      "impact": "The core exception-driven R0/R1 route is either unimplementable or forces an implementer to broaden the ordinary runtime or human approval gateway beyond its declared authority. Because the receipt alone advances work from READY_REVIEW to READY, choosing an implicit writer is an unsafe authorization path, not an editorial ambiguity.",
+      "recommendation": "Create a distinct narrow PolicyAdmissionReceipt issuer/append role and transaction. Define its authenticated service identity, signing key use, database privilege, allowed event/schema, deterministic input validation, quota/CAS behavior, invalidation/revocation handling, and audit subject. State that it cannot issue human Approval, DelegatedAdmissionPolicy, exceptions, or any widened authority. Update the record catalog and authority table accordingly.",
+      "verification": "The authority matrix and record catalog name exactly one non-human derived-receipt writer. A successful R0/R1 trace persists the receipt without using a human-issuance role, while negative tests prove the role cannot append approvals, policies, arbitrary events, changed-input receipts, R2+ receipts, or widened bounds.",
+      "confidence": "high",
+      "prior": "R3-REQ-001 / G13 (delegation path reopened by unresolved writer authority)"
+    },
+    {
+      "id": "ARCH-R4-001",
+      "severity": "high",
+      "title": "The evidence set still asserts the disclaimed UTC+08 provenance story and semantic support",
+      "requirement": "The plan and evidence package must be evidence-honest. Unverified legacy dates must not be converted into a collection-history explanation, and structurally present records must not be described as semantically supporting external claims before the blocking fresh immutable re-fetch and human semantic review.",
+      "evidence": [
+        "PLAN.md lines 3-4 and 80-84 say the legacy provenance is unverified, no UTC collection account is asserted, structural repair does not establish semantic support, and the fresh immutable re-fetch plus human semantic review blocks Increment 1.",
+        "research/repository-agent-operating-system/evidence-cutoff.md says the earlier UTC+08 explanation is an unverified process narrative and that no actual UTC retrieval time or pre-cutoff compliance is asserted.",
+        "research/repository-agent-operating-system/synthesis-coverage.md line 11 nevertheless says records have 2026-09-13 access dates 'because that is the UTC+08 host\u2019s local calendar date.' This is a causal collection-history assertion, not an uncertainty label.",
+        "research/repository-agent-operating-system/research-manifest.json provenance_disclaimer.access_date_scope repeats that 2026-09-13 'is intended as the UTC+08 host local calendar date,' even though the controlling cutoff document says that account is unverified.",
+        "research/repository-agent-operating-system/evidence-repair.md, under 'Claims supportable at the cutoff,' says the checked-in corpus 'supports' claims about external platform documents, standards, concurrency, and the METR study, while the same file and PLAN.md state that semantic evidence validation was not performed.",
+        "review/round-3-resolution.md G15 claims this contradictory timing narrative was labeled unverified and that no semantic/provenance closure is inferred, but the current artifacts above do not consistently implement that repair."
+      ],
+      "reproduction": [
+        "Search the named evidence artifacts for 'UTC+08'. The synthesis coverage returns the unqualified 'because' sentence, and research-manifest.json returns the intended-local-date account.",
+        "Compare those results with evidence-cutoff.md paragraphs 2-3 and PLAN.md \u00a74. The former calls that account unverified; the latter forbids treating structural presence as semantic evidence validation.",
+        "Read evidence-repair.md from 'Claims supportable at the cutoff' through items 3-6, then compare it with its own statement that semantic validation was not performed and material-claims.json scope_and_method.semantic_status='not_verified'."
+      ],
+      "impact": "The checked-in evidence package gives readers mutually incompatible provenance accounts and positively characterizes unreviewed source-content claims as supported. This reproduces the material evidence-honesty defect that round 3 claimed to close and can improperly influence the pre-implementation admission decision.",
+      "recommendation": "Replace the UTC+08 causal/intention account everywhere with the controlling statement that the 2026-09-13 labels are unverified legacy metadata with no established UTC meaning. In evidence-repair.md, change the external-content list from 'supportable/supports' to an explicitly unverified inventory of propositions pending fresh source observations and human entailment review. Regenerate dependent evidence artifacts and check them for the forbidden narrative and semantic-support wording.",
+      "verification": "A repository-wide search finds no factual or causal UTC+08 explanation outside clearly quoted historical text marked unverified. All current evidence summaries say external propositions are candidate claims or inventory only until the same-run immutable retrieval and human semantic dispositions exist. The regenerated material claim graph and coverage artifacts agree with PLAN.md \u00a74 and evidence-cutoff.md.",
+      "confidence": "high",
+      "prior": "ROAD-EVID-R3-001 and CEC-R3-003 (reproduced, not fully closed)"
+    },
+    {
+      "id": "ARCH-R4-002",
+      "severity": "low",
+      "title": "Increment 0 still instructs the builder to archive a prototype that the repository says was removed",
+      "requirement": "The sole implementation roadmap should give executable, checkout-consistent admission work and must not require a nonexistent artifact.",
+      "evidence": [
+        "README.md Status says prototype code was removed after its failures were incorporated into the plan.",
+        "PLAN.md \u00a720 Increment 0 still begins 'Archive prototype as non-shipping.'",
+        "review/round-3-resolution.md maps CEC-R3-005 to a promised replacement with checkout-verifiable prototype absence, but the current roadmap row retains the old archive instruction."
+      ],
+      "reproduction": [
+        "Read README.md Status.",
+        "Read PLAN.md \u00a720, Increment 0, and search for 'Archive prototype'.",
+        "Compare with review/round-3-resolution.md finding 24 / G14."
+      ],
+      "impact": "Increment 0 contains a stale and potentially impossible clerical step. It does not create an unsafe runtime path, but it weakens roadmap determinism and the accuracy of the closure register.",
+      "recommendation": "Replace 'Archive prototype as non-shipping' with 'Verify from the checkout and record that prototype implementation artifacts are absent; retain review and resolution evidence.'",
+      "verification": "The Increment 0 row requires an absence check rather than archival, and README.md, PLAN.md, and the resolution register agree.",
+      "confidence": "high",
+      "prior": "CEC-R3-005 (reproduced, still open)"
+    }
+  ],
+  "residual_uncertainty": [
+    "This is a plan-only audit. Compiler output, model checking, PostgreSQL/RLS behavior, recovery behavior, signed release verification, sandbox isolation, and rollout metrics remain future gates and are not treated as defects merely because they have not run.",
+    "The normative manifests are large enough that executable generation remains the right future completeness proof; this audit checked the published contracts and prior closure points but does not claim a machine proof.",
+    "The fresh evidence run and human semantic review remain intentionally pending. The finding concerns present artifact wording, not failure to pass that future gate."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,414 @@
+{
+  "scope": "Implementation boundary: make issue intake definitions, repository labels, the schema/policy of one organization-owned GitHub Project, and controller behavior reviewable in Git. Git is the source of truth for desired configuration and allowed transitions. GitHub remains the authoritative live store for issues, project items and their current field values. The design does not pretend that committing `status: READY` changes a remote item, and it does not bulk-declare every item's status in Git. A reconciler observes remote state, compares it with a versioned desired schema/policy, and applies or reports drift. Repository rules, merges, deployments, credentials and self-improvement approval remain outside the agent's authority.",
+  "current_capabilities": [
+    "Issue forms are YAML files under `.github/ISSUE_TEMPLATE` on the default branch. Top level requires unique `name`, `description`, `body` and can default title/labels/projects/assignees/type. Labels must already exist or are silently not added; `projects` entries use owner/number and require the issue opener to have write access to every target Project, so production intake should let the App add membership. Forms are not available for pull requests and responses become Markdown in the ordinary issue body, not a retained typed record ([issue-form syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms)). Form elements provide input, textarea, dropdown, checkbox, upload and markdown, canonical ids, and limited `required` validation; the docs currently say shared `required` is only for public repositories. Both the form schema and forms remain public preview ([form schema](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema)). Canonical machine state must therefore live in labels/project fields or a separate contract, never be reconstructed by parsing headings.",
+    "Repository labels have versioned REST CRUD plus add/remove/set-on-issue endpoints. Fine-grained tokens require Issues or Pull requests repository permission as documented per endpoint; list pages are cursor/page bounded (usually max 100) and must be exhausted ([labels API](https://docs.github.com/en/rest/issues/labels)).",
+    "Projects are user- or organization-level, not repository-local. The supported automation surface is primarily GraphQL. It exposes project/node discovery; creation/update/deletion; project fields; single/multi-select options, iterations and typed values; item add/archive/delete/position/value mutations; status updates; repository/team links; collaborators; and views in the current public schema ([schema](https://docs.github.com/public/fpt/schema.docs.graphql), [guide](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects)). Node, field, item and option IDs must be discovered. `addProjectV2ItemById` returns the existing item when already present, but add and update cannot occur in one call.",
+    "`updateProjectV2ItemFieldValue` handles project-owned text, number, date, iteration, single-select and multi-select values. It cannot update Assignees, Labels, Milestone or Repository because those belong to the issue/PR; use the corresponding issue/PR mutations. Updating select options overwrites the supplied option configuration, so a controller must read the complete current list before partial intent is applied ([API guide](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects), [schema](https://docs.github.com/public/fpt/schema.docs.graphql)).",
+    "The schema exposes project workflows for reading and deletion but, in the inspected 2026-09-13 schema, no create/update workflow mutation. Thus built-in Project workflow rules are not a fully declarative API surface. Views now have create/update/delete inputs, but the live schema is a moving contract and requires capability detection. Project webhooks (`projects_v2`, `projects_v2_item`, status update) are organization-only, require at least read Projects organization permission, and are themselves public preview ([webhook reference](https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects_v2_item))."
+  ],
+  "representative_systems": [
+    "Native primitives: issue-form YAML, label REST API, Project v2 GraphQL API/schema, organization Project webhooks, Actions, GitHub Apps, repository rulesets and CODEOWNERS.",
+    "[OpenGitOps principles](https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md) supply the useful semantics—declarative, versioned/immutable, automated pull and continuous reconciliation—but GitHub Projects is an API-managed SaaS object, not a GitOps deployment engine; those semantics must be implemented by this controller.",
+    "[GitHub Safe-Settings](https://github.com/github-community-projects/safe-settings) is an operational policy-as-code precedent for GitHub settings. It is not evidence of complete Projects v2 management. The open Terraform GitHub provider request for a Projects resource ([#2917](https://github.com/integrations/terraform-provider-github/issues/2917)) is a practical warning against assuming mature off-the-shelf coverage."
+  ],
+  "primary_evidence": [
+    "GitHub explicitly says `GITHUB_TOKEN` is repository-scoped and cannot access Projects; its Actions guide recommends a GitHub App for organization projects and a PAT for user projects ([Actions/Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions)). The general token guide says to create a GitHub App installation token when required permissions are unavailable and to minimize `permissions` ([GITHUB_TOKEN](https://docs.github.com/en/actions/tutorials/authenticate-with-github_token)).",
+    "Project access roles are No access, Read, Write and Admin; organization base access can unintentionally give every member write/admin, so set No access or Read and grant the controller App only Write unless it truly manages collaborators ([access](https://docs.github.com/en/issues/planning-and-tracking-with-projects/managing-your-project/managing-access-to-your-projects)).",
+    "GraphQL requires `first`/`last` 1–100 per connection, no more than 500,000 total nodes, and can terminate after 10 seconds; baseline user/App installation quota is generally 5,000 points/hour, while secondary controls include 100 concurrent requests, 2,000 GraphQL points/minute, and content-creation limits ([limits](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api)).",
+    "Project scale limits include 50,000 items across active views and archive ([archive](https://docs.github.com/en/issues/planning-and-tracking-with-projects/managing-items-in-your-project/archiving-items-from-your-project)) and 50 options per single-select field ([single-select](https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-single-select-fields))."
+  ],
+  "independent_evidence": [
+    "OpenGitOps calls for continuous reconciliation, not one-shot provisioning. This supports periodic full scans in addition to best-effort webhooks, but it does not guarantee SaaS API atomicity ([principles](https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md)).",
+    "The official Terraform GitHub provider community still tracked implementation of a Projects resource as a feature request in the observed period ([issue #2917](https://github.com/integrations/terraform-provider-github/issues/2917)). Treat this only as an ecosystem maturity signal: it challenges claims that Project v2 is routine Terraform, but it cannot prove absence of every community controller.",
+    "OpenSSF Scorecard independently treats excessive Actions token permissions as a supply-chain risk ([Token-Permissions](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions)). NIST SSDF requires protected configuration, roles, review and provenance ([SP 800-218](https://csrc.nist.gov/pubs/sp/800/218/final)). These reinforce separation between an agent that proposes policy and a protected controller/human that approves it.",
+    "GitHub's own hardening guide concedes that expression interpolation of issue/PR-controlled text can become script injection and that full commit SHA pinning is the only immutable action reference ([secure use](https://docs.github.com/en/actions/reference/security/secure-use)). Hence issue titles, bodies, labels and project text are untrusted data, never shell/code."
+  ],
+  "metrics_and_limits": {
+    "project": "50,000 total active+archived items; single-select max 50 options. Treat both as service limits, not throughput targets.",
+    "graphql": "Connections require `first`/`last` 1–100; maximum 500,000 requested nodes/call; processing timeout normally 10 seconds. General baseline is 5,000 points/hour/user or non-Enterprise App installation; secondary ceiling includes 100 concurrent REST+GraphQL requests and 2,000 GraphQL points/minute. Limits can vary and response headers are authoritative.",
+    "webhooks": "Payload cap is 25 MB; `X-GitHub-Delivery` is a GUID; sender can be `ghost`, so sender identity alone is not authorization ([reference](https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects_v2-item)).",
+    "evidence_limit": "No independent measured denominator was found for drift frequency, lost Project events, field-mutation latency, or reconciler error rate at 50,000 items. Benchmark these in the target organization.",
+    "audit": "Organization audit log exposes the last 180 days and is organization-owner-only; its catalog is not a complete item-field transition ledger. Keep an independent controller ledger ([audit log](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization))."
+  },
+  "recommended_design": "Use a small, deterministic GitHub App controller, not an autonomous agent, as the sole normal writer of lifecycle fields. Desired files define labels, Project metadata/fields/views, state names, legal transitions and mapping rules. The App reads the protected default-branch revision, validates schemas, queries and normalizes complete remote state, emits a no-side-effect plan, then applies bounded idempotent changes. Store node/option IDs only in a rebuildable controller database/cache keyed by owner + project number + logical key; never make opaque IDs the human contract. Preserve unknown remote objects by default. Require a reviewed `allow_destroy` change with inventory and migration for deletion, type change, option removal/rename, visibility/access changes or collaborator changes. Use webhook-triggered narrow reconcile for latency plus scheduled full reconcile for missed events. Remote item state is actual operational state; Git contains only its schema/policy and approved transition commands. Agents may propose config PRs and evidence, but cannot approve, change rulesets/CODEOWNERS/App permissions, rotate credentials, promote their own prompts/tools, or approve policy/self-improvement.",
+  "state_and_event_contract": {
+    "desired_revision": "Immutable default-branch commit SHA plus SHA-256 of normalized `.github/control-plane/*.yaml`; all plans and writes record both.",
+    "identity": "`work_item = repo_node_id + issue_number`; `project_item_id` and field/option node IDs are resolved remote handles. Config objects have stable logical keys; name/type ambiguity is a hard stop.",
+    "item_states": [
+      "INBOX",
+      "TRIAGED",
+      "PLANNING",
+      "CLARIFICATION_REQUIRED",
+      "READY_REVIEW",
+      "READY",
+      "LEASED",
+      "EXECUTING",
+      "BLOCKED",
+      "PROPOSED",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "MERGE_READY",
+      "MERGED",
+      "CLOSED"
+    ],
+    "command": "`transition_id` UUID, work_item, from_state, to_state, expected_remote_updated_at/value fingerprint, spec_revision, actor class, reason/evidence URL, policy SHA, expiry. A transition is accepted only if the matrix allows it and prerequisites still match.",
+    "events": "Normalize issue/labeled/unlabeled/edited/closed/reopened, projects_v2_item created/edited/archived/restored/deleted, reconciliation tick and manual apply into `{delivery_id,event_type,actor,occurred_at,received_at,resource,old?,new?,desired_sha}`. Verify webhook HMAC-SHA256 and deduplicate delivery GUID.",
+    "idempotency_and_concurrency": "Persist delivery IDs and transition IDs. Serialize per project/item. Add is idempotent by API behavior; other writes use compare-read-write-read because Project mutations expose no general expected-version precondition. If the observed fingerprint changed, abort and re-plan. On ambiguous timeout, read before retry. Every mutation must converge under replay.",
+    "drift_classes": "(1) benign/live item progress: record if legal; (2) governed schema drift: alert and optionally revert after grace period; (3) destructive/access drift: freeze apply and human incident; (4) unsupported/unobservable feature: report only. Never commit an automatically observed item status back as desired configuration."
+  },
+  "repository_artifacts": [
+    "`.github/ISSUE_TEMPLATE/config.yml`, `bug.yml`, `task.yml`, `change.yml`: intake UX only; stable ids and required fields.",
+    "`.github/control-plane/labels.yaml`: logical key, exact name, color, description, aliases/deprecation; default preserve-unknown.",
+    "`.github/control-plane/project.yaml`: owner kind/login, project number (or bootstrap title), visibility, links, fields `{key,name,type,options}`, managed views, capability minimums; no secrets/node IDs.",
+    "`.github/control-plane/lifecycle.yaml`: states, allowed transitions, prerequisites, terminal states, risk tiers and human gates.",
+    "`.github/control-plane/mappings.yaml`: form/type/label/repository event to initial fields and built-in issue metadata.",
+    "`.github/control-plane/permissions.yaml`: App repository/organization permission allowlist and prohibited capabilities; machine check against installed manifest.",
+    "`.github/control-plane/schemas/*.schema.json`: JSON Schemas; `.github/control-plane/migrations/*.yaml`: explicit rename/type/option migrations and rollback.",
+    "`cmd/github-control-plane/{validate,plan,apply,reconcile}` and `internal/github/{graphql,rest,webhook}.…`; generated GraphQL operations checked against the downloaded schema.",
+    "`.github/workflows/control-plane-check.yml`: unprivileged validation/plan on PR; `.github/workflows/control-plane-reconcile.yml`: protected scheduled/manual caller of App-backed service, with no checkout/run of untrusted code.",
+    "`CODEOWNERS`, ruleset documentation, `docs/runbooks/{drift,rate-limit,webhook-replay,credential-rotation,rollback}.md`, and golden fixtures under `testdata/`."
+  ],
+  "workflow_steps": [
+    "1. On config PR, parse YAML strictly, validate schemas and semantic invariants (unique keys/names; supported field types; <=50 select options; no state without transitions; no destructive delta without migration). Produce a redacted plan against a read-only fixture or live read token.",
+    "2. Ruleset requires controller tests, security checks and designated human CODEOWNER approval on the exact head SHA. Changing the head invalidates approval. The planning agent cannot be required reviewer or bypass actor.",
+    "3. After merge, controller fetches the exact approved SHA, acquires a project-scoped lease, queries all paginated labels/project fields/options/views/items needed, verifies permissions and capability schema, and computes normalized drift.",
+    "4. Apply non-destructive schema in dependency order: labels; project/link; fields/options; managed views; then item membership/value commands. Do not add and update a Project item in one GraphQL call. Use bounded batches, rate headers and jittered backoff.",
+    "5. After every batch, re-read and compare. Publish `{desired_sha, plan_hash, mutations, before/after IDs/fingerprints, errors, residual_drift}` as an immutable check/artifact. Stop on ambiguity, auth loss, unexpected destructive delta, rate exhaustion, API/schema mismatch or concurrent edit.",
+    "6. Webhooks are verified, enqueued, acknowledged quickly and deduplicated. A narrow reconcile validates legal item transitions. A scheduled full scan catches missing/public-preview events and manual drift.",
+    "7. For failure, do not blindly invert. Re-read; retry only idempotent/convergent operations within budget. Quarantine illegal lifecycle moves, freeze destructive/access reconciliation, and open a deduplicated incident issue for a human.",
+    "8. Improvement telemetry may create a proposal plus versioned eval case. Only protected PR review and independent eval results can promote controller/prompt/tool changes; the proposer never approves itself."
+  ],
+  "human_gates": [
+    "Human CODEOWNER approval bound to the exact config PR head SHA for lifecycle/policy/App/workflow changes; enforce via ruleset, not CODEOWNERS alone.",
+    "Explicit two-person or security-owner gate for project visibility/base role/collaborators, App permission expansion, secrets, webhook target, deletion, field type change, option removal/rename with populated values, bulk item deletion/archive, ruleset/bypass changes and emergency drift override.",
+    "Human product-owner gate for ambiguous issue intent, readiness approval, roadmap/priority policy and any exception that changes Definition of Ready.",
+    "Agent-generated self-improvement stays a proposal until a non-agent owner reviews the diff, an independent evaluator runs versioned regression/security tests, and a separate protected promotion workflow approves the exact artifact hash. No policy or permission self-approval."
+  ],
+  "security_and_failure_modes": [
+    "Untrusted issue/form/project text injected into Actions shell or GraphQL: pass as typed API variables/env/input, never concatenate queries or shell; validate length/enums; escape output. GitHub documents the injection pattern ([secure use](https://docs.github.com/en/actions/reference/security/secure-use)).",
+    "Overprivileged PAT or organization-wide base Write/Admin: prefer short-lived GitHub App installation tokens, separate read/plan and write/apply identities, No access/Read base role, explicit repository installation and secret rotation. `GITHUB_TOKEN` cannot solve Projects access ([Actions/Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions)).",
+    "Compromised action/dependency: pin third-party Actions to full commit SHA, restrict allowed Actions, emit SBOM/provenance, keep apply outside PR-controlled code. GitHub says a full SHA is the only immutable Action release reference ([secure use](https://docs.github.com/en/actions/reference/security/secure-use)).",
+    "Missed/duplicated/out-of-order preview webhooks: HMAC-SHA256, delivery GUID ledger, durable queue, per-resource ordering/fingerprint, scheduled scan and read-after-write. Do not authorize from `sender`, which may be `ghost` ([webhooks](https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects_v2-item)).",
+    "GraphQL pagination omission/timeouts/partial multi-mutation success: force cursor exhaustion, cap query size, inspect `errors` even with `data`, one logical mutation per ledger record, read on ambiguous response, bounded exponential backoff respecting rate/reset headers.",
+    "Option overwrite or destructive rename loses meaning: fetch full option list, map stable logical keys to IDs, inventory all values, require migration/human plan; preserve unknown by default.",
+    "Manual edit/controller ping-pong: classify live item state separately from governed schema; grace window and alert; freeze rather than revert access/destructive drift. Record controller actor and desired SHA.",
+    "Workflow recursion or missing follow-up: GitHub suppresses most workflow runs caused with `GITHUB_TOKEN` ([trigger rules](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#triggering-a-workflow-from-a-workflow)); do not rely on chained incidental events—enqueue explicit reconciliation and retain periodic scan.",
+    "Secret-dependent automation triggered from forks or Dependabot may not receive secrets, and reusable workflows do not receive them automatically ([Actions secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#using-secrets-in-a-workflow)). Treat those runs as unprivileged plan/intake only; let the installed App service consume authenticated webhook/queue work."
+  ],
+  "validation_and_tests": [
+    "Schema tests for every issue form and control-plane YAML; fixtures include duplicate ids/names, malformed colors, 51 options, unsupported type, missing transition and unsafe deletion. Include non-existing labels/project membership expectations, a private-repository `required` behavior test, forbidden YAML boolean-like keys, and Markdown-body changes; never rely on silent top-level defaults.",
+    "GraphQL schema contract test downloads/pins hash of [FPT schema](https://docs.github.com/public/fpt/schema.docs.graphql), verifies required queries/mutations/types, and fails closed on incompatible change; run a canary against a sandbox organization Project.",
+    "Golden plan tests: shuffled API order normalizes identically; second apply produces zero mutations; unknown remote objects survive; add-timeout replay does not duplicate; partial response creates residual drift.",
+    "State-machine property tests: illegal edges never write, prerequisites/approval SHA/expiry are rechecked, terminal states cannot reopen except declared recovery, concurrent commands yield at most one accepted transition.",
+    "Webhook tests using signed fixtures: bad signature rejected, duplicate GUID ignored, out-of-order edit reconciled from current state, 25 MB/oversize behavior handled, ghost sender not trusted, queue replay converges.",
+    "Permission tests: compare App installation permissions with allowlist; prove plan identity cannot write and agent identity cannot modify control-plane config/rulesets/secrets. Run [OpenSSF Scorecard token permissions](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions).",
+    "Destructive migration rehearsal in a disposable Project with populated fields; snapshot/export before apply; verify rollback or documented irreversibility. Load test cursor pagination, secondary throttling and 10-second timeout behavior below service limits.",
+    "End-to-end acceptance: form -> issue -> label -> project membership -> legal status transition -> drift edit -> alert/reconcile -> closed item, with complete audit ledger and no chat-history dependency."
+  ],
+  "operational_maintenance": "Run event-driven reconcile plus a full scan at least daily (tune after measuring drift). Export normalized snapshots and residual-drift metrics, but do not commit automatic snapshots as desired state. Track `reconcile_duration`, API points, throttles, webhook lag/duplicates/signature failures, mutations, conflicts, illegal transitions, residual drift age and permission deltas. Archive/delete only under retention policy; the 50,000-item maximum includes archive. Quarterly: rotate App keys/webhook secrets, review installations and base roles, refresh GraphQL schema fixtures, update pinned Actions, exercise credential-loss/webhook-replay/rate-limit/rollback runbooks. On controller upgrade, canary one sandbox Project, then read-only plans, then a small repository cohort. Preserve immutable plan/apply records and approval SHA; GitHub UI/audit data is supporting evidence, not the controller's sole ledger. GitHub organization audit-log visibility is only 180 days, so export allowed evidence before expiry and keep the controller ledger under the organization retention policy.",
+  "maturity_and_uncertainty": "Issue-form files, label CRUD, Project item/field mutations, GitHub Apps, Actions, rulesets and protected review are production-capable primitives. A safe non-destructive reconciler is implementable now. Full “Project as code” parity is conditional: issue forms and Projects webhooks remain public preview; opaque IDs and pagination complicate stable identity; API writes lack a universal compare-and-swap; built-in Project workflows are not fully create/update-manageable in the inspected schema; and views/new field types are evolving. Destructive reconciliation, permissions, and arbitrary current-item status from Git should be treated as human-gated or unsupported. Overall confidence is high for documented primitives/limits and medium for complete surface parity and long-run operational reliability because vendor docs are live and no independent drift/loss benchmark was found.",
+  "implementation_recommendation": "MVP: one organization Project and 1–3 repositories; three issue forms; REST-managed label catalog; Project `Status`, `Risk`, `Spec revision`, `Lease` fields; lifecycle policy; GitHub App with repository Issues read/write + organization Projects read/write and Metadata read; protected config PRs; validate/plan/apply CLI; webhook queue; nightly full scan; append-only ledger; preserve-unknown/no-delete. Keep project collaborator/view/built-in-workflow management report-only initially. Stage 2 adds managed views, option migrations, multi-repo link reconciliation and read-only drift dashboards after sandbox contract tests. Stage 3 permits bounded automatic repair of proven non-destructive drift and sampled audits. Never extend to agent-controlled permissions, gates, rulesets, credentials, evaluation definitions plus promotion, or self-approval.",
+  "sources": [
+    {
+      "title": "Syntax for GitHub’s form schema",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; public preview, accessed snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema",
+      "supported_claims": "Issue-form element types, ids, validation, preview status"
+    },
+    {
+      "title": "Configuring issue templates for your repository",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository",
+      "supported_claims": "default-branch .github/ISSUE_TEMPLATE files; top-level labels/projects/assignees; forms preview"
+    },
+    {
+      "title": "REST API endpoints for labels",
+      "publisher_or_author": "GitHub",
+      "source_type": "official API documentation",
+      "publication_or_update_date": "API version shown 2026-03-10",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/issues/labels",
+      "supported_claims": "label CRUD, issue-label endpoints, permissions and pagination"
+    },
+    {
+      "title": "Using the API to manage Projects",
+      "publisher_or_author": "GitHub",
+      "source_type": "official API guide",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+      "supported_claims": "GraphQL discovery/mutations, node IDs, add idempotency, field constraints, scopes, webhooks"
+    },
+    {
+      "title": "GraphQL public schema snapshot (FPT)",
+      "publisher_or_author": "GitHub",
+      "source_type": "official machine-readable API schema",
+      "publication_or_update_date": "snapshot accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/public/fpt/schema.docs.graphql",
+      "supported_claims": "exact ProjectV2 object/input/mutation surface including fields, values, views, workflows"
+    },
+    {
+      "title": "Automating Projects using Actions",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions",
+      "supported_claims": "GITHUB_TOKEN cannot access Projects; App recommended for org projects; PAT for user projects"
+    },
+    {
+      "title": "Managing access to your projects",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/managing-your-project/managing-access-to-your-projects",
+      "supported_claims": "No access/read/write/admin roles and organization base role"
+    },
+    {
+      "title": "Webhook events and payloads: projects_v2 and projects_v2_item",
+      "publisher_or_author": "GitHub",
+      "source_type": "official webhook reference",
+      "publication_or_update_date": "living; public preview, accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects_v2_item",
+      "supported_claims": "organization-only Projects webhooks, Projects permission, GUID/signatures, 25 MB cap, ghost sender caveat"
+    },
+    {
+      "title": "Validating webhook deliveries",
+      "publisher_or_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+      "supported_claims": "HMAC SHA-256 verification"
+    },
+    {
+      "title": "Best practices for using webhooks",
+      "publisher_or_author": "GitHub",
+      "source_type": "official operational documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "supported_claims": "delivery handling, replay/idempotency and asynchronous processing guidance"
+    },
+    {
+      "title": "Rate limits and query limits for the GraphQL API",
+      "publisher_or_author": "GitHub",
+      "source_type": "official API documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api",
+      "supported_claims": "primary/secondary limits, node and timeout constraints"
+    },
+    {
+      "title": "Rate limits for the REST API",
+      "publisher_or_author": "GitHub",
+      "source_type": "official API documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "supported_claims": "REST primary and secondary limits"
+    },
+    {
+      "title": "About single select fields",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-single-select-fields",
+      "supported_claims": "50-option maximum"
+    },
+    {
+      "title": "Archiving items from your project",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/managing-items-in-your-project/archiving-items-from-your-project",
+      "supported_claims": "50,000 items maximum across active and archive"
+    },
+    {
+      "title": "Use GITHUB_TOKEN for authentication in workflows",
+      "publisher_or_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/tutorials/authenticate-with-github_token",
+      "supported_claims": "job permissions, least privilege, App/PAT when token capability is absent"
+    },
+    {
+      "title": "Secure use reference",
+      "publisher_or_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "supported_claims": "untrusted-input injection, minimum token, SHA pinning, secret exposure"
+    },
+    {
+      "title": "Events that trigger workflows",
+      "publisher_or_author": "GitHub",
+      "source_type": "official Actions documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#triggering-a-workflow-from-a-workflow",
+      "supported_claims": "GITHUB_TOKEN-created events normally do not start new workflow runs, limiting recursion"
+    },
+    {
+      "title": "About rulesets",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "supported_claims": "enforced branch/tag protections, evaluation and bypass controls"
+    },
+    {
+      "title": "About code owners",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "supported_claims": "CODEOWNERS review routing and interaction with protected-branch approval"
+    },
+    {
+      "title": "OpenGitOps Principles v1.0",
+      "publisher_or_author": "OpenGitOps / CNCF GitOps Working Group",
+      "source_type": "open standard",
+      "publication_or_update_date": "v1.0.0, 2021-11-10",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md",
+      "supported_claims": "declarative, versioned/immutable, pulled automatically, continuously reconciled desired state"
+    },
+    {
+      "title": "GitHub Safe-Settings",
+      "publisher_or_author": "github-community-projects (originated by GitHub)",
+      "source_type": "open-source repository",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/github-community-projects/safe-settings",
+      "supported_claims": "operational precedent for central policy-as-code reconciliation of GitHub settings; does not establish full Projects v2 support"
+    },
+    {
+      "title": "[FEAT]: Implement Projects resource (github_project), issue #2917",
+      "publisher_or_author": "integrations/terraform-provider-github community",
+      "source_type": "independent implementation issue",
+      "publication_or_update_date": "opened 2025; status observed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/integrations/terraform-provider-github/issues/2917",
+      "supported_claims": "evidence that broad Terraform-provider Projects resource support remained a requested gap; not proof no other tools exist"
+    },
+    {
+      "title": "OpenSSF Scorecard Token-Permissions check",
+      "publisher_or_author": "OpenSSF",
+      "source_type": "independent security control documentation",
+      "publication_or_update_date": "living; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions",
+      "supported_claims": "independent check that flags excessive GitHub Actions token permissions"
+    },
+    {
+      "title": "NIST SP 800-218 Secure Software Development Framework 1.1",
+      "publisher_or_author": "NIST",
+      "source_type": "government standard",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "supported_claims": "protect code/configuration, review changes, record provenance and roles"
+    },
+    {
+      "title": "Syntax for issue forms",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms",
+      "supported_claims": "top-level form contract; existing-label/write-project prerequisites; Markdown issue body; no PR forms"
+    },
+    {
+      "title": "Common validation errors when creating issue forms",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/common-validation-errors-when-creating-issue-forms",
+      "supported_claims": "form semantic constraints and YAML boolean-key hazards"
+    },
+    {
+      "title": "Use secrets in GitHub Actions",
+      "publisher_or_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_or_update_date": "living; accessed snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#using-secrets-in-a-workflow",
+      "supported_claims": "fork, Dependabot and reusable-workflow secret availability caveats"
+    },
+    {
+      "title": "Reviewing the audit log for your organization",
+      "publisher_or_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_or_update_date": "living; accessed snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization",
+      "supported_claims": "180-day organization audit retention, owner access and search constraints"
+    },
+    {
+      "title": "github/docs snapshot closest before target date",
+      "publisher_or_author": "GitHub",
+      "source_type": "official versioned repository commit",
+      "publication_or_update_date": "2026-09-11",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/github/docs/commit/078b5832caa5cde591c2babb389ef447a0ef66eb",
+      "supported_claims": "version anchor for living docs two days before target as-of date"
+    }
+  ],
+  "conflicts": [
+    "“Projects as code” conflicts with GitHub's actual ownership model: repository YAML can describe desired Project schema, but Project v2 lives at user/organization scope and current item values live remotely. Resolution: name the design a reconciler and keep desired policy distinct from observed operational state.",
+    "Issue forms are called structured, yet the official schema is public preview and the resulting issue is ordinary issue content rather than a documented typed payload. Resolution: use forms for validated intake UX; copy canonical state to API-native labels/fields and retain source body as untrusted evidence.",
+    "GitHub's current GraphQL schema contains more management surface (multi-select, issue fields, views) than older guides/examples show. Conversely, workflow objects lack general create/update mutations. Resolution: schema capability-detect and pin contract tests; do not infer parity from either guide examples or object readability.",
+    "GitHub recommends PATs for user-project Actions examples but general security guidance favors Apps and minimum permissions. Resolution: choose an organization project and GitHub App for production; use PAT only where Apps cannot serve, with narrow owner, expiry and rotation.",
+    "The Terraform provider feature request signals incomplete ecosystem support but does not prove that no third-party controller supports Projects v2. It is recorded as counterevidence, not a universal absence claim."
+  ],
+  "confidence": {
+    "overall": "high for official feature/permission/limit claims; medium for the proposed reconciler’s operational reliability until target-org pilot metrics exist",
+    "high": [
+      "issue-form location/preview",
+      "label REST capability",
+      "Projects GraphQL IDs/mutations",
+      "GITHUB_TOKEN limitation",
+      "roles",
+      "50 options/50,000 items",
+      "webhook preview/organization scope"
+    ],
+    "medium": [
+      "exact completeness and stability of live GraphQL surface",
+      "safe matching/migration across renamed fields/options",
+      "event delivery reliability",
+      "rate behavior under target load"
+    ],
+    "low_or_unknown": [
+      "industry drift rates",
+      "lost webhook rate",
+      "safe unattended destructive-reconcile outcomes",
+      "universal third-party tool coverage"
+    ]
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "No independent quantitative drift/webhook-loss benchmark was found.",
+    "The official documentation and FPT GraphQL schema are living sources; capability names and preview status can change after the as-of snapshot.",
+    "Complete third-party controller coverage was not exhaustively established because broad web search was unavailable; the cited Terraform request is only a maturity signal.",
+    "Whether every view/workflow setting is API-round-trippable remains uncertain; the inspected schema exposes view mutations but no general workflow create/update mutation.",
+    "The closest versioned official docs snapshot verified before the target is 2026-09-11, two days before 2026-09-13; an unpublished 48-hour change cannot be excluded."
+  ]
+}

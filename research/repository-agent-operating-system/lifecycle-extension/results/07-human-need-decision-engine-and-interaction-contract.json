@@ -1,0 +1,1380 @@
+{
+  "scope": {
+    "question": "A repository-native human-need decision engine and durable interaction contract that deterministically chooses CONTINUE, CLARIFY, REQUEST_APPROVAL, ESCALATE, PAUSE or STOP across ideation, build and maintenance.",
+    "boundaries": [
+      "The engine governs transitions and capabilities; an LLM may propose classifications, questions and evidence but cannot authorize its own action.",
+      "Covers decisions from authenticated intake through closure, incident learning and governed improvement. It does not claim to infer product intent, legal acceptance, security risk appetite or ground truth autonomously.",
+      "As-of 2026-09-13. Policies are recommendations composed from platform mechanisms, standards, security evidence and prior repository-agent research; they are not a published universal standard."
+    ],
+    "decision_semantics": {
+      "CONTINUE": "Advance one already-authorized, reversible step inside the exact capability/risk/budget envelope.",
+      "CLARIFY": "Ask the accountable source a minimal answerable question because a missing or conflicting fact can change goal, acceptance oracle, scope or safe plan. No consequential execution while waiting.",
+      "REQUEST_APPROVAL": "Present a complete known proposal/action and exact immutable subject to an authorized role that owns the decision.",
+      "ESCALATE": "Transfer coordination to a higher/specialist/incident authority because policy conflict, unknown ownership, unsafe exception, high severity or failed containment exceeds the current actor.",
+      "PAUSE": "Persist state and relinquish compute/credentials while waiting for time, event, dependency, evidence, rate limit or human response; not a terminal outcome.",
+      "STOP": "End the attempt/work item due to cancel, deny, supersession, impossible/unsafe request, repeated policy violation, terminal budget or completed handoff; cleanup and audit still run."
+    }
+  },
+  "verified_capabilities": [
+    {
+      "claim": "Warp Factories currently models triage, planning, building, review and human handoff. By default it pauses for spec approval, asks on unclear requirements and leaves merging to people. The foreman alone speaks to the requester and resumes the same agent conversation.",
+      "evidence": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "limit": "Spec/question gates are instructions/workflow conventions and can be edited; repository permissions enforce merge. Warp says it has no factory-specific approval role."
+    },
+    {
+      "claim": "Warp definitions, agents, triggers, scorers and benchmarks can be versioned as code; current self-improvement groups scorer failures into proposals for review and adopts nothing automatically.",
+      "evidence": [
+        "S04",
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "limit": "This supports proposal/evaluation mechanics, not autonomous policy authority or independent proof of quality."
+    },
+    {
+      "claim": "LangGraph interrupts/checkpoints and Temporal Signals/Updates/durable workflows can persist a wait and resume after a human/external decision.",
+      "evidence": [
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "limit": "They persist orchestration; they do not decide who is authorized, what must be approved or whether evidence is sufficient. LangGraph reruns an interrupted node, requiring idempotent pre-interrupt effects."
+    },
+    {
+      "claim": "OpenAI Agents SDK implements per-tool approval interruptions with serializable RunState and call-ID keyed approve/reject/resume; AutoGen offers immediate human input but documents that an in-run blocked UserProxy state is not safe to save/resume; Camunda user tasks and Temporal messages provide stronger long waits.",
+      "evidence": [
+        "S38",
+        "S39",
+        "S40",
+        "S41",
+        "S42",
+        "S43",
+        "S44"
+      ],
+      "limit": "These are framework/runtime mechanisms, not proof of approver RBAC, decision semantics or safe repository policy. State serialization can contain secrets and must be versioned/protected."
+    },
+    {
+      "claim": "GitHub rulesets, protected branches, CODEOWNERS and environments can enforce checks/reviews/deployment holds and prevent some self-review.",
+      "evidence": [
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S18"
+      ],
+      "limit": "Features and bypass vary by plan/configuration; CODEOWNERS alone only routes; environment reviewer lists do not by themselves implement arbitrary quorum. Live configuration, not YAML claims, is actual enforcement."
+    },
+    {
+      "claim": "Agent-confidence/rationale and inbox UI can help triage attention but are not security boundaries.",
+      "evidence": [
+        "S03",
+        "S21"
+      ],
+      "limit": "A notification may be best effort and confidence can be miscalibrated; authority must be checked at transition time."
+    },
+    {
+      "claim": "OASIS WS-HumanTask supplies a mature human-task lifecycle and event-history template, while W3C SCXML supplies executable state/guard/run-to-completion mechanics. OWASP ACS v0.1.0 proposes a pre-tool Guardian allow/deny/modify wire hook.",
+      "evidence": [
+        "S50",
+        "S51",
+        "S52",
+        "S53"
+      ],
+      "limit": "WS-HumanTask/SCXML define mechanics, not when AI needs humans. ACS v0.1.0 discloses limited implemented hooks, fail-open reference behavior and authentication gaps; use as emerging schema inspiration, not mature assurance."
+    }
+  ],
+  "evidence_and_limits": {
+    "strong_direct_evidence": [
+      "Official Warp documentation directly defines current human checkpoints and says self-improvement remains proposal-for-review [S01-S06].",
+      "Official GitHub documentation/changelog proves implementable enforcement, audit and the fact that admins can weaken defaults [S14-S22].",
+      "Versioned workflow docs establish persistence/interrupt mechanics [S08-S11]; CloudEvents supplies event-envelope vocabulary only [S30].",
+      "NIST AI RMF/GenAI Profile require context-specific governance, oversight, monitoring, appeal and decommission capability but deliberately do not set universal thresholds [S48-S49]."
+    ],
+    "independent_challenges": [
+      "OWASP identifies prompt injection and excessive agency, supporting least privilege and external authorization [S28-S29].",
+      "SWE-Bench+ and SWE-bench Live show public/agent-written evaluation can be weak or contaminated; a green score cannot own promotion [S33-S34].",
+      "METR found a scoped 19% slowdown and DORA reported mixed delivery associations. Vendor productivity/autonomy claims therefore need local controlled evidence [S35-S36]."
+    ],
+    "not_established": [
+      "No source establishes a universal uncertainty threshold, optimal question count, approval quorum, canary window, or acceptable autonomous risk. Values below are conservative defaults that must be calibrated and human-promoted per repository.",
+      "No independent longitudinal evidence establishes general unattended ideation-to-production ownership, reliable novel incident repair, or recursive self-governance.",
+      "Framework durability is not exactly-once external effect delivery. Idempotency, compare-and-swap, fencing and reconciliation remain application duties."
+    ],
+    "evidence_rule": "Every policy decision records deterministic rules first. Statistical/LLM evidence can only tighten or pause unless a separately governed calibration policy explicitly permits a narrow auto-advance. Absence, staleness, conflict or unverifiable provenance never converts to pass."
+  },
+  "actors_and_authority": {
+    "principals": [
+      {
+        "actor": "requester/source owner",
+        "authority": "answers intent/context questions; may cancel its own request; does not automatically own security/release acceptance"
+      },
+      {
+        "actor": "product owner",
+        "authority": "priority, behavior, non-goals, user tradeoffs and acceptance semantics"
+      },
+      {
+        "actor": "technical/domain owner or CODEOWNER",
+        "authority": "architecture, path-specific feasibility and exact change review"
+      },
+      {
+        "actor": "security/privacy/legal/data/finance specialist",
+        "authority": "specialist risk acceptance within role; cannot replace product or release owner"
+      },
+      {
+        "actor": "incident commander/on-call",
+        "authority": "incident severity, containment and bounded break-glass; follow-up governance required"
+      },
+      {
+        "actor": "policy owner",
+        "authority": "risk policy, capability profiles, role mappings and exception classes; protected from candidates"
+      },
+      {
+        "actor": "planner/foreman",
+        "authority": "gather evidence, route, ask and propose; read-only for authorization"
+      },
+      {
+        "actor": "implementation agent",
+        "authority": "leased task-branch actions only; no approval, merge, deploy, policy, hidden-eval or audit-delete authority"
+      },
+      {
+        "actor": "verifier/evaluator",
+        "authority": "run protected checks and sign evidence; cannot modify candidate or promote"
+      },
+      {
+        "actor": "controller",
+        "authority": "sole state writer; evaluates versioned policy and valid tokens; cannot invent human decisions"
+      },
+      {
+        "actor": "merge/deploy/promote controller",
+        "authority": "actuate an already-valid decision on exact SHA/digest; separate identity and short-lived capability"
+      },
+      {
+        "actor": "auditor/appeal reviewer",
+        "authority": "read complete history, adjudicate disputes and sample automated decisions; cannot rewrite history"
+      }
+    ],
+    "separation_invariants": [
+      "Proposer/author is never its own verifier, approver, exception approver or promoter.",
+      "The candidate cannot read or mutate protected tests, graders, policy, role mapping, permissions, baselines, audit ledger or promotion keys.",
+      "Human identity is authenticated and role eligibility resolved at decision time; a display name, comment, label, reaction or model statement is not authority.",
+      "The engine computes effective risk as max(declared risk, protected-path/capability/diff/runtime detectors); agents may raise but never lower it.",
+      "Merge/deploy permission is withheld until the exact token and current live enforcement pass."
+    ]
+  },
+  "complete_state_catalog": {
+    "aggregate_primary": [
+      "INBOX",
+      "TRIAGED",
+      "DISCOVERING",
+      "CLARIFICATION_REQUIRED",
+      "PLANNING",
+      "DECISION_REQUIRED",
+      "READY_REVIEW",
+      "READY",
+      "LEASED",
+      "EXECUTING",
+      "PROPOSED",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "MERGE_READY",
+      "QUEUED",
+      "MERGED",
+      "RELEASE_READY",
+      "CANARY",
+      "DEPLOYED",
+      "OBSERVING",
+      "LEARNING"
+    ],
+    "attention_waiting": [
+      "WAITING_HUMAN",
+      "WAITING_OWNER_ASSIGNMENT",
+      "WAITING_DEPENDENCY",
+      "WAITING_EXTERNAL_EVENT",
+      "WAITING_RATE_LIMIT",
+      "WAITING_WINDOW",
+      "PAUSED_USER",
+      "PAUSED_POLICY",
+      "PAUSED_BUDGET",
+      "STALE",
+      "HUMAN_TASK_READY",
+      "HUMAN_TASK_RESERVED",
+      "HUMAN_TASK_IN_PROGRESS",
+      "HUMAN_TASK_SUSPENDED"
+    ],
+    "failure_exception": [
+      "BLOCKED_AMBIGUITY",
+      "BLOCKED_CAPABILITY",
+      "BLOCKED_EVIDENCE",
+      "BLOCKED_CONFLICT",
+      "VERIFY_FAILED",
+      "POLICY_DENIED",
+      "ESCALATED_SPECIALIST",
+      "ESCALATED_INCIDENT",
+      "EXCEPTION_REVIEW",
+      "ROLLBACK_REQUIRED",
+      "ROLLBACK_RUNNING",
+      "ROLLBACK_FAILED",
+      "SYNC_ERROR",
+      "CLEANUP_PENDING"
+    ],
+    "terminal": [
+      "COMPLETED_HANDOFF",
+      "CLOSED_ACCEPTED",
+      "CLOSED_NO_CHANGE",
+      "CANCELLED",
+      "REJECTED",
+      "DEFERRED",
+      "SUPERSEDED",
+      "ROLLED_BACK",
+      "FAILED_TERMINAL",
+      "POLICY_STOPPED",
+      "EXPIRED"
+    ],
+    "orthogonal_dimensions": {
+      "phase": "IDEATION|BUILD|MAINTENANCE|RESEARCH|IMPROVEMENT",
+      "attention": "ACTIVE|HUMAN_NEEDED|EXTERNAL_WAIT|NONE",
+      "decision": "NONE|QUESTION_OPEN|APPROVAL_OPEN|ESCALATION_OPEN|DECIDED",
+      "health": "OK|DEGRADED|BLOCKED|FAILED",
+      "cleanup": "NOT_DUE|PENDING|DONE|HELD"
+    },
+    "invariants": [
+      "One authoritative primary state plus explicit orthogonal dimensions prevents ambiguous names such as merely blocked.",
+      "Waiting persists a checkpoint and revokes unnecessary leases/credentials. Terminal never means evidence deletion; cleanup/legal hold is independent.",
+      "Completed handoff is not merged or deployed. Warp explicitly defines completion as handoff, not shipping [S01-S02].",
+      "Rollback failure is an incident escalation, never silently terminal success."
+    ]
+  },
+  "transition_contract": {
+    "event_envelope": {
+      "schema_version": "semver URI",
+      "event_id": "UUID/ULID",
+      "event_type": "namespace.action.vN",
+      "aggregate_id": "work item",
+      "aggregate_version": "monotonic integer",
+      "occurred_at_received_at": "RFC3339 UTC",
+      "actor": "stable principal, actor type and authenticated source",
+      "correlation_causation": "conversation/run/change/incident IDs",
+      "from_to": "exact states",
+      "subject_versions": "spec, decision, candidate SHA/artifact, policy, role map, capability, evaluator and environment digests",
+      "evidence_refs": "content-addressed URIs/digests with provenance, retention and redaction labels",
+      "reason": "machine rule IDs plus human rationale where applicable",
+      "idempotency_key": "source delivery or command key",
+      "deadline_expiry": "optional",
+      "signature_attestation": "issuer/key/verification status"
+    },
+    "command_processing": [
+      "Authenticate; persist raw input; deduplicate by source/event ID.",
+      "Load aggregate at expected version and current live role/capability/policy facts.",
+      "Evaluate deny/stop rules, staleness/invalidation, risk floor, evidence sufficiency and allowed transition.",
+      "Append decision plus outbox atomically with compare-and-swap. External side effect uses deterministic marker; read back and reconcile.",
+      "Duplicate returns prior result. Stale/out-of-order facts are retained but cannot advance; impossible transition creates SYNC_ERROR/ESCALATION, never inferred success."
+    ],
+    "approval_binding": "ApprovalToken = work_item_id + decision_id + spec_revision/hash + candidate SHA or artifact digest + base SHA + policy/role-map/capability versions + exact action/scope/cohort/budget + evidence digest + eligible approver identities/roles/quorum + decision/rationale + issued/expiry. Any material bound-input change invalidates it.",
+    "material_invalidation": [
+      "goal, priority, non-goal or acceptance/oracle change",
+      "candidate/base/dependency/DAG change",
+      "protected path, behavior, risk, capability, permission, data classification or blast-radius change",
+      "policy, role membership, evaluator, evidence, rollout/rollback or environment drift",
+      "TTL expiry, approver revocation, compromised identity or superseding decision"
+    ],
+    "resume_contract": "Resume references question/approval ID and expected aggregate version. Re-evaluate all guards against current facts before continuing. A late answer remains evidence but cannot revive an expired/superseded token automatically.",
+    "decision_precedence": "STOP/DENY > automatic containment or safe rollback > ESCALATE > REQUEST_APPROVAL > CLARIFY > PAUSE > CONTINUE. When multiple apply, choose the most restrictive and record suppressed candidates."
+  },
+  "artifact_contracts": {
+    "artifacts": [
+      {
+        "name": "WorkItem",
+        "fields": "id, authenticated source, raw immutable payload, phase/state/version, goal, constraints, owners, risk floor, data class, links, created/updated"
+      },
+      {
+        "name": "SpecRevision",
+        "fields": "revision, canonical content/hash, problem, users, behavior, non-goals, alternatives, acceptance oracles, dependencies, rollout/rollback, unresolved decisions, provenance"
+      },
+      {
+        "name": "DecisionRecord",
+        "fields": "decision_id/type/status, question or proposal, enumerated options, recommendation, consequences, exact subject hashes, rule/policy versions, eligible roles/quorum, requester/decider, rationale, evidence, created/due/answered/effective/expired/superseded timestamps"
+      },
+      {
+        "name": "ConversationEvent",
+        "fields": "conversation/thread/turn IDs, parent turn, speaker principal, typed intent (question/answer/approval/reject/cancel/correct/status), body plus structured payload, attachments/digests, visibility/redaction, related decision, causal event"
+      },
+      {
+        "name": "EvidenceBundle",
+        "fields": "bundle hash, producer identity, source URLs or runs, base/head/artifact, commands/checks, test counts, base-fail/candidate-pass proof, security/SBOM/provenance, metric denominators/intervals, conflicts, freshness and attestation"
+      },
+      {
+        "name": "PolicyDecision",
+        "fields": "decision outcome, evaluated rule IDs and predicates, input snapshot/digests, risk and confidence/calibration slice, denied capabilities, human need, expiry and engine version"
+      },
+      {
+        "name": "ApprovalToken",
+        "fields": "binding described in transition_contract; signatures/quorum and revocation"
+      },
+      {
+        "name": "ExceptionRecord",
+        "fields": "failed rule, reason, owner, exact scope/artifact, alternatives, compensating controls, approvers, start/expiry, rollback/kill switch, follow-up and closure evidence"
+      },
+      {
+        "name": "Checkpoint",
+        "fields": "aggregate version, runnable node, serialized non-secret context refs, open decisions, deadlines, leases revoked, resume token hash and compatibility version"
+      },
+      {
+        "name": "OutcomeRecord",
+        "fields": "accepted/rejected/deferred/cancelled/rolled-back result, user/SLO/security outcome, review effort, cost, incident/revert, retained-at-window status, learning links"
+      }
+    ],
+    "storage_rules": [
+      "JSON Schema validates typed envelopes. Canonicalize before hashing; large/sensitive payloads live in restricted object storage with immutable digest references.",
+      "Append-only events are authority; issue/Project/inbox UI is a projection. Git holds desired schemas/policies, while live GitHub/Warp settings are observed actual and reconciled.",
+      "Corrections append a superseding record; never mutate away an earlier user answer. Privacy erasure uses tombstone/redaction events and retained integrity metadata under approved retention policy.",
+      "Context compaction is a derived artifact with source turn IDs, omissions, digest and generator version; it never replaces the original decision trail."
+    ]
+  },
+  "conversation_and_handoffs": {
+    "contract": [
+      "Every user-agent exchange is a durable versioned event. Natural language is retained, but authoritative decisions also require a typed DecisionRecord.",
+      "One active foreman owns requester communication. Specialists return evidence/open questions to it; direct hidden side conversations cannot authorize transitions. This matches Warp routing but strengthens it with external authorization [S02].",
+      "Questions are atomic, answerable, identify why blocked, state default/non-answer consequence, list viable options and tradeoffs, name owner, deadline and exact affected spec revision. Batch related questions; do not drip-feed avoidable questions.",
+      "An answer is attributable to question ID. Free text is parsed into a proposed structured answer and confirmed when materially ambiguous; the original text remains. Silence is never consent unless a named policy owner pre-approved a reversible low-risk timeout default.",
+      "Handoff packet contains state, exact goal/spec/candidate/policy versions, completed work, evidence/conflicts, open decisions, capabilities used/revoked, deadlines, next legal actions and rollback/cleanup status. Receiver acknowledges expected aggregate version."
+    ],
+    "question_economics": {
+      "ask_when": "A blocking variable is unresolved/conflicting and at least two plausible values produce different acceptance behavior, risk tier, irreversible effect or plan. Also ask when the accountable human preference/value judgment cannot be derived from evidence.",
+      "research_first": "If the answer is discoverable safely within remaining read-only budget and does not require human preference/authority, investigate rather than ask.",
+      "do_not_ask": "Do not ask for facts already in authoritative context, cosmetic preferences with an approved default, or permission the policy forbids. Explain denial/escalation instead.",
+      "bounded_default": "At most 5 decision atoms per batch and 2 clarification cycles before owner escalation by default; repository policy may change these values after measured review. Urgent incident questions are one action plus safe fallback."
+    },
+    "resume": [
+      "Persist before notifying. Notification failure does not lose the queue item [S03].",
+      "On resume, verify actor/role, decision state, revision and policy freshness. Mark conflicting later answers disputed and escalate; do not last-write-wins semantic decisions.",
+      "After maximum wait, move to DEFERRED/EXPIRED or take only the explicitly declared safe default. Revoke credentials during long waits."
+    ]
+  },
+  "orchestration_and_composition": {
+    "rules": [
+      "Subagents cannot independently contact decision owners or advance authoritative state. They emit signed result envelopes to the foreman/controller.",
+      "Fanout is allowed for reversible read-only research and independent verification. Each child gets minimum context/capability/budget and returns sources, uncertainty and artifact digest.",
+      "Join policy is explicit: ALL for protected checks; QUORUM only for independent equivalent reviewers with named quorum; ANY only for redundant lookup. Missing/conflicting mandatory results => PAUSE or ESCALATE, never majority-vote intent.",
+      "Dependencies form a versioned DAG. A downstream node cannot run when an upstream decision/evidence hash changed. Cancellation propagates to descendants; cleanup and evidence preservation do not cancel.",
+      "Lease/fencing prevents duplicate workers. Human takeover increments fence and revokes agent writes. Warp Factory MCP warns local pickup does not itself pause/lock factory work, so this stronger controller lock is required [S06].",
+      "Budgets cover wall time, tokens/cost, tool calls, files/diff, retries, concurrency, network and production exposure. Near limit => checkpoint/pause; exceeded or repeated identical failure => stop attempt/escalate, not request broader privilege automatically."
+    ],
+    "subfactory_handoff": "Parent supplies immutable contract and capability profile; child returns outcome/evidence/open-decision records. Parent revalidates policy and versions. A child completion cannot equal parent authorization.",
+    "cleanup": "Every exit schedules credential revocation, runner/worktree destruction, lease release, partial-side-effect reconciliation and retention/legal-hold evaluation. Cleanup retries independently and pages on SLA breach."
+  },
+  "human_need_policy": {
+    "risk_tiers": {
+      "R0": "read-only/mechanical/no behavior change; may continue inside allowlist",
+      "R1": "bounded reversible low-risk change with independent oracle; propose automatically; merge/canary only after local promotion",
+      "R2": "material user-visible/shared/API/cross-service change; human intent/plan, exact PR and release gates",
+      "R3": "security/IAM/crypto/privacy/payments/destructive data/migration/CI-policy/infrastructure/publish/major incident; specialist and independent multi-party gates",
+      "R4": "ambiguous intent, unknown authority, no trustworthy oracle/rollback, irreversible/unbounded action or self-governance; proposal/evidence only"
+    },
+    "hard_rules": [
+      {
+        "outcome": "STOP",
+        "when": [
+          "authenticated cancel/reject/supersede",
+          "request is illegal/disallowed or asks to bypass immutable controls",
+          "candidate attempts to change/audit-delete/approve/promote protected policy, grader, permission or itself",
+          "critical secret compromise or repeated deliberate policy violation requiring containment",
+          "terminal budget with no safe checkpoint value"
+        ],
+        "effect": "revoke capability, contain safe effects, preserve evidence, cleanup; incident escalation if harm possible"
+      },
+      {
+        "outcome": "ESCALATE",
+        "when": [
+          "Sev-1/2, suspected compromise, rollback failure or harm expanding",
+          "risk R3/R4, owner/role conflict, cross-boundary authority, legal/privacy/security question",
+          "exception/break-glass, conflicting human decisions, repeated clarification/retry limit, unknown cause with production impact",
+          "detector disagreement could change risk by >=1 tier"
+        ],
+        "effect": "assign named specialist/incident/policy owner; no consequential continuation except pre-authorized containment"
+      },
+      {
+        "outcome": "REQUEST_APPROVAL",
+        "when": [
+          "proposal is complete but transition spends money/material budget, grants new capability, creates public/external effect, merges/releases/promotes, or is R2/R3",
+          "spec/readiness exact revision; protected path/dependency/workflow; destructive reconciliation; failed-check exception; canary with material exposure",
+          "policy/evaluator/model/prompt/tool/memory schema/autonomy-class change"
+        ],
+        "effect": "create immutable approval request/token subject; pause and revoke unneeded capability"
+      },
+      {
+        "outcome": "CLARIFY",
+        "when": [
+          "blocking intent/acceptance/scope/non-goal/owner fact is missing",
+          "authoritative sources conflict or requested behavior has multiple materially different interpretations",
+          "no independent acceptance oracle and a human can define one",
+          "user preference/value tradeoff rather than discoverable technical fact"
+        ],
+        "effect": "ask minimum decision atoms; bind answer; return to planning and invalidate affected downstream approval"
+      },
+      {
+        "outcome": "PAUSE",
+        "when": [
+          "dependency/event/window/rate limit/reviewer/answer pending",
+          "evidence missing, stale, conflicting, underpowered or provenance invalid",
+          "budget warning, repeated transient failure, policy/live-state drift, lease lost",
+          "canary outcome is inconclusive"
+        ],
+        "effect": "checkpoint, set deadline/retry policy, release compute/credentials; notification is advisory"
+      },
+      {
+        "outcome": "CONTINUE",
+        "when": [
+          "no higher-precedence rule; state transition is allowlisted; effective risk within pre-approved profile; exact spec/policy/capability/evidence current; action reversible/idempotent or side effect separately authorized; budget and lease valid"
+        ],
+        "effect": "advance one transition only, journal result and re-evaluate after new evidence"
+      }
+    ],
+    "evidence_based_overlay": {
+      "features": [
+        "task/risk class",
+        "blocking-unknown count",
+        "evidence completeness/freshness/provenance",
+        "oracle independence and historical false-green rate",
+        "model/agent calibrated success lower bound by exact slice",
+        "rollback success and blast radius",
+        "human correction/rescue rate",
+        "incident/error-budget state",
+        "cost/latency of asking versus safe reversible probe"
+      ],
+      "rule": "No raw model confidence authorizes. A calibrated statistic may auto-continue only for a human-promoted R0/R1 profile with adequate local sample and a predeclared one-sided lower confidence bound above its threshold, zero critical unauthorized actions, stable safety/SLO outcomes and tested rollback. Otherwise it can only ask/pause/escalate.",
+      "cold_start": "All mutations require human review; collect shadow decisions and false-continue/false-ask costs.",
+      "example_conservative_thresholds": "Pilot candidate, not universal: >=100 representative eligible outcomes and >=60 days; 95% lower bound on retained-safe success meets repository target; zero severe escapes/privilege violations; rollback drill 100%; sampled human audit >=10%. Rare catastrophic risk still needs hard gates because sample size cannot establish tiny failure probability.",
+      "question_value": "Ask if expected loss avoided by obtaining owner answer exceeds delay/reviewer cost, but any non-delegable value/authority decision is asked regardless of estimated cost. Numeric loss weights are policy-owner artifacts, never learned by the candidate."
+    },
+    "unanswerable_autonomy": [
+      "Autonomous roadmap/priority/product-value choice without a delegated policy",
+      "silent interpretation of material ambiguity",
+      "self-approval, self-granted permissions, self-modification of policy/tests/graders/promotion or audit",
+      "unattended R3/R4 merge/release, irreversible data action, broad IAM/security change or novel production repair",
+      "declaring its own benchmark/evaluator adequate or promoting based only on agent-authored tests",
+      "guaranteeing fully autonomous ideation-to-production or recursive self-improvement; evidence supports governed proposal/eval/shadow/canary/rollback only"
+    ]
+  },
+  "factory_as_code_schema": {
+    "version": "human-need-policy.repo-os/v1alpha1",
+    "top_level": {
+      "metadata": "name, owners, effective/expiry, supersedes, policy digest",
+      "roles": "stable identities/groups, scopes, separation and quorum",
+      "riskProfiles": "R0-R4 matchers and capability ceilings",
+      "decisions": "precedence and outcome rules expressed in side-effect-free predicates",
+      "questions": "blocking fields, templates, batching, deadlines and explicit safe defaults",
+      "approvals": "transition/action matchers, subject bindings, roles/quorum, TTL/invalidation",
+      "escalations": "severity/owner routing, SLA and safe containment",
+      "pauses": "reason, checkpoint, wake event, timeout and terminal/default disposition",
+      "budgets": "cost/time/tool/diff/concurrency/exposure limits",
+      "evidence": "required types/producers/freshness/provenance/statistical thresholds",
+      "protectedControls": "paths/resources/identities that candidates cannot read/write/promote",
+      "lifecycle": "states, transitions, guards, effects and terminal cleanup",
+      "telemetry": "decision/outcome metrics, audit sampling and retention"
+    },
+    "example": {
+      "apiVersion": "repo-os.dev/v1alpha1",
+      "kind": "HumanNeedPolicy",
+      "metadata": {
+        "name": "default-governance",
+        "owners": [
+          "team:repo-policy"
+        ],
+        "changeGate": "R3",
+        "digest": "sha256:<canonical>"
+      },
+      "spec": {
+        "precedence": [
+          "stop",
+          "rollback",
+          "escalate",
+          "approval",
+          "clarify",
+          "pause",
+          "continue"
+        ],
+        "profiles": [
+          {
+            "name": "r1-doc-fix",
+            "match": {
+              "riskMax": "R1",
+              "paths": [
+                "docs/**"
+              ],
+              "behaviorChange": false,
+              "maxFiles": 5
+            },
+            "allow": [
+              "read",
+              "task_branch_write",
+              "draft_pr"
+            ],
+            "deny": [
+              "merge",
+              "deploy",
+              "policy_write"
+            ]
+          }
+        ],
+        "clarify": [
+          {
+            "id": "blocking-intent",
+            "when": "missingAny(goal,acceptanceOracle,owner) || authoritativeConflict",
+            "maxAtoms": 5,
+            "timeout": "P7D",
+            "onTimeout": "DEFERRED"
+          }
+        ],
+        "approvals": [
+          {
+            "id": "r2-ready",
+            "when": "risk >= R2 && transition == READY",
+            "roles": [
+              "product-owner",
+              "technical-owner"
+            ],
+            "quorum": "ALL",
+            "bind": [
+              "specHash",
+              "policyDigest"
+            ],
+            "ttl": "P7D"
+          },
+          {
+            "id": "release",
+            "when": "transition == CANARY",
+            "roles": [
+              "release-owner"
+            ],
+            "bind": [
+              "artifactDigest",
+              "evidenceDigest",
+              "policyDigest",
+              "cohort"
+            ],
+            "ttl": "PT4H"
+          }
+        ],
+        "escalate": [
+          {
+            "id": "incident",
+            "when": "severity <= 2 || rollbackFailed",
+            "to": "incident-commander",
+            "sla": "PT5M"
+          }
+        ],
+        "pause": [
+          {
+            "id": "inconclusive",
+            "when": "evidence.status in [MISSING,STALE,CONFLICTING,UNDERPOWERED]",
+            "wake": [
+              "evidence.updated",
+              "decision.answered"
+            ],
+            "releaseCapabilities": true
+          }
+        ],
+        "continue": {
+          "requires": [
+            "leaseValid",
+            "policyCurrent",
+            "capabilityAllowed",
+            "budgetAvailable",
+            "allMandatoryEvidencePass"
+          ],
+          "maxOneTransition": true
+        },
+        "protected": [
+          "policy/**",
+          "evals/hidden/**",
+          ".github/CODEOWNERS",
+          ".github/workflows/**",
+          "audit/**"
+        ],
+        "default": "DENY"
+      }
+    },
+    "compiler_rules": [
+      "Schema and semantic validation reject overlapping same-precedence rules without explicit tie-break, unreachable states, missing timeout disposition, circular role/self-approval, unbounded wildcard capabilities and approval not bound to mutable subjects.",
+      "Compile to a pure decision table/WASM or signed bundle. Controller records exact bundle hash; candidates receive read-only explanations, not promotion keys or hidden evaluator contents.",
+      "Git review is desired state only. Reconciler inventories live GitHub/Warp permissions, rulesets and environments; weakening or unknown drift blocks governed transitions."
+    ]
+  },
+  "end_to_end_workflows": {
+    "ideation": [
+      "Authenticate request and persist raw idea; triage safety/data/owner.",
+      "Continue read-only discovery while questions are discoverable. Create alternatives and evidence with explicit uncertainty.",
+      "Clarify only blocking human intent/value choices; each answer creates/supersedes a DecisionRecord and SpecRevision.",
+      "Request product/technical approval of exact READY spec. Reject, defer or cancel explicitly. No production coding lease before READY; disposable prototype is labeled and non-promotable."
+    ],
+    "build": [
+      "Admit current READY token; calculate risk/capability; lease fenced sandbox.",
+      "Continue bounded plan implementation only. Scope/capability expansion pauses and requests approval; ambiguity returns to planning.",
+      "External clean verifier evaluates exact SHA with protected oracles. Repair within retry budget; repeated/flaky/weak evidence pauses/escalates.",
+      "Request CODEOWNER/specialist approval by tier; enqueue current head; invalidate stale reviews on push/policy drift.",
+      "Release immutable digest through environment gate; canary automatically succeeds/fails/inconclusive. Fail => tested rollback; inconclusive => pause/human; rollback failure => incident escalation.",
+      "Observe retained outcome, record human corrections/revert/incidents, cleanup and close."
+    ],
+    "maintenance": [
+      "Authenticated alert/user/CI/dependency input is normalized/deduped; severity, ownership and blast radius determine route.",
+      "Known low-risk idempotent runbook within exact pre-approved parameters may continue; every step records telemetry and abort threshold.",
+      "Novel cause, missing/conflicting signal, repeated action, security/data impact or Sev-1/2 escalates. Do not let an agent improvise broad production mutation.",
+      "Incident commander authorizes bounded containment/break-glass; release/rollback approvals bind exact action/artifact.",
+      "Postmortem records contributors and failed defenses; reviewed regression/eval becomes evidence. Agent may draft but cannot close governance actions."
+    ],
+    "decision_lifecycle": [
+      "OPEN -> NOTIFIED -> ANSWERED/APPROVED/REJECTED -> VALIDATED -> EFFECTIVE; side paths EXPIRED, REVOKED, DISPUTED, SUPERSEDED.",
+      "A response changes no state until controller validation. Effective decision is rechecked at execution. Corrections append supersession and invalidate descendants."
+    ]
+  },
+  "self_improvement_boundary": {
+    "maximum_safe_loop": [
+      "Automatically collect redacted outcomes and propose failure clusters/hypotheses.",
+      "Automatically create candidate prompt/model/router/tool/workflow/code changes in an isolated branch.",
+      "Run protected offline evaluations with repetitions, adversarial/property/fault tests and private temporal holdouts through a separate evaluator.",
+      "Run non-authoritative shadow with side-effect sink; compare to pinned baseline and human decisions.",
+      "After independent approval of exact digest, canary a reversible R0/R1 bundle under bounded cohort/budget/abort thresholds.",
+      "Automatically roll back to tested last-known-good when predeclared fail threshold fires; pause on inconclusive; record outcome and propose follow-up."
+    ],
+    "outside_candidate": [
+      "protected tests/hidden holdouts and inclusion rules",
+      "grader/evaluator definitions, metric weights and acceptance thresholds",
+      "policy/risk map, role/quorum and protected-path definitions",
+      "permissions/secrets/identity/rulesets/environments and audit retention",
+      "baseline selection, canary exposure ceiling, promotion authority and rollback keys",
+      "ground-truth labels, appeals and exception authority"
+    ],
+    "promotion": "Control/evaluator/permission/policy changes are always human-governed R3. Even a narrow auto-promotion profile must itself be human-approved, time-bounded, separately actuated, audited and instantly revocable. No candidate can expand its profile.",
+    "why": "Warp itself proposes self-improvement changes for review [S01,S05]. Weak-test/leakage evidence [S33-S34] prevents the evaluated system from owning its oracle. NIST/OWASP support ongoing management, feedback, least privilege and human recourse [S24-S29].",
+    "not_safe_or_currently_supported": [
+      "general recursive self-improvement with autonomous policy/grader/promotion changes",
+      "automatic adoption of scorer-generated factory modifications",
+      "unattended high-risk or irreversible production changes",
+      "learning from raw user/production data without governed privacy, consent, provenance and curation",
+      "claiming fully self-improving means no human authority; maximum supported meaning is automated proposal/eval/shadow/canary/rollback under protected governance"
+    ]
+  },
+  "validation_strategy": {
+    "schema_static": [
+      "Validate JSON Schema and policy references/digests; reject unknown fields in security-critical sections.",
+      "Lint transition completeness, precedence, terminal cleanup, timeout disposition, role eligibility/quorum, separation of duty, protected resources and default deny.",
+      "Model-check reachable states: no mutation before READY, no merge/deploy without current token, no candidate control of evaluator/policy, every wait can wake/expire/cancel, every partial effect can reconcile/compensate."
+    ],
+    "property_model_tests": [
+      "Generate every state x event x risk x capability x evidence-status combination. Invalid events never advance; duplicates are identical; stale versions never authorize; more risk/missing evidence cannot increase authority (monotonic safety).",
+      "Replay/crash at each append/outbox/side-effect/readback boundary; external effects are at-most-once logically through idempotency/reconciliation.",
+      "Approval invalidates on each bound field mutation. Late answer, role removal, policy drift and concurrent contradictory answer cannot revive authority.",
+      "Cancellation always revokes lease/capability and eventually cleans up; cleanup failure pages without rewriting terminal outcome."
+    ],
+    "security_adversarial": [
+      "Prompt injection in issue, repository, test output, web/MCP and reviewer comment cannot obtain hidden controls/secrets or create approval.",
+      "Forge comment/label/reaction/actor, replay webhook, substitute SHA/evidence, compromise verifier, alter CODEOWNERS/workflow/ruleset/environment, poison evaluator and exfiltrate via logs/network.",
+      "Prove requester/author/verifier/approver/promoter separation and negative permission tests against live GitHub/Warp configuration [S19,S23,S28-S29]."
+    ],
+    "human_factors_eval": [
+      "Measure false-continue (highest cost), false-stop/false-escalate, unnecessary-question and missed-question rates from blind expert adjudication.",
+      "Track question turns, time-to-answer, expiry, disagreement, overrides, approval latency, reviewer findings, rescue/rework and incident/rollback by tier/task/repository/model/policy version.",
+      "Test alert fatigue and automation bias with structured rationale/evidence, not confidence badges; sample auto decisions and supply appeal/recourse."
+    ],
+    "promotion_test": "Pre-register task slice, baseline, denominators, confidence method, severe-event rule and rollback. Use retained outcome/SLO/security and total human+compute cost, not PR count/LOC. Freeze expansion on any critical unauthorized action, false approval, evidence tamper, high-severity escape or failed rollback.",
+    "acceptance_scenarios": [
+      "ambiguous feature with two valid meanings => CLARIFY",
+      "complete R2 proposal => REQUEST_APPROVAL",
+      "agent asks for forbidden admin => ESCALATE/DENY, never approval to agent itself",
+      "dependency outage => PAUSE then resume current version",
+      "rollback failure => incident ESCALATE",
+      "user cancellation during tool call => fence/revoke/STOP and reconcile",
+      "policy/evidence changes after approval => invalidate and pause",
+      "inconclusive canary => PAUSE, not pass",
+      "candidate edits hidden test/policy => STOP and security event"
+    ]
+  },
+  "implementation_recommendation": {
+    "architecture": "Build a small deterministic event-sourced controller around untrusted agents. PostgreSQL event/decision/outbox ledger is authority; Git contains protected desired policy/schema; GitHub/Warp are live projections/enforcement; object storage retains content-addressed evidence. Use LangGraph for agent checkpoints if useful and Temporal only if long-lived durable workflow needs justify it, but keep authorization in the controller.",
+    "stage0_0_4_weeks": [
+      "Define states, event/DecisionRecord/approval/exception schemas and R0-R4 policy; protect policy/CODEOWNERS/workflows/evals.",
+      "Implement read-only intake, conversation ledger, policy dry-run and live permission/ruleset/environment inventory. Shadow every human-need decision; humans still decide/execute.",
+      "Create dashboards for queue age, open decisions, question turns, false decisions, drift and cleanup."
+    ],
+    "stage1_4_8_weeks": [
+      "Enable clarification/pause/resume with exact revision binding, deadlines and notifications; add controller-only state writes, CAS/outbox/reconciliation.",
+      "Add separate proposer/verifier identities, capability broker, lease/fencing and draft PR only. Require human READY/PR/release approval for all mutations.",
+      "Run replay, fault, prompt-injection, forged-approval, stale-token and cancellation drills."
+    ],
+    "stage2_after_local_evidence": [
+      "Promote one closed R0/R1 profile to automatic continuation/draft PR; shadow proposed auto-merge decisions and audit samples.",
+      "Add protected offline eval, shadow and reversible canary improvement path. Keep policy/evaluator/permission/promotion human-gated.",
+      "Only then allow conditional R0/R1 auto-merge/canary if predeclared retained-outcome, safety, rollback and cost gates pass. Expand one capability/repository/task class at a time."
+    ],
+    "operating_rules": [
+      "Publish decision policy and appeal path. On-call owns stuck/rollback/cleanup SLAs. Review expired exceptions and role drift at least weekly; restore/test quarterly.",
+      "Pin schema/policy/evaluator/model/tool versions and expose reason codes. If engine unavailable or facts stale, fail closed for mutations but permit safe read-only evidence gathering.",
+      "Do not implement LLM-confidence-based autonomy, generic agent voting, mutable labels as approval, or universal numerical thresholds."
+    ]
+  },
+  "sources": [
+    {
+      "id": "S01",
+      "title": "How Warp Factories work",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/factories/how-factories-work/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "factory stages; default spec/question/merge human decision points; self-improvement proposes reviewable changes rather than adopting them"
+    },
+    {
+      "id": "S02",
+      "title": "Factory agents",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/factories/factory-agents/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "foreman-only requester interaction; persistent agent conversation; default spec approval; implement never merges; review is advisory; instruction versus permission boundary"
+    },
+    {
+      "id": "S03",
+      "title": "Factory inbox",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/factories/factory-inbox/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "durable personal queue kinds: asked/answered question, spec/PR review, blocked and failed; best-effort notification is not authority"
+    },
+    {
+      "id": "S04",
+      "title": "Factory definitions as code",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/factories/factory-as-code/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "version-controlled factory definitions, validation, schemas, triggers and credential configuration"
+    },
+    {
+      "id": "S05",
+      "title": "Measure and improve a factory: self-improvement",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/self-improvement/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "scorer-driven failure clustering and proposed changes requiring review"
+    },
+    {
+      "id": "S06",
+      "title": "Warp Factories complete documentation export",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/_llms-txt/factories.txt",
+      "publication_update_date": "Generated from current official documentation; accessed version 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation export",
+      "supported_claims": "cross-page verification of lifecycle, inbox, governance, factory-as-code, benchmarks and self-improvement claims"
+    },
+    {
+      "id": "S07",
+      "title": "warp-factory-examples",
+      "publisher_author": "Warp",
+      "url": "https://github.com/warpdotdev/warp-factory-examples",
+      "publication_update_date": "Repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": "versioned example agent prompts and factory definitions; shows policy is configuration rather than a fixed safety theorem"
+    },
+    {
+      "id": "S08",
+      "title": "Interrupts",
+      "publisher_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "durable interrupt/resume, approval/edit/reject patterns; node restarts on resume and side effects before interrupt must be idempotent"
+    },
+    {
+      "id": "S09",
+      "title": "Persistence",
+      "publisher_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "thread checkpoints and stores for durable conversations"
+    },
+    {
+      "id": "S10",
+      "title": "Workflow message passing",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/encyclopedia/workflow-message-passing",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Signals, Queries and validated Updates for external decisions; handlers and durable workflow waits"
+    },
+    {
+      "id": "S11",
+      "title": "Temporal workflows",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflows",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "durable replay and deterministic workflow constraints"
+    },
+    {
+      "id": "S12",
+      "title": "Microsoft Agent Framework repository README",
+      "publisher_author": "Microsoft",
+      "url": "https://github.com/microsoft/agent-framework",
+      "publication_update_date": "Repository active as of 2026-09-12",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": "checkpointing, human-in-loop and graph workflow claims; framework is substrate, not repository authority"
+    },
+    {
+      "id": "S13",
+      "title": "Agent Runtime Environments",
+      "publisher_author": "Microsoft AutoGen",
+      "url": "https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/core-concepts/architecture.html",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "runtime identity/lifecycle/message boundary; does not supply organizational approval policy"
+    },
+    {
+      "id": "S14",
+      "title": "About rulesets",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "layered enforcement, evaluation modes and bypass visibility"
+    },
+    {
+      "id": "S15",
+      "title": "About protected branches",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "required reviews/checks, stale approval dismissal, last-push review and merge queue controls"
+    },
+    {
+      "id": "S16",
+      "title": "About code owners",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "path-qualified ownership routing, requiring separate branch/ruleset enforcement"
+    },
+    {
+      "id": "S17",
+      "title": "Deployments and environments",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "required reviewers, prevent self-review, delayed environment secret release, plan-dependent limits"
+    },
+    {
+      "id": "S18",
+      "title": "Reviewing deployments",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "approve/reject/bypass workflow and reviewer behavior"
+    },
+    {
+      "id": "S19",
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "prompt-injection controls, restricted triggers, workflow approval and additional PR review"
+    },
+    {
+      "id": "S20",
+      "title": "Optionally skip approval for Copilot coding agent Actions workflows",
+      "publisher_author": "GitHub Changelog",
+      "url": "https://github.blog/changelog/2026-03-13-optionally-skip-approval-for-copilot-coding-agent-actions-workflows",
+      "publication_update_date": "2026-03-13",
+      "access_date": "2026-09-13",
+      "source_type": "official changelog",
+      "supported_claims": "default human workflow approval can be administratively disabled, so live policy must be inventoried"
+    },
+    {
+      "id": "S21",
+      "title": "About rationale, confidence, and approvals for issues",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automation-rationale-and-approvals",
+      "publication_update_date": "Public preview; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "confidence/rationale UI and explicit warning that approval UI is not a security boundary"
+    },
+    {
+      "id": "S22",
+      "title": "Agentic audit log events",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/reference/enterprise-administrators/agentic-audit-log-events",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "agent actor/session/user/action audit fields"
+    },
+    {
+      "id": "S23",
+      "title": "Keeping GitHub Actions secure: Preventing pwn requests",
+      "publisher_author": "GitHub Security Lab; Jaroslav Lobacevski",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_update_date": "2021-08-17",
+      "access_date": "2026-09-13",
+      "source_type": "vendor security research/guidance",
+      "supported_claims": "privileged workflow plus untrusted checkout attack pattern"
+    },
+    {
+      "id": "S24",
+      "title": "AI Risk Management Framework 1.0",
+      "publisher_author": "NIST",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "publication_update_date": "2023-01-26",
+      "access_date": "2026-09-13",
+      "source_type": "government framework",
+      "supported_claims": "Govern, Map, Measure and Manage; voluntary, context-specific risk management"
+    },
+    {
+      "id": "S25",
+      "title": "NIST AI 600-1: Generative AI Profile",
+      "publisher_author": "NIST; Autio et al.",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "publication_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/profile",
+      "supported_claims": "predeployment testing, ongoing monitoring, incidents, provenance, feedback and recourse"
+    },
+    {
+      "id": "S26",
+      "title": "NIST SP 800-218 SSDF v1.1",
+      "publisher_author": "NIST; Souppaya, Scarfone, Dodson",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_update_date": "2022-02",
+      "access_date": "2026-09-13",
+      "source_type": "government standard",
+      "supported_claims": "protected development, change control, verification and vulnerability response outcomes"
+    },
+    {
+      "id": "S27",
+      "title": "NIST SP 800-61 Rev. 3",
+      "publisher_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+      "publication_update_date": "2025-04",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/guidance",
+      "supported_claims": "governed incident detection, response, recovery and continuous improvement"
+    },
+    {
+      "id": "S28",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "publication_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "supported_claims": "untrusted content can redirect agent behavior; constrain privileges and segregate content"
+    },
+    {
+      "id": "S29",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "publication_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "supported_claims": "minimize functionality, permissions and autonomy; require approval for high-impact actions"
+    },
+    {
+      "id": "S30",
+      "title": "CloudEvents specification v1.0.2",
+      "publisher_author": "Cloud Native Computing Foundation",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "publication_update_date": "2022-02-05 release lineage",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open standard",
+      "supported_claims": "event identity/source/type/time/subject/data; not workflow durability or deduplication"
+    },
+    {
+      "id": "S31",
+      "title": "SLSA v1.2 Requirements",
+      "publisher_author": "SLSA project / OpenSSF",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "publication_update_date": "Version 1.2; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "supply-chain specification",
+      "supported_claims": "provenance and hardened build requirements"
+    },
+    {
+      "id": "S32",
+      "title": "Argo Rollouts Analysis and Progressive Delivery",
+      "publisher_author": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_update_date": "Current stable docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source official documentation",
+      "supported_claims": "success/failure/inconclusive metric outcomes, pause, abort and promotion"
+    },
+    {
+      "id": "S33",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_author": "Yang et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper/preprint",
+      "supported_claims": "solution leakage and weak-test suspicious passes challenge evaluator authority"
+    },
+    {
+      "id": "S34",
+      "title": "SWE-bench Live: Can AI Agents Resolve Software Issues in the Wild?",
+      "publisher_author": "research authors",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "publication_update_date": "2025-05",
+      "access_date": "2026-09-13",
+      "source_type": "research preprint",
+      "supported_claims": "fresh-task evaluation and capability/contamination limits"
+    },
+    {
+      "id": "S35",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced OSS Developer Productivity",
+      "publisher_author": "METR",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled study",
+      "supported_claims": "19% measured slowdown in scoped population despite optimistic forecasts/perceptions; not universally generalizable"
+    },
+    {
+      "id": "S36",
+      "title": "Accelerate State of DevOps Report 2024",
+      "publisher_author": "DORA",
+      "url": "https://dora.dev/research/2024/dora-report/",
+      "publication_update_date": "2024",
+      "access_date": "2026-09-13",
+      "source_type": "industry empirical research",
+      "supported_claims": "individual gains can coexist with worse delivery throughput/stability associations; not causal"
+    },
+    {
+      "id": "S37",
+      "title": "The SPACE of Developer Productivity",
+      "publisher_author": "Forsgren et al., ACM Queue",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "publication_update_date": "2021-03-06",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed framework",
+      "supported_claims": "productivity is multidimensional; activity counts alone are unsafe promotion criteria"
+    },
+    {
+      "id": "S38",
+      "title": "Human-in-the-loop",
+      "publisher_author": "OpenAI Agents SDK",
+      "url": "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "per-tool approval predicates, interruptions, serializable RunState approve/reject and resume"
+    },
+    {
+      "id": "S39",
+      "title": "RunState source at fbd2dbca",
+      "publisher_author": "OpenAI",
+      "url": "https://github.com/openai/openai-agents-python/blob/fbd2dbcaaf74a2c447c6d3fa9d5645d83fd7e292/src/agents/run_state.py",
+      "publication_update_date": "Commit fbd2dbca; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official versioned source",
+      "supported_claims": "approval state, serialization and call-ID keyed decision mechanics"
+    },
+    {
+      "id": "S40",
+      "title": "Using tools: connectors and remote MCP servers",
+      "publisher_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/tools-connectors-mcp",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "MCP approval request/response protocol and require_approval configuration"
+    },
+    {
+      "id": "S41",
+      "title": "Human-in-the-loop",
+      "publisher_author": "Microsoft AutoGen",
+      "url": "https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tutorial/human-in-the-loop.html",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "UserProxy live wait; documented warning that blocked in-run state cannot safely save/resume"
+    },
+    {
+      "id": "S42",
+      "title": "Managing state",
+      "publisher_author": "Microsoft AutoGen",
+      "url": "https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tutorial/state.html",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "team/agent state save and load for terminate/handoff then later continuation"
+    },
+    {
+      "id": "S43",
+      "title": "Workflow execution",
+      "publisher_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "long-lived durable execution and event-history replay"
+    },
+    {
+      "id": "S44",
+      "title": "User tasks",
+      "publisher_author": "Camunda 8",
+      "url": "https://docs.camunda.io/docs/components/modeler/bpmn/user-tasks/",
+      "publication_update_date": "Camunda 8.9 docs; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "durable assigned user task, deadlines, forms, listeners and denied lifecycle transitions"
+    },
+    {
+      "id": "S45",
+      "title": "Agent questions",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/agents/local-agents/interacting-with-agents/agent-questions/",
+      "publication_update_date": "Last updated 2026-09-09",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "structured single/multi-select questions, recommendation, Other and explicit Skip result"
+    },
+    {
+      "id": "S46",
+      "title": "Agent Profiles and Permissions",
+      "publisher_author": "Warp",
+      "url": "https://docs.warp.dev/agents/capabilities/agent-profiles-permissions/",
+      "publication_update_date": "Last updated 2026-09-09",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "always ask/allow/agent decides action controls and profile enforcement boundaries"
+    },
+    {
+      "id": "S47",
+      "title": "Analysis and progressive delivery",
+      "publisher_author": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_update_date": "Current stable docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source official documentation",
+      "supported_claims": "success/failure/inconclusive metric analysis, pause, abort and promotion"
+    },
+    {
+      "id": "S48",
+      "title": "Artificial Intelligence Risk Management Framework (AI RMF 1.0), NIST AI 100-1",
+      "publisher_author": "NIST; Tabassi",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+      "publication_update_date": "2023-01",
+      "access_date": "2026-09-13",
+      "source_type": "government framework",
+      "supported_claims": "GOVERN/MAP/MEASURE/MANAGE, differentiated human oversight, go/no-go risk management, appeal/override/incident/decommission records; voluntary and non-prescriptive"
+    },
+    {
+      "id": "S49",
+      "title": "NIST AI 600-1: Generative Artificial Intelligence Profile (official PDF)",
+      "publisher_author": "NIST; Autio et al.",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "publication_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/profile",
+      "supported_claims": "action IDs for independent evaluation, risk-tolerance release, monitoring, human override, incident and deactivation records"
+    },
+    {
+      "id": "S50",
+      "title": "WS-HumanTask Specification Version 1.1",
+      "publisher_author": "OASIS BPEL4People Technical Committee",
+      "url": "https://docs.oasis-open.org/bpel4people/ws-humantask-1.1-spec-cs-01.html",
+      "publication_update_date": "2010-08-25",
+      "access_date": "2026-09-13",
+      "source_type": "committee specification",
+      "supported_claims": "human-task READY/RESERVED/IN_PROGRESS/SUSPENDED and terminal states, claim/release/delegate/deadline/history semantics"
+    },
+    {
+      "id": "S51",
+      "title": "State Chart XML (SCXML): State Machine Notation for Control Abstraction",
+      "publisher_author": "W3C",
+      "url": "https://www.w3.org/TR/scxml/",
+      "publication_update_date": "2015-09-01",
+      "access_date": "2026-09-13",
+      "source_type": "W3C Recommendation",
+      "supported_claims": "explicit states, events, guards, final states and run-to-completion execution algorithm"
+    },
+    {
+      "id": "S52",
+      "title": "Agent Control Standard",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://github.com/GenAI-Security-Project/agent-control-standard",
+      "publication_update_date": "v0.1.0 repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "emerging open specification/source",
+      "supported_claims": "pre-tool steps/toolCallRequest Guardian envelope and allow/deny/modify decisions; disclosed limited hooks/fail-open reference/authentication gaps"
+    },
+    {
+      "id": "S53",
+      "title": "Tool-call request schema v0.1.0",
+      "publisher_author": "OWASP Agent Control Standard",
+      "url": "https://genai-security-project.github.io/agent-control-standard/schema/v0.1.0/hooks/tool-call-request.json",
+      "publication_update_date": "v0.1.0",
+      "access_date": "2026-09-13",
+      "source_type": "versioned JSON schema",
+      "supported_claims": "request/version/session/agent/tool/argument fields for a pre-action control hook"
+    },
+    {
+      "id": "S54",
+      "title": "Regulation (EU) 2024/1689, Article 14",
+      "publisher_author": "European Union",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+      "publication_update_date": "2024-07-12",
+      "access_date": "2026-09-13",
+      "source_type": "law / official journal",
+      "supported_claims": "for applicable high-risk AI: competent human oversight, automation-bias awareness, override/reverse/intervene/stop capabilities; applicability requires counsel"
+    },
+    {
+      "id": "S55",
+      "title": "Meaningful Human Control over Autonomous Systems: A Philosophical Account",
+      "publisher_author": "Santoni de Sio and van den Hoven",
+      "url": "https://doi.org/10.3389/frobt.2018.00015",
+      "publication_update_date": "2018-02-28",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed open-access paper",
+      "supported_claims": "tracking relevant human reasons and tracing outcomes to humans who understand their role; conceptual not a computable threshold"
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "Warp human checkpoints are visible but not all are enforcement",
+      "claims": "Warp says spec/question gates live in foreman instructions and can be changed, while merge relies on repository permissions [S01-S02].",
+      "resolution": "Treat prompts as routing UX only. The external controller and live GitHub controls own authorization; inventory drift."
+    },
+    {
+      "topic": "Confidence/rationale versus authority",
+      "claims": "GitHub exposes confidence-based triage/approvals but warns the UI is not a security boundary [S21].",
+      "resolution": "Confidence may prioritize review; only authenticated hash-bound policy tokens authorize."
+    },
+    {
+      "topic": "Durable interrupt versus exactly-once effect",
+      "claims": "LangGraph and Temporal persist waits/replay [S08-S11], but resume/replay can re-enter code and external APIs are not transactional with workflow history.",
+      "resolution": "Persist-before-notify, idempotent commands, outbox, fencing, readback and reconciliation."
+    },
+    {
+      "topic": "Self-improving marketing versus actual adoption",
+      "claims": "Warp calls factories self-improving but documents proposals that always arrive for review and nothing is adopted automatically [S01,S05].",
+      "resolution": "Use the precise maximum-safe definition: automated proposal/eval/shadow/canary/rollback; protected authority stays external."
+    },
+    {
+      "topic": "Green evaluation versus correctness",
+      "claims": "Vendor/framework scorers enable automated comparison [S05-S06], while SWE-Bench+/Live identify weak-oracle and contamination risk [S33-S34].",
+      "resolution": "Protected independent oracles, temporal holdouts, expert calibration and no candidate-controlled graders."
+    },
+    {
+      "topic": "Productivity/autonomy claims versus measured outcomes",
+      "claims": "Vendor autonomy metrics can count no human code push, while DORA and METR show mixed/negative outcomes in scoped studies [S35-S36].",
+      "resolution": "Measure retained safe outcomes, SLOs, reviewer/on-call cost and incidents by local task class; do not promote on PR volume."
+    },
+    {
+      "topic": "Human approval versus automation bias/latency",
+      "claims": "Human gates reduce unauthorized consequence but clicks can be inattentive and slow; no cited source supplies an optimal gate rate.",
+      "resolution": "Ask only non-delegable/blocking decisions, give exact diff/evidence/consequence, use qualified roles/quorum, audit outcomes and automate narrow proven reversible classes."
+    },
+    {
+      "topic": "Automatic rollback versus irreversible side effects",
+      "claims": "Argo supports abort/rollback outcomes [S47], but database/external/legal effects may not reverse.",
+      "resolution": "Automatic rollback only for rehearsed compatible immutable bundles/flags; otherwise require human-owned compensation and escalation."
+    },
+    {
+      "topic": "Repository configuration versus actual authority",
+      "claims": "Git makes policy reviewable, but GitHub/Warp roles, secrets, rulesets, environments and bypass remain mutable remote state [S04,S14-S20].",
+      "resolution": "Git is desired; periodic live inventory/read-after-write is actual; weakening/unknown drift blocks."
+    },
+    {
+      "topic": "Emerging machine control standard versus production assurance",
+      "claims": "OWASP ACS v0.1.0 defines a useful pre-tool Guardian request and allow/deny/modify response [S52-S53], but its reference implementation/project disclosures include fail-open and incomplete hook/authentication behavior.",
+      "resolution": "Adopt the envelope idea only behind authenticated fail-closed policy; test exact pinned implementation and do not claim ACS conformance or maturity beyond v0.1.0."
+    }
+  ],
+  "uncertainties": [
+    {
+      "unknown": "No target repository risk appetite, role map, GitHub plan, Warp edition or regulated-data context was provided.",
+      "impact": "Exact gates, quorums and enforcement feasibility require deployment-specific inventory and accountable owner approval."
+    },
+    {
+      "unknown": "No local confusion matrix/calibration exists for human-need decisions by task/risk class.",
+      "impact": "Evidence-based overlay must remain shadow-only; numerical pilot thresholds are illustrative, not validated."
+    },
+    {
+      "unknown": "Rare catastrophic-event probability cannot be estimated from typical pilots.",
+      "impact": "R3/R4 hard gates and protected controls remain even if routine success appears high."
+    },
+    {
+      "unknown": "Many product/framework docs are living pages without immutable publication revisions.",
+      "impact": "Pin tested versions/schemas and revalidate URLs/behavior during implementation."
+    },
+    {
+      "unknown": "Independent longitudinal evidence for Warp Factories and current agent-framework governance in production is absent.",
+      "impact": "Verified mechanism does not equal outcome or SLA; local staged evaluation is required."
+    },
+    {
+      "unknown": "Optimal question batch size, clarification-cycle cap, approval TTL, evidence freshness, canary sample and audit percentage are context-specific.",
+      "impact": "Defaults need operational tuning without weakening non-delegable authority."
+    },
+    {
+      "unknown": "Notification delivery and external identity/role systems can fail or diverge.",
+      "impact": "Inbox/notification cannot be the ledger; reconciliation and escalation SLAs are required."
+    }
+  ],
+  "confidence": {
+    "overall": "High for the external-authority boundary, durable decision artifacts, exact-version approval, least privilege, fail-closed mutation and proposal/eval/shadow/canary/rollback boundary. Medium for the composed state machine and routing policy. Low for universal numeric thresholds and productivity benefit.",
+    "claim_level": {
+      "high": [
+        "Warp/GitHub documented mechanisms and limitations [S01-S23]",
+        "workflow interrupt/checkpoint mechanics [S08-S11]",
+        "need for least privilege, protected evaluation and live enforcement inventory [S23-S31,S33-S34]"
+      ],
+      "medium": [
+        "R0-R4 tier definitions, state names, decision precedence and question contract are engineering synthesis rather than a single standard",
+        "event sourcing/CAS/outbox/fencing/reconciliation are mature patterns but this exact composition is not evaluated end to end"
+      ],
+      "low": [
+        "illustrative sample, duration and audit thresholds",
+        "generalization of METR/DORA to this repository",
+        "net autonomy/productivity/safety improvement before local baseline and pilot"
+      ]
+    },
+    "currency_note": "As-of 2026-09-13. Continuously updated provider documentation and future-dated cutoff were treated as current at that cutoff based on available repository prior research and direct Warp official documentation export."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "human_need_policy",
+    "implementation_recommendation"
+  ]
+}

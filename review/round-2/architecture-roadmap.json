@@ -1,0 +1,120 @@
+{
+  "reviewer": "architecture-roadmap",
+  "scope": "Round-2 review of PLAN.md after round-1 corrections, limited to the three-authority model, smallest-architecture sequencing, one-owner buildability, trigger gates, and roadmap specificity. The plan-only scope and intentional absence of implementation were accepted and not scored as defects.",
+  "strengths": [
+    "The plan clearly separates protected Git desired-state authority, controller runtime-fact authority, and GitHub external-resource authority, while treating workers as disposable and non-authoritative.",
+    "The roadmap defers mutation, fleet, multi-tenancy, Temporal, domain extraction, and GTM work until later increments, and each increment includes an owner, dependencies, entry conditions, exit tests, and a stop or rollback path.",
+    "The canonical IR/compiler-first sequence directly addresses the round-1 fragmentation findings and gives one owner a small read-only Release 0 before operational infrastructure.",
+    "The plan preserves role separation even when one person initially fills several roles, and explicitly requires independent people when risk or governed improvement requires independence."
+  ],
+  "findings": [
+    {
+      "id": "ARCH-R2-001",
+      "severity": "high",
+      "title": "The storage trigger and roadmap allow a GitHub writer and a second repository before the plan's mandatory PostgreSQL gate",
+      "requirement": "Before any GitHub writer is enabled, the corrected plan must require the durable transactional invariants and PostgreSQL race evidence required by the state/orchestration resolution. The plan also states that PostgreSQL is mandatory before external side effects or more than one repository.",
+      "evidence": {
+        "files": [
+          "PLAN.md:12",
+          "PLAN.md:101",
+          "PLAN.md:477-483",
+          "review/requirements-traceability.md:17",
+          "review/round-1-resolutions/state-orchestration.md:118-122"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Read PLAN.md line 12: PostgreSQL becomes mandatory before external side effects.",
+        "Read line 101: SQLite may serve the first single-process mutating pilot and PostgreSQL is mandatory only for unattended external effects, among other triggers.",
+        "Follow the roadmap: Increment 3 permits SQLite; Increment 4 enables draft-PR GitHub effects; Increment 8 adds a second repository; PostgreSQL/RLS is not placed explicitly until Increment 9 and is still conditional there.",
+        "Compare this sequence with the round-1 state/orchestration resolution, which requires PostgreSQL two-session race evidence before any Stage-2 GitHub writer."
+      ],
+      "impact": "An implementer can follow the roadmap exactly and enable external writes on SQLite, then add a second repository before PostgreSQL/RLS. That violates both the stated architecture decision and a round-1 safety gate. It leaves effect atomicity, fencing races, recovery, and repository isolation under-specified at the first mutating boundary. This blocks safe implementation of Increment 4 and later increments.",
+      "recommendation": "Choose one rule and make it normative everywhere. To satisfy the round-1 resolution, put PostgreSQL, least-privilege procedures, compare-and-append/outbox semantics, restore/replay, and two-session race tests in Increment 3 as mandatory exit criteria before Increment 4. Require RLS/isolation tests before Increment 8. Remove the SQLite writer option, or confine SQLite to Release 0 simulation with no external-effect credentials. Keep Temporal separately trigger-gated.",
+      "verification": "A roadmap walk from Increment 0 through 9 has no path to a GitHub write or second repository without a passed PostgreSQL acceptance manifest. The decision, smallest-architecture rule, increment table, traceability matrix, and Stage-2 writer gate all name the same boundary. Tests include two-session races, effect response-loss replay, process-kill recovery, restore, and cross-repository isolation before writer enablement.",
+      "confidence": "high"
+    },
+    {
+      "id": "ARCH-R2-002",
+      "severity": "medium",
+      "title": "Approval ownership is inconsistent inside the three-authority model",
+      "requirement": "The architecture must distinguish authoritative storage, decision authority, issuance authority, and runtime consumption so the general controller cannot manufacture or self-approve authority-bearing records.",
+      "evidence": {
+        "files": [
+          "PLAN.md:81-87",
+          "PLAN.md:107-116",
+          "PLAN.md:251-255",
+          "PLAN.md:418-425",
+          "review/round-1-resolutions/security-improvement.md:14-19",
+          "review/round-1-resolutions/security-improvement.md:59-62"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "In the three-authority table, the durable controller authority is said to own approvals.",
+        "In the durable record catalog, Approval is assigned to product/human authority and is only appended through a controller gateway.",
+        "Sections 10 and 16 then require a narrow authenticated approval gateway and a database role separate from the controller, and say runtime cannot manufacture approvals.",
+        "No explicit ownership vocabulary resolves whether 'owns' means storage custody, issuance, mutation, or decision authority."
+      ],
+      "impact": "The central architecture diagram/table can lead an implementer to place approval issuance in the ordinary controller trust boundary, recreating the authority collapse identified in round 1. Later prose points toward the safe design, but the top-level authority contract remains ambiguous and cannot generate an unambiguous role/procedure model.",
+      "recommendation": "Split the authority table into at least record/system-of-record authority, decision/issuance authority, and actuator authority. State that the controller store is the authoritative persistence location for approval events, while only the authenticated approval gateway acting for qualified human principals may issue them; the scheduler/runtime may only validate and consume them. Show this gateway and human principal in the diagram and bind the roadmap/compiler contracts to that wording.",
+      "verification": "A reviewer can map every Approval operation (request, issue, revoke, validate, consume, audit) to exactly one authenticated role and storage boundary. Generated database privileges demonstrate that the scheduler/controller runtime cannot insert, alter, or self-satisfy approvals, while the authority table, catalog, diagram, and security section use the same terms.",
+      "confidence": "high"
+    },
+    {
+      "id": "ARCH-R2-003",
+      "severity": "medium",
+      "title": "Release 0 simultaneously disclaims recovery and requires restart recovery as acceptance behavior",
+      "requirement": "Release 0 must have one explicit durability and recovery contract so a single owner knows what data survives restart, what failures are in scope, and what acceptance tests define release readiness.",
+      "evidence": {
+        "files": [
+          "PLAN.md:10",
+          "PLAN.md:101",
+          "PLAN.md:476",
+          "PLAN.md:542"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Read the smallest-architecture rule: Release 0 has an embedded append-only simulation journal but 'has no crash-recovery promise.'",
+        "Read Increment 2: rollback the release manifest if decision recovery fails.",
+        "Read Immediate next action 6: Release 0 acceptance includes restart/recovery of waits.",
+        "The plan does not distinguish clean process restart, host crash, torn journal write, or recovery of conversation decisions versus waits."
+      ],
+      "impact": "The Release 0 persistence format, test scope, and exit decision cannot be implemented consistently. One owner may either overbuild crash-safe workflow machinery prematurely or ship a release that fails the stated acceptance test.",
+      "recommendation": "Define a narrow Release 0 recovery envelope. For example, require clean-restart replay and atomic journal writes for conversations, decisions, and simulated waits, explicitly exclude host-loss and in-flight external-effect recovery because no write credentials exist, and state corruption behavior and export/rollback. Align lines 101, 476, and 542 to that envelope.",
+      "verification": "A Release 0 acceptance manifest enumerates retained record types and fault cases. Restart tests and journal-corruption tests have specified expected outcomes, and no text claims both no recovery promise and mandatory recovery for the same failure class.",
+      "confidence": "high"
+    },
+    {
+      "id": "ARCH-R2-004",
+      "severity": "medium",
+      "title": "Several roadmap entry gates are qualitative and can be declared passed after the fact",
+      "requirement": "Later architecture and autonomy increments must be admitted by predeclared, auditable triggers with an owner, measurement window, denominator, decision record, and stop rule; vague demand or usefulness judgments must not authorize premature platform work.",
+      "evidence": {
+        "files": [
+          "PLAN.md:436",
+          "PLAN.md:472-486",
+          "PLAN.md:510-512",
+          "review/round-1-resolutions/factory-contracts.md:28-32",
+          "review/round-1-resolutions/factory-contracts.md:120-126"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Inspect roadmap entries such as 'read-only pilot useful,' 'stable draft pilot,' 'two real consumers request it,' 'engineering evidence,' and 'concurrency/HA/tenant toil crosses recorded threshold.'",
+        "Inspect the later-team trigger text: 'sustained upgrade demand' and 'benefit beyond duplicated repository-native installs' have no defined observation window or decision artifact.",
+        "Section 21.6 requires predeclared samples and denominators only before autonomy increases, not before scale architecture, second-repository productization, or domain/GTM extraction."
+      ],
+      "impact": "The roadmap expresses good intent but does not make the smallest-architecture rule enforceable. A future owner can rationalize platform, fleet, or abstraction work using retrospective judgments, while another owner cannot determine whether an entry gate is actually green.",
+      "recommendation": "Add a common `IncrementAdmissionDecision` contract. Require each qualitative entry condition to name the metric or evidence, minimum observation window/sample, denominator where relevant, accountable signer, conflict/uncertainty treatment, and expiry. Values may be set before the predecessor pilot rather than guessed now, but they must be frozen before measurement and cannot be authored by the proposed platform change itself.",
+      "verification": "For increments 3-10, every entry cell references a versioned admission manifest with predeclared evidence and a deterministic pass/block outcome. A tabletop review cannot advance any increment using only an unrecorded assertion that the prior pilot was 'useful,' 'stable,' or sufficiently burdensome.",
+      "confidence": "medium"
+    }
+  ],
+  "residual_uncertainty": [
+    "No implementation exists by design, so this review cannot validate operational cost, controller throughput, GitHub API edge cases, or whether the proposed gates produce acceptable human burden.",
+    "Exact numeric thresholds for usefulness, stability, recovery toil, and consumer demand should come from local pilots; the defect is the missing precommitment mechanism, not the absence of invented numbers today.",
+    "A single person can build and operate Release 0, but mutation, R2/R3 work, and governed improvement intentionally require independent review or quorum; staffing feasibility beyond the first releases remains a business decision rather than a plan contradiction."
+  ]
+}

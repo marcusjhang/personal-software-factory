@@ -1,0 +1,193 @@
+{
+  "reviewer": "round-8 independent requirements and architecture closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-7 corrections and schema-3 regeneration",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-7-resolution.md",
+      "review/round-7-closure/evidence-currentness.json",
+      "review/round-7-closure/formal-transitions.json",
+      "review/round-7-closure/improvement-interleavings.json",
+      "review/round-7-closure/lease-cleanup-adversary.json",
+      "review/round-7-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/report.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "All 16 requirements; full owner journey; authority, readiness, and security boundaries; sole roadmap; persistence gates; dogfood, GTM, and cross-scope contracts; cross-document contradictions; and reader-visible status/readability.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, a contradiction, an unsafe or undefined implementation path, or a material evidence overclaim. This audit does not require implementation, a full reachable-product/model proof, fresh immutable retrieval, semantic evidence review, or completion of future admission gates."
+  },
+  "contract_reproduction": [
+    {
+      "area": "requirements_and_full_owner_journey",
+      "result": "pass",
+      "basis": "The traceability register maps R-01 through R-16 to exact PLAN clauses, the sole §20 roadmap, validation, and human gates. PLAN §§2, 9, 10.1, 14, 15, and 17 reproduce install, ideation/research, typed decisions, exact-digest READY, admission, isolated execution, review, merge/effect reconciliation, observation, rollback, cleanup, consumer release, export, and uninstall. The Issue/CLI surface is explicitly a future unimplemented contract with session-derived identity, durable typed outcomes, replay, status/why, waits, and fail-closed errors."
+    },
+    {
+      "area": "authority_readiness_and_security",
+      "result": "pass",
+      "basis": "Protected Git, authenticated human issuance, approval custody, the purpose-only PolicyAdmissionReceipt issuer, runtime validation, narrow actuators, durable facts, external resources, and disposable workers have separated authority. Only closed R0/R1 items may use bounded delegation after every human-needed predicate is false; R2-R4 and exception, UNKNOWN, canary, widening, promotion, cleanup-risk, quiescence, and break-glass decisions remain human controlled. Typed tenant+ScopeRef identity, signed context, purpose-bound approvals, restricted database roles, total sandbox selection, capability intersection, supply-chain pins, and non-waivable break-glass boundaries fail closed."
+    },
+    {
+      "area": "roadmap_persistence_review_and_delivery",
+      "result": "pass",
+      "basis": "PLAN §20 is the sole increment-numbering authority. Release 0 is one-owner/one-repository, read-only, credential-free, restartable, repair-receipted, and exportable. Any external writer waits for the Increment 3 PostgreSQL restricted-role, CAS/outbox, database-time lease, restore/replay, and real two-session race gate. A second repository also waits for FORCE ROW LEVEL SECURITY or stronger isolation, substitution tests, and Increment 8. Reviews bind exact heads and expire on change; auto-merge remains off through Release 0 and the draft-PR pilot, then is limited to one earned closed R1 profile."
+    },
+    {
+      "area": "dogfood_gtm_and_cross_scope",
+      "result": "pass",
+      "basis": "Consumer releases inventory, pin, and rehash every managed input/output and emit verification or rollback receipts through self-test, isolated dogfood, and opt-in rings. Cross-boundary transfer requires a dual-owner, purpose/field-limited, expiring, revocable envelope and receipt. Engineering remains first. GTM begins only after engineering admission as proposal/read-only research with a named owner; publication, spend, and contact remain human-gated."
+    },
+    {
+      "area": "round_7_formal_repairs",
+      "result": "pass",
+      "basis": "All 14 raw high IDs in the five round-7 reviews are retained and map to 13 distinct defects. Current PLAN/manifest text reproduces the five-state RemediationObligation lifecycle and generation/replay rules; immutable terminal parent/item behavior and durable catalog records; FAILURE_PENDING_CLEANUP and RETRY_DISPOSITION with terminal FAILED immutability; synchronized improvement cleanup; generation fencing; direct/reconstructed widening exclusivity; exhaustive settled UNKNOWN outcome rows; HEALTHY/IH03 guards; and rollback/cancellation remediation settlement. Prior A11, DEEP-RESEARCH publication, and Effect-origin partitions remain preserved."
+    },
+    {
+      "area": "normative_manifest_table_contracts",
+      "result": "pass",
+      "basis": "The current manifest contains 679 unique row IDs with zero duplicates and 90 listed canonical CW edges. FactoryInstance has 29 rows, NodeRun 32, Attempt 24, improvement release-attempt 17, and RemediationObligation 14. The exact 28-heading set includes §§13.1, 15.3.1, and 15.8. These are deterministic plan-table results, not a full reachable-product/model proof."
+    },
+    {
+      "area": "schema_3_evidence_package",
+      "result": "pass",
+      "basis": "Independent SHA-256 recomputation gives PLAN.md 25f6960b677d7d4a62c7a55c6bcbbe6ebe744e176c41855cbf08ffa5ed2f6acc and docs/state-transition-manifests.md b1cd4933042162367d7e6a3d8e42f07f85ad3308ffd5d38b5882500a3f542413, exactly matching material-claims.json generated_against. The exact derived numbered manifest-heading set has 28 entries and equals the reviewed set. Schema 3.0.0 has 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes; all 36 are unreviewed_candidate. The corpus is exactly 37 JSON result files (14 foundational plus 23 repository-agent-operating-system), all parse, and all research-manifest/schema-3 inventory byte hashes match. This boundary is structural only. report.md and evidence-matrix.md are superseded/non-authoritative, and synthesis-coverage.md is traceability-only."
+    },
+    {
+      "area": "status_and_readability",
+      "result": "partial",
+      "basis": "PLAN and README correctly distinguish completed checkout-local round-7 correction/regeneration from pending implementation, full model checking, fresh immutable retrieval, semantic review, and this independent closure. requirements-traceability.md still contains present-tense claims that round-7 regeneration is pending/stale and that the current graph covers 27 headings, while later rows in the same file say regeneration is complete against 28 headings. This is the direct contradiction in R8-REQ-001."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R8-REQ-001",
+      "severity": "high",
+      "title": "The current traceability document still says round-7 regeneration is pending and stale while also saying it is complete",
+      "requirement": "The plan-only closure package must state checkout-level evidence and review readiness consistently, so a reader can distinguish completed schema-3 regeneration from the still-pending fresh immutable retrieval, semantic review, implementation, model, and independent-closure gates.",
+      "evidence": [
+        "review/requirements-traceability.md §6 says: 'The current round-7 formal edit makes regeneration pending again.'",
+        "review/requirements-traceability.md §7 says: 'The current round-7 formal edit now makes its byte digests and heading set stale pending later regeneration.'",
+        "review/requirements-traceability.md §8 says the schema-3 graph 'now matches the current PLAN/manifest digests and all 27 headings,' although the current manifest and graph contain 28 numbered headings.",
+        "The same file §9 says round-7 regeneration now matches current PLAN/manifest bytes and 28 headings, and §10 repeats that it matches all 28 dynamically derived headings. README.md Status and review/round-7-resolution.md likewise state that regeneration is complete.",
+        "Independent recomputation confirms the current digests are PLAN 25f6960b677d7d4a62c7a55c6bcbbe6ebe744e176c41855cbf08ffa5ed2f6acc and manifest b1cd4933042162367d7e6a3d8e42f07f85ad3308ffd5d38b5882500a3f542413, both equal material-claims.json generated_against, and the derived/reviewed heading sets are exactly equal at 28."
+      ],
+      "impact": "The named current requirements/status artifact gives mutually exclusive readiness states and the wrong current heading count. A reader cannot reliably tell whether checkout-level regeneration is complete or still blocks review, and may confuse that completed local step with the genuinely pending future immutable evidence and semantic gates. It also means the round-7 resolution claim that this status contradiction was corrected is not true of the current bytes.",
+      "recommendation": "Rewrite traceability §§6-8 as explicitly historical statements. Remove the present-tense round-7 pending/stale clauses, and replace the 27-heading current claim with wording that the earlier round-6 graph covered its then-current 27 headings while the round-7 schema-3 graph matches the current digests and dynamically derived 28-heading set. Preserve fresh immutable retrieval, human semantic review, implementation/model gates, and independent closure as distinct future work.",
+      "verification": "README.md, PLAN §§4 and 24, requirements-traceability.md §§6-10, round-7-resolution.md, and material-claims.json must all distinguish completed current-byte candidate-only regeneration from pending future evidence/implementation gates, with no present-tense stale/pending contradiction and no fixed or incorrect current heading count.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "requirements_partial": 0,
+    "round_7_review_files_reviewed": 5,
+    "round_7_raw_high_findings_reviewed": 14,
+    "round_7_distinct_defects_reviewed": 13,
+    "round_7_distinct_defects_closed": 12,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "No implementation, full reachable-product/model proof, operational safety proof, external source truth/currentness, or human semantic entailment review was required or inferred.",
+    "Fresh immutable retrieval in one ResearchRun, same-run human semantic review, reviewed-edge regeneration, Increment 0/1 gates, and later persistence/admission gates remain future work rather than findings.",
+    "The preserved round-7 review findings describe the pre-correction bytes; they were used as correction contracts, not treated as unresolved merely because the review files remain in the repository."
+  ],
+  "closure_criteria_pass": false
+}

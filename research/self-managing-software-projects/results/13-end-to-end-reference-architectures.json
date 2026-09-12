@@ -1,0 +1,481 @@
+{
+  "scope": "End-to-end reference architecture means a durable, auditable loop that connects demand/incident intake; specification and planning; isolated implementation; deterministic test/security/review; governed merge and artifact creation; progressive deployment; telemetry and SLO evaluation; rollback or repair proposal; and learning through curated eval/policy/spec updates. It excludes a mere multi-agent role diagram or an issue-to-PR tool. Evidence covers GitLab, GitHub Copilot, OpenHands, Sentry Seer, Microsoft’s starter blueprint, GitOps/Argo/OpenTelemetry/SLSA/NIST foundations, and independent benchmark/productivity evidence. [S1-S21]",
+  "current_state": [
+    "Verified: no reviewed source implements and validates all seven stages as one autonomous product. The closest single SDLC surface is GitLab Duo Agent Platform: planner/developer/review/CI-repair/security flows are GA in 18.8, but production deployment, telemetry-driven repair, and governed learning remain separate integrations. [S2-S6]",
+    "Verified: Microsoft’s reference repository makes requirements-to-validated-code explicit with structured artifacts and a resolution gate, but its documented pipeline ends at code validation. [S1] GitHub Copilot cloud agent and OpenHands cover asynchronous issue/event-to-PR work in isolated or cloud execution, not self-authorized release and operation. [S7-S8]",
+    "Vendor-claimed but mechanically documented: Sentry Seer closes part of observe-to-repair by using telemetry for root-cause analysis and PR creation or handoff; Seer Agent remains open beta and has an acknowledged fine-grained-access gap. [S9]",
+    "Production-ready building blocks exist for the deterministic control plane: GitOps reconciliation, progressive delivery analysis/abort, vendor-neutral telemetry, rulesets, provenance and SSDF controls. [S10-S15,S21] The end-to-end composition and its semantics are custom engineering.",
+    "Inference: safe autonomy is feasible today for narrow, reversible, well-tested change classes. Unattended product prioritization, ambiguous feature work, production diagnosis, and automatic policy self-modification remain experimental because benchmark validity and field productivity are unsettled. [S16-S20]"
+  ],
+  "representative_systems": [
+    {
+      "system": "GitLab Duo Agent Platform 18.8-19.x",
+      "coverage": "Plan/build/review/CI repair/security within one DevSecOps control surface; custom flows and session audit. Closest integrated blueprint, but docs do not connect production telemetry to deployment or learning automatically.",
+      "status": "Core platform and named flows GA; some REST triggers/features experimental; vendor product evidence. [S2-S6]"
+    },
+    {
+      "system": "Microsoft agentic-sdlc-starter",
+      "coverage": "Assessor → resolver → specifier → generator → validator with file contracts and guardrails.",
+      "status": "Reference code, created 2026; early and not a production operating system. [S1]"
+    },
+    {
+      "system": "GitHub Copilot cloud agent / OpenHands",
+      "coverage": "Issue, schedule or event → ephemeral worktree/environment → tests → branch/PR → human review.",
+      "status": "Useful implementation workers, not end-to-end controllers. [S7-S8]"
+    },
+    {
+      "system": "Sentry Seer",
+      "coverage": "Errors/traces/logs/profiles/code → RCA/plan → PR or external-agent handoff; pre-merge AI review.",
+      "status": "Narrow observe/repair bridge; some functions beta and claims vendor-supplied. [S9]"
+    },
+    {
+      "system": "OpenGitOps + Argo Rollouts + OpenTelemetry",
+      "coverage": "Versioned desired state; continuous reconciliation; canary/blue-green analysis; traces/metrics/logs.",
+      "status": "Mature operational substrate; deliberately does not decide semantic repairs. [S10-S12,S15]"
+    },
+    {
+      "system": "Rulesets + SLSA 1.2 + NIST SSDF 1.1",
+      "coverage": "Policy enforcement, required evidence, artifact provenance and secure-development practice.",
+      "status": "Mature governance substrate. [S13-S14,S21]"
+    }
+  ],
+  "primary_evidence": [
+    "GitLab documents actual trigger, runner, context and output mechanics: issues/mentions become draft MRs; code review is a CI job; failing pipelines yield suggestions/new MRs or escalation; users retain accept/modify/reject control and API calls are audited. [S3-S6]",
+    "Microsoft publishes the only source reviewed that calls itself an Agentic SDLC reference architecture, with explicit structured handoffs and ambiguity resolution. Its README’s terminal output is validator review/code, establishing the missing Ops half rather than implying it. [S1]",
+    "GitHub and OpenHands document isolated asynchronous coding and PR production. Sentry documents telemetry-to-RCA-to-PR. These form a composable seam at issue/PR/repository APIs. [S7-S9]",
+    "OpenGitOps, Argo, OpenTelemetry, SLSA, NIST SSDF, Google SRE canary practice and repository rulesets provide non-LLM invariants for deployment and assurance. [S10-S15,S21]"
+  ],
+  "independent_evidence": [
+    "SWE-bench established that real repository repair requires cross-file context and execution; its original best result was only 1.96%, but this is a 2023-era historical baseline, not a present product score. [S16]",
+    "SWE-rebench shows why impressive static leaderboards are not sufficient architecture evidence: fresh tasks suggest contamination can inflate some SWE-bench Verified results, and neither benchmark measures safe production deployment or incident learning. [S17]",
+    "METR’s early-2025 RCT measured a 19% slowdown for 16 experienced maintainers on their own repositories, then labeled the result outdated. Its 2026 follow-up saw raw speedup signals but declared them unreliable because selection and measurement changed. This conflict argues for local controlled trials, not universal ROI assumptions. [S18-S19]",
+    "DORA 2025’s system-level conclusion is that AI amplifies the organization already present. Though vendor-sponsored, it independently supports investment in testability, platform and feedback systems before greater autonomy. [S20]"
+  ],
+  "metrics": [
+    {
+      "metric": "Coverage/adoption evidence",
+      "value": "GitLab’s named plan/build/review/CI repair flows reached GA in 18.8. Microsoft starter API metadata showed only 14 stars/5 forks on 2026-09-13.",
+      "caveat": "GA and repository popularity measure availability/interest, not successful unattended lifecycle completion. [S1-S6]"
+    },
+    {
+      "metric": "Historic repository repair",
+      "value": "SWE-bench: 2,294 issues, 12 Python repositories; Claude 2 solved 1.96% in original evaluation.",
+      "caveat": "Obsolete as a current capability estimate and only patch-level. [S16]"
+    },
+    {
+      "metric": "Benchmark freshness",
+      "value": "SWE-rebench: >21,000 interactive Python tasks and a continuously fresh evaluation method.",
+      "caveat": "Authors find possible contamination inflation for some models; no deploy/operate outcome. [S17]"
+    },
+    {
+      "metric": "Field productivity",
+      "value": "Early-2025 METR: 19% slower. 2026 follow-up raw estimates: 18% speedup returning developers (CI -38% to +9%) and 4% new recruits (CI -15% to +9%).",
+      "caveat": "Later intervals cross zero; authors judge selection and time measurement unreliable. [S18-S19]"
+    },
+    {
+      "metric": "Missing decisive metric",
+      "value": "No source reports a denominator-based rate for autonomous plan→production→observe→repair→learn completions, escaped defects, rollback rate, or cost per accepted durable outcome.",
+      "caveat": "Unknown, not zero; product documentation is not an evaluation."
+    }
+  ],
+  "reference_workflow": [
+    "1. Intake/trigger: accept a typed event from issue tracker, dependency/security alert, CI failure, SLO burn, or user feedback. Persist immutable event ID, repository/release/trace links, business owner, severity, budget and allowed action class. Never pass raw untrusted telemetry or issue text directly to privileged tools.",
+    "2. Triage and plan: a planner retrieves only allowlisted repository, runbook and telemetry context; generates hypothesis, scope, acceptance tests, risk tier, rollout/rollback plan and missing questions. For feature work, use assessor/resolver/specifier artifacts like S1. Unknown or high-risk items transition to NEEDS_CLARIFICATION, not BUILDING. [S1,S9]",
+    "3. Policy admission: deterministic policy maps risk tier to permissions. Low-risk docs/tests/dependency patches may proceed. Auth/security/data/schema/billing/infrastructure changes require named owner approval. Create a short-lived job identity and isolated worktree/container with outbound network deny-by-default. [S8,S13-S14]",
+    "4. Build: one implementation agent edits a branch; another process records tool calls, prompt/model/version, input hashes, cost and artifacts. Run formatter, compiler, focused tests, full regression, SAST/secret/dependency/license scans, and generate provenance. A retry must start from a known commit and consume a bounded retry/cost budget. [S3,S7-S8,S13]",
+    "5. Independent review: submit a draft PR. Deterministic rulesets require checks; CODEOWNERS/human reviews high-risk code. An AI reviewer may add findings but must not be the sole approver of its own or sibling-agent output. CI-repair agents return suggestions/new PRs and escalate security-sensitive or low-context failures. [S4-S5,S21]",
+    "6. Merge/build/release: protected merge queue produces a signed, immutable artifact with SBOM/provenance. GitOps changes desired state by reviewed commit; deployment credentials are held by reconciler, never coding agent. [S10,S13]",
+    "7. Progressive deploy: dev/staging first, then a time-boxed canary. Argo analysis queries SLO/error/latency/business guardrails; PASS advances, FAIL aborts/rolls back, INCONCLUSIVE pauses for a human. [S11,S15]",
+    "8. Observe: OpenTelemetry correlates release SHA, PR, artifact digest, feature flag and agent-run ID across traces/metrics/logs. Alert deduplication creates an incident evidence bundle. Sentry-like RCA can propose a diagnosis and patch PR, but cannot suppress alerts or deploy independently. [S9,S12]",
+    "9. Repair: first choose reversible operational actions from an allowlist (rollback, disable flag, scale within cap). Code repair enters the same branch/PR/test/canary loop; never patch production directly. Repeated failure, high blast radius or budget exhaustion transitions to HUMAN_INCIDENT. [S9-S11]",
+    "10. Learn: after verified observation window, label outcome accepted/rejected/rolled-back/escaped-defect; attach reviewer edits, test gaps, time/cost and SLO delta. Add sanitized examples to a versioned local eval set. Humans review changes to prompts, policies, runbooks and acceptance tests; canary workflow-policy releases separately. DORA’s amplifier finding makes this socio-technical step essential. [S17-S20]"
+  ],
+  "integration_points": [
+    "Event bus/queue: GitHub/GitLab issue, PR/MR, workflow/job, security advisory and deployment webhooks; Sentry/alertmanager events. Use idempotency keys and an outbox so redelivery does not create duplicate branches or deploys. [S3-S9]",
+    "State store: relational workflow state machine plus append-only audit/artifact store. Store event→plan→commit→checks→artifact digest→deployment→telemetry→outcome links; do not treat chat history as durable state.",
+    "Agent execution: GitHub Actions ephemeral environment, GitLab runners, or self-hosted sandbox. Broker issues task-scoped tokens; repository app is restricted to selected repos; secrets are injected only to the exact CI/deploy step. [S3-S8]",
+    "Context/tool plane: allowlisted read APIs for repositories, issues, jobs, telemetry and docs; MCP only through an audited gateway with per-tool schemas, output size limits and prompt-injection filtering. GitLab lists its ai_workflows API surface and audit events. [S6]",
+    "Assurance plane: branch/ruleset APIs, CI checks, scanners, provenance/SBOM/signing and policy engine. [S13-S14,S21]",
+    "Delivery plane: artifact registry plus GitOps config repository; reconciler pulls desired state; Argo Rollouts queries metrics providers and emits promotion/abort. [S10-S11]",
+    "Observation/feedback: OTLP into Collector/backends; release markers and trace IDs feed Sentry-like RCA; curated outcomes feed offline evals, never live weight/policy updates. [S9,S12,S17]"
+  ],
+  "human_gates": [
+    "Clarify business intent, priority, nonfunctional requirements and ambiguous acceptance criteria before specification; the Microsoft resolver gate can be automated only when source documents contain explicit answers. [S1]",
+    "Approve elevated tool scope or any external network/secret access. Separate requester, agent service identity and approver.",
+    "Require human/code-owner approval for public APIs, auth/crypto, user data, schema/destructive migration, billing, infrastructure/permissions, incident severity 1-2, policy/prompt changes and agent-generated tests that define acceptance. [S14,S21]",
+    "Require a human at INCONCLUSIVE canary, conflicting telemetry, unknown root cause, repeated CI/repair failure, material cost overrun, or rollback failure. Argo explicitly supports inconclusive analysis; GitLab CI repair explicitly escalates low-context/security-sensitive cases. [S5,S11]",
+    "Permit auto-merge/deploy only for pre-approved low-risk classes with all independent checks, small blast radius, reversible state and proven local historical precision. Periodically sample even successful automated changes."
+  ],
+  "failure_modes": [
+    "Specification failure: plausible code satisfies an underspecified prompt but not user need; evaluator/tests generated from the same flawed assumption create correlated false confidence. [S1]",
+    "Context/tool failure: stale index, missing cross-repo contract, oversized logs, transient runner, hallucinated API, model drift, nondeterministic retry, or broad app permissions. OpenHands’ documented repository/Actions/workflow access illustrates the blast radius. [S8]",
+    "Security: prompt injection in issue/log/dependency text, secret exfiltration, poisoned tool/MCP response, malicious dependency, artifact substitution, privilege escalation, and an agent approving its own work. [S13-S14]",
+    "Quality/evaluation: tests pass but are weak; benchmark contamination inflates expectations; issue-to-patch success does not predict production correctness. [S16-S17]",
+    "Delivery: nonreproducible artifact, configuration drift, schema incompatibility, canary metric blindness, delayed failure, noisy metric, false rollback or rollback that cannot undo data mutation. [S10-S15]",
+    "Repair oscillation: monitor triggers agent, patch creates new symptom, repeated agents issue conflicting changes, or alert suppression hides harm. Use one incident lease and cooldown.",
+    "Learning corruption: successful short observation window labels a latent regression positive; raw customer data enters eval/prompts; an agent self-modifies policy to optimize proxy metrics.",
+    "Organization/economics: review queues become bottleneck, alert/PR spam destroys trust, token/runner cost exceeds saved labor, and maintainers spend longer correcting agents. Independent productivity estimates conflict and later measurement is biased. [S18-S20]"
+  ],
+  "controls_and_mitigations": [
+    "Capability security: deny-by-default network, sandbox, read-only context phase, separate write token, task/repo/path/tool allowlists, short TTL, no production credential in coding runtime, concurrency/rate/cost ceilings, and immediate kill switch. [S8,S13-S14]",
+    "Change security: protected branches/rulesets, mandatory status checks and code owners; signed commits/artifacts, SBOM, SLSA provenance verification; two-person control for policy, identity and deployment changes. [S13-S14,S21]",
+    "Evidence diversity: keep planner, implementer, test oracle and reviewer independent where possible; require deterministic compilation/tests/scans; mutation/property/contract tests for critical paths; never accept model confidence as a check.",
+    "Release safety: GitOps pull reconciliation, staged environments, feature flags, canary comparison, minimum sample/window, abort on guardrail violation, pause on inconclusive, tested rollback and backup/restore. [S10-S11,S15]",
+    "Operational containment: deduplicate by incident/release fingerprint, one active repair lease, capped retries, exponential backoff, repair cooldown, maximum blast radius, rollback-first playbooks, and human escalation.",
+    "Audit/privacy: immutable lineage of prompts/tool calls/model/config/artifacts/approvals; redact telemetry and customer data before LLM context; retention/deletion policy; replay eval before model/prompt upgrades. GitLab API audit and Sentry’s acknowledged org-wide access caveat show both a mechanism and a gap. [S6,S9]",
+    "Learning safety: version eval sets/policies; prevent online self-edit; human-review proposed learning; shadow and canary new workflow versions; track escaped defect, rollback, reviewer-edit, false-alert and cost rates by change class. [S17-S20]"
+  ],
+  "maturity_assessment": "Conditionally useful, not autonomously end-to-end production-ready. Plan/build/PR/test, deterministic CI/CD, GitOps, telemetry and rollback are separately production-grade. Narrow CI and telemetry-to-PR repair is commercially available. A single governed loop across product planning, code, deployment, operations and learning is emerging: GitLab is closest in SDLC breadth but lacks a documented production-telemetry/learning closure; Sentry supplies a narrow Ops bridge; Microsoft supplies an early Dev reference. Independent evidence tests patches or human task time rather than full-loop safety, and contamination/selection disputes remain. Grade: production-ready for deterministic substrate and low-risk supervised proposals; conditionally useful for auto-merge/canary of allowlisted changes; experimental for automatic incident code repair; speculative for self-changing policy or unattended product direction. [S1-S21]",
+  "build_vs_buy": "Buy/integrate the commodity control plane: GitHub or GitLab repository/issue/CI/rulesets; hosted coding agent or OpenHands; Sentry or another telemetry/RCA layer; OpenTelemetry; artifact signing/provenance; GitOps and Argo-style progressive delivery. GitLab reduces seams for plan-to-CI repair; GitHub/OpenHands allow more modular workers; Sentry is the clearest documented observe-to-PR bridge. Build the organization-specific orchestration: typed event/state model, risk classifier, scoped credential broker, context gateway, acceptance-test policy, cross-tool lineage, SLO/canary rules, repair lease/deduplication, outcome labeling, local eval harness and human escalation UI. Do not buy a role-playing multi-agent framework and mistake it for lifecycle assurance. [S1-S15,S21]",
+  "recommended_pattern": "Adopt a hub-and-spoke, proposal-first architecture. The hub is a deterministic workflow engine/policy engine with durable state and append-only evidence. Replaceable agent workers may plan, code, review or diagnose, but they have no standing production authority. Repository PR/MR is the universal change contract; signed artifact digest and GitOps commit are the release contracts; OpenTelemetry release-linked evidence is the operations contract. Start at Level 0 observe-only; Level 1 agent drafts PRs; Level 2 auto-merge only docs/tests/low-risk dependency patches after measured precision; Level 3 auto-canary reversible application changes with SLO abort; keep migrations, identity, money, sensitive data and workflow-policy changes human-gated. Promote each change class only after a local trial reports acceptance, reviewer-edit, escaped-defect, rollback, MTTR, cost and false-action rates. This architecture preserves tool portability, limits correlated agent error and turns learning into reviewed configuration/evals rather than uncontrolled self-modification. [S3-S15,S17-S21]",
+  "open_questions": [
+    "What is the full-loop completion denominator and rate by change class, including rejected plans, abandoned PRs, canary aborts and latent regressions? No reviewed source reports it.",
+    "Can an independent oracle detect semantic/product mistakes when planner, code and tests share model/data lineage?",
+    "How should provenance cover prompts, retrieved context, tool versions and model snapshots without leaking secrets or personal data? SLSA covers source/build artifacts, not the full agent reasoning supply chain. [S13]",
+    "What observation window and counterfactual establish that a repair caused improvement rather than coinciding with traffic change?",
+    "How portable are GitLab custom flows and Sentry handoffs across self-managed installations, multi-repo systems and regulated data boundaries? [S2,S6,S9]",
+    "Which workflow-level benchmark measures deploy safety, incident precision, rollback and learning quality on fresh tasks? SWE-rebench fixes some patch contamination but not this scope. [S17]",
+    "What are reliable current productivity and total-cost effects under concurrent agents? METR says its newer design is biased and time accounting breaks under concurrency. [S19]"
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Agentic SDLC Starter",
+      "publisher_author": "Microsoft (GitHub repository)",
+      "url": "https://github.com/microsoft/agentic-sdlc-starter",
+      "publication_update_date": "created 2026-03-12; repository pushed 2026-04-08; metadata checked 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "primary source repository / reference architecture",
+      "supported_claims": [
+        "Five-stage PRD/TDD/user-story to assessed, resolved, specified, generated, validated code pipeline",
+        "Human or hybrid resolution gate and repository guardrails",
+        "Stops at production-ready code; README does not implement deploy, production observation, repair, or learning",
+        "Very early operational signal: GitHub API showed 14 stars and 5 forks, not evidence of production efficacy"
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "GitLab Duo Agent Platform",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/",
+      "publication_update_date": "living documentation; Agent Platform GA in GitLab 18.8",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Multi-agent SDLC surface includes planner, developer, review, CI repair and security flows",
+        "GA status is product availability, not proof of autonomous end-to-end reliability",
+        "Custom flows can combine agents"
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Developer Flow",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/developer/",
+      "publication_update_date": "GA in GitLab 18.8; mention triggers introduced 18.11",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Issue or mention can trigger research and a draft merge request",
+        "AGENTS.md carries conventions and agent-config.yml defines execution environment",
+        "Runners execute tests; user reviews resulting merge request"
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Code Review Flow",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/code_review/",
+      "publication_update_date": "GA in GitLab 18.8; model updated 2026-08-06",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Agentic review runs as a CI job and uses a runner",
+        "Two stages: pre-scan retrieves related repository context, then review evaluates fixed context",
+        "Can be invoked through UI and, experimentally, REST API"
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Fix CI/CD Pipeline Flow",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/fix_pipeline/",
+      "publication_update_date": "GA in GitLab 18.8; suggestion behavior GA in 19.2",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Examines pipeline logs, MR changes, repository contents, exits and permissions",
+        "Produces reviewable inline suggestions or a new MR rather than directly merging",
+        "Escalates when context is insufficient, security-sensitive, or not actionable"
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Software Development Flow",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/",
+      "publication_update_date": "GA in GitLab 18.8",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Creates a plan, stages changes, and lets the user accept, modify, pause or reject",
+        "OAuth ai_workflows scope reaches project, search, pipeline, jobs, MR, issues, notes and audit-related APIs",
+        "Each API request generates an audit event; local-workstation execution has stated LLM-agent risks"
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation",
+      "supported_claims": [
+        "Can research, plan, change a branch, test in an ephemeral GitHub Actions environment and open a PR",
+        "Can be scheduled or event-triggered and can address security alerts",
+        "Does not itself establish an autonomous production-deploy/observe/learn loop"
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "GitHub Integration",
+      "publisher_author": "OpenHands Docs",
+      "url": "https://docs.openhands.dev/openhands/usage/cloud/github-installation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "primary open-source/product documentation",
+      "supported_claims": [
+        "Issue label or @openhands mention starts work and successful resolution can open a PR",
+        "GitHub app requests contents, issues, PRs, Actions, workflow and webhook access",
+        "Tokens are short-lived with documented eight-hour expiry, but permissions remain broad"
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "Seer",
+      "publisher_author": "Sentry Docs",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/",
+      "publication_update_date": "living documentation; Seer Agent marked open beta",
+      "access_date": "2026-09-13",
+      "source_type": "primary vendor documentation / vendor claims",
+      "supported_claims": [
+        "Telemetry-triggered root-cause analysis can recommend remediation and create a PR",
+        "Uses issues, traces, logs, profiles and linked code, and can hand implementation to external coding agents",
+        "Org-wide query access lacks finer-grained controls for Seer Agent; capability and best-in-class language are vendor claims"
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "GitOps Principles v1.0.0",
+      "publisher_author": "OpenGitOps Working Group, Linux Foundation / CNCF ecosystem",
+      "url": "https://opengitops.dev/",
+      "publication_update_date": "v1.0.0; site current 2026",
+      "access_date": "2026-09-13",
+      "source_type": "open standard / primary community source",
+      "supported_claims": [
+        "Desired state should be declarative, versioned and immutable",
+        "Agents pull desired state and continuously reconcile actual state",
+        "Provides a safe deployment-state foundation, not semantic code repair"
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Analysis and Progressive Delivery",
+      "publisher_author": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "primary open-source documentation",
+      "supported_claims": [
+        "Canary/blue-green analysis supports success, failure and inconclusive outcomes",
+        "Metrics providers and failure limits can pause or abort progressive delivery",
+        "Separates rollout control from code-generation decisions"
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "What is OpenTelemetry?",
+      "publisher_author": "OpenTelemetry project / CNCF",
+      "url": "https://opentelemetry.io/docs/what-is-opentelemetry/",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "primary standard/project documentation",
+      "supported_claims": [
+        "Vendor-neutral telemetry covers traces, metrics and logs through APIs, SDKs and Collector components",
+        "Supplies observation data but does not decide repairs"
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "SLSA specification v1.2",
+      "publisher_author": "SLSA community / OpenSSF, Linux Foundation",
+      "url": "https://slsa.dev/spec/v1.2/",
+      "publication_update_date": "v1.2 approved; current as accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "industry consensus specification",
+      "supported_claims": [
+        "Defines incremental build and source supply-chain assurance levels",
+        "Recommends provenance and verification attestations",
+        "Useful as an artifact admission gate independent of agent confidence"
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "Secure Software Development Framework (SSDF) Version 1.1, NIST SP 800-218",
+      "publisher_author": "Murugiah Souppaya, Karen Scarfone, Donna Dodson; NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_update_date": "2022-02",
+      "access_date": "2026-09-13",
+      "source_type": "government standard / primary guidance",
+      "supported_claims": [
+        "Secure practices must be integrated into SDLC models",
+        "Practices reduce vulnerabilities, limit impact and address root causes",
+        "Supports explicit security gates rather than delegating policy to a model"
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "Canarying Releases",
+      "publisher_author": "Alec Warner, Štěpán Davidovič et al.; Google SRE Workbook",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "publication_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering reference / operational practice",
+      "supported_claims": [
+        "A canary is a partial, time-limited deployment evaluated against a control",
+        "Reproducible builds, automated tests and automated deployments reduce release toil and improve rollback clarity"
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_author": "Carlos E. Jimenez et al.; ICLR 2024",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_update_date": "submitted 2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / independent benchmark",
+      "supported_claims": [
+        "Original benchmark has 2,294 real issues from 12 Python repositories",
+        "Historical Claude 2 result solved 1.96%, showing early repository repair difficulty",
+        "Benchmark covers issue-to-patch, not planning through production operation"
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents",
+      "publisher_author": "Ibragim Badertdinov et al.; NeurIPS 2025",
+      "url": "https://arxiv.org/abs/2505.20411",
+      "publication_update_date": "submitted 2025-05-26; revised 2025-11-04",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / independent benchmark critique",
+      "supported_claims": [
+        "Dataset contains over 21,000 interactive Python SWE tasks",
+        "Fresh evaluation indicates some model results on SWE-bench Verified may be inflated by contamination",
+        "Static patch benchmarks cannot validate deployment, operations or learning loops"
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_author": "Joel Becker, Nate Rush, Beth Barnes, David Rein; METR",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_update_date": "2025-07-10; page later marked results out of date",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled trial",
+      "supported_claims": [
+        "Sixteen experienced open-source developers were 19% slower with early-2025 AI tools in the studied setting",
+        "Authors warn benchmarks trade realism for scale and can over- or underestimate impact",
+        "Authors now explicitly call this snapshot out of date"
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_author": "Joel Becker et al.; METR",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "publication_update_date": "2026-02-24",
+      "access_date": "2026-09-13",
+      "source_type": "independent follow-up study / methodological critique",
+      "supported_claims": [
+        "Late-2025 raw estimates ranged from 18% speedup for returning developers to 4% for new recruits, with confidence intervals crossing zero",
+        "Selection, lower pay and concurrent-agent time accounting make the signal unreliable",
+        "Operational productivity evidence remains conflicting and task-selection dependent"
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "State of AI-assisted Software Development 2025",
+      "publisher_author": "DORA / Google Cloud with research partners",
+      "url": "https://dora.dev/research/2025/dora-report/",
+      "publication_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "industry research report (vendor-sponsored)",
+      "supported_claims": [
+        "AI acts mainly as an amplifier of existing organizational strengths and weaknesses",
+        "Returns depend on the organizational system, not only tool deployment"
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "About rulesets",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "primary platform documentation",
+      "supported_claims": [
+        "Repository rulesets can require status checks, reviews and deployment controls and expose rule insights",
+        "Appropriate enforcement point between an untrusted agent proposal and protected branches/environments"
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate-high for documented mechanics and the conclusion that components exist but no validated unified autonomous loop was found; moderate for comparative maturity; low for market-wide absence and ROI.",
+    "claim_level": {
+      "high": "GitLab/GitHub/OpenHands/Sentry documented triggers, permissions, outputs and release-control standards; benchmark sample/result statements. [S1-S19,S21]",
+      "moderate": "GitLab is the closest reviewed integrated SDLC surface; compositional architecture and maturity categories. Broad search was constrained, and vendor docs can omit failures.",
+      "low": "Production prevalence, unattended success rate and total economics because no audited full-loop case study or denominator-based metric was found; 2026 METR evidence is explicitly unreliable. [S19]"
+    }
+  },
+  "conflicts": [
+    "Availability versus efficacy: GitLab marks platform/flows GA, while GA only indicates supported availability; no independent full-loop reliability result accompanies it. [S2-S6]",
+    "Benchmark optimism versus freshness: current agent marketing/leaderboards imply strong repair capability, but SWE-rebench reports contamination may inflate some SWE-bench Verified performance. Both are patch benchmarks, not deployment evidence. [S16-S17]",
+    "Productivity direction changed: METR measured 19% slowdown in early 2025 and later raw speedup estimates; METR itself labels the first outdated and the second unreliable due to selection, pay and concurrency measurement. Likely explanation is improving tools plus non-comparable samples/tasks. [S18-S19]",
+    "Autonomy versus control: vendors describe agents as autonomous, but actual safe mechanics terminate in staged changes, suggestions or PRs controlled by users/rulesets. This is useful bounded agency, not autonomous lifecycle ownership. [S1-S9,S21]",
+    "Continuous reconciliation versus semantic repair: GitOps automatically corrects runtime state to declared desired state; it cannot infer a correct new desired state or code patch. Treating reconciliation as self-healing software conflates two different capabilities. [S10]"
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    {
+      "claim": "No production deployment has ever connected every stage in one implementation.",
+      "reason": "Absence cannot be proven; reviewed primary sources and independent studies yielded no auditable end-to-end case with denominators. Private internal systems may exist.",
+      "impact": "Do not phrase as universal nonexistence; say no validated reviewed example was found."
+    },
+    {
+      "claim": "Microsoft agentic-sdlc-starter adoption or effectiveness.",
+      "reason": "Repository was created in 2026 and had small public activity indicators; stars/forks are not usage or outcome measures.",
+      "impact": "Treat as design material only. [S1]"
+    },
+    {
+      "claim": "Current coding-agent productivity magnitude.",
+      "reason": "Early METR RCT is outdated; 2026 follow-up has confidence intervals crossing zero and serious selection/concurrency bias.",
+      "impact": "Require local randomized or phased measurement. [S18-S19]"
+    },
+    {
+      "claim": "Sentry Seer RCA/fix precision and safe auto-trigger performance.",
+      "reason": "Mechanics and limitations are documented, but no independent precision, accepted-PR, regression or MTTR denominator was found.",
+      "impact": "Use advisory/PR mode and measure locally. [S9]"
+    },
+    {
+      "claim": "Future version/status drift after the as-of date.",
+      "reason": "Living vendor documentation changes; exact behavior depends on tier, flags, model and hosted/self-managed version.",
+      "impact": "Pin product/model/workflow versions and revalidate before implementation. [S2-S9]"
+    },
+    {
+      "claim": "Research search completeness.",
+      "reason": "Configured Serper web search was unavailable. Research used direct official URLs, repository API/document traversal and known academic sources; Chinese/community discovery was therefore less broad than planned.",
+      "impact": "Moderate confidence in the landscape, lower confidence in universal absence and regional alternatives."
+    }
+  ]
+}

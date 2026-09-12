@@ -1,0 +1,101 @@
+{
+  "reviewer": "round-10 independent improvement/races closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-9 corrections/regeneration",
+    "specialty": "Degradation versus send, rollback versus Effect, live candidate revocation/no-exposure, widening/promotion terminal dispositions, canary pause/abort, and single-owner cleanup.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-9-resolution.md",
+      "review/round-9-closure/evidence-traceability.json",
+      "review/round-9-closure/remediation-cleanup.json",
+      "review/round-9-closure/formal-state.json",
+      "review/round-9-closure/improvement-interleavings.json",
+      "review/round-9-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim. Future implementation, exhaustive/full reachable-product model checking, fresh immutable retrieval, and same-run human semantic review are accepted gates. closure_criteria_pass iff critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "degradation_before_effect_settlement",
+      "result": "pass",
+      "exact_text": [
+        "IH01-W atomically changes `WIDENING_EFFECT->WIDENING_RECONCILING`, records degradation, revokes/fences every send and widening authority, preserves the original Effect coordinate, and starts no rollback.",
+        "IH01-P applies the same effect-first rule to `PROMOTING->PROMOTION_RECONCILING`.",
+        "IH06-WX/WN and IH06-PX/PN alone classify the settled original Effect into protected exposure versus proved non-application; X creates one rollback saga and N does not.",
+        "IRB01 requires the original mutation Effect terminal/reconciled with durable protected exposure classification and rejects `SENDING|UNKNOWN|LIVE` or either reconciliation rollout."
+      ],
+      "basis": "The round-9 effect-first correction prevents rollback dispatch from racing an unsettled original mutation when cancellation is NONE. The cancellation-first exception is reported below."
+    },
+    {
+      "area": "candidate_revocation_and_canary_abort",
+      "result": "pass_with_cancellation_interleaving_failure_reported_below",
+      "exact_text": [
+        "IC32-N handles listed protected no-exposure coordinates by revoking/fencing authority, creating one CleanupManifest, and starting no rollback.",
+        "IC32-CX/PX/WX/MX atomically revoke the candidate, change the exact rollout, and create one rollback saga for protected exposure.",
+        "IC32-UW/UP enter `WIDENING_RECONCILING|PROMOTION_RECONCILING` without rollback; IC32-RWX/RPX/RN alone classify after settlement.",
+        "IR07-X/N, IR09-X/N then IR11-X/N, IR10-X/N, and IR53-X/N partition canary abort by protected exposure; X creates rollback once and N preserves no-exposure without fake rollback."
+      ],
+      "basis": "The corrected rows provide exact ordinary-flow ownership and prevent inferred exposure. They do not remain complete when IX01 wins the cancellation race."
+    },
+    {
+      "area": "terminal_effect_dispositions_and_cleanup",
+      "result": "pass_with_cancellation_interleaving_failure_reported_below",
+      "exact_text": [
+        "Only direct E06 through IR38/IR18 or reconstructed E17 through IR56/IR57 may persist widened bounds or cross `MERGED`.",
+        "Disposition edges `{E20,E21,E24,E25,E28,E29,E37,E39}` have X and N product rows in `WIDENING_EFFECT` and `PROMOTING`; target-effect no-application edges `{E09,E10,E30,E31,E33,E35}` have N rows only.",
+        "For widening-abort with cancellation NONE, IR13C alone schedules cleanup after IR13A/IR13B; non-widening rollback uses IRB08. With cancellation REQUESTED or QUIESCING, IX03 is declared the sole cleanup scheduler.",
+        "ICL01, ICL02, and ICL03 own ordinary final cleanup folds; IX04 separately owns cancellation terminality."
+      ],
+      "basis": "The round-9 reachable-relation and rollback-origin corrections are internally exact in ordinary flow. IX03's cancellation guard is not strong enough to preserve rollback ownership after a cancellation-first race."
+    },
+    {
+      "area": "schema_3_evidence_status",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json declares schema `3.0.0`, `regeneration_checkpoint` `round-9`, candidate-only associations, and zero `supports`/`refutes` edges.",
+        "Its current bound SHA-256 values are `38c42d41bf38edff16c6777c0e93b0c0ee3e4a4c489645a7ae3c81db21116bb8` for PLAN.md and `e61bdd51f16d8e9a49d3b1b6bb7fe060cd84fbd51f477e344cce782de729ee8d` for docs/state-transition-manifests.md; independent byte recomputation matched both.",
+        "The package reports 25/25 PLAN numbered sections and all 28 dynamically derived normative-manifest headings reviewed, while reserving fresh retrieval, semantic review, and reviewed-edge regeneration as future gates."
+      ],
+      "basis": "The package makes no material support/refutation or production-safety overclaim."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R10-RACE-001",
+      "severity": "high",
+      "title": "Cancellation-first interleavings disable the named exposure/rollback owners, while IX03 still accepts rollback IDLE",
+      "requirement": "Whole-work cancellation must invoke genuine rollback wherever exposure may exist, must remain total from every reachable nonterminal tuple, and must preserve one deterministic cleanup owner.",
+      "evidence": [
+        "PLAN.md §8 says a cancellation request is accepted from every reachable nonterminal product tuple, reconciles effects, and invokes rollback where exposure may exist; final CANCELLED waits for genuine rollback or independently authorized remediation settlement.",
+        "Normative §15.5 says IX01 is authorized for every `ReachableNonterminalTupleV1`, but once cancellation is not NONE it rejects candidate, rollout, control, widening, and promotion edges. It permits only child stop, Effect reconciliation, safety-required rollback, quiescence closure, and cleanup.",
+        "Every relevant rollback-entry owner also changes one of those now-forbidden coordinates: IR10-X changes `CANARY_RUNNING->CANARY_ABORTING`; IH06-WX/PX changes a reconciliation rollout; IC32-RWX/RPX changes candidate/rollout; and every exposed IW/IP product row changes `WIDENING_EFFECT|PROMOTING` before creating rollback.",
+        "Concrete reachable race: from CANARY_RUNNING with a current ExposureReceipt and rollback IDLE, IX01 may win before IR10-X. After IX01, the blanket rule rejects IR10-X. Once the child stops and effects settle, IX03 accepts rollback `IDLE|ROLLED_BACK`; it does not require protected no-exposure when rollback is IDLE, so it can schedule cancellation cleanup despite proved exposure.",
+        "The same gap occurs if IX01 wins while IH01-W/P or IC32-UW/UP reconciliation is pending, or while a widening/promotion Effect is live. Effect reconciliation may settle/prove application, but the required IH06-X or exposed IW/IP/IC32-RX rollout row is forbidden. If the Effect edge can settle alone, IX03 can bypass rollback; if terminal settlement requires the synchronized product row, the tuple cannot meet IX03 and deadlocks."
+      ],
+      "impact": "A permitted transaction ordering can either clean up an applied canary/widening/promotion mutation without restoration or remain permanently nonterminal. This contradicts the PLAN's cancellation guarantee and the claimed complete rollback/cleanup ownership partition.",
+      "required_correction": "Define exact synchronized cancellation variants for protected exposure, protected no-exposure, and unsettled original Effects at CANARY_RUNNING, WIDENING_EFFECT, PROMOTING, WIDENING_RECONCILING, and PROMOTION_RECONCILING (including revoked candidates), or explicitly exempt only named safety rows from the blanket cancellation rejection. IX03 must require protected no-exposure when rollback is IDLE and require ROLLED_BACK when exposure/reversible application exists. Add IX01-first and abort/degradation/revocation/effect-response-first race witnesses and prove exact single-owner cleanup for each."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1
+  },
+  "residual_uncertainty": [
+    "Implementation, generated exhaustive reachable-product model checking, and executable race tests remain future gates.",
+    "Fresh immutable evidence retrieval, same-run human semantic review, and deterministic reviewed-edge regeneration remain future gates."
+  ],
+  "closure_criteria_pass": false
+}

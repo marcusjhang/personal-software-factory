@@ -1,0 +1,121 @@
+{
+  "reviewer": "round-9 independent evidence and traceability closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-8 combined correction",
+    "specialty": "current digests, dynamically derived 28-heading coverage, candidate-only edge semantics, banners, and all historical/current traceability and status text",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-8-resolution.md",
+      "review/round-8-closure/cleanup-reclaim.json",
+      "review/round-8-closure/evidence-status.json",
+      "review/round-8-closure/formal-state.json",
+      "review/round-8-closure/improvement-product.json",
+      "review/round-8-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Report only critical/high findings. A finding requires a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, reviewed-edge regeneration, and production validation were not required or inferred. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "current_digest_identity",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json generated_against.plan_sha256: ‘9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5’",
+        "material-claims.json generated_against.normative_manifest_sha256: ‘8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2’",
+        "material-claims.json generated_against.regeneration_checkpoint: ‘round-8’"
+      ],
+      "basis": "Independent SHA-256 recomputation over the current PLAN.md and docs/state-transition-manifests.md bytes produced exactly those two digests."
+    },
+    {
+      "area": "dynamic_complete_manifest_heading_set",
+      "result": "pass",
+      "exact_text": [
+        "README.md: ‘The graph dynamically covers all 28 current numbered headings.’",
+        "review/requirements-traceability.md §11: ‘The schema-3 candidate-only material graph now matches the current PLAN and manifest digests and dynamically covers all 28 current headings.’",
+        "review/round-8-resolution.md: ‘The graph matches the current PLAN and manifest digests and dynamically covers all 28 headings.’",
+        "review/requirements-traceability.md §11: ‘Every future generation must derive the full actual numbered heading set dynamically and require exact equality, never a fixed count.’"
+      ],
+      "basis": "Independent enumeration of every numbered level-2-or-deeper heading in the current normative manifest produced 28 headings. Their ordered strings exactly equal material-claims.json coverage_validation.normative_manifest_headings_reviewed, and the artifact records count 28 and all_actual_normative_manifest_headings_reviewed=true. The count is an observed checkpoint result, not an authoritative constant."
+    },
+    {
+      "area": "candidate_only_edge_semantics",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md §4: ‘every external legacy edge is unreviewed and uses `candidate_support|candidate_refute|context_only`; `supports|refutes` are reserved for future observations from the same immutable run whose edge-level entailment a human reviewer accepts.’",
+        "material-claims.json provenance_policy.editorial_graph_status: ‘Every edge in this artifact points to the checked-in legacy corpus and has semantic_disposition=unreviewed_candidate. candidate_support and candidate_refute express editorial nomination or conflict preservation, not entailment.’"
+      ],
+      "basis": "All 36 material-graph edges have semantic_disposition=unreviewed_candidate. Relation counts are candidate_support=23, candidate_refute=5, context_only=8, supports=0, and refutes=0. No reviewed semantic edge is claimed."
+    },
+    {
+      "area": "reader_visible_evidence_banners_and_future_gates",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md status: ‘revised plan-only implementation contract; no working implementation, semantic evidence validation, or autonomous self-government is claimed.’",
+        "synthesis-coverage.md: ‘CURRENT STATUS — TRACEABILITY ONLY, NOT SEMANTIC SUPPORT’",
+        "report.md and evidence-matrix.md: ‘NON-AUTHORITATIVE STATUS’ and ‘Every categorical claim, confidence label, cutoff/date statement, and source-to-claim association in it is an unreviewed legacy candidate association’",
+        "README.md: ‘Immutable re-fetch, same-run human semantic review, deterministic reviewed-edge regeneration, implementation/model gates, and independent closure re-review remain required.’"
+      ],
+      "basis": "The evidence package consistently separates completed structural/editorial regeneration from unperformed provenance, semantic, implementation, model, safety, and closure gates. No material evidence overclaim was found."
+    },
+    {
+      "area": "round_8_raw_review_accounting",
+      "result": "pass",
+      "exact_text": [
+        "review/round-8-resolution.md: ‘The raw count is 15/15 across 5/5 files: 1 critical and 14 high.’",
+        "review/requirements-traceability.md §11: ‘All 15 raw critical/high findings across all 5/5 review/round-8-closure/*.json files map individually in review/round-8-resolution.md, including every duplicate ID.’"
+      ],
+      "basis": "Independent parsing of all five round-8 review JSON files reproduced 15 findings: 1 critical and 14 high. Each raw ID appears in the resolution map."
+    },
+    {
+      "area": "historical_current_status_consistency",
+      "result": "fail",
+      "exact_text": [
+        "review/requirements-traceability.md §10: ‘The later round-8 formal edit supersedes those normative bytes, so only the current round-8 status below declares regeneration pending.’",
+        "review/requirements-traceability.md §11: ‘The schema-3 candidate-only material graph now matches the current PLAN and manifest digests and dynamically covers all 28 current headings.’",
+        "README.md: ‘Round 8 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests.’"
+      ],
+      "basis": "The §10 pending statement directly contradicts the immediately following authoritative current status and the verified graph identity. See R9-ET-001."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R9-ET-001",
+      "severity": "high",
+      "title": "Traceability still declares current round-8 regeneration pending although the package and next section declare it complete",
+      "requirement": "Historical/current traceability and reader-visible status must be unambiguous and must not retain a stale pending statement after completed current-digest regeneration. Round-8 correction clause R8-C08 specifically requires unambiguous evidence currentness.",
+      "evidence": [
+        "review/requirements-traceability.md §10 says: ‘The later round-8 formal edit supersedes those normative bytes, so only the current round-8 status below declares regeneration pending.’",
+        "The immediately following §11 says: ‘The schema-3 candidate-only material graph now matches the current PLAN and manifest digests and dynamically covers all 28 current headings.’",
+        "README.md says round-8 regeneration is ‘complete for the current PLAN and normative-manifest digests,’ and review/round-8-resolution.md says the graph matches the current digests and all 28 headings.",
+        "Independent recomputation confirms PLAN SHA-256 9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5 and manifest SHA-256 8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2 match material-claims.json; all 28 dynamically enumerated headings match its ordered coverage set."
+      ],
+      "impact": "The authoritative requirements/status register gives mutually exclusive answers about whether the current round-8 editorial regeneration is pending or complete. This is the same class of stale-currentness contradiction R8-C08 was meant to close and can mislead a reader about the package's remaining gates.",
+      "required_plan_repair": "In review/requirements-traceability.md §10, replace ‘so only the current round-8 status below declares regeneration pending’ with historical/current wording that says the round-8 regeneration completed and that §11 is authoritative for the current checkpoint. Preserve the separate pending future gates: immutable re-fetch, human semantic review, reviewed-edge regeneration, implementation/model proof, and independent closure. Because this is traceability-only text, no PLAN/manifest digest or material-graph regeneration is needed. Re-run independent plan-only closure audit."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "No implementation or deployed controller was assessed under the accepted plan-only scope.",
+    "No exhaustive reachable-product/full-model proof was required or inferred from document checks.",
+    "No fresh immutable retrieval, external source-truth proof, same-run human semantic review, or reviewed-edge regeneration was required or claimed.",
+    "review/plan-link-check.json retains the identity of its historical reachability run; it is not treated as proof that its recorded PLAN digest is current or that linked content entails a claim."
+  ],
+  "closure_criteria_pass": false
+}

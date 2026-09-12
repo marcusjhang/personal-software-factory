@@ -1,0 +1,92 @@
+fields:
+  analysis:
+  - name: scope
+    description: Exact lifecycle/factory question and boundaries.
+    detail_level: detailed
+    required: true
+  - name: verified_capabilities
+    description: What official systems demonstrably support.
+    detail_level: detailed
+    required: true
+  - name: evidence_and_limits
+    description: Primary and independent evidence, outcomes, missing denominators
+      and limits.
+    detail_level: detailed
+    required: true
+  model:
+  - name: actors_and_authority
+    description: Actors, identities, authority, trust and separation.
+    detail_level: detailed
+    required: true
+  - name: complete_state_catalog
+    description: Normal, waiting, failure, cancellation, rollback, stale and terminal
+      states.
+    detail_level: detailed
+    required: true
+  - name: transition_contract
+    description: Events, guards, effects, idempotency, invalidation and reconciliation.
+    detail_level: detailed
+    required: true
+  - name: artifact_contracts
+    description: Inputs, outputs, versions, digests, evidence and provenance.
+    detail_level: detailed
+    required: true
+  - name: conversation_and_handoffs
+    description: Back-and-forth, questions, decisions, context compaction, resume
+      and checkpoint behavior.
+    detail_level: detailed
+    required: true
+  - name: orchestration_and_composition
+    description: Fanout/join, dependencies, delegation, subfactories, budgets and
+      cleanup.
+    detail_level: detailed
+    required: true
+  - name: human_need_policy
+    description: Exact deterministic and probabilistic triggers for clarification,
+      approval, escalation and stop.
+    detail_level: detailed
+    required: true
+  implementation:
+  - name: factory_as_code_schema
+    description: Concrete versioned declarative schema and examples.
+    detail_level: detailed
+    required: true
+  - name: end_to_end_workflows
+    description: Detailed ideation/build/maintenance/research or improvement flows.
+    detail_level: detailed
+    required: true
+  - name: self_improvement_boundary
+    description: Automated loop, protected invariants, promotion and rollback.
+    detail_level: detailed
+    required: true
+  - name: validation_strategy
+    description: Schema, transition, property, fault, security, evaluation and acceptance
+      tests.
+    detail_level: detailed
+    required: true
+  - name: implementation_recommendation
+    description: Minimum build and staged path.
+    detail_level: detailed
+    required: true
+  metadata:
+  - name: sources
+    description: Claim-linked direct URLs with full metadata and access date.
+    detail_level: detailed
+    required: true
+  - name: conflicts
+    description: Contradictions and resolution.
+    detail_level: detailed
+    required: true
+  - name: uncertainties
+    description: Remaining unknowns and impact.
+    detail_level: detailed
+    required: true
+  - name: confidence
+    description: Overall and claim-level confidence.
+    detail_level: moderate
+    required: true
+  - name: as_of
+    description: Currency date.
+    detail_level: brief
+    required: true
+uncertain: []

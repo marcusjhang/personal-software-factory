@@ -1,0 +1,51 @@
+{
+  "reviewer": "round-3 roadmap/evidence closure auditor",
+  "scope": "Final plan-only closure audit of PLAN.md, README.md, requirements traceability, all round-2 reviews and their resolution register, all round-1 resolution memos, and the repository-agent-operating-system evidence-repair artifacts. No implementation proof was required. Specialty checks covered PostgreSQL-before-write, RLS-before-repository-2, IncrementAdmissionDecision coverage, Release 0 boundary/recovery, evidence provenance, 37-track coverage, claim types/conflicts, and overclaims.",
+  "strengths": [
+    "The plan now makes PostgreSQL proof mandatory before any external writer token or actuator. It confines SQLite to Release 0 no-write simulation and requires restricted roles, compare-and-append, transactional outbox, restore/replay, crash tests, and a real two-session admission/lease/fence race (PLAN.md:12, 117-119, 470, 489).",
+    "A second repository is explicitly impossible before FORCE ROW LEVEL SECURITY or stronger isolation, hostile-role normalization, and cross-repository substitution/export tests, followed by IAD-08 (PLAN.md:119, 432, 475).",
+    "IncrementAdmissionDecision is a concrete frozen-before-measurement record for Increments 3-10. It includes ownership, change digest, definitions, numerator/denominator, sample or window, integrity, uncertainty/conflict/missingness, pass and stop predicates, expiry, and rollback (PLAN.md:461-479).",
+    "Release 0 is consistently scoped as one-owner, one-repository and no external-write credential. Its recovery envelope covers atomic journal persistence, deterministic replay, simulated-wait resumption, torn-tail repair receipts, interior-corruption fail-closed export, and package reinstall/rollback, while explicitly excluding host loss and in-flight real effects (PLAN.md:10, 117, 469, 489).",
+    "The corpus inventory and track map cover exactly 37 result files with the 14/10/8/5 breakdown. The manifest states structural-only limits, and synthesis-coverage.md contains one entry for each of the 37 tracks.",
+    "The authoritative plan does not claim implementation or semantic evidence validation. It blocks Increment 1 on a fresh immutable run and human semantic review, and it keeps future operational proof gates explicitly unpassed (PLAN.md:3-4, 73-84, 463, 501, 526-537).",
+    "Within this specialty, ARCH-R2-001, ARCH-R2-003, and ARCH-R2-004 are closed at the plan-contract level. The remaining findings concern incomplete closure of EVID-R2-001, EVID-R2-002, and related R2-RJ-003 evidence assertions."
+  ],
+  "findings": [
+    {
+      "id": "ROAD-EVID-R3-001",
+      "severity": "high",
+      "title": "Unsupported pre-cutoff retrieval history remains asserted in the evidence artifacts and source-list introduction",
+      "prior_findings": "Incomplete closure of EVID-R2-001 and R2-RJ-003.",
+      "evidence": [
+        "PLAN.md correctly says the cutoff is an intended scope boundary, legacy collection history is unverified, and immutable re-fetch plus human semantic review is a blocking future gate (PLAN.md:3-4, 73, 82, 530).",
+        "research/repository-agent-operating-system/evidence-cutoff.md:3 still states as fact that research was executed at approximately 2026-09-12 15:00-17:30 UTC.",
+        "research/repository-agent-operating-system/evidence-index.md:3 still states that retrieval was performed before the UTC cutoff.",
+        "PLAN.md:542 still introduces URLs as direct sources used for material claims, although evidence-repair.md Edit 7 requires provenance-qualified legacy-corpus wording and the same file says provenance/semantic closure remains blocked.",
+        "review/round-2-resolution.md rows 5 and 13 nevertheless mark these provenance findings Addressed without limiting that assertion to PLAN.md alone."
+      ],
+      "impact": "The named deliverable artifacts give two incompatible accounts of collection history. A reader can still treat an unattested process narrative as proven UTC provenance. This directly leaves the user's research-validation and no-overclaim requirement unmet even though the future implementation gate itself is safe.",
+      "required_closure": "Remove the asserted execution/retrieval history or label it explicitly unverified process narrative; apply the provenance-qualified source-list wording; then narrow or update the resolution statuses so they describe the complete artifact set accurately. Do not mark the future immutable re-fetch or semantic gate as passed."
+    },
+    {
+      "id": "ROAD-EVID-R3-002",
+      "severity": "high",
+      "title": "The material claim register is stale against the revised plan and does not provide source-linked conflict closure",
+      "prior_findings": "Incomplete closure of EVID-R2-002 and the claim-graph part of R2-RJ-003.",
+      "evidence": [
+        "material-claims.json says its coverage is a manual review of PLAN.md and says a later PLAN edit requires rerunning it, but MC-001 still says PLAN claims pre-cutoff display stamps and 37 validated results (material-claims.json:51-58). Current PLAN.md:4,73,82 says the opposite.",
+        "MC-002 retains removed queue:max, 100-pending, and FIFO detail (material-claims.json:74), while current PLAN.md:84 makes only the narrower queue-mode statement.",
+        "MC-012 retains the removed categorical 19% slowdown sentence and classifies an external empirical study as local_outcome_hypothesis; current PLAN.md:522 deliberately states only a qualified caution. MC-013 similarly types an evidence-scope conclusion as a local outcome.",
+        "The register contains no canonical_work_id fields and no refutes edges. Material counterevidence is left as unlinked conflict prose even though the prior closure criteria require canonical work identity and typed source-observation support/refute/context edges.",
+        "PLAN.md:537 still lists linking fresh-run artifacts and reviewer decisions to stable material claim IDs as a future action, while review/round-2-resolution.md row 6 already claims the material claim graph addressed."
+      ],
+      "impact": "The claimed current graph does not describe the current authoritative plan, cannot trace material counterevidence to canonical source families, and conflates external empirical evidence with target-system outcomes. This leaves the requested complete, conflict-preserving evidence synthesis unclosed and makes the blanket 25/25 resolution count an overclaim.",
+      "required_closure": "Regenerate the claim register against the exact current PLAN digest. Remove or version superseded claims. Add canonical work/source-observation identity and source-linked refutes edges for material conflicts. Use a claim type that separates external empirical findings/evidence assessments from local target-system outcome hypotheses. Preserve the existing rule that semantic validation remains a future human gate."
+    }
+  ],
+  "residual_uncertainty": [
+    "Finding counts: critical 0, high 2, medium 0, low 0.",
+    "Closure criteria do not pass because two prior high evidence findings are only partially closed across the complete artifact set.",
+    "Plan safety gates pass this specialty review: external writes remain blocked on PostgreSQL proof; repository 2 remains blocked on RLS/isolation proof and IAD-08; Release 0 remains no-write; no implementation proof is claimed.",
+    "The 37-file inventory and 37-track coverage pass structurally. Source provenance, semantic entailment, independence, and local effectiveness remain intentionally unproven pending the plan's future immutable re-fetch and human review gate."
+  ]
+}

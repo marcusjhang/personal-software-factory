@@ -1,0 +1,1281 @@
+{
+  "scope": {
+    "question": "Turn outline → add items/fields → parallel primary-source research → validate → conflict audit → report → user decision → resume/refresh into a reusable factory declared in code.",
+    "in_scope": [
+      "versioned planning",
+      "durable user decisions",
+      "claim-level provenance",
+      "parallel work and deterministic join",
+      "validation/conflict/report",
+      "resume/selective refresh",
+      "governed improvement"
+    ],
+    "out_of_scope": [
+      "autonomous product intent/legal conclusions",
+      "candidate control of protected tests, graders, permissions, policy or promotion",
+      "unrestricted recursive self-modification"
+    ],
+    "unit_of_work": "ResearchProject aggregate pinned to a factory digest with versioned Item, Field, Claim, Observation, Conflict, Decision, Attempt, Receipt and Report artifacts.",
+    "fully_self_improving": "Maximum safe meaning is automatic proposal, offline evaluation, non-authoritative shadow, bounded canary, monitoring and rollback; protected controls and promotion authority remain external."
+  },
+  "verified_capabilities": [
+    {
+      "system": "Installed research skills",
+      "capability": "Separate outline, item addition, field addition, parallel research and reporting. Deep research scans JSON and skips only valid items; requires direct URLs, access dates, conflicts and uncertainty.",
+      "limit": "Bundled validator checks field-name coverage, not truth, entailment, citation accuracy or source independence.",
+      "urls": [
+        "https://github.com/Weizhena/Deep-Research-skills/blob/6ce38f60e3f8b22502c29873f96503a4e0c5addb/skills/research-codex-en/research-deep/SKILL.md",
+        "https://github.com/Weizhena/Deep-Research-skills/blob/6ce38f60e3f8b22502c29873f96503a4e0c5addb/skills/research-codex-en/research/validate_json.py"
+      ]
+    },
+    {
+      "system": "Warp Factories Early Access",
+      "capability": "Git-versioned `v1alpha1` factory definitions include agents, automations, runners, benchmarks, scorers, skills and webhooks. A foreman routes service-resident work items and pauses for key human decisions. Sampled LLM scorers can trigger failure-grouping follow-up PRs. Nothing is adopted automatically.",
+      "limit": "No exhaustive public state/event schema, research evidence model, or independent effectiveness result. Work items/runs/metrics are not stored in definition files.",
+      "urls": [
+        "https://docs.warp.dev/factories/factory-as-code/",
+        "https://docs.warp.dev/factories/how-factories-work/",
+        "https://docs.warp.dev/factories/measure-and-improve/scorers/",
+        "https://docs.warp.dev/factories/measure-and-improve/self-improvement/"
+      ]
+    },
+    {
+      "system": "Temporal and LangGraph",
+      "capability": "Temporal persists/replays histories; Activities are at-least-once. LangGraph checkpoints thread state and interrupts pause for input.",
+      "limit": "Agent/tool side effects still need idempotency, retention, migration and security. Model/web replay is not deterministic.",
+      "urls": [
+        "https://docs.temporal.io/workflow-execution/event",
+        "https://docs.temporal.io/develop/python/best-practices/error-handling",
+        "https://docs.langchain.com/oss/python/langgraph/persistence",
+        "https://docs.langchain.com/oss/python/langgraph/interrupts"
+      ]
+    },
+    {
+      "system": "GitHub and standards",
+      "capability": "Reusable workflows, token permissions, environments and attestations can separate execution/evaluation/promotion. JSON Schema, CloudEvents, W3C PROV and SLSA supply complementary structure/event/provenance primitives.",
+      "limit": "They do not decide research truth or safely compensate arbitrary cancellation.",
+      "urls": [
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations",
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+        "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+        "https://json-schema.org/draft/2020-12",
+        "https://www.w3.org/TR/prov-o/",
+        "https://slsa.dev/spec/v1.2/provenance"
+      ]
+    }
+  ],
+  "evidence_and_limits": {
+    "supported": [
+      "Separate versioned desired definition from durable runtime state.",
+      "Resume from matching validated digests, not file existence.",
+      "Parallelize bounded independent units and join deterministically.",
+      "Link report claims to immutable observations.",
+      "Treat generated grading as a calibrated signal, not authority."
+    ],
+    "independent_challenges": [
+      {
+        "finding": "SWE-Bench+ found leakage and suspicious weak-test passes; scores fell after filtering.",
+        "url": "https://arxiv.org/abs/2410.06992"
+      },
+      {
+        "finding": "AgentDojo found prompt-injection/security-utility tradeoffs in tool agents.",
+        "url": "https://arxiv.org/abs/2406.13352"
+      },
+      {
+        "finding": "GitHub Security Lab shows privileged workflow_run can execute hostile PR artifacts/code.",
+        "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/"
+      }
+    ],
+    "missing": [
+      "Independent Warp factory outcome studies",
+      "universal freshness/authority/confidence thresholds",
+      "semantic guarantees from the current validator",
+      "portable deterministic replay across changing models and web content"
+    ],
+    "status_rule": "VERIFIED, INFERRED, CONFLICTING, UNKNOWN, RETRACTED; vendor metrics remain VENDOR_REPORTED until independent reproduction."
+  },
+  "actors_and_authority": {
+    "roles": [
+      {
+        "role": "requester/domain owner",
+        "authority": "objective, exclusions, acceptance, final disposition"
+      },
+      {
+        "role": "controller",
+        "authority": "state, leases, dispatch, retry, join, budget; not intent or promotion"
+      },
+      {
+        "role": "curator",
+        "authority": "draft items/fields only"
+      },
+      {
+        "role": "research worker",
+        "authority": "read assigned inputs and write isolated candidates"
+      },
+      {
+        "role": "source adapter",
+        "authority": "bounded fetch and observation metadata"
+      },
+      {
+        "role": "validator/conflict auditor",
+        "authority": "independent checks; cannot erase evidence"
+      },
+      {
+        "role": "reporter",
+        "authority": "render validated snapshot only"
+      },
+      {
+        "role": "grader owner",
+        "authority": "protected rubrics/holdouts; candidate denied"
+      },
+      {
+        "role": "policy/security owner",
+        "authority": "permissions, source/retention policy and exceptions"
+      },
+      {
+        "role": "promotion authority",
+        "authority": "promote immutable digest; separate from proposer"
+      },
+      {
+        "role": "operator",
+        "authority": "pause, cancel, reconcile, rollback, audited break-glass"
+      }
+    ],
+    "separation": "Distinct identities/stores for proposer, fetcher, evaluator and promoter; short-lived phase/project/host-scoped capabilities.",
+    "trust": "Primary/versioned observations outrank summaries, but recency/authority never suppress direct contradiction."
+  },
+  "complete_state_catalog": {
+    "project": [
+      "DRAFT",
+      "SCOPE_DECISION_PENDING",
+      "OUTLINE_EDITING",
+      "OUTLINE_VALIDATING",
+      "OUTLINE_READY",
+      "PLAN_APPROVAL_PENDING",
+      "PLANNED",
+      "DISPATCHING",
+      "RESEARCHING",
+      "PARTIAL",
+      "JOIN_WAITING",
+      "CONFLICT_AUDIT",
+      "REPORTING",
+      "REPORT_VALIDATING",
+      "REPORT_READY",
+      "DECISION_PENDING",
+      "COMPLETE",
+      "PAUSED",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "BUDGET_EXHAUSTED",
+      "FAILED_TRANSIENT",
+      "FAILED_PERMANENT",
+      "STALE",
+      "REFRESH_PLANNED",
+      "REFRESHING",
+      "SUPERSEDED",
+      "ARCHIVED"
+    ],
+    "item": [
+      "PROPOSED",
+      "APPROVED",
+      "QUEUED",
+      "LEASED",
+      "RUNNING",
+      "WAITING_RATE_LIMIT",
+      "WAITING_ACCESS",
+      "WAITING_USER",
+      "RETRY_SCHEDULED",
+      "RESULT_WRITTEN",
+      "VALIDATING",
+      "INVALID",
+      "VALID",
+      "CONFLICTING",
+      "STALE",
+      "REFRESH_QUEUED",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "FAILED_TRANSIENT",
+      "FAILED_PERMANENT",
+      "SUPERSEDED"
+    ],
+    "source": [
+      "DISCOVERED",
+      "FETCH_QUEUED",
+      "FETCHING",
+      "OBSERVED",
+      "NOT_MODIFIED",
+      "REDIRECTED",
+      "RATE_LIMITED",
+      "AUTH_REQUIRED",
+      "ROBOTS_OR_LICENSE_BLOCKED",
+      "NOT_FOUND",
+      "UNAVAILABLE",
+      "PARSE_FAILED",
+      "QUARANTINED",
+      "STALE",
+      "RETRACTED"
+    ],
+    "decision": [
+      "QUESTION_DRAFT",
+      "AWAITING_USER",
+      "ANSWERED",
+      "EFFECTIVE",
+      "EXPIRED",
+      "INVALIDATED",
+      "SUPERSEDED",
+      "WITHDRAWN"
+    ],
+    "attempt": [
+      "CREATED",
+      "STARTED",
+      "HEARTBEATING",
+      "CHECKPOINTED",
+      "SUCCEEDED",
+      "TIMED_OUT",
+      "CRASHED",
+      "LOST",
+      "RETRYABLE",
+      "EXHAUSTED",
+      "COMPENSATING",
+      "COMPENSATED"
+    ],
+    "terminal": "COMPLETE binds a validated report digest; cancellation preserves partials/compensation; failed names invariant; supersede/archive retain provenance."
+  },
+  "transition_contract": {
+    "event_envelope": {
+      "specversion": "1.0",
+      "id": "unique ULID/UUID",
+      "source": "factory/project URI",
+      "type": "project.created|outline.changed|decision.recorded|item.leased|observation.recorded|validation.completed|conflict.opened|report.rendered|refresh.due|promotion.decided",
+      "subject": "stable aggregate/artifact ID",
+      "time": "RFC3339 UTC",
+      "dataschema": "immutable URI",
+      "extensions": [
+        "tenant",
+        "project_id",
+        "aggregate_revision",
+        "causation_id",
+        "correlation_id",
+        "actor_id",
+        "factory_digest",
+        "idempotency_key",
+        "traceparent"
+      ]
+    },
+    "guards": [
+      "expected aggregate revision",
+      "actor capability and phase",
+      "budget",
+      "lease fencing token",
+      "input/dependency digests",
+      "required effective decisions",
+      "fresh required evidence",
+      "no blocking conflict or only explicit signed exception"
+    ],
+    "effects": [
+      "append event and outbox atomically",
+      "write content-addressed artifact temp → validate → atomic manifest publish",
+      "record every external effect and reconciliation handle"
+    ],
+    "idempotency": "project+phase+item/source+input digest+factory digest+purpose; duplicate returns prior receipt and never overwrites a different digest.",
+    "retry": "Only typed transient failures; capped exponential backoff+jitter, honor Retry-After. Auth/license/schema/policy failures pause.",
+    "invalidation": "Dependency DAG: objective change invalidates plan/results/audit/report; field change invalidates validation/report but can reuse observations; source content change invalidates affected claims; renderer-only change invalidates report. Create new versions.",
+    "reconciliation": "Compare log, projections, leases, manifests and external runs; mark expired leases LOST, adopt only exact matching artifacts, replay outbox, quarantine orphans, surface ambiguous side effects.",
+    "cancellation": "Fence leases, stop dispatch, request cooperative stop, then terminate; compensate only declared reversible effects and preserve partial evidence."
+  },
+  "artifact_contracts": {
+    "common": {
+      "artifact_id": "stable URI",
+      "artifact_type": "enum",
+      "schema_version": "immutable URI/semver",
+      "project_id": "ID",
+      "version": "monotonic",
+      "status": "draft|candidate|validated|rejected|superseded",
+      "created_at/by": "UTC/principal",
+      "input_refs": "IDs+digests",
+      "factory_digest": "sha256",
+      "content_digest": "sha256 canonical bytes",
+      "provenance_ref": "PROV/attestation",
+      "sensitivity/retention": "policy keys"
+    },
+    "catalog": [
+      {
+        "type": "FactoryDefinition",
+        "content": "roles, phases, transitions, tools, source routes, schemas, budgets, gates, retry/cleanup, evaluators, promotion policy; Git commit and lock digest"
+      },
+      {
+        "type": "ResearchProject",
+        "content": "objective, audience, decisions sought, scope/exclusions, as_of/time range, risk, item/field refs, acceptance"
+      },
+      {
+        "type": "Outline/FieldSet",
+        "content": "ordered stable IDs, descriptions, required flags; renames preserve identity"
+      },
+      {
+        "type": "Question/DecisionRecord",
+        "content": "exact prompt/options/answer/rationale, actor/authority, times, binds-to digests, supersedes, invalidation rule"
+      },
+      {
+        "type": "SourceObservation",
+        "content": "requested/canonical/final URL, publisher/author/title/type, published/updated/accessed time, status/ETag/Last-Modified, license/access, snapshot/body digest, extractor"
+      },
+      {
+        "type": "ClaimEvidence",
+        "content": "claim ID/text/status/scope/version, supporting and contradicting observation anchors/quotes, entailment notes, researcher/confidence"
+      },
+      {
+        "type": "ItemResult",
+        "content": "field values mapped to claim IDs, uncertainty, conflicts and exact inputs/sources/factory"
+      },
+      {
+        "type": "ConflictRecord",
+        "content": "competing claims/evidence, kind, authority/version/date analysis, resolution or impact, resolver/decision"
+      },
+      {
+        "type": "RunManifest/Checkpoint",
+        "content": "revision, phase, attempts/leases, completed/remaining, budgets/cursors, model/tool/source config, artifacts, next safe command"
+      },
+      {
+        "type": "ValidationReceipt",
+        "content": "validator identity/version/digest, input digest, checks/findings/pass/waiver/time"
+      },
+      {
+        "type": "ReportBundle",
+        "content": "Markdown/JSON, claim-citation map, input snapshot, conflicts/uncertainties/decisions and renderer digest"
+      },
+      {
+        "type": "RefreshPlan",
+        "content": "cutoff, freshness policy, affected graph, conditional fetch results, reuse rationale"
+      },
+      {
+        "type": "Evaluation/PromotionRecord",
+        "content": "candidate/baseline digests, opaque protected suite digest, trials/slices/metrics/CIs, shadow/canary, approver/rollback"
+      }
+    ],
+    "storage": "Git for desired definition and small decision/index artifacts; append-only DB/event store for runtime truth; content-addressed object store for snapshots/reports. Secrets/raw restricted content stay out of Git. Attest release bundles and verify identity/digest."
+  },
+  "conversation_and_handoffs": {
+    "durable": "Every clarification, correction, approval, rejection, deferral and cancellation is a versioned DecisionRecord. Transcript is provenance, not authority; execution binds to the effective decision digest.",
+    "protocol": [
+      "Question includes ID, why blocked, exact options/default, affected artifacts, silence risk and deadline.",
+      "Authenticate reply; preserve original text plus normalized answer, actor/time/channel locator.",
+      "Decision becomes EFFECTIVE only when actor is authorized and bound inputs are current.",
+      "Edits supersede, never rewrite; changed digests invalidate approvals/downstream artifacts.",
+      "Handoff includes state, effective decisions, open questions/conflicts, completed/remaining work, budget, artifact map and one next action.",
+      "Compaction cites immutable IDs and never replaces decisions/evidence.",
+      "Resume reports reused, revalidated, invalidated and newly fetched artifacts."
+    ],
+    "silence": "No inferred consent for material scope, cost, restricted sources, legal/privacy, publication or promotion. Policy may apply a logged expiring undoable default only for low-risk reversible choices.",
+    "targets": [
+      "user",
+      "replacement worker",
+      "new model/provider",
+      "reporter",
+      "refresh run",
+      "operator"
+    ]
+  },
+  "orchestration_and_composition": {
+    "phases": [
+      "INTAKE",
+      "OUTLINE",
+      "EXPAND_ITEMS_FIELDS",
+      "PLAN_GATE",
+      "RESEARCH_FANOUT",
+      "ITEM_VALIDATE",
+      "JOIN",
+      "CONFLICT_AUDIT",
+      "REPORT",
+      "ACCEPTANCE",
+      "REFRESH",
+      "IMPROVEMENT"
+    ],
+    "fanout": "Default one item per isolated worker. Optionally fan out sources inside an item only when claim partitions are independent. Controller caps global/project/host concurrency, token/time/cost and egress.",
+    "join": "Snapshot expected approved item IDs and input digests. Join when each is VALID, approved BLOCKED/UNCERTAIN, or terminal failure under acceptance policy. Late/stale-fence writes are quarantined. Deterministic ordering is stable item ID.",
+    "dependency": "Explicit DAG supports subfactories: discovery, GitHub/repository inspection, papers, validation, conflict audit and report. Child receives least context/capabilities and returns artifact refs, not authoritative prose.",
+    "lease": "Attempt ID + fencing token + expiry + heartbeat. Reclaim after expiry; write requires current fence.",
+    "budget": "Per-run/item/source quotas for wall time, requests, tokens, money, bytes and retries. Near-limit stops discovery before validation; exhausted becomes BUDGET_EXHAUSTED and asks for choice.",
+    "cleanup": "Revoke credentials; close browsers/sandboxes; remove worktrees/temp objects; expire raw prompts/snapshots by policy; retain manifest, decisions, receipts, digests and audit tombstones.",
+    "engine_selection": "Start with file/SQLite/PostgreSQL controller and atomic manifests. Use Temporal for long cross-system waits/recovery. Use Argo for Kubernetes batch DAGs. GitHub Actions is protected CI/promotion, not sole long-lived state."
+  },
+  "human_need_policy": {
+    "deterministic_ask": [
+      "objective/audience/decision ambiguity changes items, fields or conclusion",
+      "requested/excluded scope conflicts",
+      "new item/field materially changes cost, policy or acceptance",
+      "source requires credentials/payment/terms, personal data or non-public material",
+      "two authoritative current sources materially conflict",
+      "no primary source for a decision-critical claim",
+      "required result blocked, stale or semantically invalid",
+      "budget/time limit reached or projected overrun exceeds approved bound",
+      "publication/export, high-impact recommendation, exception/waiver",
+      "any evaluator, hidden test, policy, permission, trust root, retention or promotion change"
+    ],
+    "deterministic_approval": [
+      "initial material scope when requested or approval_between_batches",
+      "outline/field digest before expensive execution",
+      "resolution of product/legal/ethical meaning",
+      "report acceptance/publication",
+      "canary exposure and final promotion per risk policy"
+    ],
+    "automatic_continue": [
+      "dedupe exact stable identities",
+      "retry known transient fetch within cap",
+      "resume exact validated digest-compatible result",
+      "conditional GET and unchanged digest reuse",
+      "low-risk reversible formatting/report rebuild"
+    ],
+    "escalate_stop": [
+      "suspected prompt injection/secret/PII/license violation",
+      "attempted protected-control access",
+      "irreversible side effect without approval",
+      "critical source contradiction",
+      "unknown compensation after cancellation"
+    ],
+    "probabilistic": "Scores can prioritize review only after calibration. Ask when calibrated probability of material misinterpretation exceeds policy threshold OR expected loss p(harm)×impact exceeds approved bound. Never use an uncalibrated model confidence to waive a deterministic gate. Underpowered/conflicting scores are inconclusive, not pass.",
+    "timeout": "Reminder then PAUSED. Never convert silence to material consent."
+  },
+  "factory_as_code_schema": {
+    "apiVersion": "research.factory/v1alpha1",
+    "kind": "ResearchFactory",
+    "metadata": {
+      "name": "deep-research",
+      "definitionDigest": "canonical source+lock sha256"
+    },
+    "spec": {
+      "objectiveRef": "project.request.json",
+      "roles": {
+        "controller": {
+          "identity": "orchestrator",
+          "permissions": [
+            "state:*",
+            "dispatch:*"
+          ],
+          "deny": [
+            "protected-eval:read",
+            "promotion:approve"
+          ]
+        },
+        "researcher": {
+          "fanout": "per-item",
+          "permissions": [
+            "source:read",
+            "candidate-result:write"
+          ],
+          "deny": [
+            "decision:write",
+            "policy:write"
+          ]
+        },
+        "validator": {
+          "independent": true
+        },
+        "reporter": {
+          "inputs": "validated-snapshot-only"
+        }
+      },
+      "artifacts": {
+        "schemas": "schemas/*.json",
+        "store": "content-addressed",
+        "provenance": "PROV-O + in-toto",
+        "signing": "external promoter"
+      },
+      "phases": [
+        {
+          "id": "outline",
+          "uses": "skills/research",
+          "gate": "material-scope"
+        },
+        {
+          "id": "expand",
+          "uses": [
+            "research-add-items",
+            "research-add-fields"
+          ]
+        },
+        {
+          "id": "research",
+          "foreach": "approvedItems",
+          "maxParallel": 8,
+          "uses": "research-item",
+          "retry": "transient-web",
+          "budgetRef": "standard"
+        },
+        {
+          "id": "validate",
+          "needs": "research[*]",
+          "uses": "result-v2"
+        },
+        {
+          "id": "audit",
+          "needs": "validate[*]",
+          "uses": "claim-conflict-v1"
+        },
+        {
+          "id": "report",
+          "needs": "audit",
+          "uses": "research-report"
+        },
+        {
+          "id": "accept",
+          "gate": "report-owner"
+        }
+      ],
+      "transitions": "transitions/*.yaml: from,event,guard,to,effect,timeout",
+      "sources": {
+        "preferPrimary": true,
+        "requireDirectUrls": true,
+        "recordAccessDate": true,
+        "snapshot": "where lawful",
+        "freshnessPolicyRef": "freshness-v1"
+      },
+      "budgets": {
+        "maxParallel": 8,
+        "requestsPerHost": 2,
+        "tokensPerItem": 200000,
+        "costUSD": "project decision",
+        "attempts": 3
+      },
+      "gates": {
+        "failClosed": true,
+        "bind": [
+          "artifactDigest",
+          "policyDigest",
+          "actor",
+          "expiresAt"
+        ]
+      },
+      "resume": {
+        "reuseOnlyIf": [
+          "resultValid",
+          "itemDigestEqual",
+          "fieldDigestCompatible",
+          "sourcePolicyEqual",
+          "factoryCompatible",
+          "notStale"
+        ]
+      },
+      "refresh": {
+        "conditionalRequests": true,
+        "claimDAG": true
+      },
+      "improvement": {
+        "proposalOnly": true,
+        "offline": true,
+        "shadow": "no-side-effects",
+        "canary": "bounded-and-approved",
+        "rollback": "known-good",
+        "protectedPaths": [
+          "acceptance schemas",
+          "hidden evals",
+          "policies",
+          "permissions",
+          "trust",
+          "promotion"
+        ]
+      }
+    },
+    "file_layout": [
+      "factory.yaml",
+      "factory.lock.json",
+      "roles/*",
+      "phases/*",
+      "schemas/*",
+      "policies/*",
+      "routes/*",
+      "evaluators/public/*",
+      "outline.yaml",
+      "fields.yaml",
+      "decisions/*.json",
+      "runs/<id>/manifest.json",
+      "results/<item-id>.json",
+      "evidence/observations/*.json",
+      "evidence/claims/*.json",
+      "conflicts/*.json",
+      "reports/<digest>/*",
+      "refresh/*.json"
+    ],
+    "compatibility": "Reject unknown majors; pure tested migrations; pin subfactories/schemas/tools/models/routes by immutable digest. Warp v1alpha1 inspires but is not wire-compatible."
+  },
+  "end_to_end_workflows": [
+    {
+      "stage": 1,
+      "name": "intake/outline",
+      "actions": [
+        "normalize objective/audience/decision/as_of",
+        "light primary discovery for missing scope",
+        "write stable-ID outline/fields",
+        "record assumptions and ask only material questions"
+      ],
+      "exit": "valid draft and effective scope decision"
+    },
+    {
+      "stage": 2,
+      "name": "expand/freeze",
+      "actions": [
+        "dedupe items by identity",
+        "add decision-relevant fields",
+        "diff and estimate routes/budget",
+        "approve exact digest when gated"
+      ],
+      "exit": "PLANNED"
+    },
+    {
+      "stage": 3,
+      "name": "fanout research",
+      "actions": [
+        "immutable per-item context bundle",
+        "fenced lease",
+        "official docs/source/standards/papers first; community issues verified upstream",
+        "SourceObservation then ClaimEvidence",
+        "temp candidate write"
+      ],
+      "exit": "candidate or explicit block/failure"
+    },
+    {
+      "stage": 4,
+      "name": "validate/join",
+      "actions": [
+        "parse/schema/required-field tests",
+        "URL/metadata/anchor/entailment/independence/cutoff checks",
+        "atomic publish",
+        "typed retries",
+        "join exact expected snapshot"
+      ],
+      "exit": "every item valid or explicitly waived/blocked"
+    },
+    {
+      "stage": 5,
+      "name": "conflict audit",
+      "actions": [
+        "normalize/cluster claims",
+        "detect contradiction and shared-source dependence",
+        "analyze version/date/scope/terminology",
+        "preserve unresolved conflict"
+      ],
+      "exit": "audited claim graph"
+    },
+    {
+      "stage": 6,
+      "name": "report/decision",
+      "actions": [
+        "render validated snapshot",
+        "claim-linked URLs",
+        "conflict/uncertainty/method appendices",
+        "semantic/citation review",
+        "record accept/revise/defer/cancel/publish"
+      ],
+      "exit": "COMPLETE or revision"
+    },
+    {
+      "stage": 7,
+      "name": "resume",
+      "actions": [
+        "load log/checkpoint",
+        "reconcile leases/artifacts",
+        "revalidate exact digests",
+        "invalidate descendants",
+        "show reuse/diff",
+        "continue next safe command"
+      ],
+      "exit": "running/paused/complete"
+    },
+    {
+      "stage": 8,
+      "name": "refresh",
+      "actions": [
+        "trigger by risk/volatility/schedule/manual",
+        "conditional GET",
+        "record NOT_MODIFIED or new observation",
+        "diff claim impact",
+        "selective item/audit/report rerun",
+        "ask if conclusion changes"
+      ],
+      "exit": "new report or current receipt"
+    }
+  ],
+  "self_improvement_boundary": {
+    "automatic": [
+      "redacted outcome/validation/conflict/cost/reviewer-correction telemetry",
+      "cluster failures and draft one-hypothesis prompt/route/retry/model changes",
+      "candidate staging regression cases",
+      "offline replay on public plus externally curated private temporal holdout",
+      "read-only shadow",
+      "approved bounded reversible canary",
+      "metric monitor, auto-abort and compatible rollback"
+    ],
+    "protected_outside_candidate": [
+      "required fields/acceptance invariants",
+      "hidden tests/answers and grader rubric/weights/thresholds/dataset inclusion",
+      "source authority/freshness/privacy/license policy",
+      "permissions/network/secrets/identities/trust roots",
+      "audit retention/deletion",
+      "exceptions, canary exposure, promotion signing/authority"
+    ],
+    "promotion": "Independent evaluator verifies candidate digest/provenance/protected suite and reports repeated trials, slices, CIs, cost, shadow and canary. Missing/stale/conflicting/underpowered evidence is INCONCLUSIVE. External authority promotes.",
+    "rollback": "Automatic only to tested compatible digest with reversible effects; otherwise freeze/stop/escalate/preserve evidence.",
+    "not_safely_autonomous": [
+      "new product/research intent",
+      "legal/licensing/privacy/ethical adjudication",
+      "truth when material primary sources conflict",
+      "self-granted capabilities",
+      "protected oracle edits/read",
+      "waiving invariants",
+      "self-signing/promotion",
+      "unbounded recursive change",
+      "high-impact publication without owner"
+    ]
+  },
+  "validation_strategy": {
+    "layers": [
+      {
+        "layer": "schema",
+        "tests": [
+          "meta-schema",
+          "unique IDs/references",
+          "acyclic DAG",
+          "known states/transitions",
+          "immutable pins",
+          "migration goldens"
+        ]
+      },
+      {
+        "layer": "state",
+        "tests": [
+          "every state/event pair",
+          "fail-closed invalid transitions",
+          "duplicates/reordering/crash replay",
+          "lease expiry/stale fence",
+          "pause/resume/cancel every boundary",
+          "invalidation closure",
+          "history compaction equivalence"
+        ]
+      },
+      {
+        "layer": "artifact/provenance",
+        "tests": [
+          "canonical digest",
+          "wrong project/input/factory rejected",
+          "signer/subject/predicate policy",
+          "partial-write recovery",
+          "retention tombstone"
+        ]
+      },
+      {
+        "layer": "research semantics",
+        "tests": [
+          "substantive required fields",
+          "claim-source entailment dual sample",
+          "URL/redirect/date/version/anchor",
+          "primary balance",
+          "source dedupe",
+          "cutoff/retraction",
+          "injected conflicts"
+        ]
+      },
+      {
+        "layer": "security",
+        "tests": [
+          "prompt injection",
+          "SSRF/DNS rebinding/path traversal/archive bomb",
+          "secret/PII exfiltration",
+          "protected store denial",
+          "privileged workflow never executes candidate",
+          "egress/size/rate/budget"
+        ]
+      },
+      {
+        "layer": "evaluation",
+        "tests": [
+          "single-worker baseline vs fanout",
+          "repeated trials",
+          "private temporal holdout",
+          "grader-expert agreement",
+          "contamination",
+          "slices/CIs/reviewer cost",
+          "gaming"
+        ]
+      },
+      {
+        "layer": "fault",
+        "tests": [
+          "crash points",
+          "429/5xx/auth/redirect/change",
+          "lost webhook/duplicate outbox",
+          "orphan cleanup",
+          "restore and rollback drills"
+        ]
+      }
+    ],
+    "acceptance": [
+      "100% structural required-field coverage",
+      "zero critical auth/provenance/secret violations",
+      "decision-critical claims primary-backed or explicit uncertain/conflicting",
+      "report maps citations to claim graph",
+      "unchanged resume reproduces manifest"
+    ],
+    "caveat": "Finite tests cannot prove factual completeness or no rare agent failure; challenge sampling/corrections remain required."
+  },
+  "implementation_recommendation": {
+    "decision": "Build a small deterministic controller around existing skills; chats and generic agents are not the durable control plane or grader.",
+    "mvp": [
+      "Schemas for events/decisions/sources/claims/results/manifests.",
+      "Stable IDs, digests, temp→validate→rename and ledger.",
+      "Semantic/URL lint beside current coverage validator.",
+      "Fenced one-item-worker fanout, digest resume, deterministic join.",
+      "Evidence index/conflict audit before report; protect decisions/evaluators."
+    ],
+    "next": [
+      "PostgreSQL event/outbox/leases and content-addressed snapshots.",
+      "Claim graph/source dedupe/authenticated decision inbox.",
+      "Conditional refresh and selective invalidation.",
+      "Redacted telemetry, budgets, recovery drills.",
+      "Independent offline/shadow evaluator then approved canary/rollback."
+    ],
+    "engine_choice": "Temporal only when long waits/recovery warrant it; Argo for Kubernetes batch; GitHub reusable workflow for protected verification/promotion.",
+    "metrics": [
+      "expert citation precision/recall",
+      "conflict recall/false alarms",
+      "staleness before publication",
+      "resume correctness/lost work",
+      "reviewer corrections/time-to-decision",
+      "cost per accepted decision",
+      "unsafe access and rollback latency"
+    ],
+    "buy_limit": "Warp is a useful reference/runner, but Early Access v1alpha1, service state, LLM scorers and review-only improvement do not replace this evidence/state/governance model."
+  },
+  "sources": [
+    {
+      "title": "Factory definition syntax",
+      "publisher_or_author": "Warp",
+      "url": "https://docs.warp.dev/factories/factory-as-code/",
+      "publication_or_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "v1alpha1 versioned files, resource layout, Git source of truth",
+        "runtime work items/runs/metrics are not definition files"
+      ],
+      "limits": "Early Access; vendor documentation, not independent outcome evidence"
+    },
+    {
+      "title": "How Warp Factories work",
+      "publisher_or_author": "Warp",
+      "url": "https://docs.warp.dev/factories/how-factories-work/",
+      "publication_or_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "foreman, persistent work item, stage routing, spec/question/merge human points",
+        "self-improvement proposes changes for review; nothing adopted automatically"
+      ],
+      "limits": "Policy detail is prompt-based and no exhaustive public transition schema is supplied"
+    },
+    {
+      "title": "Configuring Scorers",
+      "publisher_or_author": "Warp",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/scorers/",
+      "publication_or_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "sampled LLM classification, thresholds, criteria and replacement on rescore"
+      ],
+      "limits": "LLM classifications are not independent truth"
+    },
+    {
+      "title": "Configuring and reviewing Self-improvement",
+      "publisher_or_author": "Warp",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/self-improvement/",
+      "publication_or_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "25 unreviewed failures or oldest seven days triggers grouped proposal; ad hoc available",
+        "PR links regressions and requires review"
+      ],
+      "limits": "No published causal outcome or autonomous promotion evidence"
+    },
+    {
+      "title": "Deep-Research-skills research-deep skill",
+      "publisher_or_author": "Weizhena / Deep-Research-skills",
+      "url": "https://github.com/Weizhena/Deep-Research-skills/blob/6ce38f60e3f8b22502c29873f96503a4e0c5addb/skills/research-codex-en/research-deep/SKILL.md",
+      "publication_or_update_date": "repository snapshot 6ce38f6; pushed 2026-08-23",
+      "access_date": "2026-09-13",
+      "source_type": "versioned repository source",
+      "supported_claims": [
+        "outline/items/fields parallel research pattern and per-item output"
+      ],
+      "limits": "Prime installed adaptation differs in orchestration detail"
+    },
+    {
+      "title": "Deep-Research-skills JSON validator",
+      "publisher_or_author": "Weizhena / Deep-Research-skills",
+      "url": "https://github.com/Weizhena/Deep-Research-skills/blob/6ce38f60e3f8b22502c29873f96503a4e0c5addb/skills/research-codex-en/research/validate_json.py",
+      "publication_or_update_date": "repository snapshot 6ce38f6",
+      "access_date": "2026-09-13",
+      "source_type": "versioned source code",
+      "supported_claims": [
+        "field coverage validation mechanics"
+      ],
+      "limits": "Coverage cannot establish semantic truth/provenance"
+    },
+    {
+      "title": "Temporal Workflow Execution overview",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-execution",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "durable state, event-history replay, Continue-As-New"
+      ],
+      "limits": "external effects are not exactly once"
+    },
+    {
+      "title": "Temporal Workflow Definition",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflow-definition",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "deterministic replay and workflow versioning; external calls as Activities"
+      ],
+      "limits": "LLM/web calls are nondeterministic Activities"
+    },
+    {
+      "title": "Temporal Python error handling",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/develop/python/best-practices/error-handling",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "at-least-once Activities require idempotency"
+      ],
+      "limits": "retry is not quality evidence"
+    },
+    {
+      "title": "LangGraph Persistence",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "thread checkpoints, continuity, HITL and fault tolerance"
+      ],
+      "limits": "persistent saver/retention required; not signed provenance"
+    },
+    {
+      "title": "LangGraph Interrupts",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "persistent pause/resume with same thread ID"
+      ],
+      "limits": "node restarts from beginning; prior effects must be idempotent"
+    },
+    {
+      "title": "Argo Workflow concepts",
+      "publisher_or_author": "Argo Project / CNCF",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/workflow-concepts/",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "steps/DAG parallel dependencies and suspend templates"
+      ],
+      "limits": "live resource/archive/artifact setup is not a complete immutable ledger"
+    },
+    {
+      "title": "Argo Workflow Archive",
+      "publisher_or_author": "Argo Project / CNCF",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/workflow-archive/",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "completed workflow state archive"
+      ],
+      "limits": "pod logs not archived; artifact repository required"
+    },
+    {
+      "title": "Reuse workflows",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "workflow_call typed composition and non-escalating nested permissions",
+        "full SHA safest"
+      ],
+      "limits": "CI composition is not long-lived workflow state"
+    },
+    {
+      "title": "Artifact attestations",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "signed workflow/repository/commit provenance and policy verification"
+      ],
+      "limits": "must be verified and does not guarantee security"
+    },
+    {
+      "title": "Deployments and environments",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "required reviewers, prevent self-review and secret gating"
+      ],
+      "limits": "plan/config details vary"
+    },
+    {
+      "title": "Preventing pwn requests",
+      "publisher_or_author": "GitHub Security Lab",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_or_update_date": "2020-12-16",
+      "access_date": "2026-09-13",
+      "source_type": "first-party security research",
+      "supported_claims": [
+        "privileged workflow_run risk with untrusted artifacts/code and split-workflow mitigation"
+      ],
+      "limits": "Mitigation still needs strict artifact validation"
+    },
+    {
+      "title": "JSON Schema Draft 2020-12",
+      "publisher_or_author": "JSON Schema project",
+      "url": "https://json-schema.org/draft/2020-12",
+      "publication_or_update_date": "2020-12; core/validation drafts published 2022-06-16",
+      "access_date": "2026-09-13",
+      "source_type": "open specification",
+      "supported_claims": [
+        "machine-readable structural validation and vocabularies"
+      ],
+      "limits": "structural validity is not truth or safety"
+    },
+    {
+      "title": "CloudEvents specification v1.0.2",
+      "publisher_or_author": "CNCF CloudEvents",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "publication_or_update_date": "2022-02-05 version lineage",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open specification",
+      "supported_claims": [
+        "event ID/source/type/time/subject/data envelope"
+      ],
+      "limits": "no durability/deduplication implementation"
+    },
+    {
+      "title": "PROV-O: The PROV Ontology",
+      "publisher_or_author": "W3C",
+      "url": "https://www.w3.org/TR/prov-o/",
+      "publication_or_update_date": "2013-04-30",
+      "access_date": "2026-09-13",
+      "source_type": "W3C Recommendation",
+      "supported_claims": [
+        "Entity, Activity, Agent, derivation, association, role and delegation provenance"
+      ],
+      "limits": "does not authenticate claims or decide policy"
+    },
+    {
+      "title": "SLSA Build Provenance v1.2",
+      "publisher_or_author": "OpenSSF / SLSA",
+      "url": "https://slsa.dev/spec/v1.2/build-provenance",
+      "publication_or_update_date": "v1.2; approved specification",
+      "access_date": "2026-09-13",
+      "source_type": "industry specification",
+      "supported_claims": [
+        "digest-bound subjects, build definition, parameters, dependencies and builder/run details"
+      ],
+      "limits": "provenance does not judge research quality"
+    },
+    {
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Yuchen Zhang et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "independent academic preprint",
+      "supported_claims": [
+        "leakage and inadequate-test/suspicious-pass audit; benchmark drop after filtering"
+      ],
+      "limits": "coding benchmark evidence transfers as oracle-risk warning, not direct research-factory performance"
+    },
+    {
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses",
+      "publisher_or_author": "Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "publication_or_update_date": "2024-06-18; revisions thereafter",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint",
+      "supported_claims": [
+        "tool-agent injection attack/defense security-utility tradeoffs"
+      ],
+      "limits": "benchmark cannot prove general immunity"
+    },
+    {
+      "title": "Evaluation best practices",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official vendor guidance",
+      "supported_claims": [
+        "continuous evaluation, mixed datasets and human calibration"
+      ],
+      "limits": "vendor guidance; no universal thresholds"
+    },
+    {
+      "title": "Demystifying evals for AI agents",
+      "publisher_or_author": "Anthropic",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "publication_or_update_date": "2026-01-09",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering guidance",
+      "supported_claims": [
+        "production failures to tests, deterministic and model grading, repeated trials/human calibration"
+      ],
+      "limits": "first-party guidance and post-cutoff behavior can drift"
+    },
+    {
+      "title": "NIST Secure Software Development Framework SP 800-218",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/guidance",
+      "supported_claims": [
+        "roles, protection, provenance and secure development practices"
+      ],
+      "limits": "not agent/research specific"
+    },
+    {
+      "title": "OWASP LLM01: Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "publication_or_update_date": "2025 risk edition",
+      "access_date": "2026-09-13",
+      "source_type": "independent industry guidance",
+      "supported_claims": [
+        "retrieved content can manipulate models and require least privilege/separation"
+      ],
+      "limits": "guidance not a proof of control effectiveness"
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "definition as code versus runtime truth",
+      "evidence": "Warp calls files source of truth but explicitly says work items, runs and metrics never enter them (https://docs.warp.dev/factories/factory-as-code/).",
+      "resolution": "Git is desired definition; event/database/object stores are actual runtime/evidence truth. Bind both by digests and reconcile."
+    },
+    {
+      "topic": "durable execution versus exactly-once effects",
+      "evidence": "Temporal replays durable workflow history, while Activities may execute at least once; LangGraph resumes a node from its start (https://docs.temporal.io/workflow-definition; https://docs.langchain.com/oss/python/langgraph/interrupts).",
+      "resolution": "Keep LLM/web/tool calls outside deterministic code; use idempotency keys, fencing, atomic manifests and effect reconciliation."
+    },
+    {
+      "topic": "schema-valid versus correct research",
+      "evidence": "JSON Schema/current validator checks shape/field presence, while SWE-Bench+ demonstrates passing weak or contaminated oracles can overstate performance (https://json-schema.org/draft/2020-12; https://arxiv.org/abs/2410.06992).",
+      "resolution": "Layer semantic entailment, citation, independence, conflict and expert challenge checks over structural validation."
+    },
+    {
+      "topic": "self-improving label versus autonomous adoption",
+      "evidence": "Warp labels the factory self-improving but documents follow-up PRs and says nothing is adopted without review (https://docs.warp.dev/factories/how-factories-work/; https://docs.warp.dev/factories/measure-and-improve/self-improvement/).",
+      "resolution": "Use proposal/evaluation/shadow/canary/rollback language; never claim recursive self-governance."
+    },
+    {
+      "topic": "parallel speed versus research quality",
+      "evidence": "Workflow systems support fanout, but no cited study proves more research agents improve decision accuracy; shared prompts/models/sources correlate errors.",
+      "resolution": "Partition independent items, dedupe shared evidence, use deterministic join and measure against a single-worker baseline."
+    },
+    {
+      "topic": "fresh live docs versus reproducibility",
+      "evidence": "Many official pages are undated living documentation; snapshots may be legally/technically unavailable.",
+      "resolution": "Record access/final URL/ETag/Last-Modified/body digest and lawful snapshot; pin repository/standard versions; flag unsnapshotted claims and refresh selectively."
+    },
+    {
+      "topic": "attestation versus trust",
+      "evidence": "GitHub states attestations require verification and are not security guarantees; PROV represents lineage but does not authenticate it (https://docs.github.com/en/actions/concepts/security/artifact-attestations; https://www.w3.org/TR/prov-o/).",
+      "resolution": "Protected verifier checks signer, subject, predicate, source/builder and policy; factual review remains separate."
+    },
+    {
+      "topic": "LLM scorer convenience versus independent oracle",
+      "evidence": "Warp scorer is an LLM classifier, OpenAI/Anthropic advise calibration, and independent leakage/injection evidence shows gaming/failure risk.",
+      "resolution": "Deterministic invariants first; protected human-curated temporal holdouts and blinded expert sampling; inconclusive never auto-passes."
+    }
+  ],
+  "uncertainties": [
+    {
+      "unknown": "The requested 2026-09-13 cutoff is treated as the research snapshot, but living pages lack immutable revision dates and may change.",
+      "impact": "Product/API/schema claims need a deployment-time recheck and stored digest."
+    },
+    {
+      "unknown": "Warp Factories is Early Access; public docs do not expose a complete machine-readable factory schema, state/event history API, retention guarantees or independent outcome denominators.",
+      "impact": "Do not make Warp the only system of record or assume compatibility beyond documented files."
+    },
+    {
+      "unknown": "No universal evidence freshness interval exists.",
+      "impact": "Repository-specific policy must classify volatility/criticality; high-risk sources may require event-driven or pre-publication refresh."
+    },
+    {
+      "unknown": "No universal model-confidence, conflict or source-count threshold predicts factual accuracy.",
+      "impact": "Calibrate on domain cases and retain deterministic/human gates."
+    },
+    {
+      "unknown": "Lawful source snapshotting, robots/terms, deletion and PII constraints differ by source/jurisdiction.",
+      "impact": "Some evidence can retain only metadata/digest/quote; legal/privacy owner decides."
+    },
+    {
+      "unknown": "Offline and shadow gains may not predict report decision quality or net reviewer cost.",
+      "impact": "Canary narrowly and measure delayed corrections, reviewer effort and accepted-decision value."
+    },
+    {
+      "unknown": "Exact scale at which PostgreSQL should be replaced/supplemented by Temporal/Argo is workload-specific.",
+      "impact": "Instrument queue age, crash recovery, history size and operator cost before adopting complexity."
+    },
+    {
+      "unknown": "Automated claim entailment/conflict extraction has unknown false-negative rates for each domain/language.",
+      "impact": "Use expert samples, adversarial goldens and explicit UNKNOWN/CONFLICTING states."
+    }
+  ],
+  "confidence": {
+    "overall": "High for the proposed separation, state/idempotency/provenance contracts and documented workflow primitives; medium for the detailed factory design because it is an evidence-led synthesis; low for vendor-independent ROI, universal thresholds and unattended semantic adjudication.",
+    "high": [
+      "Warp documented file/runtime and review-only self-improvement boundaries",
+      "Temporal/LangGraph replay/interrupt caveats",
+      "JSON Schema/CloudEvents/PROV/SLSA roles",
+      "need for protected evaluator/promotion separation and digest-bound resume"
+    ],
+    "medium": [
+      "claim graph plus selective invalidation reduces refresh work without missed dependencies",
+      "one-item fanout is a good default",
+      "semantic lint plus challenge audit improves report quality"
+    ],
+    "low": [
+      "specific budgets, TTLs, confidence thresholds or canary sample sizes",
+      "net economic benefit in an unmeasured repository",
+      "safe automatic publication or universal autonomous truth resolution"
+    ],
+    "claim_level": "Each result claim must carry its own status/confidence/evidence; this aggregate rating must not override CONFLICTING/UNKNOWN records."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "human_need_policy",
+    "implementation_recommendation",
+    "uncertainties"
+  ]
+}

@@ -1,0 +1,974 @@
+{
+  "scope": "Open-source, self-hostable software-agent platforms and frameworks that can turn a sufficiently specified repository issue into a tested branch and draft pull request, then iterate on CI/review feedback. Core systems are OpenHands/Software Agent SDK, the maintenance-only SWE-agent plus successor mini-SWE-agent, Aider, and the newer Open SWE reference application; LangGraph is considered as a lower-level durable orchestration substrate. Hosted proprietary agents, issue/specification practice, and generic CI are included only where they define boundaries. 'Autonomous' means unattended execution within one bounded run, not authority to merge or deploy. Evidence emphasizes 2019–2026, though the first central benchmark is from 2023. URLs throughout are direct documents, not search snippets.",
+  "current_state": [
+    "Verified: OpenHands has a native GitHub issue trigger: label an issue `openhands` or mention `@openhands`; it acknowledges, links a live run, and conditionally opens a PR when it judges the task resolved. PR mentions can ask questions or request revisions (https://docs.openhands.dev/openhands/usage/cloud/github-installation). Its current architecture separates Agent Canvas, Agent Server, Automation Server, and a workspace/sandbox, enabling scheduled/webhook dispatch rather than only interactive chat (https://docs.openhands.dev/openhands/usage/agent-canvas/architecture).",
+    "Verified: OpenHands headless CLI emits JSONL for CI integration, but headless mode is unavoidably always-approve; it cannot provide interactive action confirmation (https://docs.openhands.dev/openhands/usage/cli/headless). The SDK separately offers risk levels and pluggable confirmation policies (https://docs.openhands.dev/sdk/arch/security). Thus a safe unattended deployment must rely on sandbox, credential scope and external merge gates, not the CLI approval UI.",
+    "Verified: SWE-agent runs one issue or batches, uses Docker/local or remote deployments, and records thought/action/observation trajectories (https://swe-agent.com/latest/usage/cli/; https://swe-agent.com/latest/usage/batch_mode/; https://swe-agent.com/latest/usage/trajectories/). However, its own current documentation says SWE-agent is maintenance-only and superseded by mini-SWE-agent (https://swe-agent.com/latest/config/environments/).",
+    "Verified: Aider is an active terminal pair-programmer with a one-message scripting mode that edits then exits, Python API access, automatic git commits, repo maps, and configurable lint/test repair loops (https://aider.chat/docs/scripting.html; https://aider.chat/docs/git.html; https://aider.chat/docs/usage/lint-test.html; https://aider.chat/docs/repomap.html). It does not itself supply a durable issue/webhook/PR control plane; teams must wrap it with queueing, sandboxing, Git provider APIs and policy.",
+    "Verified first-party design, not independent production proof: Open SWE provides an MIT-licensed issue/Slack/Linear/schedule-to-PR reference application with persistent per-thread sandboxes, CI babysitting, read-only review, approval before workflow-file pushes, pluggable sandboxes and follow-up routing (https://github.com/langchain-ai/open-swe). LangGraph supplies persistence and human interrupts, but repository delivery policy remains application code (https://github.com/langchain-ai/langgraph).",
+    "Assessment: bounded issue-to-draft-PR automation is demonstrably possible; reliable autonomous merge/deploy is not established. Official OpenHands guidance itself says vague, large, sensitive, subjective or production-infrastructure tasks are poor fits, cites time/context/state constraints, and says production-safe changes cannot be guaranteed without review (https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands)."
+  ],
+  "representative_systems": [
+    {
+      "system": "OpenHands / Software Agent SDK / Agent Canvas",
+      "status": "Active beta platform; MIT repository; V1 split architecture. Strongest ready-made open-source control plane in this set for GitHub/GitLab interactions, webhooks, sessions and sandboxes.",
+      "evidence": [
+        "https://github.com/OpenHands/OpenHands",
+        "https://docs.openhands.dev/openhands/usage/agent-canvas/architecture",
+        "https://docs.openhands.dev/sdk/arch/overview"
+      ]
+    },
+    {
+      "system": "SWE-agent",
+      "status": "Research agent with configurable agent-computer interface, batch runner and trajectories; maintenance-only as of the requested cutoff.",
+      "evidence": [
+        "https://swe-agent.com/latest/config/environments/",
+        "https://arxiv.org/abs/2405.15793"
+      ]
+    },
+    {
+      "system": "mini-SWE-agent",
+      "status": "Recommended successor from the SWE-agent team; deliberately minimal bash-only loop with multiple local/container/remote environment adapters. Better experimental core than full issue-to-PR product.",
+      "evidence": [
+        "https://mini-swe-agent.com/latest/"
+      ]
+    },
+    {
+      "system": "Aider",
+      "status": "Mature interactive/scriptable git-native editing engine; useful worker inside an orchestrator, not a complete event/durable-job/PR platform.",
+      "evidence": [
+        "https://github.com/Aider-AI/aider",
+        "https://aider.chat/docs/scripting.html",
+        "https://aider.chat/docs/git.html"
+      ]
+    },
+    {
+      "system": "Open SWE",
+      "status": "Newer MIT reference application for GitHub/Slack/Linear/scheduled work over Deep Agents/LangGraph; unusually complete workflow mechanics, but its README says production self-hosting of the standalone LangGraph Agent Server requires a license key.",
+      "evidence": [
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "system": "LangGraph",
+      "status": "MIT low-level stateful workflow/agent library with persistence and human-in-the-loop interrupts; custom engineering is required for GitHub permissions, sandboxes, policy and PR semantics.",
+      "evidence": [
+        "https://github.com/langchain-ai/langgraph"
+      ]
+    },
+    {
+      "system": "Agentless",
+      "status": "Research alternative showing that localization→repair→validation without a complex free-running agent can be competitive and cheaper on a benchmark; useful as an architecture baseline, not a maintained issue-to-PR platform.",
+      "evidence": [
+        "https://arxiv.org/abs/2407.01489"
+      ]
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "OpenHands supports GitHub label/mention triggers, live run link, conditional PR creation, and PR follow-ups; the GitHub App token is short-lived and repository/user permission bounded.",
+      "classification": "verified first-party behavior",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/cloud/github-installation"
+      ]
+    },
+    {
+      "claim": "OpenHands execution is split into control UI, conversation/execution server, automation/event service, and isolated workspace; SDK event logs are append-only and consumable by persistence/monitoring services.",
+      "classification": "verified architecture documentation",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/agent-canvas/architecture",
+        "https://docs.openhands.dev/sdk/arch/overview",
+        "https://docs.openhands.dev/sdk/arch/events"
+      ]
+    },
+    {
+      "claim": "Docker is OpenHands' recommended V1 sandbox; Process mode has no container isolation. SDK confirmation is a separate risk-policy mechanism.",
+      "classification": "verified security design",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+        "https://docs.openhands.dev/sdk/arch/security"
+      ]
+    },
+    {
+      "claim": "SWE-agent exposes single/batch CLI, configurable Docker/remote environment and inspectable trajectories, but has been superseded and is maintenance-only.",
+      "classification": "verified current project documentation",
+      "urls": [
+        "https://swe-agent.com/latest/usage/cli/",
+        "https://swe-agent.com/latest/usage/batch_mode/",
+        "https://swe-agent.com/latest/config/environments/",
+        "https://swe-agent.com/latest/usage/trajectories/"
+      ]
+    },
+    {
+      "claim": "Aider supports noninteractive one-shot invocation and Python scripting, makes git commits, uses repository maps, and can run tests after each edit and attempt repairs.",
+      "classification": "verified current product documentation",
+      "urls": [
+        "https://aider.chat/docs/scripting.html",
+        "https://aider.chat/docs/git.html",
+        "https://aider.chat/docs/usage/lint-test.html",
+        "https://aider.chat/docs/repomap.html"
+      ]
+    },
+    {
+      "claim": "Open SWE implements task triggers, persistent sandbox/thread routing, PR delivery, read-only review, CI monitoring and explicit approval for workflow changes.",
+      "classification": "first-party project claim and code/readme design",
+      "urls": [
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "The peer-reviewed SWE-agent paper reports 12.5% pass@1 on original SWE-bench and 87.7% on HumanEvalFix, showing capability but also low real-issue success in the 2024 setup.",
+      "classification": "academic evaluation by system authors; reproducible artifacts but not organizational production evidence",
+      "url": "https://arxiv.org/abs/2405.15793"
+    },
+    {
+      "finding": "Agentless reported 32.00% (96/300) on SWE-bench Lite at $0.70 average, outperforming then-open-source agents with a fixed localization→repair→validation pipeline. This conflicts with the assumption that more agent autonomy/orchestration necessarily improves results.",
+      "classification": "independent academic comparison, benchmark-limited",
+      "url": "https://arxiv.org/abs/2407.01489"
+    },
+    {
+      "finding": "SWE-bench+ manually examined SWE-agent+GPT-4 successes: 32.67% involved solution leakage and 31.08% were suspicious because of weak tests; filtering dropped the reported resolution rate from 12.47% to 3.97%. It also reports >94% of issues preceded model knowledge cutoffs.",
+      "classification": "independent benchmark critique; applies to the examined sample/method, not every later agent",
+      "url": "https://arxiv.org/abs/2410.06992"
+    },
+    {
+      "finding": "SWE-rebench argues static benchmarks become contaminated and supplies >21,000 continuously collected Python tasks; its comparison found some models' SWE-bench Verified performance may be inflated. Fresh private issue sets are therefore more decision-relevant than public leaderboards.",
+      "classification": "independent academic benchmark critique",
+      "url": "https://arxiv.org/abs/2505.20411"
+    },
+    {
+      "finding": "GitHub Security Lab demonstrates that `pull_request_target` combined with checkout of untrusted PR code can expose write tokens/secrets ('pwn request'), directly relevant when an agent executes repository code inside Actions.",
+      "classification": "independent security engineering guidance",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/"
+    },
+    {
+      "finding": "OWASP treats prompt injection and excessive agency as core LLM-application risks; repository files, issues, test output and fetched web content are untrusted instructions, while write tokens and shell/network tools increase impact.",
+      "classification": "independent consensus guidance; inference to coding-agent threat model",
+      "urls": [
+        "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ]
+    },
+    {
+      "finding": "UTBoost augmented SWE-bench tests and reports 36 tasks with insufficient tests and 345 erroneous patches previously labeled passed; corrections affected 40.9% of Lite and 24.4% of Verified leaderboard entries and changed rankings.",
+      "classification": "peer-reviewed independent test-quality audit",
+      "url": "https://aclanthology.org/2025.acl-long.189/"
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "12.5% pass@1 on original SWE-bench; 87.7% HumanEvalFix",
+      "system": "SWE-agent research configuration",
+      "date": "2024",
+      "caveat": "Author evaluation, older models/configuration and public benchmark; do not equate with production issue success.",
+      "url": "https://arxiv.org/abs/2405.15793"
+    },
+    {
+      "metric": "26.0% on 300 SWE-bench Lite tasks without hints; 79.3% Python HumanEvalFix",
+      "system": "OpenHands CodeActAgent v1.8 + Claude 3.5 Sonnet",
+      "date": "2024 paper / ICLR 2025",
+      "caveat": "Historical model/config-specific result, not current Cloud/SDK SLA or SWE-bench Verified.",
+      "url": "https://arxiv.org/abs/2407.16741"
+    },
+    {
+      "metric": "32.00% (96 fixes), $0.70 average",
+      "system": "Agentless on SWE-bench Lite",
+      "date": "2024",
+      "caveat": "Research benchmark and then-current comparison; demonstrates simpler pipeline can beat more complex agent loops, not issue-to-PR operations.",
+      "url": "https://arxiv.org/abs/2407.01489"
+    },
+    {
+      "metric": "12.47% reported success becomes 3.97% after critique filtering",
+      "system": "SWE-agent+GPT-4 sample in SWE-bench+",
+      "date": "2024",
+      "caveat": "Critique's filtering definitions are themselves research judgments; nevertheless material enough to reject raw benchmark numbers as operational SLAs.",
+      "url": "https://arxiv.org/abs/2410.06992"
+    },
+    {
+      "metric": ">21,000 interactive Python tasks in the public SWE-rebench dataset",
+      "system": "SWE-rebench",
+      "date": "2025",
+      "caveat": "Dataset scale, not agent performance; Python-focused.",
+      "url": "https://arxiv.org/abs/2505.20411"
+    },
+    {
+      "metric": "225 Exercism tasks across C++, Go, Java, JavaScript, Python and Rust; current leaderboard exposes pass rate, edit-format compliance, token counts, cost and seconds/case",
+      "system": "Aider polyglot benchmark",
+      "date": "continuously updated",
+      "caveat": "First-party model/edit-format benchmark; small isolated exercises, two attempts in many results, and not repository issue-to-PR success.",
+      "url": "https://aider.chat/docs/leaderboards/"
+    },
+    {
+      "metric": "No trustworthy published production success rate, rollback rate, human-review time, or total cost per merged PR found for the OSS/self-hosted deployments studied.",
+      "system": "all",
+      "date": "as of cutoff",
+      "caveat": "Unknown; GitHub popularity and benchmark scores are not substitutes for operational outcomes."
+    }
+  ],
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "INTAKE → REJECTED or READY",
+      "mechanics": "Receive a GitHub App webhook for a labeled/assigned issue. Authenticate installation, actor and repository; copy title/body/comments into an immutable work record; treat all text as untrusted. Require template fields: expected behavior, acceptance tests, affected service, risk class, and non-goals. Reject vague or sensitive work for clarification. OpenHands supplies native label/mention intake; custom stacks implement this with GitHub webhooks.",
+      "evidence": [
+        "https://docs.openhands.dev/openhands/usage/cloud/github-installation",
+        "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands",
+        "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+      ]
+    },
+    {
+      "step": 2,
+      "state": "READY → PLANNED",
+      "mechanics": "Pin repository SHA, tool/agent/model/config versions, budget and sandbox image. Ask a planner to localize files and propose a bounded plan. For medium/high-risk or cross-service work, pause for maintainer approval; a LangGraph interrupt or Temporal Update/Signal can persist the wait.",
+      "evidence": [
+        "https://github.com/langchain-ai/open-swe",
+        "https://docs.langchain.com/oss/python/langgraph/interrupts",
+        "https://docs.temporal.io/encyclopedia/workflow-message-passing"
+      ]
+    },
+    {
+      "step": 3,
+      "state": "PLANNED → RUNNING",
+      "mechanics": "Create an ephemeral branch/worktree in a fresh per-task container/VM. Inject only short-lived, repository-scoped credentials through a broker/proxy; keep merge/deploy credentials out. Default-deny unnecessary network egress. Run OpenHands/mini-SWE-agent/Aider with command/time/token/cost limits. Capture tool events, stdout/stderr, diffs and model/config provenance.",
+      "evidence": [
+        "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+        "https://docs.openhands.dev/openhands/usage/cli/headless",
+        "https://swe-agent.com/latest/usage/trajectories/",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "step": 4,
+      "state": "RUNNING → VALIDATING, NEEDS_HELP or FAILED",
+      "mechanics": "Use an explicit loop: inspect/localize → edit → format/lint/type-check → targeted tests → full permitted test suite. Bound retries; on repeated identical error, budget exhaustion, missing credentials, environment failure, or uncertainty, stop and ask a human rather than widening privileges. Aider can auto-test and repair; SWE-agent/mini provide command loops; Agentless shows a simpler bounded localization/repair/validation alternative.",
+      "evidence": [
+        "https://aider.chat/docs/usage/lint-test.html",
+        "https://arxiv.org/abs/2405.15793",
+        "https://arxiv.org/abs/2407.01489"
+      ]
+    },
+    {
+      "step": 5,
+      "state": "VALIDATING → DRAFT_PR",
+      "mechanics": "Run policy checks outside the agent-controlled workspace: changed-path allowlist, secret scan, SAST/dependency checks, protected-file detection, patch-size cap, test coverage/acceptance tests and generated-file rules. If green, use a separate delivery identity to push the branch and open a draft PR containing issue link, plan, evidence, tests run, agent/model/config/cost and unresolved risks. Never let a self-written test alone define success.",
+      "evidence": [
+        "https://github.com/langchain-ai/open-swe",
+        "https://arxiv.org/abs/2410.06992",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ]
+    },
+    {
+      "step": 6,
+      "state": "DRAFT_PR → REVISING or APPROVED",
+      "mechanics": "Run ordinary CI with read-only/no-secret execution for untrusted branch code. Route deterministic CI failures and explicit reviewer comments back to the same durable thread/sandbox; allow a small retry count. Keep review/chat agent read-only where possible. Do not use `pull_request_target` to execute the PR checkout with write secrets.",
+      "evidence": [
+        "https://github.com/langchain-ai/open-swe",
+        "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/"
+      ]
+    },
+    {
+      "step": 7,
+      "state": "APPROVED → MERGED or CLOSED",
+      "mechanics": "Require protected-branch status checks, code-owner/security approval by a person not represented by the coding agent, and repository merge policy. A service account may merge only pre-approved low-risk classes after an empirical shadow/canary period; deployment remains a separate pipeline with rollback. Close stale/failed runs and revoke credentials.",
+      "evidence": [
+        "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ]
+    },
+    {
+      "step": 8,
+      "state": "MERGED/CLOSED → LEARNED",
+      "mechanics": "Record review edits, revert/incident signals, elapsed time, agent cost, sandbox failures and false-success category. Sample failures and successes into a fresh private evaluation set. Update prompts/repository instructions and policies only through reviewed version control; compare against a simple fixed pipeline and human baseline before promotion.",
+      "evidence": [
+        "https://swe-agent.com/latest/usage/trajectories/",
+        "https://arxiv.org/abs/2505.20411",
+        "https://arxiv.org/abs/2407.01489"
+      ]
+    }
+  ],
+  "integration_points": [
+    {
+      "point": "Issue/SCM",
+      "details": "GitHub App labels and mentions, issue/PR comments, short-lived installation token and repository access; OpenHands also documents GitLab/Bitbucket/Jira/Slack variants, but availability differs by Cloud/Local/Enterprise.",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/cloud/github-installation"
+      ]
+    },
+    {
+      "point": "Agent execution",
+      "details": "OpenHands Agent Server HTTP/WebSocket plus SDK workspaces; OpenHands headless CLI JSONL; SWE-agent/mini CLI and batch runners; Aider CLI `--message` or Python API.",
+      "urls": [
+        "https://docs.openhands.dev/sdk/arch/overview",
+        "https://docs.openhands.dev/openhands/usage/cli/headless",
+        "https://swe-agent.com/latest/usage/cli/",
+        "https://aider.chat/docs/scripting.html"
+      ]
+    },
+    {
+      "point": "Environment",
+      "details": "Docker/VM/remote per-task sandbox with pinned image. OpenHands Process mode and Open SWE local mode are development-only because they lack isolation. SWE-agent can use Docker or remote deployment.",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+        "https://swe-agent.com/latest/config/environments/",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "point": "State/queue",
+      "details": "OpenHands append-only event log and automation dispatcher; Open SWE/LangGraph threads and checkpoints; for long waits, retries and idempotent delivery, Temporal is the stronger outer workflow option.",
+      "urls": [
+        "https://docs.openhands.dev/sdk/arch/events",
+        "https://docs.langchain.com/oss/python/langgraph/persistence",
+        "https://docs.temporal.io/workflows"
+      ]
+    },
+    {
+      "point": "Context/tools",
+      "details": "Repository instructions (for example AGENTS.md), repository map, test/lint commands, MCP/tool adapters, artifact and secret registries. MCP endpoints and fetched content must be explicitly trusted.",
+      "urls": [
+        "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands",
+        "https://aider.chat/docs/repomap.html",
+        "https://docs.openhands.dev/sdk/arch/overview",
+        "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+      ]
+    },
+    {
+      "point": "Assurance/delivery",
+      "details": "External CI/status APIs, code owners, static/security scanners, branch protection, draft PR API, reviewer comments, deployment and rollback systems. Use separate execution and delivery credentials.",
+      "urls": [
+        "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ]
+    }
+  ],
+  "human_gates": [
+    "Clarification gate before compute when acceptance criteria, reproduction, target repository, non-goals or verification method are missing; official OpenHands guidance marks vague requirements as a poor fit (https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands).",
+    "Plan approval for architecture, cross-service changes, migrations, security/auth, dependency majors, data schema and production infrastructure. LangGraph interrupts or Temporal workflow messages can preserve state across the wait (https://docs.langchain.com/oss/python/langgraph/interrupts; https://docs.temporal.io/encyclopedia/workflow-message-passing).",
+    "Action confirmation inside interactive OpenHands for HIGH/UNKNOWN-risk operations, but never assume this gate exists in headless mode, which always approves (https://docs.openhands.dev/sdk/arch/security; https://docs.openhands.dev/openhands/usage/cli/headless).",
+    "Mandatory maintainer review of every generated draft PR during adoption; mandatory security/code-owner review for sensitive paths forever. Open SWE specifically gates pushes that modify workflow files (https://github.com/langchain-ai/open-swe).",
+    "Merge approval only after independent CI and policy checks. The coding agent must not approve its own PR, control branch protection, or hold deploy/production credentials (risk rationale: https://genai.owasp.org/llmrisk/llm062025-excessive-agency/).",
+    "Escalation when budget/time/retry limits hit, environment is non-reproducible, requirements conflict, requested credentials exceed policy, tests are absent/weak, or the diff escapes the approved plan."
+  ],
+  "failure_modes": [
+    {
+      "mode": "False success / benchmark overstatement",
+      "detail": "Agent declares resolved or passes weak/generated tests while behavior is wrong; public benchmark leakage inflates expectations.",
+      "evidence": [
+        "https://arxiv.org/abs/2410.06992",
+        "https://arxiv.org/abs/2505.20411",
+        "https://docs.openhands.dev/openhands/usage/cloud/github-installation"
+      ]
+    },
+    {
+      "mode": "Prompt injection and data exfiltration",
+      "detail": "Malicious issue/comment/repository file, dependency output, webpage or MCP server instructs the model to reveal secrets or change scope. Networked shell plus tokens raises impact.",
+      "evidence": [
+        "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "mode": "CI privilege inversion",
+      "detail": "Untrusted PR code executes in a privileged GitHub Actions context and steals write token/secrets; autonomous agents can create or modify workflow files to make this worse.",
+      "evidence": [
+        "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "mode": "Host compromise",
+      "detail": "Unsandboxed/process execution gives agent shell/filesystem access; containers reduce but do not eliminate kernel, mount, socket and egress risks.",
+      "evidence": [
+        "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+        "https://github.com/OpenHands/OpenHands"
+      ]
+    },
+    {
+      "mode": "Context/scale limits",
+      "detail": "Large repository or long task exceeds context/session limits, loses relevant constraints, times out, or loops. Official OpenHands docs list time, context, state, access and visual-verification constraints.",
+      "evidence": [
+        "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands"
+      ]
+    },
+    {
+      "mode": "Tool/edit brittleness",
+      "detail": "LLM emits malformed edits, selects wrong files or fails to apply patch. Aider documents edit-format failures and confusion above roughly 25k tokens for many models.",
+      "evidence": [
+        "https://aider.chat/docs/troubleshooting/edit-errors.html"
+      ]
+    },
+    {
+      "mode": "Flaky/non-hermetic environment",
+      "detail": "Missing dependencies, nondeterministic tests, external services, rate limits or unreachable persistent sandbox cause failures or unsafe retries.",
+      "evidence": [
+        "https://swe-agent.com/latest/config/environments/",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "mode": "State/side-effect duplication",
+      "detail": "Retry after partial push/comment/PR creates duplicate or inconsistent GitHub effects unless operations use idempotency keys and reconcile remote state. Durable runtimes replay workflow logic, so side effects must be isolated.",
+      "evidence": [
+        "https://docs.temporal.io/workflows"
+      ]
+    },
+    {
+      "mode": "Framework churn/abandonment",
+      "detail": "Architecture/naming changes invalidate integrations: SWE-agent is maintenance-only; AutoGen is maintenance mode; OpenHands moved from monolith/runtime terminology toward Agent Canvas/SDK/sandbox services.",
+      "evidence": [
+        "https://swe-agent.com/latest/config/environments/",
+        "https://github.com/microsoft/autogen",
+        "https://docs.openhands.dev/openhands/usage/agent-canvas/architecture"
+      ]
+    },
+    {
+      "mode": "Economic queue failure",
+      "detail": "Repeated model calls, full test suites, sandbox warm-up and human review can cost more and take longer than a small manual fix. Published OSS production cost distributions are absent; benchmark per-task costs omit integration and review.",
+      "evidence": [
+        "https://arxiv.org/abs/2407.01489",
+        "https://aider.chat/docs/leaderboards/"
+      ]
+    }
+  ],
+  "controls_and_mitigations": [
+    "Use one ephemeral container/VM per task; no Docker socket/host mounts; read-only base image; CPU/memory/process/time quotas; default-deny egress with explicit package/document mirrors. Do not use OpenHands Process sandbox outside trusted development (https://docs.openhands.dev/openhands/usage/sandboxes/overview).",
+    "Split identities: read issue/checkout token, optional branch-push token, PR-creation service, and human/merge identity. Prefer short-lived GitHub App tokens and repository allowlists; never inject deployment or broad organization secrets (https://docs.openhands.dev/openhands/usage/cloud/github-installation; https://genai.owasp.org/llmrisk/llm062025-excessive-agency/).",
+    "Treat issue text, comments, source, tests, terminal output, web content and MCP/tool descriptions as untrusted data. Constrain tools and paths in code rather than prompts; disable arbitrary MCP/network by default (https://genai.owasp.org/llmrisk/llm01-prompt-injection/).",
+    "Protect `.github/workflows`, ownership/security policy, deployment/IaC, lockfiles and migrations with deny-by-default paths or explicit human approval. Open SWE's workflow-file approval is a useful minimum (https://github.com/langchain-ai/open-swe).",
+    "Run trusted acceptance tests and security checks outside the agent workspace after the agent stops. Do not expose secrets to untrusted PR jobs or combine `pull_request_target` with PR checkout (https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/).",
+    "Use budgets and circuit breakers: max wall time, tool calls, tokens/cost, diff size, files, test retries and concurrent jobs; kill on repeated actions or policy violations. Record JSONL/event/trajectory logs, exact commit, image, agent, model and prompt/config versions (https://docs.openhands.dev/openhands/usage/cli/headless; https://swe-agent.com/latest/usage/trajectories/).",
+    "Make GitHub side effects idempotent; use a durable queue/checkpointer, leases/heartbeats, cancellation, retry backoff and dead-letter state. For strict crash recovery, place the agent run inside a Temporal Activity and keep workflow decisions deterministic (https://docs.temporal.io/workflows).",
+    "Require branch protection, independent CI, code-owner review and reversible merge. Start in suggest-only/shadow mode, then draft-PR mode for low-risk repositories; measure merge-without-edit, reviewer time, rollback and incident rates on fresh private tasks before any auto-merge (https://arxiv.org/abs/2505.20411)."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful for bounded, well-specified low/medium-risk issues that have executable acceptance tests; emerging for end-to-end unattended issue-to-PR operations; not supported for general autonomous merge/deploy.",
+    "by_system": [
+      {
+        "system": "OpenHands",
+        "rating": "conditionally production-usable with hardening; Agent Canvas is labeled beta",
+        "rationale": "Native SCM triggers, sandboxes, event/automation architecture and SDK security primitives are substantial. Yet headless always-approve, architecture churn and official limits require an external control plane and review.",
+        "urls": [
+          "https://github.com/OpenHands/OpenHands",
+          "https://docs.openhands.dev/openhands/usage/cloud/github-installation",
+          "https://docs.openhands.dev/openhands/usage/cli/headless",
+          "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands"
+        ]
+      },
+      {
+        "system": "SWE-agent",
+        "rating": "research/maintenance-only",
+        "rationale": "Excellent configurable research harness, batch evaluation and audit trails; maintainers direct new users to mini-SWE-agent.",
+        "urls": [
+          "https://swe-agent.com/latest/config/environments/",
+          "https://swe-agent.com/latest/usage/trajectories/"
+        ]
+      },
+      {
+        "system": "mini-SWE-agent",
+        "rating": "active minimalist experimental worker",
+        "rationale": "Small inspectable bash loop and broad environment adapters, but not by itself a durable issue/PR/policy platform; first-party >74% Verified claim is not an operational SLA.",
+        "urls": [
+          "https://mini-swe-agent.com/latest/"
+        ]
+      },
+      {
+        "system": "Aider",
+        "rating": "production-useful human-in-loop editor; conditional worker",
+        "rationale": "Strong git/repo-map/test mechanics and scripting API; missing native webhooks, durable state, isolated execution and PR governance.",
+        "urls": [
+          "https://aider.chat/docs/scripting.html",
+          "https://aider.chat/docs/git.html",
+          "https://aider.chat/docs/usage/lint-test.html"
+        ]
+      },
+      {
+        "system": "Open SWE",
+        "rating": "promising/evolving reference application",
+        "rationale": "Most complete explicit delivery workflow and controls; newer, evolving quickly, with production LangGraph Agent Server license-key dependency and provider choices to validate.",
+        "urls": [
+          "https://github.com/langchain-ai/open-swe"
+        ]
+      },
+      {
+        "system": "LangGraph or Temporal custom stack",
+        "rating": "production-capable substrate, not turnkey",
+        "rationale": "LangGraph supplies agent checkpoints/interrupts; Temporal supplies stronger durable execution. Both require custom sandbox, GitHub app, secret broker, policy, evaluation and operations.",
+        "urls": [
+          "https://github.com/langchain-ai/langgraph",
+          "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "https://docs.temporal.io/workflows"
+        ]
+      }
+    ],
+    "evidence_limit": "No independent longitudinal production study found for these OSS deployments reporting acceptance, reviewer effort, security incidents, rollback and total cost per merged PR."
+  },
+  "build_vs_buy": {
+    "adopt": "Use OpenHands when native SCM UX and broad agent/runtime support matter; pilot Open SWE when its opinionated GitHub/Slack/Linear and persistent-thread design fits. Validate which features are OSS versus Cloud/Enterprise and Open SWE's LangGraph Agent Server license-key requirement before commitment.",
+    "compose": "Use Aider or mini-SWE-agent as the bounded code-edit worker behind an existing job runner when the organization already owns GitHub App intake, container fleet, policy checks and PR delivery. This reduces framework surface but increases integration work.",
+    "build": "Choose LangGraph for customizable agent state/HITL. Add Temporal outside it when jobs must survive outages, wait days for approval and guarantee auditable retry semantics. Custom components remain: threat model, GitHub permissions, secret proxy, sandbox images/egress, idempotent delivery, trusted CI, policy engine, observability and private evals.",
+    "avoid": "Do not greenfield on maintenance-only SWE-agent or AutoGen. Do not mistake Aider, Agentless, CrewAI or a raw multi-agent chat graph for a secure issue-to-PR platform.",
+    "cost_boundary": "OSS license eliminates neither model/API cost nor sandbox, CI, observability, review and maintenance cost. Measure total cost and elapsed time per accepted/merged PR, not inference cost per benchmark case."
+  },
+  "recommended_pattern": "Use a two-plane architecture. The control plane is a GitHub App plus a durable state machine (OpenHands Automation/Agent Server for fastest adoption, or Temporal + LangGraph for stricter recovery). It authenticates events, validates an issue template, applies repository/risk allowlists, pins commit/config/model/image, budgets the job, pauses for plan approval when needed, and owns idempotent branch/PR actions. The execution plane is one short-lived locked-down Docker/VM sandbox per task running OpenHands SDK, mini-SWE-agent, or Aider. It receives only checkout and short-lived branch credentials through a proxy; it cannot merge, deploy, modify protected paths, access organization secrets, or reach arbitrary networks. Use a bounded localize→plan→edit→lint/type/test loop, then destroy credentials. A separate trusted verifier checks the diff and acceptance tests and opens a draft PR with provenance. Ordinary unprivileged CI runs; review comments may trigger at most a few resumptions in the same durable thread. Human code-owner approval and branch protection merge. Roll out from suggestions → draft PRs for docs/tests/simple fixes → carefully measured low-risk auto-merge only if fresh private evaluations show acceptable false-success, reviewer-time and rollback rates. Keep deployment human/policy-gated. This pattern follows the demonstrated mechanics while addressing headless always-approve, weak-test and prompt-injection evidence (https://docs.openhands.dev/openhands/usage/cli/headless; https://github.com/langchain-ai/open-swe; https://arxiv.org/abs/2410.06992; https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/).",
+  "open_questions": [
+    "What are merge-without-material-edit, reviewer minutes, reopen/revert/incident rates and p50/p95 wall-clock plus total cost on this organization's fresh issues? Public benchmarks cannot answer this (https://arxiv.org/abs/2505.20411).",
+    "Which OpenHands/Open SWE functions, APIs and deployment components are fully OSS versus Cloud/Enterprise or license-key dependent at the chosen version? Integration lists differ by edition (https://github.com/OpenHands/OpenHands; https://github.com/langchain-ai/open-swe).",
+    "Does the selected sandbox resist malicious builds, dependency scripts, container escape, fork bombs and network exfiltration under the actual mounts, kernel and egress policy? Project docs describe providers, not a formal security guarantee (https://docs.openhands.dev/openhands/usage/sandboxes/overview).",
+    "Can a coding agent safely consume untrusted issue/comments/repository/MCP content without leaking brokered credentials? No framework here demonstrates a complete independently audited defense (https://genai.owasp.org/llmrisk/llm01-prompt-injection/).",
+    "Which task classes have trusted acceptance oracles? How are weak tests, nondeterminism, UI behavior, migrations and multi-service changes verified independently of agent-written tests (https://aclanthology.org/2025.acl-long.189/)?",
+    "What retry/resume semantics prevent duplicate branches/comments/PRs after crashes and provider outages? OpenHands/LangGraph event state is useful, while Temporal offers stronger explicit workflow history (https://docs.openhands.dev/sdk/arch/events; https://docs.temporal.io/workflows).",
+    "How stable are OpenHands' V1 split architecture and Open SWE's evolving interfaces over the next upgrade cycle, and who will own migrations?",
+    "What is the fallback when the preferred model changes behavior, price, availability, context limits or terms? Store exact model/config and continuously rerun a private regression suite."
+  ],
+  "sources": [
+    {
+      "title": "UTBoost: Rigorous Evaluation of Coding Agents on SWE-Bench",
+      "publisher_or_author": "ACL Anthology / paper authors",
+      "url": "https://aclanthology.org/2025.acl-long.189/",
+      "publication_or_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": "test insufficiency and erroneous-pass audit"
+    },
+    {
+      "title": "Git integration",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/git.html",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "automatic commits, dirty-tree handling, undo/diff controls"
+    },
+    {
+      "title": "Aider LLM Leaderboards",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/leaderboards/",
+      "publication_or_update_date": "continuously updated; specific displayed runs dated 2025",
+      "access_date": "2026-09-13",
+      "source_type": "first-party benchmark",
+      "supported_claims": "225-task polyglot results, cost/edit-format fields"
+    },
+    {
+      "title": "Repository map",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/repomap.html",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "repository-map context mechanism"
+    },
+    {
+      "title": "Scripting aider",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/scripting.html",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "one-shot CLI flags and Python scripting"
+    },
+    {
+      "title": "File editing problems",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/troubleshooting/edit-errors.html",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official troubleshooting documentation",
+      "supported_claims": "malformed edit and long-context failure modes"
+    },
+    {
+      "title": "Linting and testing",
+      "publisher_or_author": "Aider project",
+      "url": "https://aider.chat/docs/usage/lint-test.html",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "automatic lint/test feedback and repair"
+    },
+    {
+      "title": "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      "publisher_or_author": "Yang et al.; NeurIPS 2024",
+      "url": "https://arxiv.org/abs/2405.15793",
+      "publication_or_update_date": "2024-05-24; revised 2024-11-08",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / author evaluation",
+      "supported_claims": "architecture, 12.5% SWE-bench and 87.7% HumanEvalFix"
+    },
+    {
+      "title": "Agentless: Demystifying LLM-based Software Engineering Agents",
+      "publisher_or_author": "Xia et al.; FSE 2025",
+      "url": "https://arxiv.org/abs/2407.01489",
+      "publication_or_update_date": "2024-07-01; revised 2025-02-27",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": "fixed three-stage alternative, 32% Lite and $0.70"
+    },
+    {
+      "title": "OpenHands: An Open Platform for AI Software Developers as Generalist Agents",
+      "publisher_or_author": "Wang et al.; ICLR 2025",
+      "url": "https://arxiv.org/abs/2407.16741",
+      "publication_or_update_date": "2024-07-23; revised 2025-04-30",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / author evaluation",
+      "supported_claims": "historical OpenHands architecture and benchmark results"
+    },
+    {
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Yu et al.; ICSE Companion 2025",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": "solution leakage, weak tests and filtered SWE-agent rate"
+    },
+    {
+      "title": "SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents",
+      "publisher_or_author": "Badertdinov et al.",
+      "url": "https://arxiv.org/abs/2505.20411",
+      "publication_or_update_date": "2025-05-26",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": "continuous fresh tasks and contamination evidence"
+    },
+    {
+      "title": "Interrupts",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "persistent human approval/edit pauses"
+    },
+    {
+      "title": "Persistence",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "thread checkpoints and stores"
+    },
+    {
+      "title": "Agent Canvas Architecture",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/agent-canvas/architecture",
+      "publication_or_update_date": "unknown; living V1 documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Canvas/Agent Server/Automation Server/workspace split"
+    },
+    {
+      "title": "Headless Mode",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/cli/headless",
+      "publication_or_update_date": "unknown; living V1 documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "JSONL CI mode and mandatory always-approve behavior"
+    },
+    {
+      "title": "GitHub Integration",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/cloud/github-installation",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "label/mention issue-to-conditional-PR flow and token permissions"
+    },
+    {
+      "title": "When to Use OpenHands",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official guidance",
+      "supported_claims": "task fit, constraints and mandatory review limits"
+    },
+    {
+      "title": "Sandbox Configuration Overview",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+      "publication_or_update_date": "unknown; living V1 documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Docker, unsafe Process and Remote providers"
+    },
+    {
+      "title": "Events",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/sdk/arch/events",
+      "publication_or_update_date": "unknown; living SDK documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "append-only event log and consumers"
+    },
+    {
+      "title": "OpenHands SDK Architecture Overview",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/sdk/arch/overview",
+      "publication_or_update_date": "unknown; living SDK documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "SDK packages, local/remote workspace design"
+    },
+    {
+      "title": "Security",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/sdk/arch/security",
+      "publication_or_update_date": "unknown; living SDK documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "risk levels, analyzer and confirmation policies"
+    },
+    {
+      "title": "Workflow message passing",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/encyclopedia/workflow-message-passing",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Signals, Queries and Updates for approvals/control"
+    },
+    {
+      "title": "Workflows",
+      "publisher_or_author": "Temporal Technologies",
+      "url": "https://docs.temporal.io/workflows",
+      "publication_or_update_date": "unknown; living documentation",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "event-history durability, replay and activity boundary"
+    },
+    {
+      "title": "LLM01: Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "publication_or_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "source_type": "industry security guidance",
+      "supported_claims": "prompt-injection threat and mitigations"
+    },
+    {
+      "title": "LLM06: Excessive Agency",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "publication_or_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "source_type": "industry security guidance",
+      "supported_claims": "least privilege and human authorization"
+    },
+    {
+      "title": "Aider repository",
+      "publisher_or_author": "Aider project / Paul Gauthier and contributors",
+      "url": "https://github.com/Aider-AI/aider",
+      "publication_or_update_date": "active at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": "license, code and current project scope"
+    },
+    {
+      "title": "OpenHands repository / Agent Canvas",
+      "publisher_or_author": "OpenHands contributors",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "publication_or_update_date": "beta; active at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": "current Agent Canvas framing, MIT code, sandbox warning"
+    },
+    {
+      "title": "LangGraph repository",
+      "publisher_or_author": "LangChain contributors",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "publication_or_update_date": "active at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": "MIT stateful-agent framework and HITL positioning"
+    },
+    {
+      "title": "Open SWE repository and README",
+      "publisher_or_author": "LangChain contributors",
+      "url": "https://github.com/langchain-ai/open-swe",
+      "publication_or_update_date": "active/evolving at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "source repository / first-party reference application",
+      "supported_claims": "trigger-to-PR architecture, persistence, controls, licensing caveat"
+    },
+    {
+      "title": "AutoGen repository and README",
+      "publisher_or_author": "Microsoft and contributors",
+      "url": "https://github.com/microsoft/autogen",
+      "publication_or_update_date": "maintenance mode at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": "maintenance status and successor notice"
+    },
+    {
+      "title": "mini-SWE-agent Overview",
+      "publisher_or_author": "SWE-agent team, Princeton/Stanford",
+      "url": "https://mini-swe-agent.com/latest/",
+      "publication_or_update_date": "V2; living docs updated through 2026",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "recommended successor, minimal loop, environment support and vendor benchmark claim"
+    },
+    {
+      "title": "Keeping your GitHub Actions and workflows secure: Preventing pwn requests",
+      "publisher_or_author": "GitHub Security Lab",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_or_update_date": "2021-08-20",
+      "access_date": "2026-09-13",
+      "source_type": "independent security guidance",
+      "supported_claims": "pull_request_target plus untrusted checkout credential theft"
+    },
+    {
+      "title": "SWE-agent Environments",
+      "publisher_or_author": "SWE-agent team",
+      "url": "https://swe-agent.com/latest/config/environments/",
+      "publication_or_update_date": "living docs updated 2026-07-16 sitemap; accessed at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Docker environments and maintenance-only status"
+    },
+    {
+      "title": "SWE-agent Batch mode",
+      "publisher_or_author": "SWE-agent team",
+      "url": "https://swe-agent.com/latest/usage/batch_mode/",
+      "publication_or_update_date": "living docs updated 2026-07-16 sitemap; accessed at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "parallel batch runner and resource/cost caveats"
+    },
+    {
+      "title": "SWE-agent command line interface",
+      "publisher_or_author": "SWE-agent team",
+      "url": "https://swe-agent.com/latest/usage/cli/",
+      "publication_or_update_date": "living docs updated 2026-07-16 sitemap; accessed at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "single/batch/replay/inspection commands"
+    },
+    {
+      "title": "SWE-agent Output files / trajectories",
+      "publisher_or_author": "SWE-agent team",
+      "url": "https://swe-agent.com/latest/usage/trajectories/",
+      "publication_or_update_date": "living docs updated 2026-07-16 sitemap; accessed at cutoff",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "thought/action/observation audit artifacts"
+    }
+  ],
+  "confidence": {
+    "overall": "High for documented mechanics, architecture and current project status; medium for relative maturity and security recommendations; low for production effectiveness/economics because no comparable independent field data were found.",
+    "claim_levels": [
+      {
+        "level": "high",
+        "claims": "OpenHands GitHub trigger flow, V1 components, sandbox options, headless always-approve; SWE-agent maintenance status/CLI/trajectories; Aider scripting/git/test behavior; Open SWE declared architecture; each directly documented or visible in source repositories."
+      },
+      {
+        "level": "medium",
+        "claims": "Framework comparison and recommended two-plane design. These synthesize direct capabilities with standard security/durability guidance but were not tested in one deployment."
+      },
+      {
+        "level": "medium-low",
+        "claims": "Published benchmark numbers as estimates of general coding skill. They are exact reports but model/config/dataset specific and challenged by leakage/test audits."
+      },
+      {
+        "level": "low/unknown",
+        "claims": "Current OSS production acceptance rate, reviewer savings, incident rate, total cost, and safe auto-merge threshold; no adequate evidence found."
+      }
+    ],
+    "method": "Primary docs, repositories and peer-reviewed papers were preferred; independent benchmark audits and security guidance were added. Vendor/maintainer claims are labeled and benchmark-to-production extrapolation is rejected."
+  },
+  "conflicts": [
+    {
+      "claim_a": "SWE-agent's paper reports 12.47%/12.5% resolution on original SWE-bench.",
+      "claim_b": "SWE-bench+ says leakage and weak tests reduce its filtered rate to 3.97%.",
+      "resolution": "Both may be internally correct under different task-validity rules. Use fresh, independently specified private tasks and trusted tests, not the headline as an SLA.",
+      "urls": [
+        "https://arxiv.org/abs/2405.15793",
+        "https://arxiv.org/abs/2410.06992"
+      ]
+    },
+    {
+      "claim_a": "Complex autonomous tool loops are presented as enabling repository work.",
+      "claim_b": "Agentless reported 32% Lite at $0.70 with a simpler fixed pipeline, better than then-open-source agents.",
+      "resolution": "Complex orchestration adds integration and recoverability features, not guaranteed repair accuracy. Benchmark simple fixed pipelines against agentic loops per task class.",
+      "urls": [
+        "https://arxiv.org/abs/2407.01489",
+        "https://arxiv.org/abs/2405.15793"
+      ]
+    },
+    {
+      "claim_a": "SWE-bench/Verified leaderboards imply increasing resolution capability.",
+      "claim_b": "SWE-rebench and UTBoost report contamination and inadequate tests that can inflate or reorder results.",
+      "resolution": "Report exact benchmark/config/date but base adoption on post-cutoff/private tasks with independent tests.",
+      "urls": [
+        "https://arxiv.org/abs/2505.20411",
+        "https://aclanthology.org/2025.acl-long.189/"
+      ]
+    },
+    {
+      "claim_a": "OpenHands has in-SDK risk confirmation.",
+      "claim_b": "OpenHands headless mode always approves and cannot expose that interactive confirmation.",
+      "resolution": "For CI/headless, move approvals and enforcement into the outer workflow/policy/sandbox; do not claim the SDK gate protects every execution path.",
+      "urls": [
+        "https://docs.openhands.dev/sdk/arch/security",
+        "https://docs.openhands.dev/openhands/usage/cli/headless"
+      ]
+    },
+    {
+      "claim_a": "Open-source frameworks imply self-hostable control.",
+      "claim_b": "Some complete workflows rely on edition-specific integrations, external model/sandbox services, or (for Open SWE production self-hosting) a LangGraph Agent Server license key.",
+      "resolution": "Audit the actual dependency graph, licenses, egress and deployment mode; distinguish OSS code from commercial services.",
+      "urls": [
+        "https://github.com/OpenHands/OpenHands",
+        "https://github.com/langchain-ai/open-swe"
+      ]
+    },
+    {
+      "claim_a": "OpenHands' paper describes a generalist-agent platform/monolith-era system.",
+      "claim_b": "Current repository/docs center Agent Canvas plus separate SDK, Agent Server and Automation Server, with V1 'sandbox' replacing legacy 'runtime'.",
+      "resolution": "Treat the paper as historical benchmark evidence and current V1 docs/repos as architecture truth; pin versions.",
+      "urls": [
+        "https://arxiv.org/abs/2407.16741",
+        "https://docs.openhands.dev/openhands/usage/agent-canvas/architecture",
+        "https://docs.openhands.dev/openhands/usage/sandboxes/overview"
+      ]
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    {
+      "topic": "Future-day precision",
+      "uncertainty": "Research sources were accessed against the requested 2026-09-13 cutoff; continuously updated documentation may change without dated revisions. Sitemap dates were available for SWE-agent, but many pages do not expose a stable update date."
+    },
+    {
+      "topic": "Production outcomes",
+      "uncertainty": "No independent, longitudinal, apples-to-apples deployment data found for accepted/merged PR rate, human review time, rollback/security incidence or all-in cost across OpenHands, Aider, mini-SWE-agent or Open SWE."
+    },
+    {
+      "topic": "Edition and license boundaries",
+      "uncertainty": "OpenHands integrations vary across Cloud, Local/OSS and Enterprise. Open SWE is MIT, but its README says production self-hosting uses standalone LangGraph Agent Server and requires a license key; exact commercial obligations need legal/vendor confirmation."
+    },
+    {
+      "topic": "Security assurance",
+      "uncertainty": "Documentation describes containers, risk prompts and permission practices, but no independently verified end-to-end security audit or complete threat model was found for an untrusted-issue-to-PR deployment."
+    },
+    {
+      "topic": "Benchmark comparability",
+      "uncertainty": "Scores depend on benchmark variant, model, prompt, tools, attempt count, budget and date. Leakage/weak-test audits materially challenge public results; no current score should be mapped directly to production probability."
+    },
+    {
+      "topic": "Project churn",
+      "uncertainty": "SWE-agent is maintenance-only; AutoGen is maintenance mode; OpenHands V1 and Open SWE are evolving. Current APIs and repository organization may change after the cutoff."
+    },
+    {
+      "topic": "Aider automation API stability",
+      "uncertainty": "Aider documents its Python scripting API as not officially supported/backward compatible; one-shot CLI is the safer contract, but exit status/diff still require independent validation."
+    },
+    {
+      "topic": "GitHub metadata",
+      "uncertainty": "Popularity counts were intentionally not used as maturity proof. Stars/forks/open-issue counts change continuously and do not establish reliability."
+    }
+  ]
+}

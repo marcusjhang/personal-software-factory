@@ -1,0 +1,181 @@
+{
+  "reviewer": "round-9 independent requirements and architecture closure auditor",
+  "scope": {
+    "mode": "final PLAN-only closure audit after round-8 combined correction",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-8-resolution.md",
+      "review/round-8-closure/evidence-status.json",
+      "review/round-8-closure/formal-state.json",
+      "review/round-8-closure/improvement-product.json",
+      "review/round-8-closure/cleanup-reclaim.json",
+      "review/round-8-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json"
+    ],
+    "specialty": "All 16 requirements; full owner journey; authority, roadmap, security, dogfood, GTM, cross-scope architecture, and cross-document consistency.",
+    "severity_rule": "Critical/high is reserved for a direct unmet requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Future implementation, full reachable-product/model proof, fresh immutable evidence retrieval, human semantic review, reviewed-edge regeneration, and later admission gates are accepted as unperformed and are not findings."
+  },
+  "contract_reproduction": [
+    {
+      "area": "requirements_and_owner_journey",
+      "result": "pass",
+      "exact_contract": "R-01 through R-16 remain mapped to exact PLAN clauses, the sole \u00a720 roadmap, validation, and human gates. PLAN \u00a7\u00a72, 9, 10.1, 14, 15, and 17 cover install; ideation and research; typed decisions; exact-digest READY; admission; isolated execution; review; merge and Effect reconciliation; observation; rollback; cleanup; consumer release; export; and uninstall. The Issue/CLI surface remains an explicitly future contract with session-derived identity, displayed digest/diff, durable typed event/receipt, wait/error response, replay behavior, and retention/export rules."
+    },
+    {
+      "area": "authority_readiness_and_security",
+      "result": "pass",
+      "exact_contract": "Protected Git, authenticated human issuance, approval custody, the purpose-only PolicyAdmissionReceipt issuer, runtime validation, narrow actuators, durable facts, external resources, and disposable workers remain separate authorities. Bounded delegation applies only to closed R0/R1 profiles after every human-needed predicate is false. R2-R4, exception, UNKNOWN, canary, widening, promotion, cleanup-risk, quiescence, and break-glass decisions remain human controlled. Tenant plus typed ScopeRef identity, signed context, purpose-bound approvals, restricted database roles, total sandbox selection, capability intersection, supply-chain pins, and non-waivable break-glass boundaries fail closed."
+    },
+    {
+      "area": "roadmap_persistence_review_and_delivery",
+      "result": "pass",
+      "exact_contract": "PLAN \u00a720 remains the sole increment-numbering authority. Release 0 is one-owner/one-repository, read-only, credential-free, restartable, repair-receipted, and exportable. External writers wait for Increment 3 PostgreSQL restricted-role, CAS/outbox, database-time lease, restore/replay, and real two-session race proof. A second repository waits for FORCE ROW LEVEL SECURITY or stronger isolation, substitution tests, and Increment 8. Reviews bind exact heads and expire on change; auto-merge remains off through Release 0 and the draft-PR pilot, then is limited to one earned closed R1 profile."
+    },
+    {
+      "area": "dogfood_gtm_and_cross_scope",
+      "result": "pass",
+      "exact_contract": "Consumer releases inventory, pin, and rehash managed inputs and outputs, and produce verification or rollback receipts through self-test, isolated dogfood, and opt-in rings. Cross-boundary transfer requires a dual-owner, purpose- and field-limited, expiring, revocable envelope and receipt. Engineering remains first. GTM begins only after engineering admission as proposal/read-only research with a named owner; publication, spend, and contact remain human-gated."
+    },
+    {
+      "area": "round_8_formal_contracts",
+      "result": "pass",
+      "exact_contract": "R8-C01 declares rollback_state={IDLE,REQUESTED,ROLLING_BACK,VERIFYING,VERIFIED,FAILED,REMEDIATION_WAIT,ROLLED_BACK}; priority 2 and 7 map the six active values positionally, with REMEDIATION_WAIT exactly BLOCKED. R8-C02 requires HEALTHY plus CURRENT_CONTINUITY for progress and uses synchronized IH01-C/W/A/P/D/O degradation rows. R8-C03 requires exposure/no-exposure product exits for E09, E10, E30, E31, E33, E35 and E20, E21, E24, E25, E28, E29, E37, E39. R8-C04 makes every exposed IW*, IWD*, IP*, and IPD* product atomically enter rollback IDLE->REQUESTED and create one bound saga. R8-C05 lets ICL02 consume final C02 or legal-retention C12. R8-C06 supplies disjoint IA07-* and IA08-* rows for every legal candidate phase and makes IA17 the sole immutable FAILED release exit. R8-C07 partitions non-revoking RO03-RO06 signals from transactional RO01-R/RO02-R or RO11/RO12/RO13 revocation, with RO14 sole reauthorization. These current manifest contracts reproduce the seven safety/formal repairs; no implementation or generated proof is inferred."
+    },
+    {
+      "area": "schema_3_evidence_package",
+      "result": "pass",
+      "exact_contract": "Independent SHA-256 recomputation gives PLAN.md 9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5 and docs/state-transition-manifests.md 8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2, exactly matching material-claims.json generated_against. Dynamic enumeration gives 28 numbered manifest headings and matches the reviewed set. Schema 3.0.0 records 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports, and zero refutes; every edge is unreviewed_candidate. The research manifest and graph describe deterministic checkout-local structural validation only, not fresh retrieval or semantic entailment."
+    },
+    {
+      "area": "status_and_cross_document_consistency",
+      "result": "partial",
+      "exact_contract": "README Status and traceability \u00a711 say round-8 correction and current-byte schema-3 candidate-only regeneration are complete while implementation, full model proof, fresh retrieval, semantic review, reviewed-edge regeneration, and independent closure remain pending. However, traceability \u00a710 says the later round-8 edit supersedes the round-7 bytes 'so only the current round-8 status below declares regeneration pending.' The status below instead declares regeneration complete. This present-tense contradiction leaves R8-C08 incompletely repaired."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R9-REQ-001",
+      "severity": "high",
+      "title": "Traceability still says the current round-8 status declares regeneration pending although that status declares it complete",
+      "requirement": "The authoritative plan-only package must describe checkout-level evidence readiness consistently and distinguish completed schema-3 candidate-only regeneration from the separate future fresh-evidence, semantic-review, implementation, model, and closure gates.",
+      "evidence": [
+        "review/requirements-traceability.md \u00a710 says: 'The later round-8 formal edit supersedes those normative bytes, so only the current round-8 status below declares regeneration pending.'",
+        "review/requirements-traceability.md \u00a711 instead says: 'The schema-3 candidate-only material graph now matches the current PLAN and manifest digests and dynamically covers all 28 current headings.'",
+        "README.md Status says round-8 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current digests.",
+        "review/round-8-resolution.md R8-C08 says current \u00a711 and README state that round-8 schema-3 regeneration completed, and says \u00a7\u00a76-8 were rewritten to be historical.",
+        "Independent recomputation confirms the graph binds the current PLAN SHA-256 9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5 and manifest SHA-256 8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2 and covers the exact dynamically derived 28-heading set."
+      ],
+      "impact": "The named authoritative traceability artifact gives mutually exclusive present-tense states for the same round-8 regeneration. A reader cannot rely on it to determine whether current-byte candidate-only regeneration is complete or is still a pending gate. This directly defeats the unambiguous-currentness contract R8-C08, although it does not promote candidate evidence or prove implementation.",
+      "recommendation": "In traceability \u00a710, replace 'so only the current round-8 status below declares regeneration pending' with wording that the round-8 edit superseded the round-7 bytes and the completed round-8 regeneration is recorded below. Keep fresh immutable retrieval, same-run human semantic review, reviewed-edge regeneration, implementation/model proof, and independent closure as separate pending gates.",
+      "verification": "README Status, traceability \u00a7\u00a710-11, round-8-resolution R8-C08, and material-claims.json must all agree that current-byte candidate-only regeneration is complete, with no statement that \u00a711 declares it pending. They must continue to withhold semantic, provenance, implementation, model, safety, and closure claims.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "requirements_partial": 0,
+    "round_8_review_files_reviewed": 5,
+    "round_8_raw_critical_findings_reviewed": 1,
+    "round_8_raw_high_findings_reviewed": 14,
+    "round_8_stable_clauses_reviewed": 8,
+    "round_8_stable_clauses_closed": 7,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "No implementation, full reachable-product/model proof, operational safety proof, fresh external-source retrieval, or human semantic entailment review was required or inferred.",
+    "Fresh immutable retrieval in one ResearchRun, same-run human semantic review, reviewed-edge regeneration, Increment 0/1 gates, and later persistence/admission gates remain future work rather than findings.",
+    "The round-8 review files describe pre-correction bytes and were used as exact correction contracts; their retained findings are not unresolved merely because those files remain in the repository."
+  ],
+  "closure_criteria_pass": false
+}

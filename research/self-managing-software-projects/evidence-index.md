@@ -1,0 +1,533 @@
+# Evidence index
+
+As of 2026-09-13. This index contains 488 source records across 14 tracks (387 unique URLs before title-level deduplication).
+
+## Autonomous Coding Agent Platforms
+
+- [Introducing Devin](https://docs.devin.ai/) — Cognition; official documentation; unknown; live documentation as accessed
+- [Security at Cognition](https://docs.devin.ai/admin/security) — Cognition; official security documentation; unknown; live documentation as accessed
+- [API Overview](https://docs.devin.ai/api-reference/overview) — Cognition; official API documentation; unknown; live v3 documentation as accessed
+- [Self-serve plans](https://docs.devin.ai/admin/billing/self-serve) — Cognition; official pricing documentation; unknown; live documentation as accessed
+- [Devin is now generally available](https://cognition.com/blog/devin-generally-available) — Cognition Team; vendor announcement; 2024-12-10
+- [Devin's 2025 Performance Review: Learnings From 18 Months of Agents At Work](https://cognition.com/blog/devin-annual-performance-review-2025) — Cognition Team; vendor performance report; 2025-11-14
+- [Estimating the Productivity of an Autonomous AI Software Engineer](https://cognition.com/blog/ai-productivity) — Cognition Team; vendor methodology report; 2026-06-04
+- [How Cognition Uses Devin to Build Devin](https://cognition.com/blog/how-cognition-uses-devin-to-build-devin) — Cognition Team; first-party case study; 2026-02-27
+- [Codex cloud](https://developers.openai.com/codex/cloud) — OpenAI; official documentation; unknown; live documentation as accessed
+- [Cloud environments](https://developers.openai.com/codex/cloud/environments) — OpenAI; official documentation; unknown; live documentation as accessed
+- [Agent internet access](https://developers.openai.com/codex/cloud/internet-access) — OpenAI; official security documentation; unknown; live documentation as accessed
+- [Pricing](https://developers.openai.com/codex/pricing) — OpenAI; official pricing documentation; unknown; live pricing as accessed
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) — GitHub; official documentation; unknown; live documentation as accessed
+- [Risks and mitigations for GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations) — GitHub; official security documentation; unknown; live documentation as accessed
+- [About third-party coding agents](https://docs.github.com/en/copilot/concepts/agents/about-third-party-coding-agents) — GitHub; official preview documentation; unknown; public preview as accessed
+- [About rationale, confidence, and approvals for issues](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automation-rationale-and-approvals) — GitHub; official preview documentation; unknown; public preview as accessed
+- [Claude Code overview](https://code.claude.com/docs/en/overview) — Anthropic; official documentation; unknown; live documentation as accessed
+- [Claude Code security](https://code.claude.com/docs/en/security) — Anthropic; official security documentation; unknown; live documentation as accessed
+- [Claude Code GitHub Actions](https://code.claude.com/docs/en/github-actions) — Anthropic; official integration documentation; unknown; live documentation as accessed
+- [Configure the sandboxed Bash tool](https://code.claude.com/docs/en/sandboxing) — Anthropic; official security documentation; unknown; live documentation as accessed
+- [Monitoring](https://code.claude.com/docs/en/monitoring-usage) — Anthropic; official observability documentation; unknown; live documentation as accessed
+- [Manage costs effectively](https://code.claude.com/docs/en/costs) — Anthropic; official cost documentation; unknown; live documentation as accessed
+- [Cloud Agents](https://cursor.com/docs/cloud-agent) — Cursor; official documentation; unknown; live documentation as accessed
+- [Cloud Agents: Security overview](https://cursor.com/docs/cloud-agent/security) — Cursor; official security documentation; unknown; live documentation as accessed
+- [Getting started with Jules](https://jules.google/docs/) — Google; official documentation; unknown; live documentation as accessed
+- [Jules, Google’s asynchronous AI coding agent, is out of public beta](https://blog.google/innovation-and-ai/models-and-research/google-labs/jules-now-available/) — Google; vendor announcement; 2025-08-06
+- [OpenHands repository](https://github.com/All-Hands-AI/OpenHands) — All-Hands-AI contributors; source repository; rolling; repository accessed 2026-09-13
+- [Thoughts On A Month With Devin](https://www.answer.ai/posts/2025-01-08-devin.html) — Hamel Husain, Isaac Flath, Johno Whitaker; Answer.AI; independent operational evaluation; 2025-01-08
+- [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/abs/2507.09089) — Joel Becker, Nate Rush, Elizabeth Barnes, David Rein; METR; independent randomized controlled study/preprint; 2025-07-25 v2
+- [We are Changing our Developer Productivity Experiment Design](https://metr.org/blog/2026-02-24-uplift-update/) — Joel Becker et al.; METR; independent research update; 2026-02-24
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Carlos E. Jimenez et al.; Princeton/ICLR 2024; peer-reviewed benchmark paper; 2024-11-11 v3; ICLR 2024
+- [SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents](https://arxiv.org/abs/2505.20411) — Ibragim Badertdinov et al.; NeurIPS 2025; peer-reviewed benchmark paper; 2025-11-04 v2; NeurIPS 2025
+- [SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?](https://arxiv.org/abs/2502.12115) — Samuel Miserendino et al.; OpenAI; research benchmark paper; 2025-05-29 v4
+- [AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents](https://arxiv.org/abs/2406.13352) — Edoardo Debenedetti et al.; academic security benchmark; 2024-11-24 v3
+
+## Open Source Agent Frameworks
+
+- [UTBoost: Rigorous Evaluation of Coding Agents on SWE-Bench](https://aclanthology.org/2025.acl-long.189/) — ACL Anthology / paper authors; peer-reviewed paper; 2025
+- [Git integration](https://aider.chat/docs/git.html) — Aider project; official documentation; unknown; living documentation
+- [Aider LLM Leaderboards](https://aider.chat/docs/leaderboards/) — Aider project; first-party benchmark; continuously updated; specific displayed runs dated 2025
+- [Repository map](https://aider.chat/docs/repomap.html) — Aider project; official documentation; unknown; living documentation
+- [Scripting aider](https://aider.chat/docs/scripting.html) — Aider project; official documentation; unknown; living documentation
+- [File editing problems](https://aider.chat/docs/troubleshooting/edit-errors.html) — Aider project; official troubleshooting documentation; unknown; living documentation
+- [Linting and testing](https://aider.chat/docs/usage/lint-test.html) — Aider project; official documentation; unknown; living documentation
+- [SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793) — Yang et al.; NeurIPS 2024; peer-reviewed paper / author evaluation; 2024-05-24; revised 2024-11-08
+- [Agentless: Demystifying LLM-based Software Engineering Agents](https://arxiv.org/abs/2407.01489) — Xia et al.; FSE 2025; peer-reviewed paper; 2024-07-01; revised 2025-02-27
+- [OpenHands: An Open Platform for AI Software Developers as Generalist Agents](https://arxiv.org/abs/2407.16741) — Wang et al.; ICLR 2025; peer-reviewed paper / author evaluation; 2024-07-23; revised 2025-04-30
+- [SWE-Bench+: Enhanced Coding Benchmark for LLMs](https://arxiv.org/abs/2410.06992) — Yu et al.; ICSE Companion 2025; peer-reviewed paper; 2024-10-09
+- [SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents](https://arxiv.org/abs/2505.20411) — Badertdinov et al.; research paper/preprint; 2025-05-26
+- [Interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts) — LangChain; official documentation; unknown; living documentation
+- [Persistence](https://docs.langchain.com/oss/python/langgraph/persistence) — LangChain; official documentation; unknown; living documentation
+- [Agent Canvas Architecture](https://docs.openhands.dev/openhands/usage/agent-canvas/architecture) — OpenHands; official documentation; unknown; living V1 documentation
+- [Headless Mode](https://docs.openhands.dev/openhands/usage/cli/headless) — OpenHands; official documentation; unknown; living V1 documentation
+- [GitHub Integration](https://docs.openhands.dev/openhands/usage/cloud/github-installation) — OpenHands; official documentation; unknown; living documentation
+- [When to Use OpenHands](https://docs.openhands.dev/openhands/usage/essential-guidelines/when-to-use-openhands) — OpenHands; official guidance; unknown; living documentation
+- [Sandbox Configuration Overview](https://docs.openhands.dev/openhands/usage/sandboxes/overview) — OpenHands; official documentation; unknown; living V1 documentation
+- [Events](https://docs.openhands.dev/sdk/arch/events) — OpenHands; official documentation; unknown; living SDK documentation
+- [OpenHands SDK Architecture Overview](https://docs.openhands.dev/sdk/arch/overview) — OpenHands; official documentation; unknown; living SDK documentation
+- [Security](https://docs.openhands.dev/sdk/arch/security) — OpenHands; official documentation; unknown; living SDK documentation
+- [Workflow message passing](https://docs.temporal.io/encyclopedia/workflow-message-passing) — Temporal Technologies; official documentation; unknown; living documentation
+- [Workflows](https://docs.temporal.io/workflows) — Temporal Technologies; official documentation; unknown; living documentation
+- [LLM01: Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) — OWASP GenAI Security Project; industry security guidance; 2025 edition
+- [LLM06: Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) — OWASP GenAI Security Project; industry security guidance; 2025 edition
+- [Aider repository](https://github.com/Aider-AI/aider) — Aider project / Paul Gauthier and contributors; source repository; active at cutoff
+- [OpenHands repository / Agent Canvas](https://github.com/OpenHands/OpenHands) — OpenHands contributors; source repository; beta; active at cutoff
+- [LangGraph repository](https://github.com/langchain-ai/langgraph) — LangChain contributors; source repository; active at cutoff
+- [Open SWE repository and README](https://github.com/langchain-ai/open-swe) — LangChain contributors; source repository / first-party reference application; active/evolving at cutoff
+- [AutoGen repository and README](https://github.com/microsoft/autogen) — Microsoft and contributors; source repository; maintenance mode at cutoff
+- [mini-SWE-agent Overview](https://mini-swe-agent.com/latest/) — SWE-agent team, Princeton/Stanford; official documentation; V2; living docs updated through 2026
+- [Keeping your GitHub Actions and workflows secure: Preventing pwn requests](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/) — GitHub Security Lab; independent security guidance; 2021-08-20
+- [SWE-agent Environments](https://swe-agent.com/latest/config/environments/) — SWE-agent team; official documentation; living docs updated 2026-07-16 sitemap; accessed at cutoff
+- [SWE-agent Batch mode](https://swe-agent.com/latest/usage/batch_mode/) — SWE-agent team; official documentation; living docs updated 2026-07-16 sitemap; accessed at cutoff
+- [SWE-agent command line interface](https://swe-agent.com/latest/usage/cli/) — SWE-agent team; official documentation; living docs updated 2026-07-16 sitemap; accessed at cutoff
+- [SWE-agent Output files / trajectories](https://swe-agent.com/latest/usage/trajectories/) — SWE-agent team; official documentation; living docs updated 2026-07-16 sitemap; accessed at cutoff
+
+## Issue And Specification Driven Development
+
+- [Syntax for GitHub's form schema](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema) — GitHub; official documentation; undated; live documentation, public preview
+- [Adding sub-issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues) — GitHub; official documentation; undated; live documentation
+- [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue) — GitHub; official documentation; undated; live documentation
+- [Best practices for using GitHub Copilot to work on tasks](https://docs.github.com/en/copilot/using-github-copilot/coding-agent/best-practices-for-using-copilot-to-work-on-tasks) — GitHub; vendor documentation; undated; live documentation
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent) — GitHub; vendor documentation; undated; live documentation
+- [Review output from Copilot](https://docs.github.com/en/copilot/using-github-copilot/coding-agent/reviewing-a-pull-request-created-by-copilot) — GitHub; vendor documentation; undated; live documentation
+- [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches) — GitHub; official documentation; undated; live documentation
+- [Spec Kit repository README](https://github.com/github/spec-kit) — GitHub; source repository / first-party documentation; repository state accessed 2026-09-13; README announces 1.0.0
+- [Spec-driven development with AI: Get started with a new open source toolkit](https://github.blog/news-insights/product-news/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/) — Den Delimarsky, GitHub; first-party product announcement; 2025-09-02
+- [Specs](https://kiro.dev/docs/specs/) — Kiro / Amazon Web Services; vendor documentation; updated 2026-08-27
+- [OpenSpec repository README](https://github.com/Fission-AI/OpenSpec) — Fission-AI; source repository / first-party documentation; repository state accessed 2026-09-13
+- [Description templates](https://docs.gitlab.com/user/project/description_templates/) — GitLab; official documentation; live docs; histories include 17.10 and 18.1 changes
+- [Manage issues](https://docs.gitlab.com/user/project/issues/managing_issues/) — GitLab; official documentation; live docs; feature histories shown
+- [Software Development Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/) — GitLab; vendor documentation; live docs; generally available in GitLab 18.8
+- [Write the Pitch (Shape Up, Chapter 6)](https://basecamp.com/shapeup/1.5-chapter-06) — Ryan Singer / Basecamp; first-party methodology / book; 2019
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Carlos E. Jimenez et al.; peer-reviewed conference paper / preprint; submitted 2023-10-10; revised 2024-11-11
+- [SWE-bench project: Original benchmark](https://www.swebench.com/original.html) — Princeton NLP contributors; academic project documentation; released 2023-10; live project page
+- [SWE-Bench+: Enhanced Coding Benchmark for LLMs](https://arxiv.org/abs/2410.06992) — Reem Aleithan et al.; independent empirical preprint; 2024-10-10 revision
+- [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) — Joel Becker et al., METR; independent randomized controlled trial report; 2025-07-10
+- [We are Changing our Developer Productivity Experiment Design](https://metr.org/blog/2026-02-24-uplift-update/) — Joel Becker et al., METR; independent follow-up study report; 2026-02-24
+- [Reference: Gherkin](https://cucumber.io/docs/gherkin/reference) — Cucumber; official open-source documentation; undated; live documentation
+- [RFC 2119: Key words for use in RFCs to Indicate Requirement Levels](https://www.rfc-editor.org/rfc/rfc2119) — S. Bradner / IETF; standard / foundational primary source; 1997-03; updated by RFC 8174 in 2017
+- [Secure use reference](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions) — GitHub; official security documentation; undated; live documentation
+- [About Copilot automations](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automations) — GitHub; vendor documentation; undated; live documentation accessed 2026-09-13
+- [About GitHub Agentic Workflows](https://docs.github.com/en/copilot/concepts/agents/about-github-agentic-workflows) — GitHub; vendor documentation; undated; live documentation, public preview
+- [Accelerate State of DevOps Report 2024](https://dora.dev/research/2024/dora-report/) — DORA / Google Cloud; industry survey research; 2024 report; page updated 2026-04-13
+- [pstack README](https://github.com/cursor/plugins/tree/main/pstack) — poteto; distributed in Cursor plugins repository; source repository / first-party workflow documentation; repository state accessed 2026-09-13
+- [pstack Feature playbook](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/feature.md) — poteto; Cursor plugins repository; source repository / workflow specification; repository state accessed 2026-09-13
+- [pstack Multi-phase or multi-PR plan playbook](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/multi-phase-plan.md) — poteto; Cursor plugins repository; source repository / workflow specification; repository state accessed 2026-09-13
+- [pstack Bug fix playbook](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/bug-fix.md) — poteto; Cursor plugins repository; source repository / workflow specification; repository state accessed 2026-09-13
+
+## Ci Cd And Agent Execution Integration
+
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent) — GitHub; official documentation; continuously updated; exact page date not stated
+- [Configure the development environment](https://docs.github.com/en/copilot/how-tos/agents/copilot-coding-agent/customize-the-agent-environment) — GitHub; official documentation; continuously updated; exact page date not stated
+- [Customizing or disabling the firewall for GitHub Copilot](https://docs.github.com/en/copilot/how-tos/agents/copilot-coding-agent/customize-the-agent-firewall) — GitHub; official security documentation; continuously updated; exact page date not stated
+- [Secure use reference](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions) — GitHub; official security documentation; continuously updated; exact page date not stated
+- [Managing environments for deployment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) — GitHub; official documentation; continuously updated; exact page date not stated
+- [OpenID Connect](https://docs.github.com/en/actions/concepts/security/openid-connect) — GitHub; official documentation; continuously updated; exact page date not stated
+- [Claude Code GitHub Actions](https://code.claude.com/docs/en/github-actions) — Anthropic; vendor documentation; continuously updated; exact page date not stated
+- [Claude Code GitLab CI/CD](https://code.claude.com/docs/en/gitlab-ci-cd) — Anthropic; vendor documentation; continuously updated; exact page date not stated
+- [Codex cloud](https://developers.openai.com/codex/cloud) — OpenAI; vendor documentation; continuously updated; exact page date not stated
+- [Cloud environments](https://developers.openai.com/codex/cloud/environments) — OpenAI; vendor documentation; continuously updated; exact page date not stated
+- [Agent internet access – Codex web](https://developers.openai.com/codex/cloud/internet-access) — OpenAI; vendor security documentation; continuously updated; exact page date not stated
+- [Codex GitHub Action](https://developers.openai.com/codex/github-action) — OpenAI; vendor documentation; continuously updated; exact page date not stated
+- [Non-interactive mode](https://developers.openai.com/codex/noninteractive) — OpenAI; vendor documentation; continuously updated; exact page date not stated
+- [openai/codex-action repository](https://github.com/openai/codex-action) — OpenAI; source repository; repository state accessed 2026-09-13
+- [GitLab Duo Agent Platform](https://docs.gitlab.com/user/duo_agent_platform/) — GitLab; official documentation; reflects GitLab 18.x; exact page date not stated
+- [Software Development Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/) — GitLab; official documentation; GA in GitLab 18.8 per page history
+- [Deployment approvals](https://docs.gitlab.com/ci/environments/deployment_approvals/) — GitLab; official documentation; continuously updated; exact page date not stated
+- [Protected environments](https://docs.gitlab.com/ci/environments/protected_environments/) — GitLab; official documentation; continuously updated; exact page date not stated
+- [Security for self-managed runners](https://docs.gitlab.com/runner/security/) — GitLab; official security documentation; continuously updated; exact page date not stated
+- [Docker Sandbox](https://docs.openhands.dev/openhands/usage/runtimes/docker) — OpenHands; open-source documentation; continuously updated; exact page date not stated
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Jimenez et al. (ICLR 2024); peer-reviewed paper; 2023-10-10; revised 2024-11-11
+- [SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793) — Yang et al.; research paper; 2024-05-06; revised 2024-11-11
+- [Measuring AI Ability to Complete Long Software Tasks](https://arxiv.org/abs/2503.14499) — METR; independent research paper; 2025-03-18; later revisions available
+- [AgentDojo](https://arxiv.org/abs/2406.13352) — Debenedetti et al.; peer-reviewed security research; 2024-06-19; revised 2024-11-24
+- [Agent Security Bench (ASB)](https://arxiv.org/abs/2410.02644) — Zhang et al. (ICLR 2025); peer-reviewed security research; 2024-10-03; ICLR 2025
+- [RedCode](https://arxiv.org/abs/2411.07781) — Guo et al.; research paper; 2024-11-12; later revisions available
+- [Announcing the 2024 DORA report](https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report) — DORA / Google Cloud; industry empirical research (vendor-affiliated); 2024-10-22
+- [Preventing pwn requests](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/) — GitHub Security Lab; first-party security research; 2020-12-16
+- [SLSA v1.1 Security levels](https://slsa.dev/spec/v1.1/levels) — OpenSSF / SLSA; open standard; v1.1; release context 2025-04-22
+- [Artifact attestations](https://docs.github.com/en/actions/concepts/security/artifact-attestations) — GitHub; official documentation; continuously updated; exact page date not stated
+- [SWE-bench-Live: Can AI Agents Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2505.23419) — SWE-bench-Live authors (NeurIPS 2025); peer-reviewed paper; 2025-05-29; NeurIPS 2025
+- [ARGUS: A Framework for Staged Static Taint Analysis of GitHub Workflows and Actions](https://www.usenix.org/conference/usenixsecurity23/presentation/muralee) — Muralee et al. (USENIX Security 2023); peer-reviewed security paper; 2023-08
+- [GitHub Actions Supply Chain Attack: ReviewDog and tj-actions Compromised](https://unit42.paloaltonetworks.com/github-actions-supply-chain-attack/) — Palo Alto Networks Unit 42; independent incident investigation; 2025-03-20; updated 2025-04-02
+- [MCP Security Notification: Tool Poisoning Attacks and GitHub MCP Exploitation](https://invariantlabs.ai/blog/mcp-github-vulnerability.html) — Invariant Labs; independent security demonstration; 2025-05-26
+- [Optionally skip approval for Copilot coding agent Actions workflows](https://github.blog/changelog/2026-03-13-optionally-skip-approval-for-copilot-coding-agent-actions-workflows) — GitHub Changelog; official changelog; 2026-03-13
+- [Configure secrets and variables for Copilot cloud agent](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/configure-secrets-and-variables) — GitHub; official documentation; continuously updated; exact page date not stated
+- [Configure flow execution](https://docs.gitlab.com/user/duo_agent_platform/flows/execution/) — GitLab; official documentation; introduced GitLab 18.3; living page
+- [Composite identity](https://docs.gitlab.com/user/duo_agent_platform/composite_identity/) — GitLab; official security documentation; GA GitLab 18.8; automatic since 18.9
+- [Sessions](https://docs.gitlab.com/user/duo_agent_platform/sessions/) — GitLab; official documentation; continuously updated; exact page date not stated
+- [OpenHands sandbox overview](https://docs.openhands.dev/openhands/usage/sandboxes/overview) — OpenHands; open-source documentation; 2026-02-11
+- [Conversations and Sandboxes](https://docs.openhands.dev/enterprise/conversations-and-sandboxes) — OpenHands; vendor/open-source documentation; 2026-08-13
+- [OpenHands Security](https://docs.openhands.dev/sdk/arch/security) — OpenHands SDK; open-source architecture documentation; 2026-01-26
+- [Environments](https://swe-agent.com/latest/config/environments/) — SWE-agent; open-source documentation; living page accessed 2026-09-13
+- [Deployments and environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) — GitHub; official documentation; continuously updated; exact page date not stated
+
+## Dependency And Security Maintenance
+
+- [Configuration options for the dependabot.yml file](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About Dependabot security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About Dependabot alerts](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About dependency review](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [Troubleshooting Dependabot on GitHub Actions](https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About autofix for CodeQL code scanning](https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-autofix-for-codeql-code-scanning) — GitHub Docs; official/vendor documentation; continuously updated; exact page date not shown
+- [Responsible use of Copilot Autofix for code scanning](https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning) — GitHub Docs; official/vendor limitations; continuously updated; exact page date not shown
+- [Automerge](https://docs.renovatebot.com/key-concepts/automerge/) — Renovate Docs; official documentation; continuously updated; exact page date not shown
+- [Noise Reduction](https://docs.renovatebot.com/noise-reduction/) — Renovate Docs; official documentation; continuously updated; exact page date not shown
+- [Configuration Options](https://docs.renovatebot.com/configuration-options/) — Renovate Docs; official documentation; continuously updated; exact page date not shown
+- [Security and Permissions](https://docs.renovatebot.com/security-and-permissions/) — Renovate Docs; official documentation; continuously updated; exact page date not shown
+- [OSV-Scanner repository and documentation](https://github.com/google/osv-scanner) — Google / OpenSSF; official open-source repository; 2022-present; release dates in repository
+- [OSV-Scanner usage](https://google.github.io/osv-scanner/usage/) — Google / OpenSSF; official documentation; continuously updated; exact page date not shown
+- [Repository scanning](https://trivy.dev/latest/docs/target/repository/) — Aqua Security Trivy Docs; official/vendor documentation; continuously updated; exact page date not shown
+- [Scorecard GitHub Action](https://github.com/ossf/scorecard-action) — OpenSSF; official open-source repository; 2021-present; release dates in repository
+- [Verifying artifacts](https://slsa.dev/spec/v1.2/verifying-artifacts) — SLSA; industry specification; 2025 (SLSA v1.2)
+- [Verify signatures](https://docs.sigstore.dev/cosign/verifying/verify/) — Sigstore Docs; official documentation; continuously updated; exact page date not shown
+- [Secure Software Development Framework (SSDF) Version 1.1, SP 800-218](https://csrc.nist.gov/pubs/sp/800/218/final) — NIST; government standard; 2022-02-03
+- [Known Exploited Vulnerabilities Catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) — CISA; government operational catalog; continuously updated
+- [Exploit Prediction Scoring System (EPSS)](https://www.first.org/epss/model) — FIRST; industry risk model documentation; model updated over time
+- [On the Use of Dependabot Security Pull Requests](https://doi.org/10.1109/MSR52588.2021.00037) — Alfadel, Costa, Shihab, Mkhallalati; IEEE MSR; peer-reviewed empirical paper; 2021-05
+- [Dependabot and security pull requests: large empirical study](https://doi.org/10.1007/s10664-024-10523-y) — Rebatchi, Bissyandé, Moha; Empirical Software Engineering; peer-reviewed empirical paper; 2024-07-30
+- [Dependency management bots in open-source systems—prevalence and adoption](https://doi.org/10.7717/peerj-cs.849) — Erlenhov, de Oliveira Neto, Leitner; PeerJ Computer Science; peer-reviewed empirical paper; 2022-03-03
+- [Can Automated Pull Requests Encourage Software Developers to Upgrade Out-of-Date Dependencies?](https://doi.org/10.1109/ASE.2017.8115671) — Mirhosseini and Parnin; IEEE/ACM ASE; peer-reviewed foundational experiment; 2017-10
+- [Details about the event-stream incident](https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident) — npm; first-party incident report; 2018-11-26
+- [Secure use reference for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions) — GitHub Docs; official documentation; continuously updated; exact page date not shown
+- [About Dependabot version updates](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) — GitHub Docs; official documentation; 2026-07-15 source update
+- [Dependabot options reference](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference) — GitHub Docs; official documentation; 2026-08-21 source update
+- [Automating Dependabot with GitHub Actions](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions) — GitHub Docs; official documentation; 2026-08-04 source update
+- [Managing auto-merge for pull requests](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository) — GitHub Docs; official documentation; 2026-08-14 source update
+- [How Renovate works](https://docs.renovatebot.com/key-concepts/how-renovate-works/) — Renovate Docs; official documentation; 2026; docs build referenced release 44.82.4
+- [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) — Renovate Docs; official documentation; 2026-01-07 source update
+- [Known limitations](https://docs.renovatebot.com/known-limitations/) — Renovate Docs; official documentation; 2026-09-02 source update
+- [Automating Dependency Updates in Practice: An Exploratory Study on GitHub Dependabot](https://doi.org/10.1109/TSE.2023.3278129) — He et al.; IEEE Transactions on Software Engineering; peer-reviewed empirical paper; 2023
+- [Investigating the Resolution of Vulnerable Dependencies with Dependabot Security Updates](https://doi.org/10.1109/MSR59073.2023.00042) — Mohayeji et al.; IEEE MSR; peer-reviewed empirical paper; 2023
+- [Software Composition Analysis for Vulnerability Detection: An Empirical Study on Java Projects](https://doi.org/10.1145/3611643.3616299) — Zhao et al.; ACM ESEC/FSE; peer-reviewed empirical paper; 2023
+- [On the Accuracy of GitHub's Dependency Graph](https://doi.org/10.1145/3661167.3661175) — Bifolco et al.; ACM EASE; peer-reviewed empirical paper; 2024
+- [Towards Measuring Supply Chain Attacks on Package Managers for Interpreted Languages](https://doi.org/10.14722/ndss.2021.23055) — Duan et al.; NDSS; peer-reviewed empirical paper; 2021
+- [Are Your Dependencies Code Reviewed? Measuring Code Review Coverage in Dependency Updates](https://doi.org/10.1109/TSE.2023.3319509) — Imtiaz and Williams; IEEE TSE; peer-reviewed empirical paper; 2023
+- [What Are Weak Links in the npm Supply Chain?](https://doi.org/10.1145/3510457.3513044) — Ohm et al.; ACM ICSE-SEIP; peer-reviewed empirical paper; 2022
+- [Resolve code scanning alerts](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts) — GitHub Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+- [Security and quality AI features: responsible use and limitations](https://docs.github.com/en/code-security/responsible-use/security-and-quality-ai-features) — GitHub Docs; official/vendor limitations; continuously updated; accessed 2026-09-13
+- [Dependabot errors](https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-errors) — GitHub Docs; official documentation; continuously updated; accessed 2026-09-13
+- [Automatic Fix PR rules](https://docs.snyk.io/scan-fix-and-prevent/fix/snyk-pull-or-merge-requests/enable-automatic-fix-prs.md) — Snyk Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+- [Pull request checks](https://docs.snyk.io/scan-fix-and-prevent/prevent/pull-request-checks.md) — Snyk Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+- [Autofix for Semgrep Code](https://docs.semgrep.dev/semgrep-code/triage-remediation/autofix) — Semgrep Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+- [Rule-defined autofix](https://docs.semgrep.dev/writing-rules/rule-defined-fix) — Semgrep Docs; official documentation; continuously updated; accessed 2026-09-13
+- [Guided remediation](https://google.github.io/osv-scanner/experimental/guided-remediation/) — Google / OpenSSF OSV-Scanner; official open-source documentation; experimental documentation; accessed 2026-09-13
+- [Vulnerability scanning](https://trivy.dev/docs/latest/scanner/vulnerability/) — Aqua Security Trivy Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+- [Exit code](https://trivy.dev/docs/latest/configuration/others/#exit-code) — Aqua Security Trivy Docs; official/vendor documentation; continuously updated; accessed 2026-09-13
+
+## Observability To Autonomous Remediation
+
+- [Seer](https://docs.sentry.io/product/ai-in-sentry/seer/) — Sentry; official documentation; continuously updated; accessed 2026-09-13
+- [Autofix](https://docs.sentry.io/product/ai-in-sentry/seer/autofix/) — Sentry; official documentation; continuously updated; accessed 2026-09-13
+- [AI Privacy Principles](https://docs.sentry.io/product/ai-in-sentry/ai-privacy-and-security/) — Sentry; official documentation; continuously updated; accessed 2026-09-13
+- [Signals](https://opentelemetry.io/docs/concepts/signals/) — OpenTelemetry Authors/CNCF; standard/project documentation; 2026-03-10
+- [Trace Context, W3C Recommendation](https://www.w3.org/TR/trace-context/) — W3C; web standard; 2021-11-23
+- [Alertmanager configuration: webhook_config](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config) — Prometheus Authors/CNCF; official documentation; continuously updated; accessed 2026-09-13
+- [Analysis and Progressive Delivery](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) — Argo Rollouts Authors/CNCF; official documentation; continuously updated; accessed 2026-09-13
+- [Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) — Kubernetes Authors/CNCF; official documentation; continuously updated; accessed 2026-09-13
+- [PagerDuty Automation Actions](https://support.pagerduty.com/main/docs/automation-actions) — PagerDuty; official documentation; 2026-06-08
+- [Workflows](https://docs.dynatrace.com/docs/analyze-explore-automate/workflows) — Dynatrace; official documentation; 2026-03-18
+- [Bits AI SRE](https://docs.datadoghq.com/bits_ai/bits_ai_sre/) — Datadog; official documentation/vendor claims; continuously updated; accessed 2026-09-13
+- [What is Amazon DevOps Guru?](https://docs.aws.amazon.com/devops-guru/latest/userguide/welcome.html) — AWS; official documentation/vendor claims; continuously updated; accessed 2026-09-13
+- [The Evolution of Automation at Google](https://sre.google/sre-book/automation-at-google/) — Google SRE authors; first-party production-practice book; 2016
+- [Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — Google SRE authors; first-party production-practice book; 2016
+- [Knight Capital Americas LLC to Pay $12 Million to Settle Charges](https://www.sec.gov/newsroom/press-releases/2013-222) — U.S. SEC; regulator enforcement release / independent evidence; 2013-10-16
+- [Cloudflare outage on July 2, 2019](https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/) — Cloudflare; first-party incident postmortem; 2019-07-12
+- [October 4, 2021 outage](https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/) — Meta Engineering; first-party incident postmortem; 2021-10-05
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Jimenez et al.; peer-reviewed conference paper / benchmark; 2024-02-21 (ICLR 2024 version)
+- [Introducing SWE-bench Verified](https://openai.com/index/introducing-swe-bench-verified/) — OpenAI; benchmark audit / first-party research; 2024-08-13
+- [SWE-Bench+: Enhanced Coding Benchmark for LLMs](https://arxiv.org/abs/2410.06992) — Yuchen Zhang et al.; academic preprint / independent benchmark critique; 2024-10-09
+- [AutoCodeRover: Autonomous Program Improvement](https://arxiv.org/abs/2404.05427) — Yuheng Lin et al.; academic paper/preprint; 2024-04-08
+- [Automated Program Repair: a Step Towards Practical Evaluation](https://doi.org/10.1007/s10664-019-09746-1) — Durieux et al.; peer-reviewed empirical study; 2019-07-13
+- [Incident Response](https://csrc.nist.gov/pubs/sp/800/61/r3/final) — NIST; government standard/guidance; 2025-04
+- [Rollback a deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment) — Kubernetes Authors/CNCF; official documentation; continuously updated; accessed 2026-09-13
+- [getsentry/seer](https://github.com/getsentry/seer) — Sentry; open-source repository; repository status accessed 2026-09-13
+- [Seer, Sentry’s AI Debugger, Is Generally Available](https://blog.sentry.io/seer-sentrys-ai-debugger-is-generally-available/) — Sentry; vendor announcement / metrics claim; 2025-06-17
+- [AI Code Review](https://docs.sentry.io/product/ai-in-sentry/seer/code-review/) — Sentry; official documentation; continuously updated; accessed 2026-09-13
+- [Releases](https://docs.sentry.io/product/releases/) — Sentry; official documentation; continuously updated; accessed 2026-09-13
+- [Seer Fixes Seer: How Sentry’s Debugging Agent Helped Resolve Its Own Outage](https://blog.sentry.io/seer-fixes-seer-debugging-agent/) — Sentry; vendor incident case study; 2026-03-20
+- [Summary of the Amazon S3 Service Disruption in the Northern Virginia Region](https://aws.amazon.com/message/41926/) — AWS; first-party incident postmortem; 2017-03-02
+- [Inside Google Cloud’s outage of June 2, 2019](https://cloud.google.com/blog/products/gcp/inside-google-clouds-outage-of-june-2-2019) — Google Cloud; first-party incident postmortem; 2019-06-18
+- [Canarying Releases](https://sre.google/workbook/canarying-releases/) — Google SRE Workbook authors; first-party production-practice book; 2018
+- [DORA metrics: Four Keys](https://dora.dev/guides/dora-metrics-four-keys/) — DORA/Google Cloud; research-backed practitioner guidance; continuously updated; accessed 2026-09-13
+- [SWE-bench Evaluation](https://www.swebench.com/SWE-bench/guides/evaluation/) — SWE-bench authors; benchmark documentation; accessed 2026-09-13
+- [Bits Remediation](https://docs.datadoghq.com/bits_ai/bits_remediation/) — Datadog; official documentation; Preview feature; accessed 2026-09-13
+- [Dynatrace Intelligence](https://docs.dynatrace.com/docs/dynatrace-intelligence) — Dynatrace; official documentation; vendor claims; Preview feature; 2026-01-28
+- [Request approval workflow action](https://docs.dynatrace.com/docs/analyze-explore-automate/workflows/default-workflow-actions/approval-request-workflow-action) — Dynatrace; official documentation; 2025-11-03
+- [PagerDuty AIOps](https://support.pagerduty.com/main/docs/aiops) — PagerDuty; official documentation; vendor claims; 2026-07-15
+- [Event Orchestration](https://support.pagerduty.com/main/docs/event-orchestration) — PagerDuty; official documentation; 2026-07-07
+- [Ryanair uses automation to save 1,000 hours a year](https://www.pagerduty.com/customer/ryanair/) — PagerDuty/Ryanair; vendor-authored customer case study; accessed 2026-09-13
+- [AWS Systems Manager Incident Manager availability change](https://docs.aws.amazon.com/incident-manager/latest/userguide/incident-manager-availability-change.html) — AWS; official service-status documentation; accessed 2026-09-13
+- [aws:approve – Pause for manual approval](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-action-approve.html) — AWS; official documentation; accessed 2026-09-13
+- [OpenTelemetry specification status](https://opentelemetry.io/docs/specs/status/) — OpenTelemetry Authors/CNCF; official project status; accessed 2026-09-13
+- [Collector resiliency and data loss](https://opentelemetry.io/docs/collector/resiliency/) — OpenTelemetry Authors/CNCF; official documentation; accessed 2026-09-13
+- [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) — Kubernetes Authors/CNCF; official documentation; accessed 2026-09-13
+- [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) — Kubernetes Authors/CNCF; official documentation; accessed 2026-09-13
+- [StackStorm Overview](https://docs.stackstorm.com/overview.html) — StackStorm; open-source project documentation; accessed 2026-09-13
+- [Keptn project status](https://www.cncf.io/projects/keptn/) — CNCF; foundation project status; 2025-09-03 archive status
+- [ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks](https://arxiv.org/abs/2502.05352) — Jha et al.; academic preprint / independent benchmark; 2025-02-08
+- [AIOpsLab: A Holistic Framework to Evaluate AI Agents for Enabling Autonomous Clouds](https://arxiv.org/abs/2407.12165) — Shetty et al.; peer-reviewed conference paper; 2024-07-16; SoCC 2024
+- [Recommending Root-Cause and Mitigation Steps for Cloud Incidents using Large Language Models](https://doi.org/10.1109/ICSE48619.2023.00149) — Ahmed et al./Microsoft Research; peer-reviewed conference paper; 2023
+- [An Analysis of Patch Plausibility and Correctness for Generate-and-Validate Patch Generation Systems](https://doi.org/10.1145/2786805.2786825) — Qi et al.; peer-reviewed empirical paper; 2015
+
+## Automated Testing Review And Quality Gates
+
+- [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches) — official documentation
+- [Managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) — official documentation
+- [Auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/) — official documentation
+- [Merge request approval rules](https://docs.gitlab.com/user/project/merge_requests/approvals/rules/) — official documentation
+- [Code scanning with CodeQL](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql) — official documentation
+- [Core deployment](https://semgrep.dev/docs/deployment/core-deployment) — vendor documentation
+- [Understanding quality gates (SonarQube Server 2025.4)](https://docs.sonarsource.com/sonarqube-server/2025.4/quality-standards-administration/managing-quality-gates/introduction-to-quality-gates.md) — vendor documentation
+- [Using GitHub Copilot code review](https://docs.github.com/en/copilot/using-github-copilot/code-review/using-copilot-code-review) — official/vendor documentation
+- [Application card: GitHub Copilot Agents](https://docs.github.com/en/copilot/responsible-use/code-review) — vendor responsible-use documentation
+- [Automated Unit Test Improvement using Large Language Models at Meta](https://arxiv.org/abs/2402.09171) — peer-reviewed industrial research; first-party deployment
+- [EvoSuite: automatic test suite generation for object-oriented software](https://dl.acm.org/doi/10.1145/2001420.2001750) — peer-reviewed paper; older foundation
+- [Pynguin: Automated Unit Test Generation for Python](https://arxiv.org/abs/2009.09692) — academic paper and open-source project
+- [Code Coverage Best Practices](https://testing.googleblog.com/2020/08/code-coverage-best-practices.html) — first-party engineering guidance
+- [PIT Mutation Testing: Basic concepts](https://pitest.org/quickstart/basic_concepts/) — open-source project documentation
+- [OSS-Fuzz documentation and project history](https://google.github.io/oss-fuzz/) — official project documentation and first-party operational evidence
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — peer-reviewed benchmark paper
+- [SWE-bench repository README](https://github.com/SWE-bench/SWE-bench/blob/main/README.md) — official benchmark repository
+- [SWE-Bench+: Enhanced Coding Benchmark for LLMs](https://arxiv.org/abs/2410.06992) — independent preprint benchmark audit
+- [Can LLMs Express Their Uncertainty? An Empirical Evaluation of Confidence Elicitation in LLMs](https://arxiv.org/abs/2306.13063) — peer-reviewed paper
+- [Secure Software Development Framework (SSDF) Version 1.1: Recommendations for Mitigating the Risk of Software Vulnerabilities (SP 800-218)](https://csrc.nist.gov/pubs/sp/800/218/final) — government standard/guidance
+- [Static Analysis Results Interchange Format (SARIF) Version 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html) — open standard
+- [An Empirical Analysis of Flaky Tests](https://dl.acm.org/doi/10.1145/2635868.2635920) — peer-reviewed paper; older foundation
+- [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) — official documentation
+- [CodeRabbit Architecture: The System Behind Every Review Comment](https://docs.coderabbit.ai/overview/architecture) — vendor architecture claim
+- [Configuring blocking and errors in CI](https://docs.semgrep.dev/semgrep-ci/configuring-blocking-and-errors-in-ci) — vendor documentation
+- [Quality gate for agentic AI](https://docs.sonarsource.com/sonarqube-cloud/standards/ai-code-assurance/quality-gate-for-agentic-ai.md) — vendor documentation
+- [Hypothesis documentation](https://hypothesis.readthedocs.io/en/latest/) — open-source documentation
+- [Continuous Integration (CIFuzz)](https://google.github.io/oss-fuzz/getting-started/continuous-integration/) — official project documentation
+- [Leveling Up Fuzzing: Finding More Vulnerabilities with AI](https://security.googleblog.com/2024/11/leveling-up-fuzzing-finding-more.html) — first-party operational case study
+- [About GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review) — vendor documentation
+- [StrykerJS configuration: thresholds](https://stryker-mutator.io/docs/stryker-js/configuration/#thresholds-object) — open-source documentation
+- [An Empirical Evaluation of Using Large Language Models for Automated Unit Test Generation](https://arxiv.org/abs/2302.06527) — peer-reviewed empirical study
+- [Deep Learning-based Code Reviews: A Paradigm Shift or a Double-Edged Sword?](https://arxiv.org/abs/2411.11401) — independent controlled-study preprint
+- [LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code](https://arxiv.org/abs/2403.07974) — academic benchmark paper
+- [Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback](https://aclanthology.org/2023.emnlp-main.330/) — peer-reviewed paper
+
+## Human Oversight Governance And Security
+
+- [Risks and mitigations for GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations) — Official product documentation
+- [Customize the firewall for GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-the-firewall) — Official product documentation
+- [Agent approvals & security](https://learn.chatgpt.com/docs/agent-approvals-security) — Official product documentation
+- [Agent internet access](https://learn.chatgpt.com/docs/cloud/internet-access) — Official product documentation
+- [Security — Claude Code](https://code.claude.com/docs/en/security) — Official product documentation
+- [Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) — Government standard/profile landing page
+- [AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) — Government framework
+- [SP 800-218 Secure Software Development Framework (SSDF) Version 1.1](https://csrc.nist.gov/pubs/sp/800/218/final) — Government standard
+- [LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) — Practitioner consensus guidance
+- [LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) — Practitioner consensus guidance
+- [SLSA v1.2 Requirements](https://slsa.dev/spec/v1.2/requirements) — Supply-chain specification
+- [Verify signatures with Cosign](https://docs.sigstore.dev/cosign/verifying/verify/) — Official open-source documentation
+- [Secure use reference — GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use) — Official product documentation
+- [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches) — Official product documentation
+- [Reviewing deployments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments) — Official product documentation
+- [AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents](https://arxiv.org/html/2406.13352) — Academic paper / benchmark
+- [Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection](https://arxiv.org/abs/2302.12173) — Academic paper
+- [Asleep at the Keyboard? Assessing the Security of GitHub Copilot's Code Contributions](https://arxiv.org/abs/2108.09293) — Peer-reviewed academic paper
+- [Do Users Write More Insecure Code with AI Assistants?](https://arxiv.org/abs/2211.03622) — Peer-reviewed academic paper / user study
+- [We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen) — Peer-reviewed academic paper
+- [OpenSSF Scorecard](https://scorecard.dev/) — Open-source project documentation
+- [in-toto: Providing farm-to-table guarantees for bits and bytes](https://www.usenix.org/conference/usenixsecurity19/presentation/torres-arias) — Peer-reviewed academic paper / open standard foundation
+- [Security profiles — Devin](https://docs.devin.ai/product-guides/security-profiles) — Official product documentation
+- [CLI permissions — Devin](https://docs.devin.ai/cli/reference/permissions) — Official product documentation
+- [CLI sandbox — Devin](https://docs.devin.ai/cli/sandbox) — Official product documentation
+- [Organizations audit logs API — Devin](https://docs.devin.ai/api-reference/v3/audit-logs/organizations-audit-logs) — Official API documentation
+- [Security & confirmation — OpenHands SDK](https://docs.openhands.dev/sdk/guides/security) — Official open-source documentation
+- [Security architecture — OpenHands SDK](https://docs.openhands.dev/sdk/arch/security) — Official open-source architecture documentation
+- [Docker sandbox — OpenHands SDK](https://docs.openhands.dev/sdk/guides/agent-server/docker-sandbox) — Official open-source documentation
+- [Agentic audit log events](https://docs.github.com/en/copilot/reference/enterprise-administrators/agentic-audit-log-events) — Official product documentation
+- [NIST AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile](https://doi.org/10.6028/NIST.AI.600-1) — Government standard/profile
+- [NIST SP 800-190: Application Container Security Guide](https://doi.org/10.6028/NIST.SP.800-190) — Government standard
+- [NIST SP 800-53 Rev. 5: Security and Privacy Controls for Information Systems and Organizations](https://doi.org/10.6028/NIST.SP.800-53r5) — Government control catalog
+- [LLM03:2025 Supply Chain](https://genai.owasp.org/llmrisk/llm032025-supply-chain/) — Practitioner consensus guidance
+- [LLM05:2025 Improper Output Handling](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/) — Practitioner consensus guidance
+- [Agent Security Bench (ASB): Formalizing and Benchmarking Attacks and Defenses in LLM-based Agents](https://arxiv.org/abs/2410.02644) — Peer-reviewed academic benchmark
+- [RedCode: Risky Code Execution and Generation Benchmark for Code Agents](https://arxiv.org/abs/2411.07781) — Academic preprint / benchmark
+
+## Academic Autonomous Software Engineering
+
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Jimenez et al.; peer-reviewed-conference paper/preprint record; 2023-10-10; revised 2024-11-11
+- [SWE-bench official leaderboards and benchmark family](https://www.swebench.com/) — SWE-bench team; official benchmark documentation; current page accessed 2026-09-13
+- [SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793) — Yang et al.; peer-reviewed-conference paper/preprint record; 2024-05-06; revised 2024-11-11
+- [SWE-agent source repository](https://github.com/SWE-agent/SWE-agent) — SWE-agent/Princeton NLP contributors; official open-source repository; accessed 2026-09-13
+- [OpenHands: An Open Platform for AI Software Developers as Generalist Agents](https://arxiv.org/abs/2407.16741) — Wang et al.; peer-reviewed-conference paper/preprint record; 2024-07-23; revised 2025-04-18
+- [OpenHands source repository](https://github.com/OpenHands/OpenHands) — OpenHands contributors; official open-source repository; accessed 2026-09-13
+- [Agentless: Demystifying LLM-based Software Engineering Agents](https://arxiv.org/abs/2407.01489) — Xia, Deng, Dunn, Zhang; research paper/preprint; 2024-07-01; revised 2024-10-29
+- [AutoCodeRover: Autonomous Program Improvement](https://arxiv.org/abs/2404.05427) — Zhang, Ruan, Fan, Roychoudhury; peer-reviewed software-engineering paper/preprint record; 2024-04-08; revised 2024-07-25
+- [RepairAgent: An Autonomous, LLM-Based Agent for Program Repair](https://arxiv.org/abs/2403.17134) — Bouzenia, Devanbu, Pradel; research paper/preprint; 2024-03-25; revised 2024-10-28
+- [Defects4J: A Database of Existing Faults to Enable Controlled Testing Studies for Java Programs](https://github.com/rjust/defects4j) — Just et al. / Defects4J; foundational benchmark and official repository; project begun 2014; repository accessed 2026-09-13
+- [SWT-Bench: Testing and Validating Real-World Bug-Fixes with Code Agents](https://arxiv.org/abs/2406.12952) — Mündler, Müller, He, Vechev; research paper/preprint; 2024-06-18; revised 2025-02-07
+- [SWE-bench Multimodal: Do AI Systems Generalize to Visual Software Domains?](https://arxiv.org/abs/2410.03859) — Yang et al.; research paper/preprint; 2024-10-04
+- [SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?](https://arxiv.org/abs/2502.12115) — Samuel Miserendino, Michele Wang, Tejal Patwardhan, Johannes Heidecke; research paper/preprint; 2025-02-17; revised 2025-05-29
+- [SWE-smith: Scaling Data for Software Engineering Agents](https://arxiv.org/abs/2504.21798) — John Yang, Kilian Lieret, Carlos E. Jimenez, Alexander Wettig, Kabir Khandpur, Yanzhe Zhang, Binyuan Hui, Ofir Press, Ludwig Schmidt, Diyi Yang; research paper/preprint; 2025-04-30; revised 2025-05-21
+- [SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents](https://arxiv.org/abs/2505.20411) — Badertdinov et al.; research paper/preprint; 2025-05-26; revised 2025-11-04
+- [SWE-bench Goes Live!](https://arxiv.org/abs/2505.23419) — Zhang et al.; research paper/preprint; 2025-05-29; revised 2025-06-01
+- [What Does an LLM-Agent Leaderboard Rank Actually Compare?](https://arxiv.org/abs/2609.07785) — Wei-Jung Huang; research preprint; 2026-09-07
+- [Shortcutting the Fix: Identifying and Categorizing Agentic Exploits in Software Engineering Benchmarks](https://arxiv.org/abs/2609.06780) — Ludwig, Ahmad, Majumdar, Ginsburg; research preprint; 2026-09-06
+- [SWE-Bench Pro Verified: A Reliable Benchmark for Software Engineering Agents](https://arxiv.org/abs/2609.08149) — Zheng et al.; research preprint; 2026-09-08
+
+## Production Case Studies And Operational Evidence
+
+- [Introducing Devin, the first AI software engineer](https://cognition.com/blog/introducing-devin) — Cognition / Scott Wu; vendor announcement / benchmark claim; 2024-03-12
+- [Thoughts On A Month With Devin](https://www.answer.ai/posts/2025-01-08-devin.html) — Answer.AI / Hamel Husain, Isaac Flath, Johno Whitaker; independent practitioner case study; 2025-01-08
+- [Estimating the Productivity of an Autonomous AI Software Engineer](https://cognition.com/blog/ai-productivity) — Cognition Team; vendor production measurement study; 2026-06-04
+- [How Cognition Uses Devin to Build Devin](https://cognition.com/blog/how-cognition-uses-devin-to-build-devin) — Cognition Team; first-party internal production case study; 2026-02-27
+- [Rakuten Claude Code case study](https://claude.com/customers/rakuten) — Anthropic / Rakuten; vendor-published customer case study; unknown/not stated on page
+- [TELUS Claude Platform case study](https://claude.com/customers/telus) — Anthropic / TELUS; vendor-published customer case study; unknown/not stated on page
+- [How Anthropic teams use Claude Code](https://claude.com/blog/how-anthropic-teams-use-claude-code) — Anthropic; first-party internal case study; 2025-07-24
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) — GitHub Docs; official product documentation; unknown/not stated on page
+- [Risks and mitigations for GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations) — GitHub Docs; official security documentation; unknown/not stated on page
+- [Configure the development environment for Copilot cloud agent](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment) — GitHub Docs; official product documentation; unknown/not stated on page
+- [Research: quantifying GitHub Copilot’s impact on developer productivity and happiness](https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/) — GitHub / Eirini Kalliamvakou; vendor controlled experiment; 2022-09-07; updated 2024-05-21
+- [Does GitHub Copilot improve code quality? Here’s what the data says](https://github.blog/news-insights/research/does-github-copilot-improve-code-quality-heres-what-the-data-says/) — GitHub / Jared Bauer; vendor controlled experiment; 2024-11-18; updated 2025-02-06
+- [Announcing the 2024 DORA report](https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report) — Google Cloud DORA; industry research summary; 2024-10-22
+- [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) — METR / Becker, Rush, Barnes, Rein; independent randomized controlled trial; 2025-07-10
+- [We are Changing our Developer Productivity Experiment Design](https://metr.org/blog/2026-02-24-uplift-update/) — METR / Becker et al.; independent follow-up experiment report; 2026-02-24
+- [Measuring the Self-Reported Impact of Early-2026 AI on Technical Worker Productivity](https://metr.org/blog/2026-05-11-ai-usage-survey/) — METR / Joel Becker; independent survey; 2026-05-11
+- [AI | 2025 Stack Overflow Developer Survey](https://survey.stackoverflow.co/2025/ai) — Stack Overflow; independent large developer survey; 2025
+- [Automerge configuration and troubleshooting](https://docs.renovatebot.com/key-concepts/automerge/) — Renovate maintainers / Mend; official open-source documentation; unknown/not stated on page
+- [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference) — GitHub Docs; official product documentation; unknown/not stated on page
+- [GitHub Copilot plans and pricing](https://github.com/features/copilot/plans) — GitHub; official pricing page; unknown/not stated on page
+- [Devin Annual Performance Review 2025](https://cognition.com/blog/devin-annual-performance-review-2025) — Cognition; vendor telemetry and selected customer cases; 2025-11-14
+- [How the GitHub billing team uses the coding agent in GitHub Copilot to continuously burn down technical debt](https://github.blog/ai-and-ml/github-copilot/how-the-github-billing-team-uses-the-coding-agent-in-github-copilot-to-continuously-burn-down-technical-debt/) — GitHub; first-party internal case study; 2025-06-12; updated 2025-08-20
+- [Money Forward Claude Code case study](https://claude.com/customers/money-forward) — Anthropic / Money Forward; vendor-published customer case study; unknown/not stated on page
+- [Wiz Claude Code case study](https://claude.com/customers/wiz) — Anthropic / Wiz; vendor-published customer case study; unknown/not stated on page
+- [Codex is now generally available](https://openai.com/index/codex-now-generally-available/) — OpenAI; vendor product announcement and internal telemetry; 2025-10-06
+- [An Empirical Study of Dependabot Security Pull Requests](https://arxiv.org/abs/2206.07230) — He et al.; IEEE Transactions on Software Engineering; independent peer-reviewed empirical study; 2023-05-25 (arXiv v3; IEEE TSE 2023)
+- [An empirical study of bots in software development: characteristics and challenges from a practitioner’s perspective](https://pmc.ncbi.nlm.nih.gov/articles/PMC9044236/) — Erlenhov, de Oliveira Neto, Leitner; PeerJ Computer Science; independent peer-reviewed empirical study; 2022-03-03
+- [Repairnator: a program repair bot for continuous integration](https://arxiv.org/abs/1811.09852) — Urli et al.; ICSE-SEIP; independent/open-source production-like repair-bot study; 2018-11-23 (preprint; ICSE-SEIP 2018)
+- [SapFix: Automated End-to-End Repair at Scale](https://discovery.ucl.ac.uk/10084761/1/SapFix-Automated-End-to-End-Repair-at-Scale-v2.pdf) — Marginean et al.; Facebook / ICSE-SEIP; peer-reviewed industrial production deployment paper; 2019
+- [Getafix: Learning to Fix Bugs Automatically](https://arxiv.org/abs/1902.06111) — Bader et al.; Facebook / PACMPL OOPSLA; peer-reviewed industrial production deployment paper; 2019-09-18
+
+## Multi Agent Orchestration And Control Planes
+
+- [Task Queues](https://docs.temporal.io/task-queue) — official documentation
+- [What is a Temporal Retry Policy?](https://docs.temporal.io/encyclopedia/retry-policies) — official documentation
+- [Events and Event History](https://docs.temporal.io/workflow-execution/event) — official documentation
+- [Workflow Execution limits](https://docs.temporal.io/workflow-execution/limits) — official documentation
+- [Error handling - Python SDK](https://docs.temporal.io/develop/python/failure-detection) — official documentation
+- [Persistence](https://docs.langchain.com/oss/python/langgraph/persistence) — official documentation
+- [Multi-agent](https://docs.langchain.com/oss/python/langchain/multi-agent) — official documentation
+- [Microsoft Agent Framework repository README](https://github.com/microsoft/agent-framework) — official source repository
+- [AutoGen repository README](https://github.com/microsoft/autogen) — official source repository
+- [Agent Runtime Environments](https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/core-concepts/architecture.html) — official documentation
+- [Handoffs](https://openai.github.io/openai-agents-python/handoffs/) — official SDK documentation
+- [Guardrails](https://openai.github.io/openai-agents-python/guardrails/) — official SDK documentation
+- [Tracing](https://openai.github.io/openai-agents-python/tracing/) — official SDK documentation
+- [Agent2Agent (A2A) Protocol Specification 1.0.0](https://a2a-protocol.org/latest/specification/) — open standard specification
+- [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) — official documentation / foundational pattern
+- [Leases](https://kubernetes.io/docs/concepts/architecture/leases/) — official documentation / foundational pattern
+- [JetStream](https://docs.nats.io/nats-concepts/jetstream) — official documentation
+- [Choosing workflow type in Step Functions](https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html) — official vendor documentation
+- [Handling errors in Step Functions workflows](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html) — official vendor documentation
+- [Why Do Multi-Agent LLM Systems Fail?](https://arxiv.org/abs/2503.13657) — independent academic preprint; annotated empirical study
+- [Single-agent or Multi-agent Systems? Why Not Both?](https://arxiv.org/abs/2505.18286) — independent academic preprint / empirical comparison
+- [More Agents Is All You Need](https://arxiv.org/abs/2402.05120) — academic preprint / experimental vendor-neutral claim
+- [Security Best Practices](https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices) — official protocol security guidance
+- [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) — official documentation
+- [Secure use reference](https://docs.github.com/en/actions/reference/security/secure-use) — official security documentation
+- [How to automatically rerun your workflow when it fails](https://docs.prefect.io/v3/how-to-guides/workflows/retries) — official documentation
+
+## Self Improvement And Feedback Loops
+
+- [Evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — OpenAI; official documentation; continuously updated; page date not stated
+- [Working with evals](https://developers.openai.com/api/docs/guides/evals) — OpenAI; official documentation; continuously updated; page date not stated
+- [OpenAI Evals](https://github.com/openai/evals) — OpenAI; official source repository; repository current at access
+- [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Anthropic; first-party engineering guidance; 2026-01-09
+- [Challenges in evaluating AI systems](https://www.anthropic.com/research/evaluating-ai-systems) — Anthropic; first-party research essay; page date not stated
+- [LangSmith Evaluation](https://docs.langchain.com/langsmith/evaluation) — LangChain; vendor documentation; continuously updated; page date not stated
+- [Use annotation queues](https://docs.langchain.com/langsmith/annotation-queues) — LangChain; vendor documentation; continuously updated; page date not stated
+- [Signals](https://opentelemetry.io/docs/concepts/signals/) — OpenTelemetry project; open standard documentation; 2026-03-10
+- [Postmortem Culture: Learning from Failure](https://sre.google/sre-book/postmortem-culture/) — Google SRE; first-party operational book; 2016
+- [Implementing SLOs](https://sre.google/workbook/implementing-slos/) — Google SRE; first-party operational book; 2018
+- [NIST AI 600-1: Generative AI Profile](https://doi.org/10.6028/NIST.AI.600-1) — NIST; Autio et al.; government standard/profile; 2024-07-26
+- [Canary deployment strategy](https://argo-rollouts.readthedocs.io/en/stable/features/canary/) — Argo Rollouts project; open-source documentation; current docs; date not stated
+- [Analysis and progressive delivery](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) — Argo Rollouts project; open-source documentation; current docs; date not stated
+- [Deployments and environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) — GitHub; vendor documentation; continuously updated; page date not stated
+- [Open Policy Agent documentation](https://www.openpolicyagent.org/docs) — Open Policy Agent/CNCF; open-source documentation; continuously updated; page date not stated
+- [OWASP Top 10 for Large Language Model Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — OWASP Foundation; community security standard; 2026 edition current
+- [The ML Test Score](https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/) — Breck et al., Google Research; peer-reviewed paper / first-party production experience; 2017
+- [Hidden Technical Debt in Machine Learning Systems](https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/) — Sculley et al., Google Research; peer-reviewed conference paper; 2015
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Jimenez et al.; peer-reviewed paper / benchmark; 2024-11-11 v3; ICLR 2024
+- [SWE-Bench+: Enhanced Coding Benchmark for LLMs](https://arxiv.org/abs/2410.06992) — Aleithan et al.; independent empirical preprint; 2024-10-10 v2
+- [Measuring AI Ability to Complete Long Software Tasks](https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/) — METR; independent research; 2025-03-19; page warns some static claims are outdated
+- [Announcing the 2024 DORA report](https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report) — Google Cloud DORA; Nathen Harvey and Derek DeBellis; industry survey report summary; 2024-10-23
+- [OpenTelemetry overview](https://opentelemetry.io/docs/specs/otel/overview/) — OpenTelemetry project; open standard; current standard; date not stated
+- [Trace Context](https://www.w3.org/TR/trace-context/) — W3C; W3C Recommendation; 2021-11-23
+- [Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — Google SRE; first-party operational book; 2016
+- [Sampling](https://opentelemetry.io/docs/concepts/sampling/) — OpenTelemetry project; open standard documentation; current docs; date not stated
+- [Handling sensitive data](https://opentelemetry.io/docs/security/handling-sensitive-data/) — OpenTelemetry project; open standard documentation; current docs; date not stated
+- [How Complex Systems Fail](https://how.complexsystems.fail/) — Richard I. Cook; independent human-factors essay; original 1998; web version current
+- [DORA metrics](https://dora.dev/guides/dora-metrics/) — DORA; industry research guidance; current guidance; accessed 2026-09-13
+- [The SPACE of Developer Productivity](https://queue.acm.org/detail.cfm?id=3454124) — Forsgren et al.; peer-reviewed article; 2021
+- [Example Error Budget Policy](https://sre.google/workbook/error-budget-policy/) — Google SRE; first-party operational template; 2018
+- [Canarying Releases](https://sre.google/workbook/canarying-releases/) — Google SRE; first-party operational book; 2018
+- [NIST SP 800-204C](https://csrc.nist.gov/pubs/sp/800/204/c/final) — NIST; government standard; 2022
+- [OpenAI Model Spec, 2026-08-18 release](https://model-spec.openai.com/2026-08-18.html) — OpenAI; official behavior specification; 2026-08-18
+- [OpenAI Model Spec source and archive](https://github.com/openai/model_spec) — OpenAI; official source repository; current at access; releases archived since 2025-02-12
+- [Introducing Model Spec Evals](https://alignment.openai.com/model-spec-evals/) — OpenAI Alignment; first-party research report; 2026-03-25
+- [Model Spec Evals repository](https://github.com/openai/model_spec_evals) — OpenAI; official source repository; current at access
+- [Evals platform deprecation notice](https://developers.openai.com/api/docs/deprecations#2026-06-03-evals-platform) — OpenAI; official deprecation notice; 2026-06-03
+- [Trace grading](https://developers.openai.com/api/docs/guides/trace-grading) — OpenAI; official documentation; current docs; date not stated
+- [SWE-bench Goes Live!](https://arxiv.org/abs/2505.23419) — SWE-bench-Live authors; academic preprint; 2025-05-29
+- [Are Solved Issues in SWE-bench Really Solved Correctly?](https://arxiv.org/abs/2503.15223) — Wang, Pradel and Liu; independent empirical paper; 2025-03-19 v1; later revision
+- [UTBoost](https://arxiv.org/abs/2506.09289) — UTBoost authors; independent empirical preprint; 2025-06-10
+- [Reflexion](https://arxiv.org/abs/2303.11366) — Shinn et al.; peer-reviewed paper; 2023-03-20; NeurIPS 2023
+- [AIOpsLab](https://arxiv.org/abs/2501.06706) — AIOpsLab authors; academic preprint; 2025-01-16
+
+## End To End Reference Architectures
+
+- [Agentic SDLC Starter](https://github.com/microsoft/agentic-sdlc-starter) — primary source repository / reference architecture
+- [GitLab Duo Agent Platform](https://docs.gitlab.com/user/duo_agent_platform/) — primary vendor documentation
+- [Developer Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/developer/) — primary vendor documentation
+- [Code Review Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/code_review/) — primary vendor documentation
+- [Fix CI/CD Pipeline Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/fix_pipeline/) — primary vendor documentation
+- [Software Development Flow](https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/) — primary vendor documentation
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) — primary vendor documentation
+- [GitHub Integration](https://docs.openhands.dev/openhands/usage/cloud/github-installation) — primary open-source/product documentation
+- [Seer](https://docs.sentry.io/product/ai-in-sentry/seer/) — primary vendor documentation / vendor claims
+- [GitOps Principles v1.0.0](https://opengitops.dev/) — open standard / primary community source
+- [Analysis and Progressive Delivery](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) — primary open-source documentation
+- [What is OpenTelemetry?](https://opentelemetry.io/docs/what-is-opentelemetry/) — primary standard/project documentation
+- [SLSA specification v1.2](https://slsa.dev/spec/v1.2/) — industry consensus specification
+- [Secure Software Development Framework (SSDF) Version 1.1, NIST SP 800-218](https://csrc.nist.gov/pubs/sp/800/218/final) — government standard / primary guidance
+- [Canarying Releases](https://sre.google/workbook/canarying-releases/) — first-party engineering reference / operational practice
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — peer-reviewed paper / independent benchmark
+- [SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents](https://arxiv.org/abs/2505.20411) — peer-reviewed paper / independent benchmark critique
+- [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) — independent randomized controlled trial
+- [We are Changing our Developer Productivity Experiment Design](https://metr.org/blog/2026-02-24-uplift-update/) — independent follow-up study / methodological critique
+- [State of AI-assisted Software Development 2025](https://dora.dev/research/2025/dora-report/) — industry research report (vendor-sponsored)
+- [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) — primary platform documentation
+
+## Adoption Maturity And Build Vs Buy Landscape
+
+- [About GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) — GitHub; official documentation; continuously updated / accessed snapshot
+- [Risks and mitigations for GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations) — GitHub; official security documentation; continuously updated / accessed snapshot
+- [GitHub Copilot plans](https://github.com/features/copilot/plans) — GitHub; official pricing page; continuously updated / accessed snapshot
+- [Codex cloud](https://learn.chatgpt.com/docs/cloud) — OpenAI; official documentation; continuously updated / accessed snapshot
+- [Codex pricing](https://learn.chatgpt.com/docs/pricing) — OpenAI; official pricing documentation; continuously updated / accessed snapshot
+- [Manage costs effectively](https://code.claude.com/docs/en/costs) — Anthropic; official documentation/vendor telemetry; continuously updated / accessed snapshot
+- [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices) — Anthropic; official documentation; continuously updated / accessed snapshot
+- [Plans and Pricing | Devin](https://devin.ai/pricing) — Cognition/Devin; official pricing page; continuously updated / accessed snapshot
+- [OpenHands/OpenHands repository](https://github.com/OpenHands/OpenHands) — OpenHands; source repository; repository snapshot accessed 2026-09-13
+- [Docker Sandbox - OpenHands Docs](https://docs.openhands.dev/openhands/usage/sandboxes/docker) — OpenHands; official open-source documentation; continuously updated / accessed snapshot
+- [Headless Mode - OpenHands Docs](https://docs.openhands.dev/openhands/usage/cli/headless) — OpenHands; official open-source documentation; continuously updated / accessed snapshot
+- [SWE-agent repository](https://github.com/SWE-agent/SWE-agent) — Princeton NLP / SWE-agent maintainers; source repository; repository snapshot accessed 2026-09-13
+- [SWE-bench Leaderboards](https://www.swebench.com/) — SWE-bench team; official benchmark site; continuously updated / accessed snapshot
+- [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770) — Jimenez et al.; ICLR 2024; peer-reviewed paper/preprint; 2023-10-10; revised 2024-11-11
+- [SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?](https://arxiv.org/abs/2502.12115) — Miserendino et al.; research paper/preprint; 2025-02-17
+- [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) — Becker, Rush, Barnes and Rein / METR; independent randomized field study; 2025-07-10
+- [Measuring AI Ability to Speed Up Developer Tasks: Uplift Study Update](https://metr.org/blog/2026-02-24-uplift-update/) — METR; independent study update; 2026-02-24
+- [2025 Stack Overflow Developer Survey: AI](https://survey.stackoverflow.co/2025/ai) — Stack Overflow; independent industry survey; 2025
+- [Accelerate State of DevOps Report 2024](https://dora.dev/research/2024/dora-report/) — DORA; industry research report; 2024
+- [Announcing the 2024 DORA report](https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report) — Google Cloud; first-party summary of industry research; 2024-10-22
+- [Research: quantifying GitHub Copilot’s impact on developer productivity and happiness](https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/) — GitHub; vendor-authored study summary; 2022-09-07
+- [The Impact of AI on Developer Productivity: Evidence from GitHub Copilot](https://arxiv.org/abs/2302.06590) — Peng et al.; controlled experiment preprint; 2023-02-13
+- [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) — GitHub; official documentation; continuously updated / accessed snapshot
+- [SLSA specification v1.2](https://slsa.dev/spec/v1.2/) — OpenSSF SLSA; open standard; v1.2; accessed 2026-09-13
+- [Renovate GitHub platform documentation](https://docs.renovatebot.com/modules/platform/github/) — Mend Renovate; official open-source documentation; continuously updated / accessed snapshot
+- [Self-hosted configuration](https://docs.renovatebot.com/self-hosted-configuration/) — Mend Renovate; official open-source documentation; continuously updated / accessed snapshot
+- [About Dependabot security updates](https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates) — GitHub; official documentation; continuously updated / accessed snapshot
+- [Secure Software Development Framework (SSDF) Version 1.1, NIST SP 800-218](https://csrc.nist.gov/pubs/sp/800/218/final) — NIST; government standard; 2022-02-03

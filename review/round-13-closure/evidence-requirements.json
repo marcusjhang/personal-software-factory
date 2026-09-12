@@ -1,0 +1,218 @@
+{
+  "reviewer": "round-13 independent evidence/requirements and architecture closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-12 combined correction",
+    "specialty": "Graph digests/status, all 16 requirements, owner journey, end-to-end architecture, roadmap boundaries, and round-12 correction closure.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-12-resolution.md",
+      "review/round-12-closure/cross-consistency.json",
+      "review/round-12-closure/evidence-requirements.json",
+      "review/round-12-closure/formal-model.json",
+      "review/round-12-closure/improvement-adversary.json",
+      "review/round-12-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, direct contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, deterministic reviewed-edge regeneration, later increment admission, and production validation are accepted unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_product_boundary",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md status: ‘revised plan-only implementation contract; no working implementation, semantic evidence validation, or autonomous self-government is claimed.’",
+        "README.md: ‘This repository intentionally contains a plan, not a working controller or deployed factory.’",
+        "PLAN.md is the sole plan/roadmap authority and normatively incorporates docs/state-transition-manifests.md as the legal-edge authority; GitHub is a human projection rather than the transaction log or lock service."
+      ],
+      "basis": "The authority chain, no-implementation boundary, worker restrictions, and mandatory pre-implementation evidence gate are direct and consistent."
+    },
+    {
+      "area": "current_digest_identity_and_schema_3_status",
+      "result": "pass",
+      "exact_text": [
+        "Recomputed PLAN.md SHA-256: `19fea5cc0f6df092eec3fa4f0b0488465b4e3460c8c54fe94c85006a795bea1c`.",
+        "Recomputed docs/state-transition-manifests.md SHA-256: `8fb9782a8e20310ce8975486a8e0742a02e76148fba85624e4197ff1073f0a1d`.",
+        "material-claims.json schema_version is `3.0.0`; generated_against records those exact digests and regeneration_checkpoint `round-12`.",
+        "The graph remains `editorial_candidate_associations_only` and `legacy_unverified`; the round-11 checkpoint is expressly historical."
+      ],
+      "basis": "Independent byte hashing matches the current graph and round-12 resolution register. README, traceability, resolution, and graph status consistently avoid implementation, semantic, provenance, model-proof, and production claims."
+    },
+    {
+      "area": "schema_3_reproducibility_and_coverage",
+      "result": "pass",
+      "exact_text": [
+        "The checked-in corpus contains 37 parseable result files: 14 foundational, 10 RAOS base, 8 lifecycle extension, and 5 domain extension.",
+        "All 37 research-manifest paths are unique and exact; every recorded file SHA-256 matches current bytes.",
+        "The graph has 25 source observations, 20 material claims, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 SourceObservation IDs reproduce from the declared derivation; every JSON pointer, pointed value, value hash, result-file hash, and URL-in-record check passes; all 31 PLAN excerpts match their recorded current lines.",
+        "All 25 numbered PLAN sections and the exact dynamically derived set of 28 normative-manifest headings are recorded reviewed."
+      ],
+      "basis": "Independent local JSON, path, digest, JSON-pointer, canonical-value, identity, reference, excerpt, count, and dynamic-heading checks reproduce the graph's structural contract. They do not prove source truth or entailment."
+    },
+    {
+      "area": "normative_graph_shape_and_round_12_corrections",
+      "result": "pass",
+      "exact_text": [
+        "The current normative manifest parses to 785 unique edge rows: 96 canonical and 689 private/product rows; no parsed edge ID is duplicated.",
+        "All five round-12 reviews contain 0 critical and 8 high findings in total, and review/round-12-resolution.md maps all 8/8 individually, including the deliberately duplicated rollback-safety defect under R12-XC-001 and R12-REC-001.",
+        "B71/B71-P/B71-R and M59/M59-P/M59-R distinguish first post-rollback cancellation, persisted-during-rollback continuation, and byte-identical replay, with B39/M30 expected-version/disposition races.",
+        "IRB07-N/R/Q alone release exact RO00-I blocks after RO09 closure, genuine restoration, fresh independent verification, and purpose/generation/key-set checks; IC24-RWX/RPX/RN continue exact stale original Effects through protected X/N settlement.",
+        "IX06-XR/XQ cover exposed CANARY_PASSED through ExposedCancellationSourcesV1, while ReachableActiveExposureInterruptCoordinatesV1 is derived from reachable tuples and covered exactly by specialized IH01 rows plus IH01-RX/RN."
+      ],
+      "basis": "The formerly unsafe or undefined coordinates now have explicit guarded transactions, ownership, replay/conflict behavior, and generated exact-equality/race obligations in PLAN §21.1 and manifest §15.8. Execution of those obligations remains a future gate, not a present claim."
+    },
+    {
+      "area": "evidence_cutoff_and_semantic_gate",
+      "result": "pass",
+      "exact_text": [
+        "`2026-09-12T23:59:59Z` is stated only as an intended decision-scope cutoff, not verified collection history.",
+        "research-manifest.json labels corpus provenance unverified and semantic evidence validation not performed.",
+        "Fresh immutable retrieval in one ResearchRun plus recorded human edge-level semantic review blocks Increment 1; only accepted same-run edges may be promoted to supports or refutes.",
+        "Historical report/matrix language is subordinated by non-authoritative banners to PLAN §4, evidence-cutoff.md, and schema-3 candidate semantics."
+      ],
+      "basis": "Local structural and HTTP reachability results are not promoted into provenance, truth, independence, semantic entailment, effectiveness, or safety claims."
+    },
+    {
+      "area": "all_16_requirements_and_owner_journey",
+      "result": "pass",
+      "exact_text": [
+        "review/requirements-traceability.md contains one normative row for each R-01 through R-16, identifies P-01 through P-16 only as aliases, and defines mapped as proposed plan contract rather than implementation or empirical closure.",
+        "PLAN §§2 and 10.1 cover install, durable ideation/research, exact-subject decisions, planning, admission, execution, verification, delivery, observation/rollback, maintenance, improvement, consumer release, feedback, status/why, pause/resume/cancel, exceptions, export, retention, and uninstall.",
+        "The journey binds identity and digest/diff, records durable events/receipts, states wait/error/replay behavior, preserves human veto and break-glass controls, and does not bypass manifest authority."
+      ],
+      "basis": "Each of the 16 requirements has an authoritative contract location, roadmap admission point, validation location, and human gate. No requirement depends on treating future implementation or evidence work as complete."
+    },
+    {
+      "area": "end_to_end_architecture_and_roadmap",
+      "result": "pass",
+      "exact_text": [
+        "PLAN §§5–6 separate contract, compiler, controller, ledger, policy, approval, execution, verification, merge/deploy, evidence, and projection authorities around one versioned IR.",
+        "Release 0 is one-owner/one-repository read-only compilation, conversation/decision capture, observation, dry-run reconciliation, and deterministic simulation with no autonomous external mutation.",
+        "Before any external write, Increment 3 requires PostgreSQL least-privilege compare-and-append, transactional outbox, backup/restore, and a real two-session admission/lease/fence race; SQLite remains no-write simulation only.",
+        "The sole §20 roadmap orders evidence/contract gates, Release 0, PostgreSQL, one-repository pilot, maintenance, shadow improvement, canary, second-repository isolation, scale, and only then gated read-only domain/GTM discovery."
+      ],
+      "basis": "Authority separation, least privilege, evidence admission, rollback, principal independence, repository isolation, and engineering-first sequencing prevent a later capability from bypassing an earlier safety gate."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "requirements_partial": 0,
+    "round_12_review_files_reviewed": 5,
+    "round_12_raw_critical_findings_reviewed": 0,
+    "round_12_raw_high_findings_reviewed": 8,
+    "normative_manifest_edge_rows": 785,
+    "canonical_edge_rows": 96,
+    "private_and_product_edge_rows": 689,
+    "research_manifest_files_hash_checked": 37,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_edges_checked": 36,
+    "current_normative_headings": 28,
+    "critical": 0,
+    "high": 0,
+    "total": 0
+  },
+  "residual_uncertainty": [
+    "This audit establishes plan-contract closure and checked-in structural evidence/status consistency only. It does not establish implementation enforcement, exhaustive reachable-product/full-model proof, operational safety, or production validation.",
+    "Fresh immutable retrieval, external source-truth validation, same-run human semantic edge review, and deterministic reviewed-edge regeneration remain accepted future gates.",
+    "The schema-3 graph is current only for the audited PLAN and normative-manifest bytes and must be regenerated after any future change to either formal source."
+  ],
+  "closure_criteria_pass": true
+}

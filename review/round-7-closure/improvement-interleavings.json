@@ -1,0 +1,176 @@
+{
+  "reviewer": "round-7 independent improvement-interleavings closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-6 combined repairs",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-6-resolution.md",
+      "review/round-6-closure/adversarial-consistency.json",
+      "review/round-6-closure/formal-model.json",
+      "review/round-6-closure/evidence-semantics.json",
+      "review/round-6-closure/improvement-recovery.json",
+      "review/round-6-closure/architecture-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "Improvement tuple reducer and event interleavings; rollback plus cancellation exact cases; single cleanup ownership; exact-one canary child/link; widening and promotion UNKNOWN handling; unconditional evidence completeness denial; asynchronous child and terminal paths.",
+    "severity_rule": "Critical/high only for an unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Implementation, a full reachable-product model, and completion of fresh evidence retrieval or semantic review are not required."
+  },
+  "contract_reproduction": [
+    {
+      "area": "round_6_rollback_cancel_repair",
+      "result": "partial_pass",
+      "basis": "IRB07-N/R/Q now partition VERIFIED->ROLLED_BACK by NONE, REQUESTED, and QUIESCING and reproduce the declared canonical sequences. IRB08 is limited to NONE, while IX03 is the sole cancellation cleanup scheduler for REQUESTED/QUIESCING after rollback is IDLE or ROLLED_BACK. The FAILED plus no-retry/exhausted case remains non-settleable as R7-INT-001 details."
+    },
+    {
+      "area": "single_cleanup_owner",
+      "result": "pass",
+      "basis": "For the repaired settlement cases, IRB08 alone schedules ordinary post-rollback cleanup and IX03 alone schedules cancellation cleanup; both require a later cleanup receipt and later terminal transaction. IX05 adopts already-existing cleanup without creating a second manifest."
+    },
+    {
+      "area": "exact_one_canary_and_async_child",
+      "result": "partial_pass",
+      "basis": "IR04 now derives deterministic child/link IDs from parent, stage, and CanaryAdmissionDecision digest, and same-decision replay uses atomic absent-or-same CAS. IR27-IR35 bind receipts to that pair. Decision replacement can nevertheless admit a new pair before the prior pair is terminal and clean, as R7-INT-002 details."
+    },
+    {
+      "area": "widening_and_promotion_effect_outcomes",
+      "result": "fail",
+      "basis": "UNKNOWN entry and the reconstructed-success/proved-absence witnesses reproduce. The direct verified widening path is not consumable by IR38, and the generic exhaustive UNKNOWN dispositions do not have synchronized rollout exits, as R7-INT-003 and R7-INT-004 detail."
+    },
+    {
+      "area": "control_health_and_canary_resume",
+      "result": "fail",
+      "basis": "PLAN \u00a78.4 forbids canary resume while control is degraded or failed, but IR06 omits a HEALTHY guard and the reducer merely masks the changed rollout coordinate as BLOCKED. See R7-INT-005."
+    },
+    {
+      "area": "evidence_bundle_completeness",
+      "result": "pass",
+      "basis": "PLAN \u00a78.5 now requires duplicate-free expected/received tuple-set equality, exact per-class and total counts, digest validation, and 100% passing executable cases. Missing, duplicate, unexpected, failed, inconclusive, or unaccounted tuples always deny enablement, canary admission, widening, and promotion. A protected disposition can only DENY, ABORT, QUARANTINE, or RERUN under a newly sealed manifest; exclusions are predeclared outside the executable expected set."
+    },
+    {
+      "area": "schema_3_candidate_only_package",
+      "result": "pass",
+      "basis": "SHA-256 reproduces for PLAN.md (e0a3194743e4434fa7f40212ef81c29985b8f63db7e9b24ae62b199c0ed4ed70) and the normative manifest (9c54a76d8090485d1a3e84283b4fbf9bda5cf481f4ee887a5ca7d2b46090476a). Schema 3.0.0 reports 20 claims, 25 observations, 36 edges, and all 27 current numbered manifest headings. Its legacy relations remain candidate_support/candidate_refute/context_only with zero supports/refutes, and reader-facing legacy prose is marked non-authoritative. No implementation, fresh retrieval, or semantic-review completion is claimed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R7-INT-001",
+      "severity": "high",
+      "title": "Cancellation cannot settle when rollback has a final no-retry failure",
+      "requirement": "Whole-work cancellation is accepted from every reachable nonterminal improvement tuple and must have a deterministic safe outcome after effect, rollback, quiescence, and cleanup handling; every nonterminal state must have a total outcome partition or bounded expiry exit.",
+      "evidence": [
+        "IRB04 reaches rollback_state=FAILED for failed, unknown, or timed-out verification.",
+        "IRB06 handles retry forbidden, stale, or exhausted only as FAILED->FAILED, records a final rollback-failure disposition, and schedules safety escalation.",
+        "IRB05 is the only edge out of FAILED and requires an approved retry, fresh authority, and budget.",
+        "IX03 expressly forbids rollback_state=FAILED, while the exact witness says cancellation at FAILED must take IRB05 and later verification before IX03. No row handles the case where IRB06 proves that such a retry is forbidden or exhausted."
+      ],
+      "reproduction": [
+        "Reach rollback VERIFYING after exposure, apply IX01 and IX02, then let IRB04 set rollback_state=FAILED.",
+        "Make retry forbidden or exhausted and apply IRB06. The tuple remains rollback FAILED and canonically ROLLBACK_FAILED under priority 2.",
+        "IRB05 is disabled and IX03 is forbidden. Replaying IRB06 cannot settle rollback, schedule cancellation cleanup, or reach CANCELLED."
+      ],
+      "impact": "A valid cancellation can be stranded permanently after a declared final rollback failure. The contract promises acceptance and bounded recovery but supplies neither a terminal failed-safety carrier nor an explicit retained-risk cancellation disposition, leaving the implementation path undefined.",
+      "required_plan_correction": "Add one explicit fail-closed outcome for final rollback failure during cancellation. It must preserve visible unresolved exposure/risk, define whether the parent remains nonterminal or hands off to a protected remediation obligation, and give exact reducer projection, cleanup ownership, and terminal eligibility. Do not treat failed rollback as ROLLED_BACK or clean."
+    },
+    {
+      "id": "R7-INT-002",
+      "severity": "high",
+      "title": "Replacing a stale canary decision can create a second child/link pair before the first pair is terminal and clean",
+      "requirement": "The bounded canary contract requires one causally bound child/link whose execution, cancellation, effects, rollback, cleanup, and receipts cannot overlap or be masked by a replacement child.",
+      "evidence": [
+        "IR04 leaves the parent at CANARY_READY after creating the deterministic pair.",
+        "IR24 can then take CANARY_READY->CANARY_PENDING_APPROVAL on expiry, withdrawal, or stale input and says only 'cancel unstarted child if created'; it does not require a durable child terminal, effect settlement, rollback settlement, or cleanup receipt before the parent can accept another decision.",
+        "A new CanaryAdmissionDecision changes the deterministic IR04 identity. IR03 and IR04 can therefore create a second, non-duplicate pair while the first child is still cancelling or cleaning.",
+        "Section 15.7 says all predicates use 'the same identity' and no duplicate-child join exists, but it defines no active-pair replacement transaction or join over two decision-derived historical/live pairs."
+      ],
+      "reproduction": [
+        "Create C1/L1 with IR04 and keep the parent CANARY_READY while C1 cancellation/cleanup is not terminal.",
+        "Apply IR24 for stale input, accept a new decision with IR03, and apply IR04 again. The new decision digest derives C2/L2, so absent-or-same uniqueness for C1 does not reject it.",
+        "The tuple now has C1 still live in cancellation/cleanup and C2 admitted at INBOX, but later singular receipt and terminal predicates do not define an atomic handoff or a join over both pairs."
+      ],
+      "impact": "Old child authority, effects, or cleanup can overlap a replacement canary or be omitted from the singular parent outcome. This defeats the exact-one safety bound despite fixing same-decision replay.",
+      "required_plan_correction": "Make decision replacement wait for the prior bound pair to be terminal, quiescent, effect/rollback-settled, and clean before IR03/IR04 can create a new pair, or model an explicit active-pair generation coordinate and require all old generations in every safety and terminal predicate. Cover delayed/out-of-order WorkerStarted and terminal receipts."
+    },
+    {
+      "id": "R7-INT-003",
+      "severity": "high",
+      "title": "A directly verified widening effect has no legal rollout-success edge",
+      "requirement": "A WideningDecision must have a total effect path: direct verified application and reconstructed verified application must each permit the same bounded CANARY_RUNNING continuation, while UNKNOWN or failure must never be treated as success.",
+      "evidence": [
+        "IR37 creates a typed widening effect in WIDENING_EFFECT.",
+        "The general Effect machine permits the normal E01->E04->E05->E06 path to RECEIPT_VERIFIED without UNKNOWN reconciliation.",
+        "IR38 requires an 'already-durable IR56 verified widening effect receipt'. IR56 is only the synchronized E17 APPLICATION_RECONCILED->RECEIPT_VERIFIED path after UNKNOWN.",
+        "No other row takes WIDENING_EFFECT->CANARY_RUNNING after an ordinary E06 receipt."
+      ],
+      "reproduction": [
+        "Apply IR37, then execute the widening effect normally through E01, E04, E05, and E06 with a valid remote receipt.",
+        "The effect set is settled and the reducer returns canonical REVIEW for rollout WIDENING_EFFECT.",
+        "IR56 is inapplicable because the effect is already RECEIPT_VERIFIED rather than APPLICATION_RECONCILED, and IR38's exact guard names IR56. The successful widening cannot resume canary."
+      ],
+      "impact": "The ordinary successful path is undefined/stuck; only a success reconstructed after ambiguity can advance. Implementations must weaken IR38, forge an IR56 history, or diverge from the closed manifest.",
+      "required_plan_correction": "Let IR38 consume either a directly verified E06 receipt or the exact reconstructed IR56/E17 receipt, with the same decision/bounds/identity bindings, or add separate mutually exclusive synchronized rows and witnesses for both paths."
+    },
+    {
+      "id": "R7-INT-004",
+      "severity": "high",
+      "title": "Widening and promotion lack rollout exits for exhaustive UNKNOWN dispositions other than reconstructed success or proved absence",
+      "requirement": "Because the Effect aggregate declares exhaustive UNKNOWN reconciliation and disposition paths, every reachable terminal effect disposition must have a fail-closed synchronized rollout outcome. ACCEPTED_RISK, DECLARE_FAILED, compensation success/failure, and unresolved reconstructed-receipt failure cannot authorize widening/promotion or strand the rollout.",
+      "evidence": [
+        "After IR42 or IR54, E12/E18/E19 can reach QUARANTINED, where E20, E21, or E22 are exhaustive legal dispositions; E22 can finish as COMPENSATED or COMPENSATION_FAILED, and E36 can also lead back through UNRESOLVED/QUARANTINED.",
+        "For widening, IR56 handles only E17 reconstructed receipt success and IR43 handles only E34 proved absence/no retry. No row synchronizes E20/E21/E24/E25/E28/E29/E37/E39 terminal outcomes with WIDENING_EFFECT->CANARY_ABORTING or FAILED.",
+        "For promotion, IR57 handles only E17 and IR55 only E34. No row moves PROMOTING to a fail-closed rollout state for the other declared terminal dispositions.",
+        "The reducer stops showing QUARANTINED once the effect becomes settled, but maps WIDENING_EFFECT back to REVIEW and PROMOTING back to MERGE_QUEUED; that projection is not a legal recovery edge and does not itself change the rollout coordinate."
+      ],
+      "reproduction": [
+        "Enter widening UNKNOWN with IR42, take E12, E18, E19, then DECLARE_FAILED through E21. The effect is SETTLED_FAILURE but rollout remains WIDENING_EFFECT; neither IR43 nor IR56 applies.",
+        "Repeat from promotion UNKNOWN via IR54 and end with E20 ACCEPTED_RISK or an authorized compensation that reaches E24. Rollout remains PROMOTING; IR18, IR55, and IR57 do not apply.",
+        "In each case the generic Effect machine reached a declared terminal, but the product has no synchronized abort/failure/cleanup owner."
+      ],
+      "impact": "Ambiguous production mutations can leave widening or promotion permanently poised at REVIEW/MERGE_QUEUED with no legal fail-closed product transition. A future implementation could incorrectly infer success, retry, or cleanup authority.",
+      "required_plan_correction": "Enumerate mutually exclusive synchronized rollout rows for every reachable settled UNKNOWN disposition. Only E06/E17 verified application may advance bounds or cross MERGED. All accepted-risk, declared-failed, compensation, and verification-failure outcomes must take explicit abort/rollback/failure paths based on proved exposure, with later single-owner cleanup."
+    },
+    {
+      "id": "R7-INT-005",
+      "severity": "high",
+      "title": "IR06 permits the rollout coordinate to resume canary while control health is still degraded or failed",
+      "requirement": "PLAN \u00a78.4 states that degraded or failed control cannot admit, widen, promote, or resume canary. The normative row must enforce that rule, not rely on canonical projection masking.",
+      "evidence": [
+        "IR06 guards CANARY_PAUSED->CANARY_RUNNING only with continuity proof and unchanged bounds; it does not require control_health_state=HEALTHY or a completed IH03 transition.",
+        "Reducer priority 15 maps TELEMETRY_DEGRADED, CONTROL_PAUSED, or CONTROL_FAILED to BLOCKED, but it still accepts the rollout coordinate mutation unless a reachability invariant rejects it.",
+        "The reachability invariants require HEALTHY for PROMOTING/PROMOTED/OBSERVING, but do not forbid CANARY_RUNNING with degraded/failed control.",
+        "IR31 and other CANARY_RUNNING receipt rows do not add a HEALTHY guard, so a component state hidden behind canonical BLOCKED can continue consuming exposure-related receipts."
+      ],
+      "reproduction": [
+        "Reach CANARY_PAUSED with control_health_state=CONTROL_PAUSED.",
+        "Present a continuity proof to IR06 without first applying IH03. The exact IR06 guard passes and changes rollout_state to CANARY_RUNNING, while the reducer remains canonically BLOCKED.",
+        "The product now records canary running under paused control, contrary to PLAN \u00a78.4, and no manifest invariant rejects the tuple."
+      ],
+      "impact": "Canonical masking is not an authorization barrier. A literal implementation can resume or process canary activity before control health is restored, violating a core safety requirement.",
+      "required_plan_correction": "Require control_health_state=HEALTHY and the durable IH03 restoration/fresh-decision facts on IR06 and every exposure/resume row, and reject CANARY_RUNNING paired with degraded/paused/failed control as an impossible tuple. Add both event orders to the interleaving witnesses."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 5,
+    "medium": 0,
+    "low": 0,
+    "total": 5
+  },
+  "residual_uncertainty": [
+    "This is a plan-text and exact local-transition audit, not implementation validation or exhaustive model checking.",
+    "Fresh immutable evidence retrieval and same-run human semantic review remain future gates and were not treated as closure failures.",
+    "The current schema-3 evidence graph is candidate-only; no material evidence overclaim was found in the reviewed current package."
+  ],
+  "closure_criteria_pass": false
+}

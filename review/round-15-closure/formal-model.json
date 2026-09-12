@@ -1,0 +1,116 @@
+{
+  "reviewer": "round-15 independent formal-model closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-14 correction",
+    "specialty": "All 794 normative manifest rows, with emphasis on reducer source exclusivity, release-attempt/whole-work cancellation (IA/IX), IH rollback adoption and exact interrupt equality, IH/IX settlement ownership, and graph adjacency/terminals.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-14-resolution.md",
+      "review/round-14-closure/formal-model.json",
+      "review/round-14-closure/improvement-races.json",
+      "review/round-14-closure/cross-consistency.json",
+      "review/round-14-closure/recovery-remediation.json",
+      "review/round-14-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_inventory_graph_adjacency_and_terminals",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest parses to exactly 794 unique edge IDs: 96 canonical rows and 698 private/product rows; parsing reaches the final ICL03 row, finds no duplicate ID, and finds no Markdown data-row width mismatch.",
+        "The 96-row canonical graph contains 27 symbols. Literal traversal from INBOX reaches all 27, and its exact sinks are CANCELLED, DONE, and FAILED.",
+        "Every adjacent pair in every literal canonical projection sequence across the manifest is present in the 96-row canonical graph. REDUCE-V1 remains constrained to S, one canonical edge, or the exact synchronized sequence declared by its row.",
+        "Literal source/target traversal covers the declared IDEATION, BUILD, MAINTENANCE, DEEP-RESEARCH, FactoryInstance, NodeRun, Attempt, Wait, Effect, CleanupItem, RemediationObligation, UnconfirmedQuiescence, candidate, rollout, rollback, release-attempt, cancellation, control-health, and improvement final-cleanup row families. Their literal sinks agree with their declared terminal/disposition vocabularies; rollout has RETIRED as its sole sink."
+      ],
+      "basis": "Independent escaped-pipe Markdown parsing, ID uniqueness, table-width validation, canonical directed traversal, and literal projection-pair comparison over the current manifest bytes. This is not exhaustive reachable-product execution."
+    },
+    {
+      "area": "deterministic_reducer_source_exclusivity",
+      "result": "pass",
+      "exact_text": [
+        "The reducer contract says: Each priority predicate includes “and no earlier priority matched,” so predicates are disjoint.",
+        "Unknown symbols, no matching synchronized row, multiple matching rows, or disagreement with persisted canonical_state rejects the transaction; SAVED means continue to the next lower-priority coordinate, not a default result.",
+        "Safety ownership remains ordered: cancellation with an active rollback is visible at priority 2; work cancellation REQUESTED, QUIESCING, CLEANING, and clean CANCELLED owns priorities 3-6; rollback owns priorities 7/7a; unresolved effects own priority 8; exact terminals own priorities 9-10; cleanup owns priority 11; active release attempt owns priority 12; subordinate release-attempt cancellation owns priority 13; release-attempt failure cleanup owns priority 14; degraded control owns priority 15; rollout owns priority 16; and the exhaustive candidate map returns at priority 17.",
+        "Priority 13 maps release_attempt_state=CANCEL_REQUESTED|QUIESCING|CLEANING|CANCELLED to SAVED. Those values cannot derive parent cancellation or terminality, because an earlier matching IX coordinate owns the parent projection and every later source is evaluated only when no earlier predicate matched."
+      ],
+      "basis": "Direct comparison of PLAN §8.4 with manifest §§15-15.1, including the closed coordinate vocabularies, priority table, remaining-value maps, terminal conjunctions, and rejection rules."
+    },
+    {
+      "area": "release_attempt_and_whole_work_cancellation_IA_IX",
+      "result": "pass",
+      "exact_text": [
+        "IA09-IA12 require work_cancel_state=REQUESTED|QUIESCING and an already persisted IX01 whole-work cancellation. IA13 requires REQUESTED|QUIESCING; IA14 requires QUIESCING|CLEANING; IA15 requires CLEANING and that IX04 has not fired. Every IA09-IA15 canonical projection is S under IX dominance.",
+        "IA14 schedules attempt-local cleanup only and never creates or advances the parent CleanupManifest or cleanup-set coordinate. IA15 seals only the attempt-local CANCELLED disposition and cannot terminalize the work.",
+        "While cancellation is not NONE, ordinary candidate, rollout, control (including IH01/IH06), widening, promotion, and new business-effect edges reject. The closed safety allowlist contains IX06 classification/settlement, the named rollback advances, Effect reconciliation, quiescence closure, and IX cleanup; it creates no ordinary progress or second rollback.",
+        "IX03 is the sole parent cancellation-cleanup scheduler. IX04 alone changes work_cancel_state CLEANING->CANCELLED and derives the canonical parent CANCELLED after clean receipts and no live child, authority, effect, rollback, or attempt."
+      ],
+      "basis": "Direct row-by-row reproduction of IA09-IA15, reducer priorities 2-6/13, and IX01-IX06 plus the release-attempt cancellation witness contract."
+    },
+    {
+      "area": "IH_rollback_adoption_and_interrupt_equality",
+      "result": "pass",
+      "exact_text": [
+        "RollbackAdoptionInterruptCoordinatesV1 is exactly every generated HEALTHY, work_cancel_state=NONE, protected-X, nonterminal active/exposure tuple whose matching immutable-origin saga is already REQUESTED|ROLLING_BACK|VERIFYING|VERIFIED|FAILED|REMEDIATION_WAIT|ROLLED_BACK.",
+        "Its exact rollback-state partition is IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO. Each row changes only health, preserves the byte-identical Effect, rollout target, rollback identity/state, immutable origin, remediation/block coordinate, and selected later cleanup owner, fences remaining authority and sends, creates no second saga or cleanup, and is a canonical stutter under rollback or cleanup dominance.",
+        "The exact interrupt union is IH01-C/W/WR/WV/A/P/PR/PV/D/O plus residual IH01-RX/RN and rollback-adoption IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO.",
+        "PLAN, the manifest invariant, and the round-14 correction register reproduce that identical closed union. The manifest requires exact equality with ReachableActiveExposureInterruptCoordinatesV1, empty pairwise intersections, failure on an omitted or extra guard, and no adoption member falling through IH01-RX or generic IH01."
+      ],
+      "basis": "Direct comparison of PLAN §8.4, manifest IH01-RAQ through IH01-RAO, §§15.7-15.8, and round-14 resolution items R14-IR-001/R14-IR-002."
+    },
+    {
+      "area": "IH_IX_settlement_exclusivity",
+      "result": "pass",
+      "exact_text": [
+        "IH01-WR/PR preserve the exact unsettled original Effect identity/state and reconciliation rollout, change only health, fence all remaining authority/sends, and create no rollback or cleanup before protected X/N settlement.",
+        "Every IH06-WX/WN/PX/PN guard explicitly requires work_cancel_state=NONE. With NONE, the matching IH06 row alone consumes protected X/N settlement: X creates exactly one immutable-origin rollback; N requires the protected all-target non-application proof and creates no rollback.",
+        "If IX01 or IX02 wins before settlement, every IH06 row rejects. The matching IX06-XR/XQ or IX06-NR/NQ row alone consumes settlement under REQUESTED or QUIESCING, and IX03 remains the sole parent cleanup owner.",
+        "The required witness set races X and N settlement immediately before and after IX01 and IX02, requires pairwise-disjoint guards, one saga for X, no saga for N, byte-identical Effect identity, and no cleanup owner other than IX03 after cancellation wins."
+      ],
+      "basis": "Direct comparison of PLAN §8.4, manifest §§15.5-15.8, IH01-WR/PR, IH06-WX/WN/PX/PN, IX06-XR/XQ/NR/NQ, and round-14 resolution item R14-IR-003."
+    },
+    {
+      "area": "requirements_evidence_and_status",
+      "result": "pass",
+      "exact_text": [
+        "Requirements traceability remains structurally mapped 16/16. The five round-14 high findings are mapped as five unique formal/status defects affecting R-05/P-05, R-06/P-06, R-08/P-08, and R-12/P-12.",
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-14. Its generated PLAN SHA-256 is 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd and manifest SHA-256 is 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271; independent byte hashing matches both.",
+        "The schema-3 candidate graph contains 37 corpus result files, 25 source observations, 20 material claims, and 36 unique evidence edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports, and zero refutes. Coverage records all 25 PLAN sections and the dynamically derived 28 normative headings.",
+        "README, traceability, the round-14 resolution, and schema-3 evidence consistently identify round 12 and round 13 as historical checkpoints and round 14 as the current formal-byte/candidate-graph checkpoint. They do not claim implementation, exhaustive model proof, fresh retrieval, semantic evidence validation, production safety, or independent closure."
+      ],
+      "basis": "Independent JSON parsing, edge/count/disposition checks, requirements-row count, byte hashing, heading/count review, and reader-status comparison."
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0
+  },
+  "residual_uncertainty": [
+    "Future implementation and exhaustive reachable-product/full-model execution may reveal defects that literal PLAN/manifest closure cannot establish; these accepted future gates were not performed in this audit.",
+    "Fresh immutable retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation remain pending. Candidate evidence associations were not treated as supports/refutes or as empirical proof."
+  ],
+  "closure_criteria_pass": true
+}

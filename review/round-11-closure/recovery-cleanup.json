@@ -1,0 +1,121 @@
+{
+  "reviewer": "round-11 independent recovery and cleanup closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-10 combined correction and schema-3 regeneration",
+    "specialty": "BUILD/MAINTENANCE/improvement rollback-failure remediation, cleanup/remediation/reclaim, and terminal safety.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-10-resolution.md",
+      "review/round-10-closure/formal-model.json",
+      "review/round-10-closure/evidence-status.json",
+      "review/round-10-closure/improvement-races.json",
+      "review/round-10-closure/recovery-adversary.json",
+      "review/round-10-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, human semantic review, reviewed-edge regeneration, and production validation are accepted as unperformed future gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_status",
+      "result": "pass",
+      "exact_text": [
+        "README.md: \u2018docs/state-transition-manifests.md \u2014 normative legal-edge manifests incorporated by PLAN.md; other docs/ files are supporting drafts that PLAN.md supersedes on conflict.\u2019",
+        "docs/state-transition-manifests.md \u00a71: \u2018This is a normative part of `PLAN.md`. It is a plan contract, not an implementation or proof result.\u2019",
+        "review/round-10-resolution.md: \u2018This memo does not claim independent closure, implementation, full reachable-product proof, semantic evidence validation, or production safety.\u2019"
+      ]
+    },
+    {
+      "area": "rollback_failure_private_wait_and_terminal_fencing",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md \u00a714.2: \u2018An exhausted rollback enters distinct private `ROLLBACK_REMEDIATION_WAIT`, retains exposure/resources under a protected rollback-safety RemediationObligation, and cannot use generic `BLOCKED` resume/cancel paths; obligation closure, genuine restoration, independent verification, `ROLLBACK_VERIFIED`, and `ROLLED_BACK` must precede cleanup or cancellation terminality.\u2019",
+        "docs/state-transition-manifests.md B37: `ROLLBACK_FAILED -> ROLLBACK_REMEDIATION_WAIT` atomically creates the protected rollback-safety obligation and retains exposure and every resource block.",
+        "docs/state-transition-manifests.md B75/B77 and M63/M65 record cancellation or permanent wait without cleanup, terminalization, resource release, or generic BLOCKED continuation.",
+        "docs/state-transition-manifests.md B74/M62, B34/M25, B38/M29 require obligation closure, genuine restoration, independent verification, and `ROLLED_BACK` before B39/M30 cleanup or B71/M59 cancellation continuation."
+      ]
+    },
+    {
+      "area": "remediation_obligation_creation_edge",
+      "result": "fail",
+      "exact_text": [
+        "docs/state-transition-manifests.md \u00a71: \u2018Prose, diagrams, state lookup tables, and examples cannot add an edge.\u2019",
+        "docs/state-transition-manifests.md \u00a713.1: \u2018Every mutation uses expected aggregate version, expected latest generation, exact tenant/scope/disposition/parent/item/child/link digests, a unique idempotency/event key, and compare-and-append.\u2019",
+        "docs/state-transition-manifests.md RO01 guard: \u2018C11 signal and no prior generation\u2019; RO02 guard: \u2018C11 signal and latest prior generation is CLOSED with verified closure receipt.\u2019",
+        "docs/state-transition-manifests.md B37/M28 instead require direct atomic creation of a rollback-safety RemediationObligation, and \u00a713 states this purpose-bound subject \u2018does not create a CleanupItem or permit cleanup.\u2019"
+      ]
+    },
+    {
+      "area": "resource_block_release_order",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md \u00a713: \u2018Every resource key stays blocked until the `CLOSED` transition atomically verifies the exact `RemediationClosureReceipt`.\u2019",
+        "docs/state-transition-manifests.md RO09: \u2018only now may bound resource blocks be removed atomically with closure receipt.\u2019",
+        "docs/state-transition-manifests.md B74/M62 occur after RO09 closure and say \u2018preserve exposure/resource blocks until verification seals.\u2019",
+        "docs/state-transition-manifests.md \u00a75/\u00a76 prose requires B34/M25 and B38/M29 after B74/M62 before rollback is verified and rolled back."
+      ]
+    },
+    {
+      "area": "cleanup_and_reclaim_terminal_safety",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md \u00a713: \u2018It is terminal-equivalent only for `FAILED` or `CANCELLED` work\u2019 and \u2018never terminal-equivalent for `DONE`, secrets/credentials, live lease/grant, shared mutable workspace, public exposure, or an unclassified item.\u2019",
+        "docs/state-transition-manifests.md A11 requires \u2018all effects settled+every required cleanup item complete from previously committed receipts+no live authority/resource ownership\u2019 and creates no successor.",
+        "PLAN.md \u00a713: \u2018No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits.\u2019"
+      ]
+    },
+    {
+      "area": "schema_3_identity_and_claim_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json `schema_version`: `3.0.0`.",
+        "material-claims.json `generated_against.plan_sha256`: `29804814db262399090c60bbd5d6c15527ed9fdce2f72cecce7eea0be9d31063`, equal to current PLAN.md SHA-256.",
+        "material-claims.json `generated_against.normative_manifest_sha256`: `d8e3c02cdffd28a7b8c33ab2cb9133ecc5dd4be8e99cf3a251b9ced50af65599`, equal to current manifest SHA-256.",
+        "material-claims.json `semantic_status`: `editorial_candidate_associations_only`; `provenance_status`: `legacy_unverified`."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "R11-REC-001",
+      "severity": "high",
+      "title": "B37/M28 have no legal RemediationObligation creation transaction",
+      "requirement": "An exhausted BUILD or MAINTENANCE rollback must atomically create the protected rollback-safety RemediationObligation through an exact legal aggregate transaction; prose cannot invent an edge.",
+      "evidence": [
+        "B37 and M28 require atomic creation of the obligation when Work enters ROLLBACK_REMEDIATION_WAIT.",
+        "The closed RemediationObligation table has only RO01/RO02 for non-revoking absent-to-OPEN creation, and both require a C11 signal.",
+        "C11 is an outgoing signal row from a terminal ESCALATED_DISPOSITION CleanupItem, while \u00a713 explicitly says the B37/M28 rollback-safety subject does not create a CleanupItem.",
+        "No row authorizes B37 or M28 as the creation trigger, and the manifest forbids prose or inferred transitions from adding one."
+      ],
+      "impact": "A literal compiler must either reject B37/M28 because their required cross-aggregate mutation has no legal RemediationObligation edge, or invent an unlisted creation path. The failed rollback can therefore strand without the protected obligation that supplies remediation, revocation, and closure safety.",
+      "required_correction": "Add exact absent-to-OPEN rollback-safety creation row(s), or broaden a named creation row with a closed purpose/trigger partition that explicitly includes B37 and M28. Define the atomic Work/obligation/link/child/event/receipt CAS, replay behavior, generation rule, and authority. Add witnesses proving B37/M28 use only that row and conflict/replay safely."
+    },
+    {
+      "id": "R11-REC-002",
+      "severity": "high",
+      "title": "RO09 releases remediation resource blocks before rollback verification seals",
+      "requirement": "Exposure and resource-reuse blocks created for an exhausted failed rollback must remain until genuine restoration is independently verified and the parent reaches ROLLBACK_VERIFIED/ROLLED_BACK.",
+      "evidence": [
+        "RO09 closes the obligation and says bound resource blocks may be removed atomically at that transition.",
+        "B74/M62 are later rows: they require the already-CLOSED obligation and only fresh independent verification authority, then enter ROLLBACK_VERIFYING.",
+        "B34/M25 perform the later known-good verification, and B38/M29 later seal ROLLED_BACK.",
+        "B74/M62 simultaneously claim to preserve exposure/resource blocks until verification seals, which contradicts RO09's earlier block removal permission and PLAN \u00a713's release-at-CLOSED rule."
+      ],
+      "impact": "A conforming implementation may release or reuse protected resources in the RO09-to-B34/M25 window even though rollback is not yet independently verified. The alternative interpretation that retains them violates the explicit RO09/PLAN release contract. This is an unsafe ordering contradiction in the round-10 repair.",
+      "required_correction": "Separate remediation-child closure from release of the rollback-safety resource blocks. Keep the blocks through B74/M62 and B34/M25, and remove them only atomically with a named verified/rolled-back transition after the genuine restoration receipt and independent verification result pass. Align PLAN \u00a713, RO09, B74/M62, and the BUILD/MAINTENANCE witnesses."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2
+  },
+  "residual_uncertainty": [
+    "Implementation and exhaustive model execution remain future gates and were not treated as findings.",
+    "The candidate-only schema-3 graph was checked for current byte identity and limited status, not semantic entailment or fresh provenance."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,188 @@
+{
+  "reviewer": "round-14 independent improvement race closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-13 combined correction",
+    "specialty": "All cancellation, degradation, revocation, digest, Effect, rollback, and cleanup-ownership interleavings after the latest rows.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-13-resolution.md",
+      "review/round-13-closure/formal-model.json",
+      "review/round-13-closure/improvement-races.json",
+      "review/round-13-closure/cross-consistency.json",
+      "review/round-13-closure/recovery-remediation.json",
+      "review/round-13-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model proof",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md states that the repository intentionally contains a plan, not a working controller or deployed factory.",
+        "Recomputed PLAN.md SHA-256 is 012934597727e4946f274a4033fc3f0dc0b2337c224155f4e1535323f8682c1a.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is da76752e03a289075e2a02e3614fccd11448899c2dab639621542cf7f7709c05."
+      ],
+      "basis": "Both digests match review/round-13-resolution.md and material-claims.json generated_against."
+    },
+    {
+      "area": "schema_3_evidence_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with generated_against.regeneration_checkpoint round-13.",
+        "Its local validation records 37 corpus result files, 25 source observations, 20 material claims, 36 evidence edges, 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, 0 refutes, and 28 normative-manifest headings."
+      ],
+      "basis": "The graph is byte-bound to the current formal sources and remains editorial candidate association only. This audit does not treat it as fresh retrieval or semantic support."
+    },
+    {
+      "area": "round_13_correction_inventory",
+      "result": "pass",
+      "exact_text": [
+        "All five round-13 review JSON files parse and contain 0 critical and 3 high findings in total.",
+        "review/round-13-resolution.md maps all 3/3 raw high findings to 2 unique defects and reports 787 unique manifest rows: 96 canonical and 691 private/product."
+      ],
+      "basis": "Independent literal table-row parsing reproduced 787 unique edge IDs with no duplicate, including 96 rows in the canonical work graph and 691 other rows."
+    },
+    {
+      "area": "unsettled_reconciliation_interrupts",
+      "result": "pass",
+      "exact_text": [
+        "IH01-WR and IH01-PR consume HEALTHY EVIDENCE_STALE or REVOKED tuples already in WIDENING_RECONCILING or PROMOTION_RECONCILING with the exact original Effect UNSETTLED and rollback IDLE.",
+        "They atomically record TELEMETRY_DEGRADED, preserve exact Effect/reconciliation identity, fence remaining authority and sends, and create neither rollback nor cleanup before X/N settlement.",
+        "The matching IH06-WX/WN/PX/PN rows alone consume later settlement after degradation."
+      ],
+      "basis": "The new rows close the exact before-settlement degradation hole reported in round 13."
+    },
+    {
+      "area": "digest_and_revocation_settlement_to_rollback",
+      "result": "pass",
+      "exact_text": [
+        "IC24-RWX atomically changes WIDENING_RECONCILING to CANARY_ABORTING and rollback IDLE to REQUESTED with immutable WIDENING_ABORT origin.",
+        "IC24-RPX atomically changes PROMOTION_RECONCILING to FAILED and rollback IDLE to REQUESTED with immutable CANDIDATE_REVOCATION origin.",
+        "Both preserve the exact original Effect/reconciliation receipt, project BLOCKED>ROLLBACK_REQUESTED, and leave an IRB01-dispatchable rollout coordinate."
+      ],
+      "basis": "The corrected protected-X rows no longer dispatch rollback from forbidden reconciliation rollout states."
+    },
+    {
+      "area": "degradation_after_settlement_continuation",
+      "result": "fail",
+      "exact_text": [
+        "The manifest requires control degradation to commit durably for every reachable active/exposure tuple and requires exactly one interrupt after the protected X/N or unsettled classifier is fixed.",
+        "IC24-RWX/RPX and IC32-RWX/RPX/HWX/HPX can leave control HEALTHY with protected X, rollback REQUESTED, and rollout CANARY_ABORTING or FAILED.",
+        "IH01-RX is the only claimed residual X interrupt, but its guard requires rollback IDLE->REQUESTED; no IH01 row adopts an already REQUESTED/active rollback."
+      ],
+      "basis": "A settlement continuation that wins before degradation creates a reachable active-exposure tuple with no legal HEALTHY-to-TELEMETRY_DEGRADED edge. Finding R14-IR-001."
+    },
+    {
+      "area": "generated_interrupt_equality",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md and the manifest control-health invariant define the sole union as IH01-C/W/WR/WV/A/P/PR/PV/D/O plus residual IH01-RX/RN.",
+        "The manifest's generated-validation witness later defines the exact sole union as IH01-C/W/WV/A/P/PV/D/O plus IH01-RX/RN, omitting IH01-WR and IH01-PR."
+      ],
+      "basis": "The normative manifest gives two incompatible exact source relations, so a compiler cannot both admit the new rows and enforce the later exact-union assertion. Finding R14-IR-002."
+    },
+    {
+      "area": "cancellation_during_degraded_reconciliation",
+      "result": "fail",
+      "exact_text": [
+        "Section 15.5 says that while cancellation is not NONE, ordinary control rows are rejected and the closed safety allowlist uses IX06-XR/XQ or IX06-NR/NQ to classify settled exposure/no-exposure, with IX03 as the cancellation cleanup owner.",
+        "Section 15.6 and the IC24/IC32 continuation prose say that after IH01-WR/PR only the matching IH06-WX/WN/PX/PN may consume later protected X/N settlement.",
+        "IH06-WX/WN/PX/PN state no work_cancel_state=NONE guard, while IH06-PN can create CleanupManifest and the IX06 N partition reserves cleanup to IX03."
+      ],
+      "basis": "Cancellation can commit between IH01-WR/PR and Effect settlement. The two normative exclusivity statements then select incompatible row families. Finding R14-IR-003."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R14-IR-001",
+      "severity": "high",
+      "title": "A degradation arriving after protected-X settlement has no edge once the settlement continuation already requested rollback",
+      "requirement": "PLAN \u00a78.4 and manifest \u00a715.6 require degradation to commit durably and atomically fence active exposure, and ReachableActiveExposureInterruptCoordinatesV1 requires exactly one interrupt for every reachable active/exposure tuple after its classifier is fixed.",
+      "evidence": [
+        "IC24-RWX yields HEALTHY + EVIDENCE_STALE + CANARY_ABORTING + protected X + rollback REQUESTED; IC24-RPX yields HEALTHY + EVIDENCE_STALE + FAILED + protected X + rollback REQUESTED. IC32-RWX/RPX and IC32-HWX/HPX create the analogous REVOKED tuples.",
+        "The control-health prose explicitly orders a settlement-first race as the applicable IC24/IC32 X/N continuation before a later derived health interrupt.",
+        "The specialized IH01-WR/PR rows require the Effect still UNSETTLED and rollback IDLE, so they no longer apply after those X continuations.",
+        "IH01-RX is the residual protected-X row, but its guard says the synchronized rollback transition is IDLE->REQUESTED. The current rollback is already REQUESTED (or can advance under IRB01-IRB07 before degradation), so the guard rejects even though the Effect column says create-or-reuse.",
+        "Generic IH01 is forbidden because the tuple remains in ReachableActiveExposureInterruptCoordinatesV1. No other IH01 row records degradation while adopting an already-existing rollback saga."
+      ],
+      "adversarial_trace": [
+        "Reach HEALTHY + SHADOW_PASSED + WIDENING_EFFECT with the exact original Effect unsettled and cancellation NONE.",
+        "Commit IC24-A, producing HEALTHY + EVIDENCE_STALE + WIDENING_RECONCILING with the Effect unsettled and rollback IDLE.",
+        "Settle the exact Effect with a protected ExposureReceipt, then let IC24-RWX win, producing CANARY_ABORTING + rollback REQUESTED while health remains HEALTHY.",
+        "Deliver continuity/SLO degradation before rollback settlement. IH01-WR rejects because the Effect is settled and the rollout left reconciliation; IH01-RX rejects because rollback is not IDLE; generic IH01 rejects the active exposure. No legal edge durably records the degradation."
+      ],
+      "impact": "A valid degradation can be dropped, delayed behind rollback, or handled through an invented transition while protected exposure and an active rollback exist. This violates the declared durable ordering and the exact interrupt-totality contract.",
+      "required_correction": "Add or extend an exact protected-X degradation adoption partition for every generated HEALTHY active/exposure tuple whose matching rollback saga already exists in REQUESTED, ROLLING_BACK, VERIFYING, VERIFIED, FAILED, REMEDIATION_WAIT, or other reachable nonterminal rollback state. It must atomically record TELEMETRY_DEGRADED, preserve Effect/rollback identity and immutable origin, create no second saga, fence remaining authority, declare an exact rollout target or stutter, and race after IC24/IC32 X continuations and each rollback advance."
+    },
+    {
+      "id": "R14-IR-002",
+      "severity": "high",
+      "title": "The generated control-health checker still excludes the new IH01-WR and IH01-PR rows from its exact legal interrupt union",
+      "requirement": "The normative manifest requires generated exact equality, not subset inclusion, between ReachableActiveExposureInterruptCoordinatesV1 and the sole legal HEALTHY-to-degraded interrupt guards.",
+      "evidence": [
+        "Manifest \u00a715.6 states: its source set must equal exactly the union of IH01-C/W/WR/WV/A/P/PR/PV/D/O and residual IH01-RX/RN guards.",
+        "PLAN \u00a78.4 states the same union and expressly includes IH01-WR/PR.",
+        "The manifest's Control health and effect-first ordering validation bullet instead says generated validation treats the exact union of IH01-C/W/WV/A/P/PV/D/O and IH01-RX/RN as sole, omitting WR and PR.",
+        "Under the latter exact assertion, the new already-reconciling coordinates either have no admitted row or IH01-WR/PR are rejected as forbidden extra edges; under the former assertion they are required."
+      ],
+      "impact": "The future compiler/model gate has two incompatible expected relations. It cannot deterministically validate the round-13 repair, and an implementation following the stale validation clause can reintroduce the exact missing degradation interrupt.",
+      "required_correction": "Change the generated-validation clause to the identical closed union IH01-C/W/WR/WV/A/P/PR/PV/D/O plus residual IH01-RX/RN everywhere, then require literal equality checks that fail on any omitted or extra guard."
+    },
+    {
+      "id": "R14-IR-003",
+      "severity": "high",
+      "title": "Cancellation between IH01-WR/PR and Effect settlement makes the IH06-only continuation rule conflict with the IX06-only cancellation allowlist",
+      "requirement": "The cancellation reducer must have disjoint total predicates, reject ordinary control progress while cancellation is active, and preserve IX03 as the sole cancellation cleanup owner; every nonterminal Effect state must still have one bounded settlement path.",
+      "evidence": [
+        "Section 15.5 states that while cancellation is not NONE, ordinary candidate, rollout, control, widening, promotion, and new business-effect rows are rejected. Its closed safety allowlist names IX06-UR/UQ/NR/NQ/XR/XQ and pre-send rows, not IH06.",
+        "The prose following IC24-R* and the control-health invariant state that if IH01-WR/PR wins before settlement, only matching IH06-WX/WN/PX/PN may consume settlement.",
+        "No IH06-WX/WN/PX/PN row states work_cancel_state=NONE. IH06-PN changes cleanup NOT_REQUIRED->PENDING and creates CleanupManifest, whereas IX06-NR/NQ say IX03 is the sole cleanup owner during cancellation.",
+        "IX01 is authorized from every reachable nonterminal tuple, so TELEMETRY_DEGRADED + WIDENING_RECONCILING/PROMOTION_RECONCILING + original Effect UNSETTLED after IH01-WR/PR is not excluded from cancellation."
+      ],
+      "adversarial_trace": [
+        "Reach HEALTHY + EVIDENCE_STALE + WIDENING_RECONCILING + original Effect UNSETTLED through IC24-A, then commit IH01-WR so health becomes TELEMETRY_DEGRADED.",
+        "Before Effect settlement, commit IX01 to REQUESTED and optionally IX02 to QUIESCING.",
+        "Settle the Effect as protected X or N.",
+        "The blanket cancellation rule and closed allowlist require the matching IX06-XR/XQ or IX06-NR/NQ path, while the later IH01 continuation contract says only IH06-WX/WN/PX/PN may consume settlement. Applying IH06-PN would also preempt IX03 cleanup ownership; rejecting it violates the stated IH06-only continuation."
+      ],
+      "impact": "The normative reducer is contradictory at a reachable cancellation/degradation/Effect interleaving. A compiler cannot choose one legal continuation and cleanup owner without ignoring an authoritative clause.",
+      "required_correction": "Scope the IH06-only continuation and each IH06-WX/WN/PX/PN guard explicitly to work_cancel_state=NONE. State that IX01 winning before settlement transfers exclusive X/N continuation to the matching IX06 REQUESTED/QUIESCING row, with IX03 sole cleanup ownership. Add before/after IX01 and IX02 race witnesses for both X and N."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "total": 3,
+    "round_13_review_files_reviewed": 5,
+    "round_13_raw_critical_findings_reviewed": 0,
+    "round_13_raw_high_findings_reviewed": 3,
+    "round_13_unique_defects_reviewed": 2,
+    "manifest_rows_reproduced": 787,
+    "canonical_rows_reproduced": 96,
+    "private_and_product_rows_reproduced": 691,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_evidence_edges_checked": 36,
+    "current_normative_headings": 28
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static adversarial audit. It does not claim implementation, exhaustive reachable-product execution, runtime safety, or production validation.",
+    "Fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, and deterministic reviewed-edge regeneration remain accepted future gates."
+  ],
+  "closure_criteria_pass": false
+}

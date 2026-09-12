@@ -1,0 +1,114 @@
+{
+  "reviewer": "round-5 architecture and consistency closure auditor",
+  "scope": "Independent final plan-only closure audit of the current post-round-4 snapshot. Reviewed PLAN.md, README.md, docs/state-transition-manifests.md, review/requirements-traceability.md, review/round-4-resolution.md, all six review/round-4-closure JSON files, and the current material-claims, research manifest, synthesis coverage, evidence repair, evidence index, and evidence cutoff artifacts. Reproduced the relevant repairs from the current text and local structure; did not require implementation proof or completion of future gates.",
+  "strengths": [
+    "Release 0 is consistently limited to a recoverable no-external-write envelope, while PostgreSQL mutation proof is required before any external writer token.",
+    "The roadmap has one increment-numbering authority, explicit predecessor gates, a separate second-repository/RLS admission boundary, isolated dogfood before opt-in consumers, and a future GTM branch limited to separately owned read-only discovery with external action still human-gated.",
+    "Cross-boundary dependency dispatch now covers hard_success, ordering, data, evidence, and approval with dual-owner authorization, closed disclosures, expiry/revocation, and consumption receipts.",
+    "The dedicated PolicyAdmissionReceipt issuer resolves the earlier runtime-versus-human issuance contradiction without widening scheduler or actuator authority.",
+    "The current PLAN and normative-manifest SHA-256 values match material-claims.json. The evidence artifacts now disclaim legacy retrieval timing and semantic validation rather than claiming that the future re-fetch gate passed.",
+    "Factory entry/projection repairs, Wait cancellation edges, split cleanup entry/terminalization, compensation-origin dispatch, second-repository isolation ordering, and consumer manifest/rollback boundaries are present in the current text."
+  ],
+  "findings": [
+    {
+      "id": "R5-ARCH-001",
+      "severity": "high",
+      "title": "The unconfirmed-quiescence escape grants new work while the one-unfinished-attempt invariant forbids the attempt that would carry it",
+      "requirement": "Lease reclaim must define one safe, implementable result when the old worker cannot be proved terminated. Any allowed disjoint continuation must state how it coexists with the attempt uniqueness invariant, or it must remain blocked.",
+      "evidence": [
+        "PLAN.md \u00a713 says the normal reclaim path creates a new attempt only after STOPPED plus quiescence/effect receipts, but then says that when termination cannot be proved a human UnconfirmedQuiescenceDisposition and isolation proof allow disjoint-resource work to proceed.",
+        "The same PLAN.md paragraph ends with the unconditional statement: 'There is no overlapping authority and one unfinished attempt per node across fences.'",
+        "docs/state-transition-manifests.md A12 moves the old Attempt to QUARANTINED and marks it 'not finished'; the Attempt rule explicitly says QUARANTINED remains unfinished across all fences.",
+        "docs/state-transition-manifests.md U04 nevertheless enters ACTIVE_DISJOINT_ONLY and grants 'new disjoint authority only' before old-attempt termination is observed at U07 and before A18 can make the old Attempt CANCELLED."
+      ],
+      "reproduction": [
+        "Let Attempt A lose its heartbeat and follow A07-A12 until A is QUARANTINED because termination is unproved.",
+        "Approve the exact unconfirmed-quiescence disposition and pass isolation, following U01-U04 to ACTIVE_DISJOINT_ONLY.",
+        "The manifest now grants new disjoint authority while A is still unfinished. To resume the reclaimed node through the normal admission model, create Attempt B and its lease/fence; A and B are then two unfinished attempts for one node across fences, which PLAN \u00a713 forbids.",
+        "If B may not be created, U04's 'new disjoint authority' has no defined Attempt/Lease carrier and the advertised liveness escape cannot execute."
+      ],
+      "impact": "An implementer must either violate the stated uniqueness/scheduling invariant or invent an unmodeled authority carrier. The former can create concurrent attempt ownership; the latter bypasses the durable attempt, lease, fence, sandbox-context, and output-gate model. This leaves a safety-critical reclaim branch contradictory and undefined.",
+      "recommendation": "Choose and state one rule. Either keep the node blocked until A18 and remove ACTIVE_DISJOINT_ONLY work, or define a narrowly scoped successor Attempt B exception. If the exception is retained, bind B to the disposition, isolation attestation, disjoint resource set, monitor/expiry/revocation, separate workspace and credentials; revise the uniqueness invariant to exactly exclude only this proven-disjoint pair; and add model checks for admission, output/effect gates, closure, and shared-resource denial.",
+      "verification": "A trace from A12/U04 either remains unable to create or run successor work until A18, or reaches a specifically modeled successor Attempt whose existence is permitted by a revised invariant and whose resource/effect/output authority is mechanically limited to the signed disjoint set. No trace relies on an authority without an Attempt/Lease/fence/context.",
+      "confidence": "high",
+      "prior": "Reproduced as a residual contradiction in the round-2 lease-reclaim repair, not merely inferred from the round-4 register."
+    },
+    {
+      "id": "R5-ARCH-002",
+      "severity": "low",
+      "title": "Requirements traceability still says completed evidence repairs are pending",
+      "requirement": "Current status text should distinguish completed local artifact regeneration from the still-future immutable re-fetch and human semantic review.",
+      "evidence": [
+        "review/requirements-traceability.md \u00a77 says the named round-4 evidence/provenance edits 'remain assigned' to later evidence repair and regeneration and does not claim they are repaired.",
+        "Its \u00a78 again says the named evidence-artifact work 'remains pending the combined deliverable.'",
+        "README.md Status and review/round-4-resolution.md Count and remaining work instead state that those local repairs and material-claim regeneration are present for the current digests.",
+        "The current artifacts corroborate the latter: material-claims.json matches the current PLAN and normative-manifest digests, and the provenance files use the repaired unverified-legacy wording."
+      ],
+      "reproduction": [
+        "Read requirements traceability \u00a7\u00a77-8 as current status, then compare README.md Status, round-4-resolution.md, the two stored digests in material-claims.json, and the current evidence disclaimers.",
+        "The same checkout labels the local repair/regeneration both pending and complete."
+      ],
+      "impact": "A reader can confuse a completed local editorial/regeneration step with the genuinely pending re-fetch and semantic-review gate. The inconsistency does not weaken a runtime safety boundary or claim that the future gate passed.",
+      "recommendation": "Update traceability \u00a7\u00a77-8 to say the local evidence repair and current-digest material-claim regeneration are complete, while immutable re-fetch, human semantic review, and independent closure remain pending.",
+      "verification": "README, traceability, round-4 resolution, and the evidence artifacts use the same two-part status: current local regeneration complete; provenance/semantic/future-gate validation incomplete.",
+      "confidence": "high",
+      "prior": "Residual part of R4-CONS-005 after the README and resolution text were corrected."
+    },
+    {
+      "id": "R5-ARCH-003",
+      "severity": "high",
+      "title": "The normative DEEP-RESEARCH acceptance row cannot satisfy the canonical verified-effect guard in Release 0",
+      "requirement": "The required Release 0 DEEP-RESEARCH journey must have a legal no-external-write completion path. A compound canonical projection must satisfy every intermediate canonical guard without inventing an effect receipt.",
+      "evidence": [
+        "PLAN.md \u00a720 Increment 2 and \u00a724 require a Release 0 DEEP-RESEARCH run while proving that Release 0 has no write credential.",
+        "docs/state-transition-manifests.md D19 projects ResearchDecision acceptance as REVIEW>MERGE_QUEUED>MERGED>OBSERVING>CLEANING in one transaction and states that publication is a separate effect only 'if any'.",
+        "The universal manifest rule requires every intermediate canonical guard in A>B>C projections to be rechecked.",
+        "Canonical CW14 is the only MERGE_QUEUED>MERGED edge and requires verified-effect. D19 names no already-durable verified effect or no-publication receipt; its own text makes publication optional and separate."
+      ],
+      "reproduction": [
+        "Run the no-write Release 0 DEEP-RESEARCH path through D00-D18 and accept its ResearchDecision.",
+        "Apply D19 and recheck the intermediate CW14 guard as required. No external publication effect exists in the no-write run and D19 supplies no typed no-publication receipt that can satisfy verified-effect.",
+        "The path stops at MERGE_QUEUED, or an implementer must fabricate/assume an unspecified effect receipt. D21 success is therefore unreachable through the literal normative guards."
+      ],
+      "impact": "A directly required Release 0 owner journey has no legal success trace. Workarounds either violate the canonical graph or falsely record an effect, undermining the event history and plan-only acceptance contract.",
+      "recommendation": "Add a canonical no-publication completion route with an explicit durable no-publish disposition/receipt, or split the research acceptance path so only an actually requested and verified publication effect crosses CW14. Keep every cleanup entry in its own later transaction as already required.",
+      "verification": "A model trace completes Release 0 DEEP-RESEARCH with zero external effects and no unmet CW14 guard. A separate publication trace crosses MERGE_QUEUED>MERGED only after a real verified effect receipt.",
+      "confidence": "high",
+      "prior": "Independently reproduced from the current D19 compound projection; not a demand for implementation proof."
+    },
+    {
+      "id": "R5-ARCH-004",
+      "severity": "high",
+      "title": "Promotion dispatch crosses the canonical verified-effect boundary before verification",
+      "requirement": "Promotion lifecycle projection must not enter MERGED or DEPLOYING until the bound promotion effect is verified. Compound projections must satisfy every canonical intermediate guard.",
+      "evidence": [
+        "docs/state-transition-manifests.md IR15 moves approval to canonical MERGE_QUEUED and explicitly says the promotion intent is not sent.",
+        "IR17 then projects MERGE_QUEUED>MERGED>DEPLOYING on 'effect dispatch' and records a promotion effect.",
+        "Canonical CW14 requires verified-effect for MERGE_QUEUED>MERGED, and the universal rule requires that guard to be rechecked inside a compound row.",
+        "The verified promotion receipt does not appear until the later IR18 transition from PROMOTING to PROMOTED."
+      ],
+      "reproduction": [
+        "Reach IR15 APPROVED/MERGE_QUEUED with a valid PromotionDecision.",
+        "Dispatch the effect through IR17 but lose the response or leave the effect LIVE. IR17's trigger has happened, yet no verified receipt exists for CW14.",
+        "Applying IR17 literally either violates CW14 while projecting MERGED>DEPLOYING or makes IR17 impossible. Verification at IR18 occurs too late to justify the earlier MERGED edge."
+      ],
+      "impact": "The normative promotion machine has an unsafe or unreachable transition at its external-effect boundary. An implementation can advertise merged/deploying state before proof of application, including while the effect is ambiguous, or must depart from the manifest.",
+      "recommendation": "Have IR17 record/dispatch the effect while canonically stuttering at MERGE_QUEUED. Cross MERGE_QUEUED>MERGED only when the verified receipt is consumed, then take the appropriate deployment/observation projection. Add explicit UNKNOWN/reconciliation and proven-no-apply branches at the pre-MERGED state.",
+      "verification": "No reachable tuple has crossed canonical CW14 without a bound verified promotion receipt. Dispatch-only, UNKNOWN, no-apply, verified-apply, and rollback traces each have one legal projection and no fabricated receipt.",
+      "confidence": "high",
+      "prior": "Independently reproduced from current IR15/IR17/IR18 ordering and the universal compound-projection rule."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "low": 1,
+    "total": 4
+  },
+  "residual_uncertainty": [
+    "This is a plan-contract audit. It does not assert implementation, model-checking, fresh source retrieval, semantic evidence review, or production safety.",
+    "The future immutable re-fetch and independent human semantic review remain correctly identified as pre-Increment-1 gates and were not treated as closure failures."
+  ],
+  "closure_criteria_pass": false
+}

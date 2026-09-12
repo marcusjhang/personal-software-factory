@@ -1,0 +1,117 @@
+{
+  "reviewer": "round-10 independent recovery adversary closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-9 corrections and schema-3 regeneration",
+    "specialty": "remediation, reclaim, rollback failure, cleanup, Effect UNKNOWN, research publication, and cancellation terminal paths",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-9-resolution.md",
+      "review/round-9-closure/evidence-traceability.json",
+      "review/round-9-closure/remediation-cleanup.json",
+      "review/round-9-closure/formal-state.json",
+      "review/round-9-closure/improvement-interleavings.json",
+      "review/round-9-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Report only critical/high findings. A finding requires a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, reviewed-edge regeneration, and production validation are accepted as unperformed future gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "ordinary reclaim and unconfirmed quiescence",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md \u00a713: \u2018No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits.\u2019",
+        "PLAN.md \u00a713: \u2018This at-most-one-unfinished invariant is unconditional; retained cleanup or an isolated old process creates no exception.\u2019",
+        "docs/state-transition-manifests.md \u00a714: \u2018The old Attempt remains unfinished and node admission remains closed until exact termination, U09, and Attempt A18 complete. A disposition never makes cancellation terminal.\u2019"
+      ]
+    },
+    {
+      "area": "cleanup escalation and remediation generations",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md \u00a713: \u2018It is never terminal-equivalent for `DONE`, secrets/credentials, live lease/grant, shared mutable workspace, public exposure, or an unclassified item.\u2019",
+        "docs/state-transition-manifests.md \u00a713.1: \u2018Only RO09 is terminal.\u2019",
+        "docs/state-transition-manifests.md \u00a713.1: \u2018No human waiver, CleanupEscalationDisposition, child terminal, or accepted risk alone unblocks it.\u2019",
+        "docs/state-transition-manifests.md \u00a713.1: \u2018RO14 is its only recovery.\u2019"
+      ]
+    },
+    {
+      "area": "Effect UNKNOWN and direct terminal proof",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md \u00a712: \u2018Without that proof, the Effect enters `UNKNOWN`/reconciliation instead of taking the direct terminal edge.\u2019",
+        "docs/state-transition-manifests.md \u00a712: \u2018A current `ExposureReceipt` for the same target Effect contradicts the terminal-edge receipt and rejects the transaction.\u2019",
+        "docs/state-transition-manifests.md \u00a712.1: \u2018It explicitly says application is **not verified** and never creates `RECEIPT_VERIFIED`.\u2019"
+      ]
+    },
+    {
+      "area": "improvement rollback failure and cleanup ownership",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md \u00a715.3.1 IRB06: \u2018retry forbidden/stale/exhausted\u2019 moves `FAILED -> REMEDIATION_WAIT` and \u2018never claim ROLLED_BACK or clean\u2019.",
+        "docs/state-transition-manifests.md \u00a715.3.1: \u2018Only independently authorized remediation that reaches RO09 may enable IRB09.\u2019",
+        "docs/state-transition-manifests.md \u00a715.3.1: \u2018Only after that can IRB08 or IX03 own cleanup.\u2019"
+      ]
+    },
+    {
+      "area": "deep-research publication and cancellation",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md \u00a714.4: \u2018Direct or reconciled verified application must bind both the verified publication receipt required by CW14 and an explicit protected purpose-bound `NoDeploymentReceipt` required by CW16.\u2019",
+        "docs/state-transition-manifests.md D19P5 requires \u2018signed absence/no-application receipt+retry forbidden or exhausted+publication failure wait guard; save exact publication continuation\u2019.",
+        "docs/state-transition-manifests.md D59 requires \u2018authenticated cancel; effect reconciliation required\u2019 and says \u2018reconcile/settle effect\u2019.",
+        "docs/state-transition-manifests.md D48 requires \u2018clean+cancel disposition\u2019 and \u2018prior cleanup receipts\u2019."
+      ]
+    },
+    {
+      "area": "schema-3 evidence status",
+      "result": "pass",
+      "exact_text": [
+        "README.md: \u2018Round 9 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests.\u2019",
+        "material-claims.json generated_against.plan_sha256: `38c42d41bf38edff16c6777c0e93b0c0ee3e4a4c489645a7ae3c81db21116bb8`.",
+        "material-claims.json generated_against.normative_manifest_sha256: `e61bdd51f16d8e9a49d3b1b6bb7fe060cd84fbd51f477e344cce782de729ee8d`.",
+        "material-claims.json scope_and_method.semantic_status: `editorial_candidate_associations_only`."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "R10-REC-001",
+      "severity": "high",
+      "title": "BUILD and MAINTENANCE can abandon an exhausted failed rollback through the generic BLOCKED state and then resume ordinary work or cancel terminally without restoration",
+      "requirement": "A failed rollback after a deployed or observed exposure must remain a protected nonterminal safety obligation until genuine restoration is independently verified; cancellation, generic resume, and cleanup must not erase the unresolved exposure. This is the same fail-closed property that \u00a715.3.1 now defines for improvement rollback failure and is required by R-06/R-07 rollback and safe cancellation.",
+      "evidence": [
+        "docs/state-transition-manifests.md B35 moves `ROLLBACK_VERIFYING -> ROLLBACK_FAILED`; B37 then moves exhausted `ROLLBACK_FAILED -> BLOCKED` with only `human disposition` and no RemediationObligation or rollback-specific coordinate.",
+        "Once B37 collapses the state to generic `BLOCKED`, B25 permits `BLOCKED -> READY_REVIEW`, B26 permits `BLOCKED -> ADMISSION_WAIT`, and B57 permits `BLOCKED -> CANCEL_REQUESTED`; B60/B61/B62 can then reach immutable `CANCELLED` after quiescence/cleanup without a verified restoration edge B34/B38.",
+        "docs/state-transition-manifests.md M26 moves `ROLLBACK_VERIFYING -> ROLLBACK_FAILED`; M28 then moves exhausted `ROLLBACK_FAILED -> BLOCKED` with only `human` and no RemediationObligation or rollback-specific coordinate.",
+        "Once M28 collapses the state to generic `BLOCKED`, M21 permits `BLOCKED -> DIAGNOSED` and M46 permits `BLOCKED -> CANCEL_REQUESTED`; M47/M48/M49 can then reach immutable `CANCELLED` without M25/M29 ever proving and sealing rollback.",
+        "By contrast, improvement IRB06 preserves the exact hazard in `REMEDIATION_WAIT`, creates a rollback-safety RemediationObligation, forbids clean/ROLLED_BACK, and requires RO09, IRB09, IRB03, and IRB07 before cleanup. The BUILD and MAINTENANCE paths reproduce none of those guards."
+      ],
+      "impact": "A literal implementation can lose the fact that rollback failed while external exposure remains. It can admit a new BUILD plan, restart ordinary MAINTENANCE diagnosis, or report terminal cancellation after cleanup even though the known-good state was never restored. Settling the rollback Effect only classifies the attempted rollback; it does not prove restoration. This is an unsafe terminal and resource-reuse path.",
+      "required_plan_repair": "Give exhausted BUILD and MAINTENANCE rollback failures distinct nonterminal remediation-wait states or equivalent orthogonal rollback coordinates. Atomically create a protected rollback-safety RemediationObligation, retain exposure/resource blocks, and exclude generic BLOCKED resume/cancel terminalization. Require obligation closure plus genuine restoration and independent verification before ROLLBACK_VERIFIED/ROLLED_BACK, and only then allow cleanup or cancellation terminality. Add exact cancellation interleavings and model witnesses for exhaustion, revocation, remediation retry, successful restoration, and permanently blocked unresolved remediation."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static closure audit. It does not claim implementation, exhaustive reachable-product proof, source truth, semantic evidence validation, or production safety.",
+    "The schema-3 graph digests were independently recomputed and match the current PLAN and normative manifest bytes; its candidate-only status is not promoted."
+  ],
+  "closure_criteria_pass": false
+}

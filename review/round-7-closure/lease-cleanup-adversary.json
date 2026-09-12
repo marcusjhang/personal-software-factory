@@ -1,0 +1,120 @@
+{
+  "reviewer": "round-7 lease-cleanup adversarial closure audit",
+  "scope": {
+    "mode": "final plan-only closure audit after round-6 combined repairs",
+    "specialty": "lease reclaim, stale lease/fence, one-unfinished-attempt, quiescence, cancellation, retained-risk cleanup resurface, RemediationObligation, UNKNOWN effects, and terminal cleanliness",
+    "files_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-6-resolution.md",
+      "review/round-6-closure/adversarial-consistency.json",
+      "review/round-6-closure/formal-model.json",
+      "review/round-6-closure/evidence-semantics.json",
+      "review/round-6-closure/improvement-recovery.json",
+      "review/round-6-closure/architecture-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_policy": "Only critical/high findings are reported. No implementation, full-model, fresh-evidence, or semantic-review completion is demanded."
+  },
+  "contract_reproduction": [
+    {
+      "contract": "Ordinary reclaim and one-unfinished-attempt exclusion",
+      "exact_text": [
+        "PLAN.md \u00a713: \u2018No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits.\u2019",
+        "docs/state-transition-manifests.md A01: \u2018atomic admission+no other unfinished Attempt for node across all fences; ordinary reclaim predecessor must have committed A11\u2019.",
+        "docs/state-transition-manifests.md after A23: \u2018The invariant \u201cat most one unfinished Attempt per node across all fences\u201d is unconditional.\u2019"
+      ],
+      "audit_result": "The round-6 repair closes the earlier A10/STOPPED reclaim gap. Renewal and reclaim CAS conditions, stale-fence rejection, A11-before-successor ordering, and the no-alternate-authority rule are consistent at plan-contract level."
+    },
+    {
+      "contract": "Unconfirmed quiescence and cancellation terminality",
+      "exact_text": [
+        "docs/state-transition-manifests.md universal guard: \u2018quiescence-closed\u2019 requires U09, a verifying closure receipt, A18, no shared-resource ownership, and settled effects.",
+        "docs/state-transition-manifests.md \u00a714: \u2018The old Attempt remains unfinished and node admission remains closed until exact termination, U09, and Attempt A18 complete.\u2019",
+        "PLAN.md \u00a713: \u2018DENIED, REVIEW, ISOLATING, and REVOKED never qualify.\u2019"
+      ],
+      "audit_result": "No successor-authority escape or cancellation-terminal shortcut was found. Direct termination and U09/A18 closure remain distinct guarded alternatives."
+    },
+    {
+      "contract": "UNKNOWN effects and clean terminal outcomes",
+      "exact_text": [
+        "docs/state-transition-manifests.md E11: \u2018SENDING | UNKNOWN | lost/ambiguous response | ... | no retry\u2019.",
+        "docs/state-transition-manifests.md \u00a712: \u2018Original and compensation origins remain disjoint.\u2019",
+        "docs/state-transition-manifests.md universal rule: \u2018Every entry to CLEANING stops there. Only a separate row sourced at CLEANING may reach DONE|FAILED|CANCELLED, and it requires clean from previously committed receipts.\u2019"
+      ],
+      "audit_result": "The effect machine prevents blind replay, preserves reconciliation origin, and requires settled effects plus separately committed cleanup evidence before terminal Work. Accepted-risk application is not misrepresented as RECEIPT_VERIFIED."
+    },
+    {
+      "contract": "Retained-risk cleanup resurface",
+      "exact_text": [
+        "PLAN.md \u00a713: \u2018Terminal Work is immutable.\u2019",
+        "docs/state-transition-manifests.md C11: \u2018resurface trigger/revocation/review due+deterministic obligation/child IDs absent-or-same\u2019.",
+        "docs/state-transition-manifests.md \u00a713: \u2018Any trigger, review due, or revocation uses C11 below and never reopens the item or parent.\u2019",
+        "docs/state-transition-manifests.md \u00a713: \u2018Only the named protected remediation owner may advance it; CLOSED requires the linked child terminal-clean...\u2019"
+      ],
+      "audit_result": "The immutable-parent repair is directionally correct, but the new obligation path is not closed or replay-safe after the child/obligation advances, as detailed in the findings."
+    },
+    {
+      "contract": "Schema-3 evidence status",
+      "exact_text": [
+        "README.md: \u2018The graph covers all 27 current manifest headings and uses only candidate/unreviewed legacy relations.\u2019",
+        "material-claims.json internal_validation: supports_edges=0, refutes_edges=0, normative_manifest_headings_reviewed=27.",
+        "material-claims.json validation_scope says validation is deterministic local validation and \u2018not external source retrieval or semantic entailment validation.\u2019"
+      ],
+      "audit_result": "Current digest/coverage claims are locally scoped and candidate-only. This audit does not require the future immutable fetch or human semantic review. No material evidence overclaim was found in the current package."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R7-LCA-001",
+      "severity": "high",
+      "title": "RemediationObligation has declared mutable states and a mandatory closure result but no normative legal-edge machine",
+      "locations": [
+        "docs/state-transition-manifests.md:3",
+        "docs/state-transition-manifests.md:20",
+        "docs/state-transition-manifests.md:605"
+      ],
+      "contract": "The normative manifest says the compiler must ingest every legal edge, prose cannot add an edge, every nonterminal row has an outgoing row, and unknown or inferred transitions are forbidden. Section 13 nevertheless declares RemediationObligation status exactly OPEN|IN_PROGRESS|VERIFYING|CLOSED|REVOKED, says the owner may advance it, and makes CLOSED the only release condition for bound resource keys, but supplies no initial-state declaration, transition rows, guards, cancellation/failure/expiry behavior, or terminal predicates for that aggregate.",
+      "adversarial_trace": [
+        "C11 creates the obligation and MAINTENANCE child after a retained-risk disposition resurfaces.",
+        "The child completes terminal-clean and the required release/removal and RemediationClosureReceipt exist.",
+        "No normative row authorizes OPEN->IN_PROGRESS, IN_PROGRESS->VERIFYING, VERIFYING->CLOSED, or any other obligation transition.",
+        "Because prose cannot invent an edge, the compiler must reject the transition or the resource key remains blocked forever; implementing prose-only transitions would violate the single closed-edge authority."
+      ],
+      "impact": "The round-6 repair replaces reopening with an aggregate that cannot be implemented from the normative transition authority. Remediation cannot reliably close, resource admission can deadlock permanently, and REVOKED behavior is undefined.",
+      "required_plan_repair": "Add a closed RemediationObligation aggregate table to the normative manifest. Define its initial and terminal states; every legal edge and total expiry/revocation/conflict outcome; exact authority/CAS/idempotency guards; child/effect/cleanup bindings; and the single resource-unblock predicate. Align PLAN and generated tests to those exact rows."
+    },
+    {
+      "id": "R7-LCA-002",
+      "severity": "high",
+      "title": "C11\u2019s mandatory repeat resurface path becomes unusable after the deterministic child or obligation advances",
+      "locations": [
+        "docs/state-transition-manifests.md:600",
+        "docs/state-transition-manifests.md:603",
+        "docs/state-transition-manifests.md:605",
+        "PLAN.md:327"
+      ],
+      "contract": "Every trigger, review due, or revocation is required to use C11. C11 performs one atomic absent-or-same CAS across the obligation, link, and child-at-INBOX; only identical canonical bytes replay the original result, while any different payload or idempotency key rejects. Each RemediationResurfaceReceipt binds trigger and observed_at.",
+      "adversarial_trace": [
+        "A first review-due event takes C11 and creates the deterministic obligation/link/child.",
+        "The child leaves INBOX or the obligation changes status.",
+        "A later revocation, monitor trigger, or next review-due event is required to use C11 and carries a new trigger and/or observed_at.",
+        "The existing records are no longer child-at-INBOX/original canonical bytes, while the new receipt is not an identical replay. C11 therefore rejects, and no other legal row records or applies the mandatory later event."
+      ],
+      "impact": "A revocation or later risk signal can be dropped precisely while retained risk persists. The parent and CleanupItem correctly remain immutable, but the replacement obligation cannot receive all events that the contract says must be processed.",
+      "required_plan_repair": "Separate first materialization from later signaling. Keep one absent-or-same create row for the deterministic obligation/link/child, then add closed CAS rows that append later resurface/review/revocation events to the existing obligation without resetting the child to INBOX. Define same-event replay versus a distinct later event, and require revocation to move or mark the obligation through a legal blocking transition."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2
+  },
+  "residual_uncertainty": [
+    "No implementation or exhaustive generated-state/model execution was reviewed or required.",
+    "Fresh immutable evidence retrieval and human semantic review remain future gates and are not closure defects here.",
+    "review/requirements-traceability.md retains historical \u2018regeneration pending\u2019 wording for earlier rounds, but its current round-6 section and README state current regeneration clearly; this was not raised as a critical/high defect."
+  ],
+  "closure_criteria_pass": false
+}

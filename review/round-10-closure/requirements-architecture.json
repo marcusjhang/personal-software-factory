@@ -1,0 +1,214 @@
+{
+  "reviewer": "round-10 independent requirements and architecture closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-9 corrections and schema-3 regeneration",
+    "specialty": "All 16 requirements; complete owner journey; authority, roadmap, security, dogfood, GTM, cross-scope architecture, and cross-document consistency.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-9-resolution.md",
+      "review/round-9-closure/evidence-traceability.json",
+      "review/round-9-closure/remediation-cleanup.json",
+      "review/round-9-closure/formal-state.json",
+      "review/round-9-closure/improvement-interleavings.json",
+      "review/round-9-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Report only critical/high findings. A finding requires a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, deterministic reviewed-edge regeneration, later increment admission, and production validation are accepted unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "requirements_and_owner_journey",
+      "result": "pass",
+      "exact_text": [
+        "review/requirements-traceability.md §9: ‘Requirements structurally mapped: **16/16**; unmapped: **0**.’",
+        "PLAN.md §2 begins: ‘The owner installs a pinned control-product release by pull request.’",
+        "review/requirements-traceability.md §3: ‘Each command has session-derived identity, displayed digest/diff, durable event/receipt, wait/error response, replay behavior and retention/export rules.’"
+      ],
+      "basis": "R-01 through R-16 each map to exact PLAN clauses, §20 increments, §21 validation, and a human gate. PLAN §§2, 9, 10.1, 14, 15, 17, and 18 provide a continuous future journey from install, ideation/research, typed decisions and exact-digest READY through admission, isolated execution, review, merge/effect reconciliation, observation, rollback, cleanup, consumer release, export, and uninstall. The Issue/CLI interaction surface remains explicitly future and durable rather than being represented as implemented."
+    },
+    {
+      "area": "authority_readiness_and_security",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md §10: ‘Silence never grants authority.’",
+        "PLAN.md §20: ‘Independence is measured by canonical person and controlling organization, not login, role alias, bot or service session.’",
+        "PLAN.md §16: ‘Every stored, queued, cached, object-stored, indexed, idempotency, and audited record carries immutable tenant_id plus typed ScopeRef.’"
+      ],
+      "basis": "Protected Git, approval custody, authenticated human issuance, the purpose-only PolicyAdmissionReceipt issuer, runtime validation, actuators, durable facts, external resources, and disposable workers remain separated. Delegation is limited to closed R0/R1 profiles after every human-needed predicate is false. R2-R4, exceptions, UNKNOWN, canary, widening, promotion, cleanup risk, unconfirmed quiescence, and break glass remain human controlled. Scope identity, signed context, exact-purpose authority, restricted database roles, capability intersection, total sandbox selection, supply-chain pins, and non-waivable break-glass limits fail closed."
+    },
+    {
+      "area": "roadmap_persistence_review_and_delivery",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md §20: ‘This section is the only increment-numbering authority.’",
+        "PLAN.md §20 Increment 2: ‘Release 0 no-write UX’ and ‘prove no write credential’.",
+        "PLAN.md §20 Increment 3: ‘PostgreSQL restricted roles, CAS/outbox, database time, restore/replay, process-kill and two-session admission/renew/reclaim races all pass before any writer token’.",
+        "PLAN.md §20 Increment 8: ‘§5 RLS/role-normalization/cross-repo tests first’ before the second repository/productized release."
+      ],
+      "basis": "The roadmap is single-authority and dependency ordered. Release 0 is one-owner/one-repository, no-write, credential-free, restartable, repair-receipted, and exportable. External mutation waits for Increment 3 persistence and real race proof. A second repository waits for forced isolation/role normalization and Increment 8. Reviews bind exact heads and expire on change. Auto-merge remains off until the bounded Increment 7 profile."
+    },
+    {
+      "area": "dogfood_gtm_and_cross_scope",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md §17: ‘Install, verify, upgrade and rollback enumerate and rehash the entire managed set, regenerate outputs deterministically, resolve effective policy, and verify signatures, compatibility and immutable references.’",
+        "PLAN.md §18: ‘Engineering alone initially defines repository decisions/specs/diffs/tests/reviews/PRs/deployments/incidents; repository tools and graders; and the five built-in factories.’",
+        "PLAN.md §20 Increment 10: ‘Domain extraction/GTM read-only discovery’ and ‘no external GTM action’."
+      ],
+      "basis": "Consumer releases inventory, pin, and rehash managed inputs and outputs and require verification or rollback receipts across self-test, isolated dogfood, and opt-in rings. Cross-boundary transfer requires a dual-owner, purpose- and field-limited, expiring and revocable envelope plus receipt. Engineering stays first. GTM begins only after engineering admission as proposal/read-only discovery with named domain/compliance/security owners; publication, spend, and contact remain human-gated."
+    },
+    {
+      "area": "round_9_correction_contracts",
+      "result": "pass",
+      "exact_text": [
+        "Manifest §15.1 priority 7a: ‘if rollback_origin=WIDENING_ABORT, the tuple remains ROLLED_BACK through IR12/IR13A and IR13C alone schedules cleanup; otherwise IRB08 alone schedules cleanup’.",
+        "Manifest §15.6: ‘IH01-W/P move to explicit WIDENING_RECONCILING|PROMOTION_RECONCILING, fence sends, and preserve the exact original Effect until settlement; only IH06-WX/WN/PX/PN may then select exposed rollback or proved-no-application failure/abort.’",
+        "Manifest §15.8: ‘Direct terminal edges E09, E10, E30, E31, E33, and E35 admit only their N rows because their target-effect-specific signed terminal receipt proves no application; the corresponding X row is unreachable and absent.’",
+        "Manifest IC32-CX/IC32-PX/IC32-WX/IC32-MX atomically revoke/fence and create one named rollback saga for exposed coordinates; IC32-N/IC32-WN/IC32-MN use protected non-application and no rollback; IC32-UW/IC32-UP reconcile unsettled original Effects before classification.",
+        "Manifest IR13B accepts ‘every bound effect is settled with proved non-application’; §15.8 explicitly includes the existing terminal E34 record from IR43.",
+        "review/requirements-traceability.md §12: ‘The schema-3 candidate-only material graph now matches the current digests and all 28 dynamically derived headings.’"
+      ],
+      "basis": "All 8 raw high findings in all 5 round-9 reviews map to R9-C01 through R9-C06. The current PLAN/manifest reproduce the exact ownership, effect-first degradation, reachable direct-terminal classification, candidate-revocation, canary-abort settlement, and historical/current traceability repairs. The review files remain pre-correction findings and do not themselves override the corrected normative bytes."
+    },
+    {
+      "area": "schema_3_evidence_package",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json schema_version: ‘3.0.0’.",
+        "material-claims.json generated_against.plan_sha256: ‘38c42d41bf38edff16c6777c0e93b0c0ee3e4a4c489645a7ae3c81db21116bb8’.",
+        "material-claims.json generated_against.normative_manifest_sha256: ‘e61bdd51f16d8e9a49d3b1b6bb7fe060cd84fbd51f477e344cce782de729ee8d’.",
+        "material-claims.json generated_against.regeneration_checkpoint: ‘round-9’.",
+        "material-claims.json semantic_gate: ‘This is an editorial candidate association graph. Fresh immutable retrieval in one ResearchRun and recorded human semantic review of each candidate edge are required before any edge may be promoted to supports or refutes.’"
+      ],
+      "basis": "Independent SHA-256 recomputation exactly matches the current PLAN and normative manifest bindings. Dynamic enumeration yields the exact recorded ordered set of 28 numbered manifest headings. All 37 research inventory paths exist and their byte hashes match research-manifest.json. Schema 3 records 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports, and zero refutes. The package claims checkout-local structural/editorial validation only, not provenance or entailment."
+    },
+    {
+      "area": "status_and_cross_document_consistency",
+      "result": "pass",
+      "exact_text": [
+        "README.md: ‘Round 9 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests.’",
+        "review/round-9-resolution.md: ‘Formal PLAN/manifest correction and current-digest candidate-only graph regeneration complete; closure not claimed.’",
+        "review/requirements-traceability.md §12: ‘Immutable re-fetch, same-run human semantic review, deterministic reviewed-edge regeneration, implementation/full-model proof, production safety proof, and independent closure remain future gates.’"
+      ],
+      "basis": "README, traceability, the resolution register, current graph identity, and evidence banners agree. Historical round-7/round-8 checkpoint text is labeled historical. Completed round-9 formal/editorial work is separated from future evidence, implementation, model, production, and closure gates; no material overclaim remains."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "requirements_partial": 0,
+    "round_9_review_files_reviewed": 5,
+    "round_9_raw_critical_findings_reviewed": 0,
+    "round_9_raw_high_findings_reviewed": 8,
+    "round_9_stable_clauses_reviewed": 6,
+    "round_9_stable_clauses_closed": 6,
+    "normative_manifest_rows_reproduced": 735,
+    "current_normative_headings": 28,
+    "critical": 0,
+    "high": 0,
+    "total": 0
+  },
+  "residual_uncertainty": [
+    "This audit establishes plan-contract closure only. It does not establish that an implementation enforces the specified transitions, atomicity, authority, isolation, or delivery rules.",
+    "Exhaustive reachable-product/full-model proof, implementation tests, operational safety proof, and production validation remain future gates.",
+    "Fresh immutable retrieval in one ResearchRun, external source-truth validation, same-run human semantic edge review, and deterministic reviewed-edge regeneration remain future gates.",
+    "The round-9 closure files describe pre-correction bytes and were used as exact correction contracts; their retained findings are not unresolved merely because the historical files remain present."
+  ],
+  "closure_criteria_pass": true
+}

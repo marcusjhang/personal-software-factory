@@ -1,0 +1,127 @@
+{
+  "reviewer": "state-exhaustiveness",
+  "scope": "Round-2 plan-only review of PLAN.md after round-1 corrections. I conceptually model-checked the canonical work lifecycle and the factory, node-run, attempt, effect, and improvement state descriptions, with emphasis on mappings, reachability, rollback, reclaim, stale/unknown handling, cancellation, cleanup, and terminal predicates. The intentional absence of a prototype or implementation was accepted and was not scored as a defect.",
+  "strengths": [
+    "The plan separates work-item, factory-instance, node-run, attempt, effect, and improvement aggregates instead of forcing unrelated concerns into one enum.",
+    "BLOCKED continuation, cancellation epochs, quiescence, cleanup receipts, stale-result rejection, and UNKNOWN-effect reconciliation are materially stronger and directly address the round-1 root causes.",
+    "The compiler-first approach and generated state-space tests are the right control points for reachability, illegal edges, composition, replay equivalence, and terminal safety.",
+    "Normal repair loops, no-deploy observation, child cleanup, immutable effect intent, and post-merge non-compensability are stated explicitly."
+  ],
+  "findings": [
+    {
+      "id": "STATE-R2-001",
+      "severity": "high",
+      "title": "The declared factory-to-work projection is incomplete and does not preserve the canonical work graph",
+      "requirement": "P-08 and SO-RC-1 require one complete lifecycle graph and an explicit, versioned mapping for every private factory state. PLAN.md also says the compiler fixture enumerates every mapping pair and rejects unmapped states or mappings that skip READY, verification, outcome, rollback verification, or cleanup gates.",
+      "evidence": {
+        "files": [
+          "PLAN.md:180-207",
+          "PLAN.md:323-345",
+          "PLAN.md:347-406",
+          "review/requirements-traceability.md:24",
+          "review/requirements-traceability.md:44",
+          "review/round-1-resolutions/state-orchestration.md:18-25"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Expand the state lists in sections 8.6 and 14.1-14.5, then compare each state with the projection rows at PLAN.md:338-343.",
+        "Observe that STALE, BUILD/MAINTENANCE NEEDS_INPUT, UNKNOWN_EFFECT, MAINTENANCE SUPPRESSED, DEEP-RESEARCH REFRESH_WAIT, IMPROVEMENT ROLLBACK_REQUESTED, REJECTED, FROZEN, EXPIRED, REVOKED, and RETIRED have no projection. IDEATION also lacks QUARANTINED even though section 14.0 requires unknown/quarantine behavior in every factory.",
+        "Treat each listed private edge as a projected work-state edge. IDEATION ACCEPTED -> HANDOFF projects READY -> PLANNING, BUILD ADMISSION_WAIT -> IMPLEMENTING projects READY -> IMPLEMENTING without LEASED, and MAINTENANCE SCHEDULED -> EXECUTING does the same. These edges are absent from the sole canonical sequence.",
+        "Therefore either the built-in factories fail the promised compiler checks or the runtime projection must make undocumented intermediate work transitions, so the mapping is not the stated exact state-to-state projection."
+      ],
+      "impact": "Increment 0 cannot produce the promised 100% mapping manifest or graph-equivalent compiler fixture from the plan as written. Different implementers can invent different mappings and intermediate transitions, including paths that bypass lease/readiness/review semantics. This is a direct unmet all-status-tracking requirement and blocks safe implementation of every built-in factory.",
+      "recommendation": "Publish an exhaustive per-factory mapping manifest, including every normal and exceptional private state. Define whether projection applies to states or transition events. If it is state-based, require every private edge to map to a legal canonical edge or stutter and add private states for mandatory canonical phases such as LEASED. If it is event-based, specify the atomic ordered canonical transitions and guards emitted by each private edge. Remove wildcards such as SHADOW_* and CANARY_* where members have different wait/review semantics.",
+      "verification": "A generated Cartesian inventory proves exactly one projection for every private state. Every private legal edge projects to a legal canonical edge, an explicitly permitted stutter, or a fully specified guarded transition sequence. Fixtures for all five factories compile with zero unmapped states and demonstrate that READY, LEASED, verification, observation, rollback verification, and cleanup cannot be skipped.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-R2-002",
+      "severity": "high",
+      "title": "Lease reclaim both issues new authority immediately and forbids overlap before the old attempt is quiescent",
+      "requirement": "SO-RC-5 and SO-RC-6 require reclaim ordering, fencing, capability revocation, and no new execution overlapping an unquiesced prior attempt. P-05 requires durable attempts and safe lease/fence orchestration.",
+      "evidence": {
+        "files": [
+          "PLAN.md:223-227",
+          "PLAN.md:273-277",
+          "PLAN.md:287-289",
+          "review/requirements-traceability.md:21",
+          "review/requirements-traceability.md:61-64",
+          "review/round-1-resolutions/state-orchestration.md:66-74"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Start attempt A in RUNNING and let its heartbeat/lease expire while its worker continues computing or cannot be contacted.",
+        "Apply the reclaim sequence at PLAN.md:277: close A's lease, advance fence/epoch, revoke capabilities, and then issue authority to attempt B.",
+        "At that point A has not traversed STOP_REQUESTED -> STOPPED, QUIESCING, or an explicit unconfirmed-quiescence disposition. B is authorized while A is still unquiesced, contradicting the next sentence that no new attempt overlaps unquiesced work.",
+        "The one-unfinished-attempt rule is scoped to node/fence, so advancing the fence does not itself prevent A and B from both being unfinished."
+      ],
+      "impact": "An implementer must choose between liveness (immediate reclaim) and the plan's no-overlap invariant. Immediate reissue can allow concurrent workspace/resource activity or an already-started external operation from A while B runs; waiting without a defined escalation can deadlock permanently after a lost worker. This blocks a safe lease-reclaim implementation.",
+      "recommendation": "Define one guarded reclaim state machine. After fencing and revocation, move A to STOP_REQUESTED/QUIESCING and classify in-flight effects and resource ownership. Issue B only after a durable STOPPED/quiesced receipt, or after a named unconfirmed-quiescence escalation whose isolation guarantees make overlap safe. State which resources may be reused, which require replacement, and whether the unfinished-attempt invariant is per node across all fences rather than per node/fence.",
+      "verification": "A model trace cannot reach a newly LEASED attempt while an older attempt for the node is RUNNING, STARTING, HEARTBEAT_LOST, STOP_REQUESTED, or otherwise unquiesced, unless a separately tested isolation/escalation guard is present. Crash and partition tests show either bounded safe recovery or a visible blocked/quarantined state, never silent overlap.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-R2-003",
+      "severity": "high",
+      "title": "Rollback verification is ordered both before and after ROLLED_BACK",
+      "requirement": "P-07, P-08, SO-RC-1, and SI-RC-14 require a single durable rollback workflow with explicit post-rollback verification, observation, failure states, receipts, and cleanup.",
+      "evidence": {
+        "files": [
+          "PLAN.md:197-203",
+          "PLAN.md:235-239",
+          "PLAN.md:323-345",
+          "PLAN.md:360-369",
+          "PLAN.md:397-406",
+          "review/requirements-traceability.md:23-24",
+          "review/requirements-traceability.md:69",
+          "review/round-1-resolutions/state-orchestration.md:25"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Read the canonical ROLLED_BACK definition at PLAN.md:203: restoration is already observed and verified on entry, then the only stated next phase is cleaning.",
+        "Read the cross-cutting factory rule at PLAN.md:331: ROLLING_BACK -> ROLLED_BACK -> VERIFY/OBSERVE -> CLEANING, which places verification/observation after entry to ROLLED_BACK.",
+        "Read the exact projection at PLAN.md:342-343: IMPROVEMENT ROLLED_BACK and any factory ROLLED_BACK map immediately to canonical ROLLED_BACK, but VERIFY/OBSERVE is not a declared private state for the rollback path and no failure edge from rollback verification is specified.",
+        "A compiler cannot select both entry semantics, and a model cannot determine whether a failed restoration health check leaves ROLLING_BACK, ROLLED_BACK, FAILED, QUARANTINED, or returns to another recovery attempt."
+      ],
+      "impact": "The rollback success label can be emitted before recovery is proven under one reading, or the required post-rollback verification transition can be illegal under the other. This can falsely authorize cleanup/terminal disposition after a bad rollback and blocks safe deployment and improvement rollback implementation.",
+      "recommendation": "Choose one ordered graph. Prefer ROLLBACK_REQUESTED -> ROLLING_BACK -> ROLLBACK_VERIFYING -> ROLLBACK_OBSERVING -> ROLLED_BACK -> CLEANING, where ROLLED_BACK means verified recovery. Add explicit timeout, unknown telemetry, failed restoration, retry/exhaustion, and human-escalation edges. Map every rollback state for BUILD, MAINTENANCE, and IMPROVEMENT to legal canonical states and bind required receipts to the terminal predicate.",
+      "verification": "Generated traces prove ROLLED_BACK is unreachable without restoration and health receipts; telemetry UNKNOWN cannot pass; failed recovery cannot enter CLEANING as successful rollback; and every rollback path reaches verified recovery, governed escalation/failure, or cancellation without a nonterminal sink.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-R2-004",
+      "severity": "medium",
+      "title": "UNKNOWN effect reconciliation has outcomes but no unambiguous state exits or settled-state classification",
+      "requirement": "P-08 and SO-RC-7 require every effect sub-lifecycle edge, guard, ambiguity outcome, safe retry path, and terminal predicate to be machine-readable. UNKNOWN must never be blindly replayed.",
+      "evidence": {
+        "files": [
+          "PLAN.md:229-233",
+          "PLAN.md:285-303",
+          "PLAN.md:329-332",
+          "review/requirements-traceability.md:24",
+          "review/requirements-traceability.md:65",
+          "review/round-1-resolutions/state-orchestration.md:76-85"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Enter effect UNKNOWN after a lost response.",
+        "The plan defines lookup findings of zero, exactly one, or multiple/uncertain matches, but it does not map them to state transitions among READY_TO_SEND, RECEIPT_VERIFIED, RECONCILED, FAILED_FINAL, CANCELLED, or QUARANTINED.",
+        "RECONCILED can plausibly mean either 'remote effect found and receipt rebuilt' or 'absence proven and retry now allowed'; those meanings have different terminal and replay behavior.",
+        "Because a node is terminal only after effects settle, the plan also leaves unspecified which effect states are settled and how failed or unknown compensation is represented."
+      ],
+      "impact": "The per-operation catalog gate reduces immediate risk, but implementers can still encode incompatible UNKNOWN exits and terminal predicates. One version may duplicate a mutation after absence was not conclusively proven; another may deadlock a node or treat reconstructed but unverified evidence as settled.",
+      "recommendation": "Add a normative generic effect transition template. Give the three lookup outcomes distinct transitions and receipts, separate 'absence reconciled/retry authorized' from 'application reconciled/receipt verified', define human dispositions, and enumerate settled-success, settled-failure, compensated, cancelled-before-send, and unresolved states. Represent compensation attempts and their UNKNOWN/failure outcomes explicitly.",
+      "verification": "For each effect catalog fixture, model tests cover response loss with zero, one, multiple, paginated, and uncertain matches. Only conclusively absent effects can create a new send attempt; exactly one match must reach verified receipt without replay; ambiguity remains nonterminal/quarantined; and node terminal predicates accept only explicitly settled effect outcomes.",
+      "confidence": "medium-high"
+    }
+  ],
+  "residual_uncertainty": [
+    "This was a plan-only conceptual review. No executable IR, compiler, database, or controller was expected or tested.",
+    "The future IR could resolve some missing transitions, but the current plan gives conflicting instructions for projection, reclaim, and rollback; those choices must be resolved before safe implementation rather than delegated implicitly.",
+    "Operation-specific GitHub effect behavior still depends on future target-tenant/API probes and catalog entries, as the round-1 resolution already records."
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "reviewer": "round-3-requirements-usability-closure",
+  "scope": "Final plan-only closure audit of PLAN.md and README.md against R-01 through R-16, the complete owner/agent journey, IDEATION, BUILD, MAINTENANCE, DEEP-RESEARCH, IMPROVEMENT, exception-driven human involvement, engineering-first/GTM boundaries, dogfooding, and readability. I read requirements-traceability.md, round-2-resolution.md, all six round-2 review JSON files, all four round-1 resolution memos, and the evidence-repair register, manifest, synthesis coverage, material-claims register, cutoff note, and legacy evidence matrix. The removed prototype and absence of implementation proof were accepted by design; future proof gates were reviewed as plan contracts and were not treated as already passed.",
+  "strengths": [
+    "The plan is explicit that it is plan-only, that the legacy evidence is structurally audited but not semantically or provenance validated, and that a fresh immutable run plus human semantic review blocks implementation rather than being claimed complete.",
+    "R-01 through R-16 all have identifiable plan sections, roadmap increments, validation classes, and human gates. The sole-roadmap rule and revised traceability register now agree on the PostgreSQL-before-write, second-repository, improvement, and GTM order.",
+    "The top-level walkthrough gives a clear idea-to-outcome narrative across durable conversation, typed planning, fenced execution, clean verification, review, effect reconciliation, observation, cleanup, maintenance, research, and improvement.",
+    "The plan defines strong future proof gates for PostgreSQL mutation, consumer release integrity, sandbox selection, research checkpoint reuse, governed improvement, second-repository isolation, domain extraction, and GTM no-go conditions without claiming that those gates passed.",
+    "Dogfooding is separated from candidate evaluation, consumer releases are pinned and reversible, raw feedback stays local by default, and the engineering-first boundary keeps GTM read-only/proposal-only until a separate domain decision."
+  ],
+  "findings": [
+    {
+      "id": "R3-REQ-001",
+      "severity": "high",
+      "title": "The supposedly exception-driven human policy still requires a human READY approval for every build admission",
+      "requirement": "R-09/P-09 requires humans to be involved only for genuine authority, ambiguity, risk, confidence, exception, or recovery needs, while safe delegated work proceeds without a per-item human gate.",
+      "evidence": {
+        "files": [
+          "PLAN.md:86-107 (only a qualified human principal may issue an Approval)",
+          "PLAN.md:252-258 (the engine says it asks only on enumerated need, and READY approvals are human-issued)",
+          "PLAN.md:312 (every admission validates a current READY approval)",
+          "PLAN.md:374 (BUILD always obtains exact-digest READY)",
+          "PLAN.md:395-396 (a later R1 profile may auto-merge, but the READY gate is not relaxed)",
+          "review/requirements-traceability.md:R-09/P-09"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Choose a mature R0/R1 task with clear intent, strong oracle, tested rollback, no conflict, and authority already delegated by protected policy.",
+        "Section 10 says this case should take a reversible default without asking a human.",
+        "Follow BUILD and admission: both still require a current exact-digest READY Approval, and the authority table permits only a qualified human principal to issue it.",
+        "Even enabling the later R1 auto-merge profile removes only the merge interaction, not the per-item READY interaction."
+      ],
+      "impact": "The planned implementation cannot deliver exception-driven operation. Every build stops for a human even when none of the plan's human-needed predicates is true. This directly leaves R-09 incomplete and undermines maintenance and low-risk dogfood autonomy.",
+      "recommendation": "Define a distinct, protected delegation/admission-authority record for closed R0/R1 profiles. Bind it to exact scope, factory/policy version, command/effect ceiling, risk, oracle, rollback, sample/window, expiry, revocation, stop rules, and audit. Permit the controller to produce READY only from canonical state under that delegation when every human-needed predicate is false. Keep per-item human Approval mandatory for R2-R4, ambiguity, exceptions, unknown effects, authority expansion, and any changed bound input.",
+      "verification": "Add decision-table and journey fixtures showing one eligible delegated R0/R1 item reaches admission without a human request, while each enumerated human-needed condition deterministically creates a bounded wait. Prove delegation expiry, changed inputs, risk escalation, failed oracle/rollback, or revoked policy restores the human gate.",
+      "confidence": "high"
+    },
+    {
+      "id": "R3-REQ-002",
+      "severity": "high",
+      "title": "The canonical projection does not define how concurrent IMPROVEMENT machines combine into one work state",
+      "requirement": "R-08/P-08 and R-12/P-12 require a total, executable lifecycle projection for the orthogonal candidate, rollout, attempt, and control-health machines, with no implementation-defined shortcut or unsafe precedence.",
+      "evidence": {
+        "files": [
+          "PLAN.md:228-236 (four orthogonal improvement machines can hold states concurrently)",
+          "PLAN.md:352-366 (the mapping claims to be state-based and total but maps each component state independently to one canonical state)",
+          "PLAN.md:364 (`DISABLED->BLOCKED`, `OFFLINE_RUNNING->VERIFYING`, and `HEALTHY->OBSERVING` can all apply at the same time)",
+          "review/round-2/security-improvement.json:SECIMP-R2-001",
+          "review/round-2/requirements-journey.json:R2-RJ-001",
+          "review/round-2-resolution.md:items 7, 11, and 20"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Take an improvement candidate in OFFLINE_RUNNING while rollout remains DISABLED and control health remains HEALTHY, a normal combination before enablement.",
+        "The published row projects those simultaneous states to VERIFYING, BLOCKED, and OBSERVING respectively.",
+        "No tuple-to-state composition function, precedence rule, allowed tuple invariant, or atomic multi-machine transition specifies which canonical state is authoritative.",
+        "A later health transition can likewise imply OBSERVING->BLOCKED even when the candidate projection is VERIFYING."
+      ],
+      "impact": "The compiler cannot generate one deterministic work projection or prove legal canonical edges. Implementers must invent precedence, which can hide a control-health block, misstate readiness, or create an illegal shortcut around improvement gates. The prior total-mapping and orthogonal-lifecycle findings are therefore not fully closed.",
+      "recommendation": "Define the IMPROVEMENT projection as an explicit function over a versioned tuple such as `(candidate_state, rollout_state, attempt_state, control_health_state, cleanup_state)`. Enumerate allowed tuples or deterministic precedence, and require each component transition to yield a legal canonical edge or stutter. Control-health failure and unresolved rollback/cleanup must dominate success/readiness. Reject unreachable or multiply projected tuples at compile time.",
+      "verification": "Generate the reachable product state space for all four machines. Assert that every reachable tuple has exactly one canonical projection, every component edge maps to one legal canonical edge/stutter, and telemetry degradation, stale evidence, abort, rollback failure, and cleanup cannot project as READY, MERGED, or DONE.",
+      "confidence": "high"
+    },
+    {
+      "id": "R3-REQ-003",
+      "severity": "high",
+      "title": "Repository identity remains mandatory in two normative contracts despite the typed cross-domain ScopeRef correction",
+      "requirement": "R-15/P-15 and the addressed CDD-R2-004 finding require a domain-neutral kernel in which repository identity is mandatory only for engineering repository authority and cannot be fabricated as the owner of account-, consent-, campaign-, subject-, or environment-scoped data.",
+      "evidence": {
+        "files": [
+          "PLAN.md:121-123 (\u00a75.1 correctly makes tenant plus typed ScopeRef normative and repository conditional)",
+          "PLAN.md:140 (\u00a76 still says each artifact must contain repository_id)",
+          "PLAN.md:402 (\u00a716 still says every stored, queued, cached, object-stored, and audited record carries repository_id)",
+          "PLAN.md:434-440 (\u00a718 says the neutral kernel has no repository-only assumption and repository ID cannot authorize GTM data)",
+          "review/round-2/cross-domain-dogfood.json:CDD-R2-004",
+          "review/round-2-resolution.md:item 19"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Model the read-only GTM research artifact explicitly allowed by \u00a718 with tenant and a consent/account ScopeRef but no repository authority.",
+        "It satisfies \u00a7\u00a75.1 and 18, but violates the closed artifact envelope in \u00a76 and the universal tenant-boundary invariant in \u00a716 because both require repository_id.",
+        "Adding an arbitrary repository_id would in turn violate the rule that repository identity cannot substitute for domain authority."
+      ],
+      "impact": "A conforming compiler/schema cannot represent the planned repository-independent domain artifacts without either rejecting them or inventing misleading authority. This directly leaves the future cross-domain requirement and the claimed CDD-R2-004 closure inconsistent.",
+      "recommendation": "Replace the universal `repository_id` fields in \u00a7\u00a76 and 16 with mandatory `tenant_id` plus typed `ScopeRef`; require repository/installation IDs only for the engineering repository scope variant. Define composite keys, idempotency namespaces, object prefixes, audit fields, and authorization from the complete typed scope, not always from repository identity.",
+      "verification": "Schema fixtures must accept an engineering artifact with repository scope and a repository-independent GTM research artifact with its required domain scope; reject a missing domain authority and reject repository ID as authorization for account/contact/campaign data. A normative-text check must find no remaining universal repository requirement outside the engineering scope variant.",
+      "confidence": "high"
+    },
+    {
+      "id": "R3-REQ-004",
+      "severity": "medium",
+      "title": "The normative owner interface still has no command for several required factory decisions",
+      "requirement": "R-03, R-10, R-12, and the addressed R2-RJ-004 finding require a complete Issue/CLI owner journey in which each required decision has an authenticated action, displayed exact subject, durable event, recovery response, and next step.",
+      "evidence": {
+        "files": [
+          "PLAN.md:262-282 (\u00a710.1 command table)",
+          "PLAN.md:360 and 368-370 (IDEATION requires DECISION_REVIEW -> ACCEPTED -> HANDOFF)",
+          "PLAN.md:363 and 380-386 (DEEP-RESEARCH requires DECISION_REVIEW)",
+          "PLAN.md:364 and 388-390 (IMPROVEMENT requires curation, enablement, canary, and promotion decisions)",
+          "review/round-2/requirements-journey.json:R2-RJ-004",
+          "review/round-2-resolution.md:item 14"
+        ],
+        "urls": []
+      },
+      "reproduction": [
+        "Read the normative command table: it has start ideation/research, answer, status, approve READY, code-head review, exception, merge, and operational commands.",
+        "There is no command/event that accepts or rejects a DecisionRecord and triggers IDEATION handoff, accepts or requests changes to a research synthesis bound to its evidence digests, or records improvement curation/enablement/canary/promotion decisions bound to their manifests.",
+        "The generic READY approval is a BUILD admission decision, and the exact-head review command is a code review; neither specifies those other decision subjects or resulting factory transitions."
+      ],
+      "impact": "The backend states are defined, but the full owner/agent journey still has interaction gaps. Implementers must invent channel semantics and receipts at the most important handoffs, so the claimed R2-RJ-004 closure is incomplete even though the plan remains fail-closed in prose.",
+      "recommendation": "Extend \u00a710.1 with typed accept/request-changes/deny commands for DecisionRecord, ResearchDecision, curation, ImprovementEnablementDecision, canary admission/widening, and promotion. For each, name the displayed digest/diff, eligible principal/quorum, durable event, stale/error behavior, resulting transition, and resume/recovery path. Reuse one generic decision command only if its closed subject types and transition table are explicit.",
+      "verification": "Paper-test one full ideation handoff, research handoff, failed curation, approved canary, denied widening, and approved promotion. Every action must map to one authenticated command and one durable exact-subject receipt; stale subjects and silence must not advance state.",
+      "confidence": "high"
+    },
+    {
+      "id": "R3-REQ-005",
+      "severity": "low",
+      "title": "The reader-visible walkthrough has broken and duplicate step numbering",
+      "requirement": "The primary plan should remain readable as the sole end-to-end implementation contract.",
+      "evidence": {
+        "files": [
+          "PLAN.md:18-29 (\u00a72 numbers the sequence 1, 3, 4, 5, 6, 7, 8, 9, 9, 10, 11)"
+        ],
+        "urls": []
+      },
+      "reproduction": "Read \u00a72 in order and observe the missing step 2 and duplicate step 9.",
+      "impact": "This does not change authority or safety semantics, but it makes the main onboarding walkthrough harder to cite and weakens plan readability.",
+      "recommendation": "Renumber the walkthrough sequentially and keep stable anchors if other documents cite individual steps.",
+      "verification": "The rendered walkthrough has one strictly increasing sequence with no duplicate or missing number.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No implementation exists by design. This audit does not claim that any future compiler, storage gate, sandbox, factory, or pilot test passes.",
+    "The evidence corpus remains structurally audited but has unverified legacy retrieval provenance and no completed semantic review. PLAN \u00a74 and Increment 0 correctly make the fresh immutable run and human semantic review future blocking gates.",
+    "Local thresholds, owner burden, product usefulness, recovery behavior, safe automation rate, and GTM value remain pilot questions. Their absence as passed evidence is not a plan-only defect where the plan requires predeclared decisions.",
+    "Aside from the findings above, R-01 through R-16 have a plan-level contract and future validation location; implementation completion remains intentionally 0/16."
+  ]
+}

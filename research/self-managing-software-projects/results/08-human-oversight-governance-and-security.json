@@ -1,0 +1,511 @@
+{
+  "scope": [
+    "Covers assurance for issue-to-PR-to-deploy agents: authority boundaries, identity and permissions, isolation, untrusted-input/prompt-injection handling, dependency/build supply chain, human approval, audit evidence, incident stop and rollback. It treats the model as an untrusted planner and every repository file, issue/comment, web result, dependency metadata, tool/MCP result, and peer-agent message as potentially hostile data (S9, S10, S17).",
+    "Does not assess code-generation quality except where it changes assurance. 'Human oversight' means risk-based independent authorization at semantic boundaries, not a human approving every command. 'Sandbox' means an OS/container/VM-enforced capability boundary, not a prompt. 'Rollback' means redeploying a previously attested immutable artifact plus a separately tested data/schema recovery path."
+  ],
+  "current_state": [
+    "[Verified product behavior] Major agents now expose useful containment primitives. GitHub Copilot cloud agent uses an ephemeral GitHub Actions environment, a single working branch, draft PRs that the agent cannot approve/merge, delayed workflow execution pending a write-authorized user's approval, signed/attributed commits, session/audit logs, and built-in CodeQL, secret, and dependency checks (S1). Codex documents isolated cloud containers, secrets only during setup, offline agent phase by default, workspace-limited OS sandboxing locally, explicit approval for boundary crossing, optional network policy, and opt-in OpenTelemetry approval/tool events (S3, S4). Claude Code documents read-only Manual-mode start, approval for edits/commands, filesystem/network sandboxing, isolated hosted VMs, scoped credential proxying, branch-limited push, and cloud audit logs (S5).",
+    "[Verified limitation] These primitives reduce blast radius but do not prove safe autonomy. GitHub says its firewall excludes MCP servers and setup-step processes and may be bypassed; OpenAI explicitly warns that internet access enables prompt injection, exfiltration, malware/vulnerable downloads and license problems; Anthropic says users remain responsible for reviewing proposed code and commands (S2, S4, S5).",
+    "[Independent evidence] Indirect prompt injection can turn retrieved data into instructions and affect API calls (S17). AgentDojo shows neither utility nor defense is solved under adversarial tool use (S16). Security studies of earlier code assistants found insecure generation and user overconfidence (S18, S19). A 2025 peer-reviewed supply-chain study found package hallucinations at meaningful scale (S20).",
+    "[Assessment] Production use is supportable for bounded change proposals that terminate in protected PR and staged-deployment gates. Unattended mutation of protected branches, production, secrets, IAM, CI trust configuration, or irreversible data remains unjustified by public evidence.",
+    "[Additional verified product behavior] Devin's 2026 security profiles can mandate Git/MCP/network restrictions inherited by child sessions and its CLI can fail closed if sandboxing is unavailable; OpenHands offers pluggable confirmation/risk policies and Docker isolation, but these are administrator/deployer-selected controls, not universal safe defaults (S23-S29)."
+  ],
+  "representative_systems": [
+    "GitHub Copilot cloud agent (current living docs): strongest documented repository-native separation of branch, PR, workflow approval, attribution, security scans, session log and audit events (S1, S2).",
+    "OpenAI Codex cloud/CLI/IDE (current living docs): two-layer sandbox plus approval policy; OpenAI-hosted cloud containers; default offline agent phase; configurable local network proxy; opt-in OTel audit events; supports dangerous bypass/full-access modes that must be centrally prohibited (S3, S4).",
+    "Anthropic Claude Code (current living docs): Manual-mode permission prompts, Accept Edits/auto variants, OS sandbox, working-directory boundary, cloud VM/egress/scoped credential/branch/audit controls; actual risk depends on mode and organization policy (S5).",
+    "Control-plane standards/tools rather than agents: NIST AI RMF 1.0 and GenAI Profile for Govern/Map/Measure/Manage (S6, S7); NIST SSDF 1.1 secure-development practices (S8); OWASP LLM01:2025 and LLM06:2025 threat/control guidance (S9, S10); SLSA 1.2 provenance/build requirements, in-toto attestations and Sigstore/Cosign verification (S11, S12, S22); GitHub rulesets/environments and OpenSSF Scorecard (S14, S15, S21).",
+    "Devin security profiles/CLI (living docs updated July-August 2026): enterprise profiles can enforce a security floor, Git/MCP/network limits and inherited restrictions; CLI has allow/ask/deny plus fail-closed OS sandbox option; organization audit API is available. No official prompt-injection detection claim was found, so containment should not be mislabeled detection (S23-S26).",
+    "OpenHands Software Agent SDK/server (living docs updated January-July 2026): pluggable AlwaysConfirm/NeverConfirm/ConfirmRisky policies and risk analyzer, event-history decisions, and Docker sandbox. These are framework primitives the deployer must select; reviewed docs do not establish default-deny egress or prompt-injection detection (S27-S29)."
+  ],
+  "primary_evidence": [
+    "[Vendor fact, documented not independently audited here] GitHub limits triggering to repository writers; gives the agent one branch; prevents its PR from becoming ready, approving, or merging; applies branch protections/checks; normally requires 'Approve and run workflows'; prevents the requesting user from approving; and adds an approval to unattributed agent PRs where approval is already required (S1).",
+    "[Vendor fact with explicit caveat] GitHub filters hidden characters in issues/comments and restricts egress, but its firewall only covers Bash-tool child processes inside the Actions appliance, not MCP or setup steps, and GitHub warns sophisticated bypass is possible (S1, S2).",
+    "[Vendor fact] Codex cloud separates networked setup from the normally offline agent phase and removes configured secrets before that phase. Local defaults limit write to workspace and network off; OS enforcement uses Seatbelt on macOS and bwrap plus seccomp on Linux. OTel, if enabled, records approval decisions and tool results with prompt text redacted by default (S3). OpenAI's own internet-access page demonstrates an issue-body instruction exfiltrating git output through curl and recommends domain/method allowlists plus log review (S4).",
+    "[Vendor fact] Claude Code Manual mode is read-only until approval. Its sandbox can isolate filesystem/network; hosted cloud uses isolated VMs, default-limited egress, scoped credential proxying, current-branch push restriction and operation logs. Its documentation acknowledges prompt injection and places final review responsibility on the user (S5).",
+    "[Standards fact] OWASP says no fool-proof prompt-injection prevention is known and recommends deterministic output validation, least privilege, external-content separation, high-risk human approval and adversarial tests (S9). OWASP traces excessive agency to excessive functionality, permissions and autonomy, and says authorization must be enforced downstream rather than entrusted to the LLM (S10).",
+    "[Standards fact] NIST AI RMF is voluntary and organizes risk work into Govern, Map, Measure and Manage; its GenAI Profile adds GenAI-specific actions rather than certifying a product (S6, S7). NIST SSDF 1.1 supplies outcome-oriented secure-development practices (S8). SLSA/in-toto/Sigstore address artifact provenance/integrity, not model intent or semantic correctness (S11, S12, S22).",
+    "[Primary standard] NIST AI 600-1 calls for inventories containing component provenance/signatures/version and human-oversight roles; supplier-risk/provenance monitoring; tamper-resistant lifecycle histories; monitoring human overrides; after-action review; and protocols to deactivate systems. These are suggested actions in a voluntary profile, not certification (S31).",
+    "[Primary standards] NIST SP 800-190 warns shared-kernel containers have lower isolation than hypervisors and container escape is possible (S32). NIST SP 800-53 Rev. 5 supplies audit generation/protection, controlled configuration change and recovery-to-known-state baselines (S33). OWASP separately covers model/data/package supply chain and unsafe model output reaching shell/exec (S34, S35)."
+  ],
+  "independent_evidence": [
+    "Greshake et al. demonstrated indirect prompt injection against real LLM-integrated systems and synthetic tool/API applications, including manipulation of whether/how APIs are called and data-theft scenarios. This establishes that repository/issues/web/tool content cannot be trusted as passive context (S17).",
+    "AgentDojo v3 provides 97 tasks and 629 security cases. In its studied general tool-agent setting, then-current models solved under 66% of benign tasks; attacks succeeded under 25% against the best-performing agents; an extra detector reduced attack success to 8%. The authors stress adaptive attacks and a utility/security tradeoff; results are not coding-agent guarantees (S16).",
+    "Pearce et al. generated 1,689 programs over 89 high-risk-CWE scenarios with the 2021 Copilot and found about 40% vulnerable. This is historical model evidence, not a rate for current cloud agents, but shows generated code needs deterministic scanning and independent review (S18).",
+    "Perry et al.'s CCS 2023 user study found participants using a Codex-based assistant produced significantly less secure code and were more likely to believe it secure; less trust/more active prompting correlated with fewer vulnerabilities. Human presence alone therefore is not an assurance control (S19).",
+    "Spracklen et al., USENIX Security 2025 Distinguished Paper, analyzed 576,000 Python/JavaScript samples from 16 LLMs. It reports at least 5.2% average hallucinated packages for commercial models, 21.7% for open-source models, and 205,474 unique hallucinated names. This motivates registry verification, approved catalogs and locked hashes before installation (S20).",
+    "Agent Security Bench (ICLR 2025) spans 10 scenarios, 10 agents, over 400 tools and 27 attack/defense methods; its highest average attack success rate was 84.30% and current defenses were limited. It is broad-tool-agent rather than coding-specific evidence; the much higher result than AgentDojo reflects different attacks/environments/metrics, not a direct replication (S36).",
+    "RedCode evaluates risky execution/generation with 4,050 Exec cases (25 Python and 20 Bash risk scenarios across three instruction formats) and 160 harmful-generation prompts, 3 agent frameworks and 19 LLMs. It uses per-test Docker and deterministic environment checks; it warns that simulated sandboxes and LLM judges can mismeasure real execution. This is adversarial benchmark evidence, not an observed production incident rate (S37)."
+  ],
+  "metrics": [
+    "AgentDojo v3: 97 realistic tasks, 629 security test cases; models solved <66% without attacks; tested attacks succeeded <25% against best agents; a secondary detector reduced attack success to 8%. Caveat: 2024 models/general productivity tools, dynamic benchmark, not repositories or a lasting upper bound (S16).",
+    "Copilot security study: 1,689 generated programs across 89 scenarios; approximately 40% vulnerable. Caveat: 2021 Copilot/version and prompted completions, not today's agent with post-generation scanners (S18).",
+    "Package-hallucination study: 16 models, 576,000 samples, Python and JavaScript; commercial models averaged at least 5.2% hallucinated packages and open-source models 21.7%; 205,474 unique names. Caveat: generated samples are not observed production installs and rates vary by model/prompt (S20).",
+    "No comparable public, independent measurement was found for end-to-end escape rate of current coding-agent sandboxes, approval bypass rate, reviewer catch rate, incident frequency, mean time to revoke an agent, or reliable rollback success. Vendor feature presence must not be read as effectiveness.",
+    "Agent Security Bench: 10 scenarios, 10 agents, >400 tools, 27 attack/defense methods, 13 LLM backbones; highest average ASR 84.30%. Caveat: worst tested average under its setup, not prevalence or coding-agent rate (S36).",
+    "RedCode: 4,050 risky-execution cases covering 25 Python plus 20 Bash scenarios and three formats; 160 harmful-code prompts, 8 scenarios; 3 agent frameworks and 19 LLMs. Caveat: benchmark Docker and language scope do not establish production containment (S37)."
+  ],
+  "reference_workflow": [
+    "1. GOVERN/REGISTER — inventory each agent, model/version, owner, repositories, tool/MCP endpoints and data classes. Threat-model with NIST Govern/Map and SSDF. Assign a risk tier and a capability manifest; default deny anything not declared (S6-S10).",
+    "2. INTAKE/QUARANTINE — webhook copies the issue/spec and referenced content into an immutable task record with actor/provenance. Normalize hidden/control text but retain raw evidence. Label all issue comments, repo files, web pages, dependency READMEs and tool/peer outputs untrusted. A policy engine rejects untrusted triggers lacking repository write authority; filtering is only defense-in-depth (S1, S9, S17).",
+    "3. AUTHORIZE — compile the task into narrow capabilities: repo/branch, read/write paths, named tool verbs, egress domains/methods, CPU/time/token budget and expiry. Mint a short-lived task identity. Keep deploy, merge, secret read, IAM, package publish and destructive database verbs absent. Enforce every tool call in a deterministic gateway/downstream authorization layer, not the prompt or model (S10).",
+    "4. EXECUTE — create a fresh VM/container with read-only base image, writable disposable workspace, no host/Docker socket, no ambient cloud credentials, resource limits and network off. Run dependency setup in a separate, logged stage using an internal mirror and lockfile; then remove setup secrets before the agent starts. If access is necessary, use exact allowlists and block local/private addresses (S2-S5).",
+    "5. PRODUCE — agent writes only a task branch/patch, plus plan, commands/tool calls, evidence, tests, dependency changes and risk summary. Sign/attribute commits and link the immutable session log. Never let the same agent mark ready, approve or merge (S1, S3).",
+    "6. VERIFY — clean-room CI checks out the patch without agent credentials. Run unit/integration/property tests, lint/type checks, SAST/CodeQL, secret scan, license policy, dependency advisory/malware check and IaC/container scan. Resolve every new package through an approved registry, pin version and hash; generate SBOM/provenance, sign the artifact, and verify attestations (S1, S8, S11, S12, S20, S21).",
+    "7. REVIEW/GATE — policy blocks protected files and failed/absent checks. A qualified non-requesting CODEOWNER reviews behavior, security-relevant diffs, generated tests and logs. Require two-person/security review for auth/crypto/IAM, CI workflows, agent policy/prompts/tools, new dependencies, migrations, infrastructure and public APIs. Only the protected PR service merges (S1, S14).",
+    "8. RELEASE — promote the exact signed CI artifact; do not rebuild. Staging runs smoke/security tests. Production environment approval releases deployment credentials only after approval; use canary/blue-green, error/SLO checks and an automatic stop threshold. Prevent self-approval and admin bypass (S11, S12, S15).",
+    "9. OBSERVE/RESPOND — stream immutable task, policy decision, prompt/input hashes, tool calls, network denials, diffs, approvals, artifact digest and deployment outcome to the audit/SIEM store with actor correlation. On anomaly: cancel job, revoke task token, quarantine outputs, preserve evidence and open an incident (S1, S3, S5, S8).",
+    "10. ROLLBACK/LEARN — redeploy the last known-good signed digest; use tested forward/backward-compatible database procedures or restore rehearsal, then verify SLO/security. Feed confirmed failures and attempted injections into versioned evals/policies only through reviewed changes. Never allow the agent that failed to rewrite its own gate or erase logs."
+  ],
+  "integration_points": [
+    "Source control: issue/PR/comment webhooks; GitHub App or equivalent task-scoped identity; one agent branch; CODEOWNERS/rulesets/protected branch; signed commit and session link; audit-log export (S1, S14).",
+    "Execution: GitHub Actions or isolated VM/container scheduler; policy-as-code admission; secret broker issuing short-lived setup-only or deployment-only credentials; artifact/cache/package proxy; DNS-aware egress gateway. GitHub and OpenAI document important separation between agent processes and setup/MCP paths (S2-S4).",
+    "Agent/tool plane: typed tool gateway with verb/resource schema, OAuth-on-behalf-of user where needed, complete mediation, per-tool budget/rate limit and separate MCP trust registry; avoid generic shell/fetch/publish tools when narrow APIs suffice (S10).",
+    "Assurance: CI status APIs, test/SAST/secret/dependency/IaC/container scanners, SBOM generator, SLSA provenance builder, in-toto attestations, Sigstore/Cosign verifier, OpenSSF Scorecard signals (S8, S11, S12, S21, S22).",
+    "Release/operations: immutable registry digest, deployment environment/reviewer API, feature flags/canary controller, observability/SLO alerts, SIEM append-only storage, incident pager, identity/token revocation and known-good artifact catalog (S3, S5, S15)."
+  ],
+  "human_gates": [
+    "No per-command gate for actions already contained by a pre-reviewed capability profile; repeated low-context prompts create fatigue. Escalate only exceptions: request for new path/tool/egress/credential, sandbox escape, policy denial, ambiguous acceptance criteria or exhausted budget (inference from layered approval/sandbox patterns in S3, S5 and excessive-agency guidance S10).",
+    "Mandatory PR review by a person independent of the requester/agent before protected-branch merge. Reviewers inspect semantics, diff, dependencies, generated/modified tests and session evidence rather than trusting a green self-authored test. GitHub implements non-self-approval and agent-no-merge constraints (S1, S14).",
+    "Mandatory specialist/two-person approval for authentication/authorization/cryptography, secrets/IAM, CI/workflow/agent configuration, MCP/tool additions, dependency or lockfile additions, supply-chain exceptions, database/destructive migrations, infrastructure/network policy, legal/privacy scope and public API compatibility (risk-based recommendation grounded in S8-S10, S13, S20).",
+    "Mandatory release approval for production or access to production secrets; deploy credentials become available only after the environment gate. Prevent initiator self-approval and disallow bypass for protected environments (S15).",
+    "Emergency gate: on anomaly or rollback trigger, the on-call human may stop/revoke and select a previously attested artifact. The agent may diagnose and draft remediation but cannot waive controls, approve its own retry, rotate policy, destroy evidence, or independently execute irreversible rollback/migration."
+  ],
+  "failure_modes": [
+    "Indirect/direct prompt injection in issue text, comments, source/docs, compiler errors, tests, web pages, package READMEs, images, MCP/tool results or peer-agent messages; hidden-character stripping covers only a subset, and OWASP states fool-proof prevention is unclear (S1, S9, S17).",
+    "Excessive agency/confused deputy: generic shell/browser/fetch or write/delete tools, shared service credentials, overly broad repo/cloud scopes, destructive calls mislabeled as read-only, or approval made by the model rather than downstream policy (S10).",
+    "Isolation gaps: sandbox/kernel/container escape; exposed Docker socket/host mount; writable toolchain/cache; self-hosted-runner residue; DNS rebinding; network allowlist abuse; direct exfiltration. GitHub explicitly excludes MCP and setup processes from its firewall and warns of bypass; Codex warns devcontainers/full access can expose credentials (S2, S3).",
+    "Supply chain: hallucinated/slopsquatted names, dependency confusion, compromised package/action/MCP server, mutable tag, poisoned cache/base image/setup script or forged/missing provenance. Recommended package registries in broad allowlists remain a path to malicious downloads (S2, S11, S13, S20-S22).",
+    "Assurance failure: generated insecure code, tests that encode the same misconception, scanners' false negatives/unsupported language, agent self-review, stale benchmark, reviewer automation bias/overconfidence, rubber-stamp approval and approval fatigue (S16, S18, S19).",
+    "Governance/audit failure: unknown agent inventory, unattributed automation, mutable prompts/model/tools, logs stored only in the ephemeral worker, missing denied attempts, sensitive prompt logging, retention/access mismatch, or inability to reconstruct artifact-input-policy lineage (S1, S3, S5-S8).",
+    "Release/rollback failure: CI approval executes attacker-modified workflow with secrets; production deploy rebuilds different bits; agent reaches environment secrets; canary metric blind spot; database migration is irreversible; rollback restores binary but not data/schema/queue side effects; revoked agent retains downstream token (S13, S15; rollback items are engineering inference).",
+    "Operational/economic: runaway loops, fork bombs, token/compute denial of service, retry storms, queue starvation, orphaned branches, human gate latency, shortage of security reviewers and false-positive overload."
+  ],
+  "controls_and_mitigations": [
+    "Authority: default-deny typed capabilities, least privilege and minimum tool functionality; user/task-scoped short-lived identity; downstream complete mediation; separate identities for setup, agent, CI signing and deploy; no standing production/merge/package-publish credential (S10).",
+    "Isolation: ephemeral VM/container plus OS sandbox; read-only base/root, disposable workspace and cache, syscall/resource limits, no privileged mode/host socket; network off by default; exact domain/path/method allowlist through lower-layer egress; isolate setup and MCP too because vendor agent firewalls may not cover them (S2-S5).",
+    "Injection resilience: provenance-label and segregate external content, normalize/scan inputs, deterministic schema/output validators, refuse instructions found in data, and red-team adaptive attacks. Do not count prompts, hidden-text filters or a second LLM classifier as an authorization boundary; contain impact even when injection succeeds (S9, S16, S17).",
+    "Supply chain: internal approved registry/proxy; verify package existence/ownership; lock exact versions/hashes; pin GitHub Actions by full commit; scan dependencies and new packages; generate SBOM; reproducible/hermetic build where feasible; SLSA/in-toto provenance and Sigstore verification; quarantine agent-proposed new names for human review (S11-S13, S20-S22).",
+    "Repository/release: agent-only branch and draft PR; required signed commits/status checks/CODEOWNERS; independent reviews; protect CI/agent config; clean-room CI; immutable signed artifacts; staging plus canary; deployment environment approval that releases secrets after approval and forbids self/bypass; feature flags and tested kill switch/rollback (S1, S14, S15).",
+    "Audit/operations: append-only centrally exported event stream of trigger identity, input/policy/model/tool versions, decisions/denials, tool/egress activity, diff, checks, approvals, artifact digest and deploy/rollback; redact secrets and control access/retention. Monitor budget/SLO/anomaly, cancel and revoke immediately, preserve incident evidence, rehearse binary and data rollback (S1, S3, S5-S8).",
+    "Use VM/microVM isolation where consequence warrants because Docker shares a kernel and container escape remains possible; if containers are used, combine non-root, no host socket/mount, read-only root, syscall/capability restrictions and lower-layer egress controls (S32, S37). Protect logs and change-control records and rehearse recovery to a known state (S33)."
+  ],
+  "maturity_assessment": [
+    "Overall: CONDITIONALLY USEFUL / production-ready only as a bounded change-proposal subsystem. Repository-native branch isolation, protected PRs, deterministic CI, deployment approval, provenance and audit are mature conventional controls and major vendors expose many of them (S1-S5, S11-S15).",
+    "Prompt-injection prevention and semantic action safety: EMERGING. OWASP says fool-proof prevention is unclear; AgentDojo shows residual attacks and weak benign utility, and adaptive attacks can invalidate static defenses (S9, S16).",
+    "Supply-chain integrity primitives: PRODUCTION-READY but incomplete. SLSA/in-toto/Sigstore can establish where/how an artifact was built, not that agent-authored source is correct or benign; package hallucination still requires catalog/registry validation (S11, S12, S20, S22).",
+    "Unsupervised protected-branch merge, production mutation, self-modification of policy/tools, broad network/MCP and irreversible data operations: EXPERIMENTAL/NOT RECOMMENDED because public independent end-to-end loss/escape/rollback evidence is absent."
+  ],
+  "build_vs_buy": [
+    "Buy/configure repository and agent primitives when they meet the boundary: GitHub Copilot cloud agent for branch/PR/workflow/audit integration (S1, S2), Codex for explicit sandbox/approval/network profiles and OTel (S3, S4), or Claude Code for permission/sandbox/cloud isolation controls (S5). Do not equate a vendor checkbox with effective assurance; test the selected mode and admin override paths.",
+    "Adopt established components rather than invent cryptography: protected branches/environments (S14, S15), scanners and Scorecard (S21), SLSA/in-toto provenance and Sigstore verification (S11, S12, S22), plus an internal package/artifact proxy.",
+    "Custom engineering is still required for a cross-vendor policy/capability broker, per-task identity, MCP/tool registry and mediation, risk classifier, immutable event schema/correlation, organizational CODEOWNER rules, eval/red-team corpus, approval UX, emergency revocation and application-specific data rollback. Prefer a thin control plane around replaceable agents; never let the agent be its own policy engine.",
+    "Devin can supply enterprise profile floors, network/MCP/Git restrictions and audit API when those controls are verified for the chosen surface (S23-S26). OpenHands offers configurable confirmation/risk and container primitives, but the deployer owns policy correctness, egress isolation and operations (S27-S29)."
+  ],
+  "recommended_pattern": [
+    "Use a 'zero-standing-privilege proposal agent': untrusted event -> immutable intake -> risk/capability policy -> ephemeral offline-by-default sandbox -> agent-only branch -> clean-room deterministic checks -> independently reviewed protected PR -> signed immutable artifact -> staged deployment approval -> canary/SLO gate -> append-only audit -> tested known-good rollback.",
+    "Start with docs/tests/low-blast-radius fixes. Measure first-pass check rate, human rejection, escaped defect/security issue, denied tool/egress attempts, review time, rollback rehearsal success and incident rate by agent/model/policy version. Expand autonomy only after pre-set error budgets and adversarial evals pass; contract it automatically on regression.",
+    "Keep three non-negotiable separations: (1) model proposes, deterministic gateway authorizes; (2) agent writes a branch, an independent identity merges/deploys; (3) build produces a signed artifact, release promotes that exact digest. Keep network, MCP and new dependencies deny-by-default. Human gates attach to irreversible or trust-expanding transitions, not routine contained commands (S9-S15)."
+  ],
+  "open_questions": [
+    "What are current, independently measured sandbox-escape, prompt-injection action-success and secret-exfiltration rates for each product/configuration, including setup scripts, browsers and MCP? Vendor docs disclose mechanisms but not comparable effectiveness (S1-S5).",
+    "How often do reviewers catch agent-specific semantic/security flaws after scanners pass, and how do time pressure, diff size, generated tests and approval fatigue affect this? Historical evidence shows overconfidence but not modern cloud-agent PR review performance (S18, S19).",
+    "Can typed information-flow/capability systems prevent data-derived instructions from causing high-impact calls under adaptive/multimodal attacks without destroying task utility? AgentDojo is a useful general benchmark, not a coding-specific proof (S16, S17).",
+    "What log granularity, retention, prompt redaction and model/tool version capture are sufficient for audit without leaking source/secrets? What vendor cloud evidence can customers export and independently verify?",
+    "What rollback contract works for database migrations, external API side effects, package publication, secrets/IAM rotation and multi-agent cascades? Public agent documentation emphasizes PR/revert paths more than end-to-end state compensation.",
+    "How will policy handle mutable model behavior and silent vendor updates? No stable cross-vendor certification maps a model+agent+tools+policy version to a measured assurance level."
+  ],
+  "confidence": [
+    "Overall: HIGH for existence and documented semantics of standards/vendor controls; MEDIUM for the recommended architecture because it composes established controls but lacks a controlled end-to-end comparison; HIGH that prompt injection and supply-chain hallucination are material classes; LOW for current real-world incident rates and quantitative residual risk.",
+    "Claim-level: S1-S15 are primary/vendor/standards documentation and support mechanism claims, not effectiveness. S16-S20 are independent/peer-reviewed or accepted-paper evidence with explicit scope/version caveats. Workflow steps labeled inference are engineering synthesis, not measured vendor capabilities."
+  ],
+  "conflicts": [
+    "Vendor safeguards versus admitted residual risk: GitHub describes strong branch/review/scanning/filtering controls, yet its firewall page says MCP/setup steps are outside coverage and sophisticated bypass is possible (S1, S2). Resolution: treat the firewall as one containment layer, not the trust boundary.",
+    "Detection gains versus no complete solution: AgentDojo reports detector ASR reduction to 8% for its attacks, while OWASP says fool-proof prompt-injection prevention is unclear and AgentDojo itself expects adaptive attacks (S9, S16). Resolution: use detectors for defense-in-depth and enforce least privilege/approval deterministically.",
+    "Human gate versus human reliability: GitHub requires human review, but Perry et al. found AI-assisted users more confident while producing less secure code (S1, S19). Resolution: independent qualified reviewers plus deterministic checks; mere click approval is not assurance.",
+    "Built-in scans versus historical insecure generation: GitHub documents CodeQL/secret/dependency checks (S1), while the 2021 Copilot study found ~40% vulnerable outputs (S18). These concern different product generations/workflows; neither shows the current end-to-end escape rate. Treat scans as valuable but incomplete.",
+    "Broad dependency access versus exfiltration/malware containment: GitHub's recommended firewall allowlist includes popular registries, while OpenAI warns network can fetch malware/vulnerable dependencies and leak code (S2, S4). Resolution: internal proxy, exact catalog/hashes, no arbitrary public install during agent phase.",
+    "Provenance versus safety: SLSA/in-toto/Sigstore can prove artifact lineage/integrity (S11, S12, S22), but cannot prove that correctly traced agent-authored source is secure. Semantic review/testing remains separate.",
+    "Prompt-injection ASR varies sharply: AgentDojo reports <25% against best agents (and 8% with a detector) while Agent Security Bench reports a highest average of 84.30% (S16, S36). Different task/attack/defense/model/metric choices explain the gap; report configuration, never quote one rate as universal."
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "The as-of date is later than many dated studies. Living vendor documentation was treated as the accessible 2026-09-13 snapshot, but pages often expose no stable publication/update date and controls can change by plan, surface, mode and administrator policy.",
+    "No independent audit of current GitHub Copilot cloud agent, Codex, or Claude Code sandbox/egress/approval effectiveness was found in the reviewed public evidence.",
+    "AgentDojo is not coding-specific; its percentages must not be projected onto repository agents. The Copilot vulnerability and Codex-user studies use older models/workflows; they establish failure modes, not current rates.",
+    "No public, representative data was found for production agent-caused security incidents, reviewer escape rates, revocation latency, approval fatigue, or successful full-state rollback.",
+    "The recommended workflow and risk tiers are synthesis from standards and product controls; they have not been validated as a single reference implementation in a controlled longitudinal study."
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "branch/PR/workflow gates, scanning, attribution, injection filtering, audit"
+    },
+    {
+      "id": "S2",
+      "title": "Customize the firewall for GitHub Copilot",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-the-firewall",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "egress defaults, allowlists, MCP/setup exclusions, bypass warning"
+    },
+    {
+      "id": "S3",
+      "title": "Agent approvals & security",
+      "publisher_author": "OpenAI",
+      "url": "https://learn.chatgpt.com/docs/agent-approvals-security",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "sandbox/approval layers, cloud setup separation, OS sandbox, OTel"
+    },
+    {
+      "id": "S4",
+      "title": "Agent internet access",
+      "publisher_author": "OpenAI",
+      "url": "https://learn.chatgpt.com/docs/cloud/internet-access",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "offline default, injection/exfiltration/download risks, allowlist guidance, worked exfiltration example"
+    },
+    {
+      "id": "S5",
+      "title": "Security — Claude Code",
+      "publisher_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/security",
+      "publication_update_date": "Updated 2026-09-09 per sitemap",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "permissions, sandbox, cloud VM/egress/credential/branch/audit and prompt-injection safeguards"
+    },
+    {
+      "id": "S6",
+      "title": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile",
+      "publisher_author": "NIST",
+      "url": "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence",
+      "publication_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "source_type": "Government standard/profile landing page",
+      "supported_claims": "GenAI risk-management profile scope and status"
+    },
+    {
+      "id": "S7",
+      "title": "AI Risk Management Framework",
+      "publisher_author": "NIST",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "publication_update_date": "AI RMF 1.0 published 2023-01-26",
+      "access_date": "2026-09-13",
+      "source_type": "Government framework",
+      "supported_claims": "Govern, Map, Measure, Manage functions; voluntary framework"
+    },
+    {
+      "id": "S8",
+      "title": "SP 800-218 Secure Software Development Framework (SSDF) Version 1.1",
+      "publisher_author": "NIST; Souppaya, Scarfone, Dodson",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_update_date": "2022-02",
+      "access_date": "2026-09-13",
+      "source_type": "Government standard",
+      "supported_claims": "secure development, protected environments, toolchain/dependency/release practices"
+    },
+    {
+      "id": "S9",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "publication_update_date": "2025 edition; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Practitioner consensus guidance",
+      "supported_claims": "no fool-proof prevention; least privilege, validation, content separation, approvals, red testing"
+    },
+    {
+      "id": "S10",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "publication_update_date": "2025 edition; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Practitioner consensus guidance",
+      "supported_claims": "minimum tools/permissions/autonomy, complete mediation, human approval"
+    },
+    {
+      "id": "S11",
+      "title": "SLSA v1.2 Requirements",
+      "publisher_author": "SLSA project / OpenSSF",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "publication_update_date": "Version 1.2; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Supply-chain specification",
+      "supported_claims": "build provenance and hardened-build requirements"
+    },
+    {
+      "id": "S12",
+      "title": "Verify signatures with Cosign",
+      "publisher_author": "Sigstore",
+      "url": "https://docs.sigstore.dev/cosign/verifying/verify/",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official open-source documentation",
+      "supported_claims": "artifact signature/identity verification"
+    },
+    {
+      "id": "S13",
+      "title": "Secure use reference — GitHub Actions",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "least privilege secrets, untrusted CI input and action pinning guidance"
+    },
+    {
+      "id": "S14",
+      "title": "About protected branches",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "required reviews/status checks and protected-branch controls"
+    },
+    {
+      "id": "S15",
+      "title": "Reviewing deployments",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "environment approval, post-approval secret access, self-approval/bypass controls"
+    },
+    {
+      "id": "S16",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher_author": "Debenedetti et al.; ETH Zurich/Invariant Labs",
+      "url": "https://arxiv.org/html/2406.13352",
+      "publication_update_date": "arXiv v3 2024-11-24",
+      "access_date": "2026-09-13",
+      "source_type": "Academic paper / benchmark",
+      "supported_claims": "97 tasks, 629 cases, utility and ASR/detector results and adaptive-benchmark caveats"
+    },
+    {
+      "id": "S17",
+      "title": "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection",
+      "publisher_author": "Greshake et al.",
+      "url": "https://arxiv.org/abs/2302.12173",
+      "publication_update_date": "arXiv v2 2023-05-05",
+      "access_date": "2026-09-13",
+      "source_type": "Academic paper",
+      "supported_claims": "indirect injection through retrieved data, API manipulation and data theft"
+    },
+    {
+      "id": "S18",
+      "title": "Asleep at the Keyboard? Assessing the Security of GitHub Copilot's Code Contributions",
+      "publisher_author": "Pearce et al.; IEEE S&P 2022",
+      "url": "https://arxiv.org/abs/2108.09293",
+      "publication_update_date": "arXiv v3 2021-12-16; peer-reviewed 2022",
+      "access_date": "2026-09-13",
+      "source_type": "Peer-reviewed academic paper",
+      "supported_claims": "1,689 programs/89 scenarios/~40% vulnerable historical result"
+    },
+    {
+      "id": "S19",
+      "title": "Do Users Write More Insecure Code with AI Assistants?",
+      "publisher_author": "Perry, Srivastava, Kumar, Boneh; ACM CCS",
+      "url": "https://arxiv.org/abs/2211.03622",
+      "publication_update_date": "CCS 2023; arXiv v3 2023-12-18",
+      "access_date": "2026-09-13",
+      "source_type": "Peer-reviewed academic paper / user study",
+      "supported_claims": "less-secure code and greater confidence with Codex-based assistance"
+    },
+    {
+      "id": "S20",
+      "title": "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs",
+      "publisher_author": "Spracklen et al.; USENIX Security",
+      "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen",
+      "publication_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "Peer-reviewed academic paper",
+      "supported_claims": "16 models/576,000 samples/package-hallucination rates and unique names"
+    },
+    {
+      "id": "S21",
+      "title": "OpenSSF Scorecard",
+      "publisher_author": "OpenSSF",
+      "url": "https://scorecard.dev/",
+      "publication_update_date": "Living project; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Open-source project documentation",
+      "supported_claims": "automated open-source project security-risk signals"
+    },
+    {
+      "id": "S22",
+      "title": "in-toto: Providing farm-to-table guarantees for bits and bytes",
+      "publisher_author": "Torres-Arias et al.; USENIX Security",
+      "url": "https://www.usenix.org/conference/usenixsecurity19/presentation/torres-arias",
+      "publication_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "Peer-reviewed academic paper / open standard foundation",
+      "supported_claims": "supply-chain step attestations and artifact lineage"
+    },
+    {
+      "id": "S23",
+      "title": "Security profiles — Devin",
+      "publisher_author": "Cognition",
+      "url": "https://docs.devin.ai/product-guides/security-profiles",
+      "publication_update_date": "Updated 2026-08-20",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "enterprise security floors and Git/MCP/network restrictions inherited by sessions"
+    },
+    {
+      "id": "S24",
+      "title": "CLI permissions — Devin",
+      "publisher_author": "Cognition",
+      "url": "https://docs.devin.ai/cli/reference/permissions",
+      "publication_update_date": "Updated 2026-07-30",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "allow/ask/deny command and tool policy"
+    },
+    {
+      "id": "S25",
+      "title": "CLI sandbox — Devin",
+      "publisher_author": "Cognition",
+      "url": "https://docs.devin.ai/cli/sandbox",
+      "publication_update_date": "Updated 2026-07-29",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "OS filesystem isolation and fail-closed option"
+    },
+    {
+      "id": "S26",
+      "title": "Organizations audit logs API — Devin",
+      "publisher_author": "Cognition",
+      "url": "https://docs.devin.ai/api-reference/v3/audit-logs/organizations-audit-logs",
+      "publication_update_date": "Updated 2026-03-24",
+      "access_date": "2026-09-13",
+      "source_type": "Official API documentation",
+      "supported_claims": "organization action audit retrieval"
+    },
+    {
+      "id": "S27",
+      "title": "Security & confirmation — OpenHands SDK",
+      "publisher_author": "All Hands AI / OpenHands",
+      "url": "https://docs.openhands.dev/sdk/guides/security",
+      "publication_update_date": "Updated 2026-07-25",
+      "access_date": "2026-09-13",
+      "source_type": "Official open-source documentation",
+      "supported_claims": "AlwaysConfirm/NeverConfirm/ConfirmRisky policy primitives"
+    },
+    {
+      "id": "S28",
+      "title": "Security architecture — OpenHands SDK",
+      "publisher_author": "All Hands AI / OpenHands",
+      "url": "https://docs.openhands.dev/sdk/arch/security",
+      "publication_update_date": "Updated 2026-01-26",
+      "access_date": "2026-09-13",
+      "source_type": "Official open-source architecture documentation",
+      "supported_claims": "pre-execution risk decisions and event history"
+    },
+    {
+      "id": "S29",
+      "title": "Docker sandbox — OpenHands SDK",
+      "publisher_author": "All Hands AI / OpenHands",
+      "url": "https://docs.openhands.dev/sdk/guides/agent-server/docker-sandbox",
+      "publication_update_date": "Updated 2026-06-24",
+      "access_date": "2026-09-13",
+      "source_type": "Official open-source documentation",
+      "supported_claims": "container workspace isolation and writable-mount implications"
+    },
+    {
+      "id": "S30",
+      "title": "Agentic audit log events",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/reference/enterprise-administrators/agentic-audit-log-events",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official product documentation",
+      "supported_claims": "Copilot audit actor/session/user/action fields"
+    },
+    {
+      "id": "S31",
+      "title": "NIST AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile",
+      "publisher_author": "NIST; Autio et al.",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "publication_update_date": "2024-07",
+      "access_date": "2026-09-13",
+      "source_type": "Government standard/profile",
+      "supported_claims": "inventory, provenance, supplier monitoring, deactivation, override and history controls"
+    },
+    {
+      "id": "S32",
+      "title": "NIST SP 800-190: Application Container Security Guide",
+      "publisher_author": "NIST; Souppaya, Morello, Scarfone",
+      "url": "https://doi.org/10.6028/NIST.SP.800-190",
+      "publication_update_date": "2017-09",
+      "access_date": "2026-09-13",
+      "source_type": "Government standard",
+      "supported_claims": "shared-kernel/container-escape limitations"
+    },
+    {
+      "id": "S33",
+      "title": "NIST SP 800-53 Rev. 5: Security and Privacy Controls for Information Systems and Organizations",
+      "publisher_author": "NIST",
+      "url": "https://doi.org/10.6028/NIST.SP.800-53r5",
+      "publication_update_date": "2020-09; minor update 2020-12-10",
+      "access_date": "2026-09-13",
+      "source_type": "Government control catalog",
+      "supported_claims": "audit generation/protection, configuration change control, recovery to known state"
+    },
+    {
+      "id": "S34",
+      "title": "LLM03:2025 Supply Chain",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/",
+      "publication_update_date": "2025 edition; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Practitioner consensus guidance",
+      "supported_claims": "model/data/package/platform provenance, supplier, SBOM/signing/scanning risks and controls"
+    },
+    {
+      "id": "S35",
+      "title": "LLM05:2025 Improper Output Handling",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+      "publication_update_date": "2025 edition; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Practitioner consensus guidance",
+      "supported_claims": "treat model output as untrusted; shell/exec RCE risk and validation"
+    },
+    {
+      "id": "S36",
+      "title": "Agent Security Bench (ASB): Formalizing and Benchmarking Attacks and Defenses in LLM-based Agents",
+      "publisher_author": "Zhang et al.; ICLR 2025",
+      "url": "https://arxiv.org/abs/2410.02644",
+      "publication_update_date": "arXiv v4 2025-05-30",
+      "access_date": "2026-09-13",
+      "source_type": "Peer-reviewed academic benchmark",
+      "supported_claims": "10 scenarios/10 agents/>400 tools/27 methods/84.30% highest average ASR"
+    },
+    {
+      "id": "S37",
+      "title": "RedCode: Risky Code Execution and Generation Benchmark for Code Agents",
+      "publisher_author": "Guo et al.",
+      "url": "https://arxiv.org/abs/2411.07781",
+      "publication_update_date": "arXiv 2024-11-12",
+      "access_date": "2026-09-13",
+      "source_type": "Academic preprint / benchmark",
+      "supported_claims": "4,050 execution and 160 generation cases, deterministic environment checks and sandbox critique"
+    }
+  ]
+}

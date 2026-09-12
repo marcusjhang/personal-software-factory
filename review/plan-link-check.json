@@ -1,0 +1,129 @@
+{
+  "checked_at_utc": "2026-09-12T23:22:50.756291Z",
+  "plan": "PLAN.md",
+  "plan_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+  "count": 24,
+  "semantics": "URL reachability only; not source-content, historical provenance, or claim validation",
+  "results": [
+    {
+      "url": "https://arxiv.org/abs/2507.09089",
+      "status": 200,
+      "resolved_url": "https://arxiv.org/abs/2507.09089"
+    },
+    {
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "status": 200,
+      "resolved_url": "https://csrc.nist.gov/pubs/sp/800/218/final"
+    },
+    {
+      "url": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations"
+    },
+    {
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+    },
+    {
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/actions/reference/security/secure-use"
+    },
+    {
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments"
+    },
+    {
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app"
+    },
+    {
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app"
+    },
+    {
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects"
+    },
+    {
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue"
+    },
+    {
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+    },
+    {
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners"
+    },
+    {
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks"
+    },
+    {
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+      "status": 200,
+      "resolved_url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries"
+    },
+    {
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "status": 200,
+      "resolved_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    },
+    {
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "status": 200,
+      "resolved_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+    },
+    {
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "status": 200,
+      "resolved_url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md"
+    },
+    {
+      "url": "https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md",
+      "status": 200,
+      "resolved_url": "https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md"
+    },
+    {
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "status": 200,
+      "resolved_url": "https://json-schema.org/draft/2020-12/json-schema-core"
+    },
+    {
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "status": 200,
+      "resolved_url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/concepts/signals/",
+      "status": 200,
+      "resolved_url": "https://opentelemetry.io/docs/concepts/signals/"
+    },
+    {
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "status": 200,
+      "resolved_url": "https://slsa.dev/spec/v1.2/provenance"
+    },
+    {
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "status": 200,
+      "resolved_url": "https://sre.google/workbook/canarying-releases/"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/sql-select.html",
+      "status": 200,
+      "resolved_url": "https://www.postgresql.org/docs/current/sql-select.html"
+    }
+  ]
+}

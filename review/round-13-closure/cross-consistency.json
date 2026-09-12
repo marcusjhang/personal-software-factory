@@ -1,0 +1,121 @@
+{
+  "reviewer": "round-13-cross-consistency",
+  "scope": {
+    "mode": "final plan-only closure audit after round-12 combined correction",
+    "documents_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-12-resolution.md",
+      "review/round-12-closure/cross-consistency.json",
+      "review/round-12-closure/evidence-requirements.json",
+      "review/round-12-closure/formal-model.json",
+      "review/round-12-closure/improvement-adversary.json",
+      "review/round-12-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json"
+    ],
+    "acceptance_boundary": "Future implementation, full reachable-product model execution, fresh immutable evidence retrieval, same-run human semantic review, reviewed-edge regeneration, and production validation were accepted as unperformed and were not treated as defects.",
+    "severity_filter": "Only critical/high unmet requirements, contradictions, unsafe or undefined paths, and material overclaims are reported."
+  },
+  "contract_reproduction": [
+    {
+      "area": "formal_source_identity_and_status",
+      "result": "pass",
+      "exact_text": [
+        "Recomputed PLAN.md SHA-256: 19fea5cc0f6df092eec3fa4f0b0488465b4e3460c8c54fe94c85006a795bea1c.",
+        "Recomputed docs/state-transition-manifests.md SHA-256: 8fb9782a8e20310ce8975486a8e0742a02e76148fba85624e4197ff1073f0a1d.",
+        "README.md and the round-12 register consistently describe a plan-only artifact and leave implementation, full-model, semantic-evidence, production, and independent-closure gates pending."
+      ],
+      "basis": "Both digests match review/round-12-resolution.md and the schema-3 generated_against object. No reviewed status text claims implementation or evidence/production closure."
+    },
+    {
+      "area": "round_12_inventory_and_requirements",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-12-closure JSON files parse.",
+        "They contain 0 critical and 8 high findings, and all 8 finding IDs appear in review/round-12-resolution.md.",
+        "review/requirements-traceability.md retains R-01 through R-16 and states 16/16 structural mapping without implementation or empirical closure."
+      ],
+      "basis": "Historical findings were used as correction contracts rather than automatically carried forward as present defects."
+    },
+    {
+      "area": "normative_manifest_shape_and_reference_integrity",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest contains 785 unique literal edge IDs: 96 canonical and 689 private/product rows.",
+        "No literal edge ID is duplicated.",
+        "The round-12 additions B71/B71-P/B71-R, M59/M59-P/M59-R, IC24-RWX/IC24-RPX/IC24-RN, IX06-XR/XQ, IH01-RX/RN, and IRB07-N/R/Q are present."
+      ],
+      "basis": "Independent Markdown row parsing and cross-reference search reproduced the correction register's inventory. Family/range references such as IA07-*, IA08-*, RO03-RO06, and RO11-RO13 resolve to declared row families."
+    },
+    {
+      "area": "schema_3_candidate_graph",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-12 and binds both current formal-source digests.",
+        "It contains 25 unique source observations, 20 unique claims, and 36 unique edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 SourceObservation IDs reproduce; every pointed source record, record-value digest, and result-file digest checked matches; all 31 exact PLAN excerpts match; all 28 dynamically derived numbered manifest headings match.",
+        "All 37 research-manifest result paths are unique and their recorded SHA-256 digests match current bytes."
+      ],
+      "basis": "The graph remains editorial_candidate_associations_only with legacy_unverified provenance. Structural success is not treated as source truth or semantic entailment."
+    },
+    {
+      "area": "round_12_stale_effect_x_continuation",
+      "result": "fail",
+      "exact_text": [
+        "Manifest line 700 forbids WIDENING_RECONCILING or PROMOTION_RECONCILING from coexisting with rollback REQUESTED, ROLLING_BACK, VERIFYING, or VERIFIED and says impossible tuples reject rather than normalize.",
+        "IC24-RWX and IC24-RPX start from those reconciliation rollout states and change rollback IDLE->REQUESTED, but neither row names a synchronized rollout-state transition.",
+        "IC24-RN explicitly names synchronized rollout -> FAILED, showing that rollout changes must be stated rather than inferred."
+      ],
+      "basis": "The reducer applies only named coordinate changes, and the rollback section forbids inferred deltas. The two protected-X rows therefore create a forbidden tuple and cannot close the path they were added to settle. Finding R13-XC-001."
+    },
+    {
+      "area": "other_round_12_guard_status_and_terminal_consistency",
+      "result": "pass",
+      "exact_text": [
+        "B71/M59 partition first post-settlement cancellation from persisted-during-rollback continuation and replay under absent-disposition/expected-version guards.",
+        "IRB07-N/R/Q require the exact improvement rollback-safety closure, restoration, independent-verification, purpose/generation/key-set, and absent release-receipt facts before releasing blocks and sealing ROLLED_BACK.",
+        "ExposedCancellationSourcesV1 includes exposed CANARY_PASSED and ReachableActiveExposureInterruptCoordinatesV1 is defined by generated reachable tuples with residual X/N rows."
+      ],
+      "basis": "No additional critical/high cross-document vocabulary, status, guard, reference, or unsafe-terminal inconsistency was established within this plan-only review."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R13-XC-001",
+      "severity": "high",
+      "title": "The EVIDENCE_STALE protected-X continuations enter rollback without leaving forbidden reconciliation rollout states",
+      "requirement_or_contract": "PLAN.md \u00a78.4 requires exact EVIDENCE_STALE X/N continuations after IC24-A, no impossible tuple, and one rollback only for protected exposure. Manifest \u00a7\u00a715 and 15.3 require exact named coordinate changes and forbid reconciliation rollout states from coexisting with active rollback.",
+      "evidence": [
+        "docs/state-transition-manifests.md:690 says the reducer applies only the exact synchronized row's named coordinate changes.",
+        "docs/state-transition-manifests.md:700 says WIDENING_RECONCILING and PROMOTION_RECONCILING cannot coexist with rollback REQUESTED|ROLLING_BACK|VERIFYING|VERIFIED and impossible tuples reject rather than normalize.",
+        "docs/state-transition-manifests.md:792 IC24-RWX leaves candidate EVIDENCE_STALE, starts rollback IDLE->REQUESTED, and creates a WIDENING_ABORT saga, but specifies no rollout target from WIDENING_RECONCILING.",
+        "docs/state-transition-manifests.md:793 IC24-RPX has the same omission from PROMOTION_RECONCILING while creating a CANDIDATE_REVOCATION rollback.",
+        "docs/state-transition-manifests.md:794 IC24-RN explicitly supplies synchronized rollout -> FAILED, while line 945 says no coordinate delta is inferred."
+      ],
+      "impact": "Each protected-X settlement produces an expressly impossible tuple. The transaction must reject, so a digest-change-only execution with settled exposed widening or promotion remains stranded in EVIDENCE_STALE reconciliation. This leaves the prior R12-XC-002 unsafe path materially unresolved and contradicts the round-12 correction/status claim.",
+      "required_correction": "Give IC24-RWX and IC24-RPX exact synchronized rollout targets that are legal with rollback REQUESTED, with exact source/target guards, origin, canonical projection, replay/conflict behavior, and cleanup ownership. Then require generated witnesses for both widening and promotion X paths and their adjacent races. Do not infer the rollout delta from rollback origin or prose.",
+      "references": [
+        "PLAN.md:234",
+        "docs/state-transition-manifests.md:690",
+        "docs/state-transition-manifests.md:700",
+        "docs/state-transition-manifests.md:792",
+        "docs/state-transition-manifests.md:793",
+        "docs/state-transition-manifests.md:794",
+        "docs/state-transition-manifests.md:945",
+        "review/round-12-resolution.md:R12-XC-002"
+      ]
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1
+  },
+  "residual_uncertainty": [
+    "This was a plan-contract audit. The future generated equality/race witnesses and full reachable-product model were not executed.",
+    "Schema-3 validation reproduced local structure and current-byte identity only; it did not perform immutable retrieval or semantic entailment review."
+  ],
+  "closure_criteria_pass": false
+}

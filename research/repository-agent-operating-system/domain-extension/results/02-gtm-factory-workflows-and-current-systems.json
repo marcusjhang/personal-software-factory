@@ -1,0 +1,895 @@
+{
+  "scope": "Question: what a repository-declared GTM artifact factory may safely automate, and what the shared runtime must expose, while engineering remains the first production domain. Scope covers evidence-backed market/account research; ICP and positioning proposals; campaign/experiment briefs; content variants; enrichment and CRM writes; email/owned-channel execution; measurement, attribution, review, publication and feedback. It excludes autonomous product/market strategy, purchasing or scraping arbitrary personal data, inferring consent, unreviewed public claims, unconstrained ad spend, autonomous cold outreach, and treating vendor dashboards as causal revenue proof. 'GTM' is a separately owned repository/domain pack, not a mode hidden inside the engineering repo. Current-product statements are capabilities documented by vendors [C1–C8]; audited outcomes require independent denominators and are largely absent [C10].",
+  "verified_capabilities": [
+    "[C1 documented capability] Current suites cover pieces of a pipeline rather than a proven autonomous factory: Clay documents account research agents, signals, CRM enrichment and a sequencer [S01–S04]; HubSpot documents a prospecting agent, enrichment, buyer intent, content approvals and attribution [S05–S10]; Salesforce documents an agent architecture/trust layer [S11–S12]; Jasper documents brand controls [S13]; Common Room documents signals/enrichment/actions [S14]. These establish UI/API/workflow surfaces, not accuracy, legality, causal pipeline lift or safe unattended operation.",
+    "[C1/C8 workflow economics] Clay documents action/data-credit accounting [S43]. HubSpot agent actions consume credits and may be unavailable in sandboxes [S05]. Cost controls are real mechanics but do not establish ROI; record vendor credits, LLM/tool spend and human review per eligible unit.",
+    "[C2 research/ICP] Account agents and buyer-intent tools can collect public/first-party observations, summarize accounts and filter companies [S01,S07]. An ICP is still a versioned business hypothesis. Its cohort, exclusions, evidence window, sample frame, decision owner and falsification criteria must be explicit; an 'intent score' is not ground truth.",
+    "[C3 signals/campaign planning] Products can watch job changes, website visits and other events and route segments [S02,S07,S14]. Safe automation is normalize/dedupe/score-with-provenance and draft a campaign brief. Segment inclusion, sensitive inferences, budget and activation remain governed decisions.",
+    "[C4 enrichment/CRM] Clay, HubSpot and Common Room document enrichment and CRM alignment [S03,S06,S14]. HubSpot explicitly says enrichment uses business information and that disabling enrichment stops future work but does not remove already-added data [S06]. Therefore use staged suggestions, per-field source/confidence/observed-at/TTL, field ownership, diff review and reversible writes; never let a model silently merge/delete or mark consent.",
+    "[C3/C5/C6 6sense] 6sense documents predictive buying stages, audience-workflow preview/checklists, review/edit of AI emails and A/B campaign workflows [S35–S38]. This is concrete orchestration, but the checklist is not a two-person exact-digest gate and prediction is a vendor-defined likelihood.",
+    "[C5 outreach] Sequencers and prospecting agents can enroll contacts and send as an assigned owner [S04,S05]. Gmail/Yahoo sender requirements [S16,S17] and CAN-SPAM/ICO duties [S18,S19] remain independent gates. A tool's ability to send is not permission to contact, lawful basis, truthful personalization or deliverability.",
+    "[C6 content/review/publication] HubSpot supports configured content approval, including assigned approvers, but its docs note cases where later subscription-email updates need no renewed approval [S08,S09]. Jasper offers brand-voice controls [S13]. These are useful controls, not exact-artifact authorization. The factory must bind approval to rendered artifact hash, claims/evidence, audience/channel, locale, schedule and policy version. Search spam, endorsements and deceptive AI claims remain external constraints [S23–S25].",
+    "[C7 experiments/attribution] HubSpot and Google expose rule/model-based attribution [S10,S15]; Meta Robyn implements MMM [S29]; always-valid inference addresses repeated looks in online experiments [S28]. Attribution credit is descriptive/model-dependent, not automatically causal. Require randomization or an explicit quasi-experimental design, exposure logs, primary metric/guardrails, sample-size/stopping rules and report both absolute lift and uncertainty.",
+    "[C8 governance surfaces] HubSpot documents super-admin/agent permissions and content approvals [S05,S08]; Salesforce describes an agent/trust architecture [S11,S12]. Safe operation still requires separately enforced identity, secrets, egress, suppression, retention, audit and publication controls because vendor documentation is not a tenant-specific control audit.",
+    "[C6/C8 approval boundary] Common Room documents a segment task queue [S45]. Jasper documents governance and a Workfront integration where downstream proofing/multistage approval occurs [S41,S42]. Current products therefore mix native review, optional auto-send, checklists, manual publish and external approvals; the factory cannot assume one vendor's approval state is sufficient."
+  ],
+  "evidence_and_limits": [
+    "Primary evidence is strong that workflow components exist, but weak that any cited platform safely owns research-to-revenue end to end. Product pages are vendor claims. Help pages are stronger for mechanics and limitations, but neither supplies representative assigned-task denominators, false-enrichment rates, hallucinated-claim rates, complaint/unsubscribe damage, reviewer cost, latent brand harm or causal revenue lift [S01–S15].",
+    "6sense exposes especially useful limit evidence: an 'hours saved' report uses an assumed three minutes per email [S39], and Value Metrics depends on CRM integration/history/package [S40]. HubSpot attribution can sample interactions at documented scale [S10]. These illustrate why dashboard values and vendor pipeline claims must be tagged as modeled/attributed, never audited incremental impact.",
+    "Independent evidence supports assistive drafting, not universal autonomy. Noy and Zhang found productivity/quality effects on bounded professional writing tasks [S26]. Dell’Acqua et al. found a jagged frontier: gains on tasks inside model capability and worse correctness/overreliance outside it [S27]. Neither audits the named GTM products, current models, CRM side effects or publication risk [C10].",
+    "Advertising controls require more than brand tone: the FTC substantiation policy and AI-claims guidance require a reasonable basis before objective claims [S46,S47], and the fake reviews/testimonials rule reaches AI-generated fakes [S48]. For calls/texts, current CFR/TCPA analysis and AI-voice treatment are separate from email [S49,S50]; the FCC's attempted one-to-one consent rule was vacated [S51], so the system must track current law rather than preserve obsolete vendor checklists.",
+    "Independent measurement evidence directly challenges naive attribution: Lewis and Rao show many ad-effect studies are underpowered because effects are small relative to outcome variance [S52]; Gordon et al. find observational approaches materially biased versus randomized field experiments despite rich data [S53]. Large-scale experiment practice emphasizes instrumentation, guardrails and sample-ratio checks [S54], while the ASA warns a p-value is not the probability a hypothesis is true or the size/importance of an effect [S55].",
+    "Regulators and standards challenge 'safe by default' claims: GDPR requires purpose/lawfulness/data-subject safeguards; ICO distinguishes direct-marketing/channel rules; CAN-SPAM imposes sender/content/opt-out duties; FTC acts on deceptive AI and endorsement/review claims; NIST calls for Govern/Map/Measure/Manage and GenAI-specific risk treatment [S18–S24]. Compliance cannot be inferred from a vendor badge or a model score.",
+    "Metrics need denominators and counterfactuals. Record eligible/attempted/approved/launched units; enrichment precision by field/source and stale rate; factual/brand/legal defect rates; approval time/rework; sends/deliveries/bounces/spam complaints/unsubscribes/replies/qualified meetings; spend and frequency; CRM conflicts; exposure and conversion; incremental lift with confidence intervals; pipeline/revenue only under stated attribution model; privacy requests/incidents. Never optimize reply/conversion alone.",
+    "As-of limitation: several sources are living pages, features vary by plan/region and the supplied cutoff is 2026-09-13. Snapshot content/digests and run tenant contract tests. No source found is an independent, reproducible audit of a complete autonomous GTM factory."
+  ],
+  "actors_and_authority": [
+    "Shared control-plane identities: event ingester (validate/store only), scheduler (leases/budgets), artifact store (append/read by policy), policy engine (deny/ask/approve decision only), evaluator (read candidate plus protected fixtures; signed result), and publisher adapters (narrow channel rights). Workers are untrusted proposal producers and never hold approval, suppression-list mutation, policy, billing or broad CRM-admin rights.",
+    "GTM-domain roles: research analyst owns source quality; PMM owns ICP/positioning and approved claims; demand-gen owner owns campaign/experiment and spend; RevOps owns schemas/dedupe/field write policy; privacy/legal owner decides lawful basis, retention, data-source and sensitive-segment questions; brand/editor owns public language/visuals; sales owner owns sender identity and account assignment; analytics owner owns metric definitions/assignment/attribution; channel publisher owns the final action; incident owner can pause/recall.",
+    "Separate service principals per repository, environment and adapter. A researcher can read approved sources but not export CRM. An enrichment worker writes only to quarantine. A CRM applier accepts reviewed field patches. A content worker cannot schedule. A scheduler cannot change content. A publisher consumes one approved immutable manifest. No author approves its own artifact; no agent asserts consent, legal basis or truth merely by confidence."
+  ],
+  "complete_state_catalog": [
+    "Normal GTM aggregate: INBOX → SCOPED → RESEARCHING → EVIDENCE_REVIEW → ICP_DRAFTED → POSITIONING_REVIEW → CAMPAIGN_PLANNED → AUDIENCE_BUILDING → ENRICHING → DATA_REVIEW → CONTENT_DRAFTING → BRAND_LEGAL_REVIEW → EXPERIMENT_READY → LAUNCH_APPROVAL → SCHEDULED → RUNNING → MEASURING → OUTCOME_REVIEW → LEARNING → ARCHIVED.",
+    "Waiting states: CLARIFICATION_REQUIRED, OWNER_REQUIRED, SOURCE_REVIEW_REQUIRED, PRIVACY_REVIEW_REQUIRED, APPROVAL_PENDING, RATE_LIMITED, BUDGET_WAIT, OBSERVATION_WINDOW and CROSS_REPO_ACK_PENDING. Waiting has owner, reason, deadline/TTL, resume token and escalation path.",
+    "Failure/exception: POLICY_DENIED, VALIDATION_FAILED, SOURCE_FAILED, ENRICHMENT_CONFLICT, CRM_SYNC_ERROR, CHANNEL_REJECTED, DELIVERY_DEGRADED, EXPERIMENT_INVALID, ATTRIBUTION_INCOMPLETE, BUDGET_EXHAUSTED, LEASE_EXPIRED, STALE and BLOCKED. These cannot be rewritten as success.",
+    "Cancellation/rollback/terminal: CANCEL_REQUESTED → CANCELLING → CANCELLED; PAUSE_REQUESTED → PAUSED; RECALL_REQUESTED → RECALLING → ROLLED_BACK where channel permits. Terminal outcomes are REJECTED, CANCELLED, COMPLETED, ROLLED_BACK, EXPIRED and ARCHIVED. Email already sent and public impressions cannot be undone; rollback means stop future sends, retract/edit where possible, preserve evidence and start incident/remediation.",
+    "Each publishable channel subartifact has its own DRAFT, REVIEWED, APPROVED, SCHEDULED, PUBLISHED/LAUNCHED, PAUSED/RETRACTED, FAILED and EXPIRED status. Aggregate RUNNING never implies every child succeeded."
+  ],
+  "transition_contract": [
+    "Canonical event fields: schema_version, event_id, type, occurred_at/received_at, actor_principal, tenant, repo/domain, work_item_id, artifact_id/version/digest, correlation_id, causation_id, expected_aggregate_version, policy_version, capability_profile, risk, purpose, audience/channel/locale, consent_or_lawful_basis_reference when applicable, source/evidence URIs and digests, decision/reason/expiry, budget/exposure, result and observed_state_hash.",
+    "Guards: schema + authorization + expected version; exact current digests; source allowlist/licence/terms and provenance; purpose/retention/minimization; suppression/DNC/unsubscribe join at launch time; sender/domain readiness; approved claims and brand checks; audience count and sensitive-attribute denial; experiment registration; spend/send/rate/time caps; named approvers; channel dry run; no stale evidence. Missing/conflicting evidence pauses rather than guesses.",
+    "Effects use transactional event/outbox recording before external calls. Idempotency key is tenant+work_item+transition+artifact_digest+audience_snapshot_digest+channel+policy_version. A publisher stores provider request/message/campaign IDs, then reads back. Duplicate delivery returns prior outcome. Partial fanout produces per-child state, not global success.",
+    "Any content, claim, audience, experiment, schedule, sender, destination, budget, suppression snapshot, policy or model/tool change invalidates relevant approval. Reconciliation treats webhooks as hints and scheduled inventories as recovery; imports external CRM/channel facts, detects unauthorized/manual changes, and opens conflict rather than overwriting domain-owned fields."
+  ],
+  "artifact_contracts": [
+    "research_bundle.json: question, scope/non-goals, source snapshots/URLs/publisher/date/licence, quote or observation, claim-evidence links, conflicts, freshness TTL, PII class and reviewer decision. Generated summaries never replace source evidence.",
+    "icp_positioning.yaml: hypothesis_id/version; market/category; jobs/pains/alternatives; inclusion/exclusion rules; firmographic/behavioral features; prohibited/sensitive features; supporting sample; counterevidence; confidence; named owner; falsification and refresh criteria. Positioning contains audience/problem/promise/reasons-to-believe/approved proof and prohibited claims.",
+    "campaign_spec.yaml: objective, audience query version, channels, offer/message architecture, approved claims, content matrix, experiment registration, attribution/UTM naming, cost/send/frequency caps, suppression policy, jurisdictions, start/stop/rollback, owners and approvals.",
+    "audience_snapshot.parquet+manifest: immutable query/digest/count, record IDs or privacy-preserving references, source/purpose/lawful-basis/consent where required, suppression result/time, fields used, sensitive-feature attestations, TTL and sampling report. Never commit raw leads/PII to Git.",
+    "enrichment_patch.jsonl: CRM object/key, field, old-value hash, proposed value, provider/source URL, observed_at, confidence, TTL, conflict/ownership rule, reason and reversible patch ID. Separate consent/preferences/system fields are deny-by-default.",
+    "content_asset.json: channel/locale/variant, structured copy/media refs, claim IDs with evidence, brand-policy result, accessibility, disclosure/endorsement flags, prompt/model/tool versions, renderer version, exact rendered digest and approvals. Approval is on the render, not editable source alone.",
+    "launch_manifest.json: approved content/audience/experiment/suppression/sender/config digests, provider account, schedule, cohort, caps, approval tokens, kill switch and idempotency key. outcome_bundle.json: exposures, sends/delivery, conversions, costs, complaints/unsubscribes/privacy events, assignment integrity, missingness, estimator/model, interval, caveats and late-outcome window.",
+    "All artifacts use JSON Schema, semantic schema version, content digest, created_by/at, parent digests, purpose, classification, retention/deletion policy, tenant/repo, lineage, encryption/access labels and tombstone/reference semantics. Large or sensitive payloads live in a restricted artifact store; Git holds schema/config/hash only."
+  ],
+  "conversation_and_handoffs": [
+    "Questions and answers are durable decision artifacts, not chat context: question_id, blocking fields, options/tradeoffs, evidence, asker, owner, deadline, answer, decision rationale and superseded-by link. Resume reconstructs from event log + latest accepted artifact graph + unresolved decisions; summaries are replaceable caches with source digests.",
+    "A domain handoff is a signed `handoff.requested` envelope with producer repo/commit, consumer repo/domain, typed artifact references/digests, purpose, requested action, data class, capability needs, acceptance schema, expiry and correlation ID. The receiving repo validates policy/schema, records ACCEPTED/REJECTED/NEEDS_INFO, imports immutable references or a redacted copy, and creates its own work item. No direct cross-repo state mutation and no shared ambient credential.",
+    "Example engineering→GTM: a released feature emits a release facts bundle (version, public API/docs, approved feature flags, availability, known limits and owner). GTM may propose messaging but cannot change release facts. GTM→engineering: reviewed market evidence or campaign feedback emits a product-insight bundle with aggregated evidence, method, privacy status and uncertainty; it becomes planning input, never an auto-created READY build or roadmap priority.",
+    "Compaction preserves decisions, unresolved questions, evidence links/digests, approvals, budgets, failures and next valid transitions. A human can correct a summary without rewriting source history."
+  ],
+  "orchestration_and_composition": [
+    "Use a shared durable controller for typed commands/events, artifact registry, leases/fencing, queueing, fanout/join, policy, budgets, secrets brokerage, redaction, observability, approvals and adapter interface. Workers/subfactories are versioned and replaceable; they return artifacts, not authority.",
+    "GTM owns its state graph, artifact schemas, role matrix, source/channel/CRM adapters, field ownership, metrics, brand/claim rules, compliance overlays, prompts/evals and risk tiers. Engineering owns issue/spec/branch/PR/CI/merge/deploy schemas and adapters. The shared core must not contain `lead`, `campaign`, `pull_request` or `merge`; it sees subject/artifact/action/capability/gate.",
+    "Compose research fanout by source/query then join on schema coverage, dedupe and conflict audit. Compose enrichment per provider/field into quarantine, then deterministic merge/conflict rules and sampled review. Compose content per channel/locale only after one approved brief; join requires each variant's validation, not majority vote. Publication fans out only after one immutable launch manifest and records child outcomes. Cleanup revokes temporary tokens, closes provider jobs, deletes transient PII per retention and emits costs.",
+    "Budgets are hierarchical per tenant/repo/work item/subfactory: time, tokens, provider credits, rows enriched, recipients, ad spend, API calls, retries and parallelism. Exhaustion pauses. Retry only classified transient failures with backoff and unchanged idempotency; semantic rejection returns to owner, never prompt-loops around a gate."
+  ],
+  "human_need_policy": [
+    "Deterministic STOP/DENY: missing owner/purpose; disallowed or sensitive targeting feature; unverifiable source/claim; absent lawful-basis/consent decision where required; suppression failure; unauthorized personal-data export; opt-out/consent field write; audience/content/config digest changed after approval; no kill switch; spend/send above cap; complaint/bounce/privacy/error threshold exceeded; stale approval; worker asks for policy/secret/publisher access. Calls/texts also deny when required consent/DNC/revocation proof or technology classification is missing [S49,S50]; do not encode the vacated FCC one-to-one rule as current federal law [S51].",
+    "Mandatory HUMAN GATE: ICP/category/positioning choice; new audience or jurisdiction/data provider; competitor/comparative, regulated, pricing, performance or testimonial claim; public or outbound launch; material budget; CRM merge/delete/overwrite of owned fields; experiment ethics/primary metric; declaring a winner or broad rollout; exception; privacy request/incident; policy, permission, retention, evaluator, hidden test, brand rule, suppression or self-improvement promotion. Approval binds exact digests/scope/expiry.",
+    "CLARIFY when two plausible interpretations would change audience, claim, channel, success metric, legal basis, spend, ownership or reversibility; when required fact confidence is below domain threshold; or evidence conflicts. Show options, consequences and a recommended reversible default. Do not ask for cosmetic ambiguity inside an approved style system.",
+    "Probabilistic signals can request review, never grant authority: source/field confidence, claim entailment, brand classifier, anomaly score and evaluator disagreement. Calibrate per slice. Example proposed triggers: review all regulated/comparative claims; sample at least 10% of already-approved low-risk drafts; pause if sampled factual defect >1%, complaint >0.1%, hard bounce >2%, or assignment imbalance >predeclared tolerance. These are conservative pilot defaults, not universal legal/deliverability limits; domain owners set stricter rules and measure them.",
+    "Continue unattended only for read-only/draft/deterministic validation tasks inside a pre-approved capability profile with fresh inputs, independent checks, remaining budget and no gate predicate. Fail closed on identity/policy/evidence uncertainty."
+  ],
+  "factory_as_code_schema": "Use a small manifest, not a universal plugin model. Example (illustrative):\napiVersion: factory.dev/v1alpha1\nkind: DomainFactory\nmetadata: {name: gtm-campaign, domain: gtm, owners: [pmm, revops], schemaVersion: 1.0.0}\nspec:\n  runtime: {distribution: org/factory-kernel@<sha>, digest: sha256:..., minVersion: 0.3.0}\n  triggers: [{type: repo_dispatch, event: gtm.campaign.requested, schema: schemas/campaign-request.v1.json, admissionPolicy: policy/trigger.rego}]\n  artifacts: [{type: CampaignSpec, schema: schemas/campaign-spec.v1.json, classification: internal}, {type: AudienceSnapshot, schema: schemas/audience.v1.json, classification: restricted}, {type: LaunchManifest, schema: schemas/launch.v1.json, classification: restricted}]\n  states: [{key: RESEARCHING, kernel: RUNNING}, {key: LAUNCH_APPROVAL, kernel: WAITING_APPROVAL}, {key: RUNNING, kernel: RUNNING}, {key: ROLLED_BACK, kernel: ROLLED_BACK, terminal: true}]\n  transitions: [{from: EXPERIMENT_READY, to: LAUNCH_APPROVAL, on: launch.proposed, guard: data_brand_experiment_pass}, {from: LAUNCH_APPROVAL, to: SCHEDULED, on: approval.granted, guard: exact_digest_and_suppression_fresh}]\n  steps: [{id: research, uses: gtm/research@<sha>, capability: research-readonly}, {id: enrich, uses: gtm/enrich@<sha>, needs: [research], fanout: provider, join: all-or-explicit-partial, output: EnrichmentPatch}, {id: publish, uses: gtm/publish@<sha>, needs: [approval], capability: channel-publisher}]\n  gates: [{id: publish, approverRoles: [brand, channel_owner], bind: [contentDigest, audienceDigest, experimentDigest, suppressionDigest, policyVersion], expires: PT24H}]\n  budgets: {duration: PT6H, tokens: 200000, enrichmentRows: 5000, recipients: 0, spendUSD: 0, retries: 2}\n  effects: {outbox: true, reconcile: PT15M, compensation: stop_future_and_retract_where_possible}\n  evals: {offline: evals/campaign.yaml, shadowRequired: true}\n  cleanup: {revokeLeases: true, deleteTransientPII: P7D, retainAudit: policy}\n`additionalProperties:false`, symbolic stable keys, semver migrations and consumer contract tests are required. Domain files live in the GTM repo (`.factory/project.yaml`, `factories/`, `schemas/`, `policy/`, `brand/`, `claims/`, `evals/`, `runbooks/`, `distribution.lock`). Runtime DB/event/effect state and raw PII do not live in Git. Engineering has the same folder contract but its own issue/PR/CI/release types.",
+  "end_to_end_workflows": [
+    "Market research → ICP/positioning: authenticate request; define question/decision/non-goals; retrieve approved public, first-party and licensed sources read-only; snapshot provenance; parallelize only independent sources; extract claim-linked observations; dedupe/conflict audit; human evidence review; draft ICP hypothesis and excluded/sensitive criteria; PMM approves exact revision; shadow-score historical accounts; review false positives/segment bias; accept, revise, reject or expire. No automatic CRM audience or campaign begins.",
+    "Campaign/content: accept approved ICP/positioning; create campaign spec with owner, offer, claims, channels, metric and caps; pre-register experiment; create content variants with claim citations/brand rules; deterministic link/UTM/accessibility/disclosure/forbidden-claim checks; factual, brand, legal/privacy and channel review; render preview; approval on digests; schedule from launch manifest; last-moment suppression/config read; publish capped cohort; reconcile provider IDs; monitor guardrails; pause/recall; outcome review and archive.",
+    "Enrichment/CRM: take immutable candidate snapshot; validate purpose/source terms and minimization; provider fanout within row/credit budget; retain source/time/confidence; deterministic field ownership/dedupe; quarantine proposed patch; sample/manual review by field risk; apply via narrow CRM principal with compare-old-hash/idempotency; read back; conflicts to RevOps; expire/reverify stale values; honor correction/deletion workflows. Consent, opt-out, legal-basis, lifecycle-stage and owner fields cannot be inferred/overwritten by enrichment.",
+    "Outreach: named human owns sender and account; confirm jurisdiction/channel policy, suppression and sender authentication; personalize only from cited approved facts; human approves template and target/cohort (or every message for high risk); start tiny capped cohort; provider message IDs to effect ledger; process bounces/replies/unsubscribes immediately; auto-pause on guardrails; no retry to opted-out contacts; classify reply only as suggestion; qualified outcome needs owner confirmation. Do not call this safe autonomous outreach.",
+    "Experiment/attribution/feedback: freeze assignment, exposure and metric definitions; validate sample ratio and data completeness; use fixed-horizon or declared sequential method [S28]; guardrails include complaints/privacy/brand and cost; outcome bundle separates observed attribution credit [S10,S15] from causal incrementality; analytics owner signs conclusion; late outcomes update without rewriting old report; reviewed learning may propose ICP/content/eval changes. A dashboard or correlation cannot self-promote a winner.",
+    "Cross-repo release launch: engineering publishes signed FeatureFactSheet handoff; broker validates; GTM accepts into INBOX and independently researches/approves claims; GTM launches through its gates; aggregated, privacy-reviewed outcome handoff returns to engineering PLANNING. Neither domain writes the other's state, readiness or policy."
+  ],
+  "self_improvement_boundary": [
+    "Permitted automated loop: observe redacted run/effect/outcome metrics → detect drift/failure clusters → draft incident/postmortem and candidate eval case → human/domain curator establishes ground truth and privacy → proposer opens one versioned prompt/workflow/routing/schema proposal → independent evaluator runs public regressions + protected holdout → non-authoritative shadow → human approves exact canary → bounded canary with control, abort and rollback → independent outcome review → promote immutable digest or restore last-known-good.",
+    "Protected invariants: workers cannot alter identities, capabilities, secrets, egress, budgets, publication gates, suppression/consent semantics, retention/audit, schema trust, approved claims, metric definitions, assignment, evaluator/holdout, policy/CODEOWNERS, distribution pins or rollback evidence. Proposer, curator, evaluator, publisher and promoter are separate. GTM owns marketing truth/brand/compliance oracles; platform/security owns kernel invariants. A shared-contract change needs both platform and affected-domain approval.",
+    "Feedback is not direct training data. Preserve source, consent/purpose, quality, slice, temporal split and deletion obligations. Never optimize a single proxy such as opens/replies/conversions: use constraint metrics and negative outcomes. Agent-authored graders are proposals; suspicious gains, evaluator disagreement, distribution shift or small samples pause.",
+    "Auto-promotion, if ever enabled, is limited to a proven reversible low-risk configuration class after enough local shadow/canary evidence. New data providers, targeting features, public claims, channels, spend, permissions, models with changed data handling, schemas, or gates always require human review. Any privacy breach, unauthorized effect, evidence tampering, material complaint regression or rollback failure freezes improvement."
+  ],
+  "validation_strategy": [
+    "Schema/static: JSON Schema 2020-12; `additionalProperties:false`; referential integrity; semver migration and backward/forward compatibility; PII classification/retention lint; no secrets/raw audiences in Git; approved-source/claim/brand/locale rules; launch manifest digest completeness.",
+    "State/model: enumerate every state/event pair; property/model-check invariants (no publish without exact current approval; no suppressed contact; no negative budget; no author self-approval; terminal monotonicity); illegal/out-of-order/duplicate events; stale aggregate/config/approval; cancel during every step; per-child partial failure; lease expiry/fencing; fanout/join and deadlock.",
+    "Effects/faults: crash before/after provider call and before outbox acknowledgement; repeated webhook/provider response; 429/5xx/timeouts; provider accepts but response lost; CRM concurrent edit; channel/manual drift; revoked token; artifact-store outage; reconciliation rebuild; stop/recall and irreversible-send incident drill; cleanup and deletion verification.",
+    "Security/privacy/compliance: signed ingress; tenant/repo isolation; least-privilege and negative capability tests; prompt injection in web/CRM/replies/files; SSRF/egress and data exfiltration; confused-deputy cross-repo handoff; suppression race; consent/lawful-basis reference cannot be synthesized; DSAR/deletion propagation; audit tamper; source terms/licence review; vendor subprocessors/retention verified in procurement.",
+    "Quality/evals: blinded factual-claim entailment to source; citation precision/recall; ICP relevance and exclusion errors by slice; enrichment precision/freshness/conflict per field/provider; brand/editor agreement; unsafe personalization; accessibility/localization; experiment assignment/sample-ratio and estimator tests; attribution missingness; hallucination/adversarial sources. Maintain temporal holdouts invisible to proposer and expert calibration.",
+    "Acceptance/pilot: shadow against representative historical/manual cases; compare quality, cycle time, human minutes, total cost, error/complaint/privacy outcomes and downstream incremental metric, with denominators and uncertainty. Roll out one domain/action/cohort at a time. Vendor case studies and raw activity volume cannot satisfy acceptance."
+  ],
+  "implementation_recommendation": [
+    "Decision: build the thin domain-neutral kernel inside engineering first. Do not launch GTM and do not extract a general plugin SDK now. Freeze shared envelopes, ArtifactRef, decisions, leases, transitions, budgets, effect ledger and handoff manifest; keep engineering business states/adapters domain-owned. Prove replay, reconciliation, stale fencing, approval binding and rollback on engineering workflows.",
+    "Gate A — kernel extraction (configured, not calendar-only): at least two genuinely different engineering workflows use the same primitives without domain conditionals; >=30 representative runs provide local cost/error/recovery baselines; duplicate/out-of-order replay, crash/effect, stale-fence, cleanup and rollback drills pass; schemas have compatibility/migration tests; named platform owner and signed version/rollback process exist. Otherwise refactor internally.",
+    "Gate B — GTM discovery: named PMM/RevOps/privacy/brand/analytics owners; one measurable hypothesis and manual baseline; system/data/source/terms/consent/retention/channel inventory; no raw PII in repo; select one reversible internal-output workflow (recommended: source-linked account research → human-approved ICP brief). If value cannot be measured or lawful data use is unresolved, stop.",
+    "Gate C — separate GTM repo/config: CODEOWNERS/ruleset, domain schemas/state/policies/evals/runbooks, tenant-specific secrets and quotas, adapter threat model/dry-run fixtures, contract-tested handoff, pinned kernel digest. Run >=30 representative shadow cases with 100% traceable claims and zero unauthorized external effects; publish factual/brand/privacy defect denominators and human review time. Thresholds must be set before evaluation.",
+    "Gate D — assistive execution: enrichment stays quarantine/diff; content remains draft; humans execute CRM/publication initially. Only after a predeclared non-inferiority/value test may one allowlisted reversible action receive bounded authority (for example, append an uncontroversial non-sensitive CRM suggestion field, not send email). Outreach, ad spend, personal-data export, regulated/comparative claims and public publication remain exact-manifest approvals. Expand one capability/cohort at a time; incident or rollback failure disables it.",
+    "Buy adapters/workflow surfaces where suitable, but keep the authoritative artifact/effect ledger, approvals, policy and outcome definitions portable. Validate vendor APIs, data lineage, deletion, subprocessor, plan and rate-limit behavior. 'AI GTM platform' should never become the system of record for authority merely because it combines many features."
+  ],
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Account Agents by Clay | AI agents for every account",
+      "publisher_or_authors": "Clay",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "sitemap last modified 2026-08-30",
+      "access_date": "2026-09-13",
+      "url": "https://www.clay.com/account-agents",
+      "supports_claims": [
+        "C1",
+        "C2"
+      ],
+      "limits": "Feature/vendor claim; no audited customer outcome or accuracy denominator."
+    },
+    {
+      "id": "S02",
+      "title": "Custom Signals",
+      "publisher_or_authors": "Clay",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "sitemap last modified 2026-08-27",
+      "access_date": "2026-09-13",
+      "url": "https://www.clay.com/signals",
+      "supports_claims": [
+        "C1",
+        "C3"
+      ],
+      "limits": "Feature/vendor claim; signal coverage and false-positive rates are not independently established."
+    },
+    {
+      "id": "S03",
+      "title": "CRM Enrichment",
+      "publisher_or_authors": "Clay",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "sitemap last modified 2026-08-04",
+      "access_date": "2026-09-13",
+      "url": "https://www.clay.com/use-cases/crm-enrichment",
+      "supports_claims": [
+        "C1",
+        "C4"
+      ],
+      "limits": "Feature/vendor claim; provider provenance, field accuracy and overwrite outcomes depend on configuration."
+    },
+    {
+      "id": "S04",
+      "title": "Clay Sequencer | Cold email sequencing on live data",
+      "publisher_or_authors": "Clay",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "sitemap last modified 2026-09-08",
+      "access_date": "2026-09-13",
+      "url": "https://www.clay.com/sequencer",
+      "supports_claims": [
+        "C1",
+        "C5"
+      ],
+      "limits": "Documents an execution surface, not legal basis, deliverability, reply quality or causal revenue."
+    },
+    {
+      "id": "S05",
+      "title": "Set up and use the prospecting agent",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-09-04",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/prospecting/use-the-prospecting-agent",
+      "supports_claims": [
+        "C1",
+        "C5",
+        "C8"
+      ],
+      "limits": "Documents permissions, identity, enrollment, credit and engagement constraints; it does not independently validate email truthfulness or outcomes."
+    },
+    {
+      "id": "S06",
+      "title": "How data enrichment works in HubSpot",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-07-13",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/records/how-data-enrichment-works-in-hubspot",
+      "supports_claims": [
+        "C1",
+        "C4",
+        "C8"
+      ],
+      "limits": "Documents business-data scope, settings and persistence; enriched-data accuracy remains record/provider-specific."
+    },
+    {
+      "id": "S07",
+      "title": "Use buyer intent",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-09-01",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/reports/use-buyer-intent",
+      "supports_claims": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "limits": "Research/visitor intent is an observed vendor-defined signal, not proof of purchase intent or incrementality."
+    },
+    {
+      "id": "S08",
+      "title": "Approve HubSpot content",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-03-13",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/marketing-email/request-approval-to-send-a-marketing-email",
+      "supports_claims": [
+        "C6",
+        "C8"
+      ],
+      "limits": "Important limit: some subscription-email updates can publish later without renewed approval; exact tenant behavior must be tested."
+    },
+    {
+      "id": "S09",
+      "title": "Approve HubSpot content",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-06-12",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/website-and-landing-pages/approve-hubspot-content",
+      "supports_claims": [
+        "C6",
+        "C8"
+      ],
+      "limits": "Shows configurable approval workflow, not that every channel/change is hash-bound or impossible to bypass."
+    },
+    {
+      "id": "S10",
+      "title": "Create attribution reports",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "last modified 2026-08-18",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/reports/create-attribution-reports",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Attribution models assign credit under specified rules; they do not identify causal lift by themselves."
+    },
+    {
+      "id": "S11",
+      "title": "Agentforce architecture",
+      "publisher_or_authors": "Salesforce Architects",
+      "source_type": "official architecture documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://architect.salesforce.com/fundamentals/agentforce",
+      "supports_claims": [
+        "C1",
+        "C8"
+      ],
+      "limits": "Vendor architecture; access can be region/bot restricted and outcomes are not audited here."
+    },
+    {
+      "id": "S12",
+      "title": "Einstein GPT Trust Layer / generative AI trust documentation",
+      "publisher_or_authors": "Salesforce",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://help.salesforce.com/s/articleView?id=ai.generative_ai_trust.htm&type=5",
+      "supports_claims": [
+        "C8",
+        "C9"
+      ],
+      "limits": "Trust-control description is a vendor claim and requires target-tenant data-flow and retention verification."
+    },
+    {
+      "id": "S13",
+      "title": "AI-powered brand voice management",
+      "publisher_or_authors": "Jasper",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://www.jasper.ai/brand-voice",
+      "supports_claims": [
+        "C1",
+        "C6"
+      ],
+      "limits": "Brand consistency and end-to-end workflow claims are not independent measurements; output still needs factual/legal review."
+    },
+    {
+      "id": "S14",
+      "title": "The AI GTM Platform",
+      "publisher_or_authors": "Common Room",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "living page; page contains 2026 posts",
+      "access_date": "2026-09-13",
+      "url": "https://www.commonroom.io/",
+      "supports_claims": [
+        "C1",
+        "C3",
+        "C4"
+      ],
+      "limits": "Feature/vendor claim for unified signals, enrichment and actions; “pipeline impact” lacks an audited general denominator."
+    },
+    {
+      "id": "S15",
+      "title": "Get started with attribution",
+      "publisher_or_authors": "Google Analytics Help",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.google.com/analytics/answer/10596866",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Explains attribution settings/credit; observed conversions remain affected by consent, identity and missing/offline data."
+    },
+    {
+      "id": "S16",
+      "title": "Email sender guidelines",
+      "publisher_or_authors": "Google",
+      "source_type": "official deliverability requirements",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.google.com/mail/answer/81126",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Provider requirements can change and do not guarantee inbox placement."
+    },
+    {
+      "id": "S17",
+      "title": "Sender Best Practices",
+      "publisher_or_authors": "Yahoo Sender Hub",
+      "source_type": "official deliverability requirements",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://senders.yahooinc.com/best-practices/",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Provider requirements can change and do not establish lawful outreach."
+    },
+    {
+      "id": "S18",
+      "title": "CAN-SPAM Act: A Compliance Guide for Business",
+      "publisher_or_authors": "U.S. Federal Trade Commission",
+      "source_type": "regulatory guidance",
+      "publication_or_update_date": "September 2009; living guidance",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "U.S. federal email baseline only; state, sector, non-U.S., SMS and calling rules can be stricter."
+    },
+    {
+      "id": "S19",
+      "title": "Direct marketing and privacy and electronic communications",
+      "publisher_or_authors": "UK Information Commissioner’s Office",
+      "source_type": "regulatory guidance",
+      "publication_or_update_date": "living guidance",
+      "access_date": "2026-09-13",
+      "url": "https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "UK guidance; exact lawful basis/consent depends on party, channel, jurisdiction and facts."
+    },
+    {
+      "id": "S20",
+      "title": "Regulation (EU) 2016/679 (General Data Protection Regulation)",
+      "publisher_or_authors": "European Parliament and Council / EUR-Lex",
+      "source_type": "binding law",
+      "publication_or_update_date": "2016-04-27; applicable 2018-05-25",
+      "access_date": "2026-09-13",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "supports_claims": [
+        "C4",
+        "C9"
+      ],
+      "limits": "Legal requirements require counsel/fact-specific assessment; this study is not legal advice."
+    },
+    {
+      "id": "S21",
+      "title": "AI Risk Management Framework (AI RMF 1.0)",
+      "publisher_or_authors": "NIST",
+      "source_type": "voluntary risk-management framework",
+      "publication_or_update_date": "2023-01-26",
+      "access_date": "2026-09-13",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "supports_claims": [
+        "C8",
+        "C9"
+      ],
+      "limits": "Voluntary framework, not a certification or proof that a vendor/system is safe."
+    },
+    {
+      "id": "S22",
+      "title": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile (NIST AI 600-1)",
+      "publisher_or_authors": "NIST; Autio et al.",
+      "source_type": "government technical report",
+      "publication_or_update_date": "2024-07",
+      "access_date": "2026-09-13",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "supports_claims": [
+        "C6",
+        "C8",
+        "C9"
+      ],
+      "limits": "Risk taxonomy and recommended actions, not a product outcome audit."
+    },
+    {
+      "id": "S23",
+      "title": "FTC Announces Crackdown on Deceptive AI Claims and Schemes",
+      "publisher_or_authors": "U.S. Federal Trade Commission",
+      "source_type": "regulatory enforcement release",
+      "publication_or_update_date": "2024-09-25",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/news-events/news/press-releases/2024/09/ftc-announces-crackdown-deceptive-ai-claims-schemes",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "Enforcement examples are not a complete catalog of prohibited claims."
+    },
+    {
+      "id": "S24",
+      "title": "Endorsements, Influencers, and Reviews",
+      "publisher_or_authors": "U.S. Federal Trade Commission",
+      "source_type": "regulatory guidance and rule links",
+      "publication_or_update_date": "living guidance",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/advertising-marketing/endorsements-influencers-reviews",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "U.S. advertising baseline only; application depends on facts and jurisdiction."
+    },
+    {
+      "id": "S25",
+      "title": "Spam policies for Google web search — scaled content abuse",
+      "publisher_or_authors": "Google Search Central",
+      "source_type": "official platform policy",
+      "publication_or_update_date": "last updated 2025-12-10 shown in page metadata",
+      "access_date": "2026-09-13",
+      "url": "https://developers.google.com/search/docs/essentials/spam-policies#scaled-content",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "Platform policy, not law; ranking/enforcement effects are not predictable per publication."
+    },
+    {
+      "id": "S26",
+      "title": "Experimental evidence on the productivity effects of generative artificial intelligence",
+      "publisher_or_authors": "Shakked Noy and Whitney Zhang; Science",
+      "source_type": "peer-reviewed randomized experiment",
+      "publication_or_update_date": "2023-07-14",
+      "access_date": "2026-09-13",
+      "url": "https://www.science.org/doi/10.1126/science.adh2586",
+      "supports_claims": [
+        "C10"
+      ],
+      "limits": "Covers midlevel professional writing tasks, not autonomous GTM systems or long-term market outcomes."
+    },
+    {
+      "id": "S27",
+      "title": "Navigating the Jagged Technological Frontier",
+      "publisher_or_authors": "Fabrizio Dell’Acqua et al.; Harvard Business School Working Paper 24-013",
+      "source_type": "field experiment / working paper",
+      "publication_or_update_date": "2023-09; revised 2024",
+      "access_date": "2026-09-13",
+      "url": "https://www.hbs.edu/ris/Publication%20Files/24-013_d9b45b68-9e74-42d6-a1c6-c72fb70c7282.pdf",
+      "supports_claims": [
+        "C10"
+      ],
+      "limits": "BCG consultant tasks and model vintage limit transferability; shows heterogeneity rather than a current vendor audit."
+    },
+    {
+      "id": "S28",
+      "title": "Always Valid Inference: Bringing Sequential Analysis to A/B Testing",
+      "publisher_or_authors": "Ramesh Johari, Leo Pekelis, David Walsh; arXiv 1512.04922",
+      "source_type": "academic preprint",
+      "publication_or_update_date": "2015-12-15; revised 2022-07-22",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/1512.04922",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Methodological foundation; does not select a business metric or repair biased assignment/measurement."
+    },
+    {
+      "id": "S29",
+      "title": "Robyn: open-source Marketing Mix Modeling",
+      "publisher_or_authors": "Meta Marketing Science",
+      "source_type": "source repository",
+      "publication_or_update_date": "repository accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/facebookexperimental/Robyn",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "An implementation/method, not proof that a fitted model is causal or appropriate for a given dataset."
+    },
+    {
+      "id": "S30",
+      "title": "Regulation (EU) 2024/1689 (Artificial Intelligence Act)",
+      "publisher_or_authors": "European Parliament and Council / EUR-Lex",
+      "source_type": "binding law",
+      "publication_or_update_date": "2024-06-13; phased application",
+      "access_date": "2026-09-13",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "Transparency/application details are use-case and timeline specific; there is no blanket rule that all AI marketing text must be labeled."
+    },
+    {
+      "id": "S31",
+      "title": "Directive 2002/58/EC on privacy and electronic communications",
+      "publisher_or_authors": "European Parliament and Council / EUR-Lex",
+      "source_type": "binding EU directive",
+      "publication_or_update_date": "2002-07-12",
+      "access_date": "2026-09-13",
+      "url": "https://eur-lex.europa.eu/eli/dir/2002/58/oj",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Member-state implementation varies; channel and subscriber facts matter."
+    },
+    {
+      "id": "S32",
+      "title": "Guidelines 1/2024 on processing personal data based on Article 6(1)(f) GDPR",
+      "publisher_or_authors": "European Data Protection Board",
+      "source_type": "official regulatory guidelines",
+      "publication_or_update_date": "adopted 2024-10-08",
+      "access_date": "2026-09-13",
+      "url": "https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2024/guidelines-12024-processing-personal-data-based_en",
+      "supports_claims": [
+        "C4",
+        "C9"
+      ],
+      "limits": "Guidelines explain the three-step test; they do not make every direct-marketing use lawful."
+    },
+    {
+      "id": "S33",
+      "title": "Direct marketing guidance",
+      "publisher_or_authors": "UK Information Commissioner’s Office",
+      "source_type": "regulatory guidance",
+      "publication_or_update_date": "page metadata 2026-05-01",
+      "access_date": "2026-09-13",
+      "url": "https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/direct-marketing-guidance/",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "UK-specific; distinguish individual and corporate subscribers and apply current PECR/UK GDPR facts."
+    },
+    {
+      "id": "S34",
+      "title": "CCPA regulations and rulemaking",
+      "publisher_or_authors": "California Privacy Protection Agency",
+      "source_type": "official regulator portal",
+      "publication_or_update_date": "living portal",
+      "access_date": "2026-09-13",
+      "url": "https://cppa.ca.gov/regulations/",
+      "supports_claims": [
+        "C4",
+        "C9"
+      ],
+      "limits": "California only; U.S. state privacy obligations are not uniform and require current legal mapping."
+    },
+    {
+      "id": "S35",
+      "title": "Predictive Modeling Overview",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "updated 2025-11-13",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/predictive-modeling-overview.md",
+      "supports_claims": [
+        "C2",
+        "C3"
+      ],
+      "limits": "Vendor-defined ML buying stages based on historical behavior; likelihood is not ground truth or causal intent."
+    },
+    {
+      "id": "S36",
+      "title": "Audience Workflows pre-publication checklist and best practices",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "updated 2026-06-24",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/audience-workflows-pre-publication-checklist-and-best-practices.md",
+      "supports_claims": [
+        "C3",
+        "C6",
+        "C8"
+      ],
+      "limits": "Documents schedule/segment/credit/node checks and preview, not two-person or exact-digest approval."
+    },
+    {
+      "id": "S37",
+      "title": "Create AI Email campaigns",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/create-email-campaigns.md",
+      "supports_claims": [
+        "C5",
+        "C6"
+      ],
+      "limits": "Documents review/edit step; product outcome and legal basis remain unverified."
+    },
+    {
+      "id": "S38",
+      "title": "A/B test Conversational Email campaigns",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/ab-test-ce-campaigns.md",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Vendor workflow supports variant selection; statistical validity/causal inference still depends on design."
+    },
+    {
+      "id": "S39",
+      "title": "Evaluate email campaign performance",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/evaluate-email-campaign-performance.md",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Hours-saved metric assumes three minutes per email; it is modeled, not audited time measurement."
+    },
+    {
+      "id": "S40",
+      "title": "Value Metrics report",
+      "publisher_or_authors": "6sense",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://support.6sense.com/docs/value-metrics-report.md",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Vendor-attributed pipeline view needs CRM integration/history and packaging; not a causal outcome audit."
+    },
+    {
+      "id": "S41",
+      "title": "Jasper Governance",
+      "publisher_or_authors": "Jasper",
+      "source_type": "first-party product page",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://www.jasper.ai/governance",
+      "supports_claims": [
+        "C6",
+        "C8"
+      ],
+      "limits": "Role-based product claim; exact enforcement and tenant configuration require audit."
+    },
+    {
+      "id": "S42",
+      "title": "Jasper and Adobe Workfront integration",
+      "publisher_or_authors": "Jasper",
+      "source_type": "first-party engineering/product article",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://www.jasper.ai/blog/adobe-workfront-integration",
+      "supports_claims": [
+        "C6",
+        "C8"
+      ],
+      "limits": "Shows approvals/compliance can be external to generation; integration claim is not an outcome audit."
+    },
+    {
+      "id": "S43",
+      "title": "Actions and Data Credits",
+      "publisher_or_authors": "Clay University",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://university.clay.com/docs/actions-data-credits",
+      "supports_claims": [
+        "C1",
+        "C8"
+      ],
+      "limits": "Documents consumption accounting, not total cost/ROI or data accuracy."
+    },
+    {
+      "id": "S44",
+      "title": "Generate campaign insights using AI",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/campaigns/generate-campaign-insights-using-ai",
+      "supports_claims": [
+        "C7",
+        "C8"
+      ],
+      "limits": "Summaries/Q&A/thumb feedback are product mechanisms, not validated causal campaign learning."
+    },
+    {
+      "id": "S45",
+      "title": "Segment tasks",
+      "publisher_or_authors": "Common Room",
+      "source_type": "official product documentation",
+      "publication_or_update_date": "living page",
+      "access_date": "2026-09-13",
+      "url": "https://www.commonroom.io/docs/using-common-room/segments/segment-actions/segment-tasks/",
+      "supports_claims": [
+        "C6",
+        "C8"
+      ],
+      "limits": "Human work queue exists, but no universal pre-send approval is established."
+    },
+    {
+      "id": "S46",
+      "title": "FTC Policy Statement Regarding Advertising Substantiation",
+      "publisher_or_authors": "U.S. Federal Trade Commission",
+      "source_type": "official policy statement",
+      "publication_or_update_date": "1984-08-02",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/legal-library/browse/ftc-policy-statement-regarding-advertising-substantiation",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "General U.S. substantiation principle; claim-specific evidence standards vary."
+    },
+    {
+      "id": "S47",
+      "title": "Keep your AI claims in check",
+      "publisher_or_authors": "Michael Atleson; U.S. Federal Trade Commission",
+      "source_type": "regulatory business guidance",
+      "publication_or_update_date": "2023-02-27",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/blog/2023/02/keep-your-ai-claims-check",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "Business guidance, not a complete statement of law; advertiser remains responsible for AI-generated claims."
+    },
+    {
+      "id": "S48",
+      "title": "Trade Regulation Rule on the Use of Consumer Reviews and Testimonials, 16 CFR Part 465",
+      "publisher_or_authors": "U.S. Federal Trade Commission / Federal Register",
+      "source_type": "final rule",
+      "publication_or_update_date": "published 2024-08-22; effective 2024-10-21",
+      "access_date": "2026-09-13",
+      "url": "https://www.federalregister.gov/documents/2024/08/22/2024-18519/trade-regulation-rule-on-the-use-of-consumer-reviews-and-testimonials",
+      "supports_claims": [
+        "C6",
+        "C9"
+      ],
+      "limits": "U.S. federal rule; fact-specific application and other endorsement duties remain."
+    },
+    {
+      "id": "S49",
+      "title": "47 CFR § 64.1200 — Delivery restrictions",
+      "publisher_or_authors": "U.S. Federal Communications Commission / eCFR",
+      "source_type": "binding regulation",
+      "publication_or_update_date": "current eCFR accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "url": "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-B/part-64/subpart-L/section-64.1200",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Calling/text rules are technology, purpose, consent, number and jurisdiction specific; verify current effective provisions."
+    },
+    {
+      "id": "S50",
+      "title": "FCC 24-17: AI-generated voices in robocalls",
+      "publisher_or_authors": "U.S. Federal Communications Commission",
+      "source_type": "declaratory ruling",
+      "publication_or_update_date": "adopted 2024-02-02; released 2024-02-08",
+      "access_date": "2026-09-13",
+      "url": "https://docs.fcc.gov/public/attachments/FCC-24-17A1.pdf",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Addresses artificial/prerecorded voice treatment; does not make other outreach lawful."
+    },
+    {
+      "id": "S51",
+      "title": "Insurance Marketing Coalition v. FCC, No. 24-10277",
+      "publisher_or_authors": "U.S. Court of Appeals for the Eleventh Circuit",
+      "source_type": "judicial opinion",
+      "publication_or_update_date": "2025-01-24",
+      "access_date": "2026-09-13",
+      "url": "https://media.ca11.uscourts.gov/opinions/pub/files/202410277.pdf",
+      "supports_claims": [
+        "C5",
+        "C9"
+      ],
+      "limits": "Vacated the FCC one-to-one consent restriction at issue; do not mistake the vacated rule for current federal law; other consent/DNC/state duties remain."
+    },
+    {
+      "id": "S52",
+      "title": "The Unfavorable Economics of Measuring the Returns to Advertising",
+      "publisher_or_authors": "Randall A. Lewis and Justin M. Rao; Quarterly Journal of Economics",
+      "source_type": "peer-reviewed empirical paper",
+      "publication_or_update_date": "2015-11",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.1093/qje/qjv023",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Shows small effects/high outcome variance make many advertising experiments underpowered; setting differs by channel/context."
+    },
+    {
+      "id": "S53",
+      "title": "A Comparison of Approaches to Advertising Measurement: Evidence from Big Field Experiments at Facebook",
+      "publisher_or_authors": "Brett R. Gordon, Florian Zettelmeyer, Neha Bhargava, Dan Chapsky; Marketing Science",
+      "source_type": "peer-reviewed empirical paper",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.1287/mksc.2018.1135",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Platform/context-specific but strong evidence that rich observational attribution can remain biased versus randomized experiments."
+    },
+    {
+      "id": "S54",
+      "title": "Online Controlled Experiments at Large Scale",
+      "publisher_or_authors": "Ron Kohavi et al.; ACM KDD",
+      "source_type": "peer-reviewed conference paper",
+      "publication_or_update_date": "2013",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.1145/2487575.2488217",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "Foundational experimentation practice; exact thresholds/design must match the GTM unit and interference structure."
+    },
+    {
+      "id": "S55",
+      "title": "The ASA Statement on p-Values: Context, Process, and Purpose",
+      "publisher_or_authors": "Ronald L. Wasserstein and Nicole A. Lazar; American Statistical Association",
+      "source_type": "professional/peer-reviewed statement",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.1080/00031305.2016.1154108",
+      "supports_claims": [
+        "C7"
+      ],
+      "limits": "General statistical guidance; does not choose business decisions or estimands."
+    }
+  ],
+  "conflicts": [
+    "Vendor 'end-to-end' or 'pipeline impact' language [S01,S13,S14] versus evidence: pages show functions and selected narratives, not representative causal outcomes. Resolution: classify as documented/vendor claim; require local eligible/attempted/outcome denominators, control/baseline, defect and human-cost measures.",
+    "Sequencer/prospecting capability [S04,S05] versus permission to contact [S18,S19] and sender rules [S16,S17]. Resolution: publication adapter requires separate lawful-basis/consent/suppression/sender gates; platform availability never grants authority.",
+    "Enrichment promises current CRM data [S03,S06,S14] versus source error, staleness, field ownership and persistence after disabling enrichment [S06]. Resolution: quarantine field-level sourced patches, compare-old-hash, TTL/reverification, correction/deletion paths; protect consent/preferences.",
+    "Brand voice/content approval [S08,S09,S13] versus factual/legal correctness and changed artifacts. HubSpot documents an update path that may not require renewed approval [S08]. Resolution: external exact-render digest approval enforced by factory; claims cite evidence; platform approval is defense-in-depth, not sole gate.",
+    "Attribution reports [S10,S15] and MMM implementation [S29] versus causal inference. Resolution: label descriptive/model attribution; use randomized holdout or justified causal design, report missingness/assumptions/intervals, and let an analytics owner decide.",
+    "Generative AI productivity evidence [S26] versus jagged-frontier harm [S27]. Resolution: automate bounded drafting/research mechanics with human review and slice-specific evals; do not extrapolate to autonomous strategy, truth or side effects.",
+    "A universal factory vocabulary versus real domain differences. Resolution: shared kernel execution states/contracts plus domain-owned business state machines/artifacts; no PR/CRM/campaign terms in core.",
+    "Git-as-code reproducibility versus mutable CRM/channel/runtime state. Resolution: Git stores desired schemas/policy/config; durable event/effect ledger and remote systems store observed actual; reconcilers read/diff/apply/read-back and surface drift."
+  ],
+  "uncertainties": [
+    "No independent audited end-to-end outcome study was found for the named 2026 GTM products. Accuracy, error slices, reviewer cost, complaint/brand harm and causal revenue lift remain unknown until local pilots.",
+    "Exact vendor plan/region/API/approval-bypass, model retention/training, subprocessor, enrichment-source licence, deletion and rate-limit behavior changes. Procurement, DPA/security review, tenant tests and content snapshots are blockers before write access.",
+    "Jurisdiction/channel/product facts determine consent/lawful basis, profiling, sensitive data, AI transparency, endorsements, telemarketing/SMS and retention. This architecture cannot encode a universal legal answer; counsel/domain owners must provide tested overlays.",
+    "GTM-specific quality thresholds, sample sizes, complaint/bounce limits and minimum ROI are intentionally not universal. Proposed pilot values are starting constraints; set pre-registered local thresholds from baseline, risk appetite and provider/regulatory requirements.",
+    "Identity loss, dark-funnel activity, offline conversions and multiple simultaneous campaigns limit attribution. A method can assign credit without identifying incrementality. Long sales cycles delay the evidence needed for promotion.",
+    "Irreversible sends/public impressions make full rollback impossible. Compensation and rapid pause reduce future harm but cannot erase it; this limits unattended publication even after pilots.",
+    "The requested lifecycle-extension directory contains only outline/fields and no validated result files at research time; domain architecture therefore reuses validated repository-OS/self-managing studies and new GTM evidence, not nonexistent lifecycle results."
+  ],
+  "confidence": "Overall: medium-high for the recommended control/contract design; medium for mapping documented product capabilities; low-to-medium for effectiveness and numeric rollout thresholds. Claim-level: C1–C8 high that the cited first-party pages document the named surfaces, medium that exact tenant behavior matches without contract testing; C9 high that cited law/guidance/framework creates real external constraints, but legal application is fact-specific; C10 medium-high that bounded generative-AI writing experiments show heterogeneous assistive effects, low for transfer to current end-to-end GTM. High confidence that vendor feature claims do not constitute audited causal outcomes and that publication/CRM authority must stay separately gated.",
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "implementation_recommendation",
+    "confidence"
+  ]
+}

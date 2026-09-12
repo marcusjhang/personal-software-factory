@@ -1,0 +1,42 @@
+topic: Cross-domain factory infrastructure with engineering first and GTM as a gated
+  extension
+objective: Determine how the repository agent operating system can support multiple
+  domain repositories through one factory-as-code runtime, while shipping engineering
+  first and adding GTM only after explicit extraction and value gates.
+as_of: '2026-09-13'
+time_range: 2023-present plus relevant workflow/platform foundations
+items:
+- name: Cross-domain artifact factory abstraction
+  category: architecture
+  description: Find the smallest domain-neutral model that supports engineering, research/writing,
+    and GTM without reducing everything to agents/chats or prematurely building a
+    plugin platform.
+- name: GTM factory workflows and current systems
+  category: gtm
+  description: Research how current teams/products define AI-assisted market research,
+    ICP/positioning, campaigns, content, CRM enrichment, outreach, experiments, attribution,
+    review, publication and feedback; distinguish safe automation and vendor claims.
+- name: Multi-repository project and domain isolation
+  category: fleet
+  description: Design one shared runtime serving separate engineering and GTM repositories
+    with project isolation, configuration inheritance, secrets, quotas, identities,
+    artifact stores, events, upgrades and cross-repo handoffs.
+- name: Engineering-first extension and extraction gates
+  category: roadmap
+  description: Define exactly what the engineering implementation must make generic
+    now, what stays engineering-specific, and evidence/trigger gates for extracting
+    a domain SDK and starting GTM.
+- name: Team and organizational factory patterns
+  category: evidence
+  description: Compare how Warp Factories, Anthropic, OpenAI, Microsoft/GitHub, GitLab
+    and other credible teams define roles, workflows, artifacts, evals, human gates
+    and domain-specific factories; extract transferable patterns and conflicts.
+execution:
+  batch_size: 5
+  items_per_agent: 1
+  output_dir: ./results
+  approval_between_batches: false
+source_policy:
+  prefer_primary: true
+  require_urls: true
+  record_access_date: true

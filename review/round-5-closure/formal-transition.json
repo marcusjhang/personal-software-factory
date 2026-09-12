@@ -1,0 +1,144 @@
+{
+  "reviewer": "round-5 formal-transition independent closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-4 repairs",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-4-resolution.md",
+      "review/round-4-closure/architecture-roadmap.json",
+      "review/round-4-closure/consistency-editorial.json",
+      "review/round-4-closure/evidence-provenance.json",
+      "review/round-4-closure/improvement-security.json",
+      "review/round-4-closure/requirements-journey.json",
+      "review/round-4-closure/transition-model.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md"
+    ],
+    "specialty": "Programmatic and manual review of canonical/private endpoints, legal canonical adjacency, S equality, initial creation, reachability, nonterminal event partitions and sinks, cancellation, child outcomes, cleanup split and terminal predicates, reconciliation origin, exact quiescence, improvement reduction, and decision dispatch across every normative table and reducer reference.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Implementation proof and passed future gates were not required."
+  },
+  "repair_reproduction": [
+    {
+      "area": "ordinary_factory_graphs",
+      "result": "partial_pass",
+      "basis": "A parser found 85 unique canonical edges. Every explicit ordinary-factory canonical pair is legal; every S row has equal source/target lookup projection; all private endpoints match PLAN section 14.0; and all declared ordinary-factory states are reachable with no nonterminal source-less sink. Initial CREATED entry is now present for BUILD B00 and DEEP-RESEARCH D00. Cancellation coverage is still incomplete as finding R5-FT-003 states."
+    },
+    {
+      "area": "wait_child_cleanup_and_terminal_contracts",
+      "result": "pass",
+      "basis": "W04 and W14-W18 cover cancellation from every reachable nonterminal Wait state. IDEATION I10/I29/I30, MAINTENANCE M11/M50/M51, and rollout IR27-IR35 distinguish child success, failure, and cancellation. Factory failure and cancellation entries stop at CLEANING and later clean rows terminalize. Cleanup escalation remains ineligible for DONE."
+    },
+    {
+      "area": "effects_and_quiescence",
+      "result": "pass",
+      "basis": "E12-E29 bind reconciliation_origin and target_effect_id and disjoin ORIGINAL from COMPENSATION exits. The quiescence-closed guard requires U09, a verified closure receipt, Attempt A18, no shared-resource ownership, and settled effects; DENIED, REVIEW, ACTIVE_DISJOINT_ONLY, and REVOKED are expressly excluded."
+    },
+    {
+      "area": "decision_dispatch",
+      "result": "pass",
+      "basis": "Manifest section 16 covers all seven PLAN section 10.1 subject types and routes accept, request-changes, deny, expiry, withdrawal, and stale-manifest outcomes to named rows. Widening cannot substitute a canary admission decision."
+    },
+    {
+      "area": "evidence_boundary",
+      "result": "pass",
+      "basis": "The current material-claims digests exactly match PLAN.md and docs/state-transition-manifests.md. The reviewed evidence artifacts label legacy retrieval provenance and semantic entailment unverified and do not claim that the future immutable re-fetch or human semantic gate passed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5-FT-001",
+      "severity": "high",
+      "title": "The release-attempt rows disagree with the total reducer on two required separate transactions",
+      "requirement": "R-08/P-08 requires one deterministic complete lifecycle in which each private edge projects to S, one legal canonical edge, or its declared guarded sequence; manifest sections 1, 15.1, 15.7, and 17 make disagreement reject the transaction.",
+      "evidence": [
+        "docs/state-transition-manifests.md:610 maps OFFLINE_PENDING to READY and SHADOW_RUNNING to VERIFYING.",
+        "docs/state-transition-manifests.md:632 makes IC06 move CURATION_PASSED to OFFLINE_PENDING through REDUCE-V1.",
+        "docs/state-transition-manifests.md:729 declares IA01 IDLE->READY as READY_REVIEW>READY.",
+        "docs/state-transition-manifests.md:733 declares IA05 VERIFYING->SUCCEEDED as VERIFYING>REVIEW.",
+        "docs/state-transition-manifests.md:774 requires IA01-IA05 to be separate normal transactions and says IC13 consumes the already-durable IA05 receipt."
+      ],
+      "reproduction": "Start at the declared improvement tuple. IC06 changes candidate to OFFLINE_PENDING, whose exhaustive candidate map already derives READY while release_attempt_state is IDLE. The later separate IA01 changes only release attempt IDLE->READY; the release map and candidate map still derive READY, so the event is S, not its declared READY_REVIEW>READY. Before the separate IA05, candidate is SHADOW_RUNNING and release attempt is VERIFYING, so canonical is VERIFYING. IA05 changes release attempt to SUCCEEDED, after which the candidate map still returns VERIFYING; only later IC13 changes candidate to SHADOW_PASSED and can derive REVIEW. IA05 is therefore also S, not its declared VERIFYING>REVIEW.",
+      "impact": "A conforming reducer must reject both declared rows because the computed canonical result disagrees with the row. The protected offline/shadow improvement path cannot execute under the stated single-contract rules.",
+      "recommendation": "Move the canonical advances to the component events that actually cause them, or change IA01/IA05 to S and state the exact IC06/IC13 synchronization order. Add the two concrete tuple traces to the generated reducer test set.",
+      "verification": "Replay IC06 then IA01 and IA04 then IA05 then IC13 from exact tuples. Require every persisted canonical result and row projection to be equal after each separate transaction.",
+      "confidence": "high",
+      "prior": "New contradiction exposed by reproducing the round-4 reducer repair rather than trusting its register."
+    },
+    {
+      "id": "R5-FT-002",
+      "severity": "high",
+      "title": "Improvement rollback entry is unnamed and ROLLED_BACK permanently masks terminal reduction",
+      "requirement": "R-08/P-08 and R-12/P-12 require explicit, deterministic rollback and terminal paths with no inferred coordinate mutation or nonterminal sink.",
+      "evidence": [
+        "docs/state-transition-manifests.md:571 says a synchronized row may apply only its named coordinate changes.",
+        "docs/state-transition-manifests.md:577 defines rollback_state as an exact coordinate and rejects an unlisted edge.",
+        "docs/state-transition-manifests.md:595 gives every non-cancel rollback state, including ROLLED_BACK, priority over DONE and FAILED at lines 597-598.",
+        "docs/state-transition-manifests.md:618 nevertheless allows terminal conjunctions with rollback_state ROLLED_BACK.",
+        "docs/state-transition-manifests.md:688 and 691 make IR19 and IR22 change only rollout state to FAILED while declaring canonical entry to ROLLBACK_REQUESTED; no synchronized rollback coordinate edge is named."
+      ],
+      "reproduction": "For IR19, keep rollback_state=IDLE as required by its named rollout-only source/target. After PROMOTING->FAILED, reducer priority 16 maps rollout FAILED to CLEANING, not ROLLBACK_REQUESTED. IR22 has the same result from OBSERVING. If an implementation instead infers rollback_state=REQUESTED, it violates the named-coordinate rule. After a rollback later reaches ROLLED_BACK, priority 7 always returns canonical ROLLED_BACK before terminal priorities 9/10, and the manifest provides no ROLLED_BACK->IDLE coordinate row, so the stated terminal conjunction using ROLLED_BACK is unreachable.",
+      "impact": "Promotion failure or delayed harm has no legal deterministic entry into the required rollback chain. Even an inferred rollback cannot complete work, leaving the improvement aggregate stuck at canonical ROLLED_BACK.",
+      "recommendation": "Define explicit synchronized rollout-plus-rollback entry rows for IR19/IR22 (and their exact coordinate deltas). Then either make a named ROLLED_BACK->IDLE settlement edge or change precedence so a fully settled ROLLED_BACK tuple can reach its exact FAILED/CANCELLED terminal without masking safety work early.",
+      "verification": "Enumerate IR19 and IR22 from reachable tuples through the complete rollback and cleanup path. Assert each coordinate delta is named, each canonical pair is legal, and a terminal tuple is reachable after rollback settlement.",
+      "confidence": "high",
+      "prior": "New contradiction exposed by executing the repaired reducer precedence and rollback references."
+    },
+    {
+      "id": "R5-FT-003",
+      "severity": "high",
+      "title": "The closed built-in manifests still leave reachable work states with no cancellation event",
+      "requirement": "The owner contract promises /factory cancel for a work ID (PLAN section 10.1), the compiler rejects missing cancel paths (PLAN section 6), and the normative manifest forbids wildcard or inferred transitions.",
+      "evidence": [
+        "docs/state-transition-manifests.md:3 and 20 forbid inferred or wildcard edges.",
+        "docs/state-transition-manifests.md:160-164 and 290-294 make BUILD.CREATED and DEEP-RESEARCH.CREATED reachable initial states, but neither factory has a cancellation row sourced at CREATED.",
+        "docs/state-transition-manifests.md:127 and 134 make IDEATION.STALE reachable; no IDEATION cancellation row is sourced at STALE.",
+        "docs/state-transition-manifests.md:150-151 make IDEATION.QUARANTINED reachable; I28 only declares failure and no cancellation row is sourced there.",
+        "docs/state-transition-manifests.md:251-252 make MAINTENANCE.UNKNOWN_EFFECT and QUARANTINED reachable; neither state has a cancellation row.",
+        "PLAN.md:284 exposes /factory cancel <work-id> without state exclusions, and PLAN.md:170 requires cancel paths."
+      ],
+      "reproduction": "Build the reachable source set from each declared initial and subtract terminals. Search each factory table for an authenticated cancellation transition. The listed states remain uncovered even though their canonical projections have applicable explicit cancellation entries: INBOX, PLANNING, or QUARANTINED. Because the private tables are closed, the canonical edge alone cannot authorize the private transition.",
+      "impact": "A valid owner cancellation can race immediately after BUILD/DEEP-RESEARCH creation or arrive while IDEATION/MAINTENANCE is stale or quarantined, but the reducer has no legal event to append. The API must either reject a promised command or invent a transition outside the sole contract.",
+      "recommendation": "Add explicit cancellation rows for every reachable cancellable private state, including the listed initial, stale, UNKNOWN, and quarantine states. If cleanup or safety rollback states intentionally defer cancellation, define an explicit durable cancel-adoption event and its later projection rather than silently excluding the command.",
+      "verification": "Generate the reachable state set for every built-in and assert that each nonterminal state has exactly one cancel/adopt/defer event with a legal projection and deterministic race behavior.",
+      "confidence": "high",
+      "prior": "Residual gap found by exhaustive source coverage after the round-4 entry and cancellation repairs."
+    },
+    {
+      "id": "R5-FT-004",
+      "severity": "high",
+      "title": "The Effect aggregate has guard-conditioned nonterminal sinks that can block settlement forever",
+      "requirement": "R-08/P-08 and the universal manifest rules require complete effect outcomes, no nonterminal sinks, and settled effects before cleanup or terminal work.",
+      "evidence": [
+        "docs/state-transition-manifests.md:493-496 gives APPLIED only E06 to RECEIPT_VERIFIED, guarded by successful receipt and remote-identity verification.",
+        "docs/state-transition-manifests.md:501-503 gives ABSENCE_PROVED only E14, guarded by fresh authority and a safe-retry policy.",
+        "docs/state-transition-manifests.md:504-506 gives APPLICATION_RECONCILED only E17, guarded by successful reconstructed-receipt verification.",
+        "docs/state-transition-manifests.md:575 folds each of these unresolved nonterminal states as LIVE, while lines 14-20 require settled effects for terminal eligibility and forbid nonterminal sinks."
+      ],
+      "reproduction": "Partition each source by the truth and falsehood of its only outgoing guard. A proved-absent original effect with retry forbidden, authority stale, or budget unavailable cannot take E14 and has no failed/cancelled/quarantine disposition. APPLIED with a receipt or remote-identity verification failure cannot take E06. APPLICATION_RECONCILED with a reconstructed receipt that fails verification cannot take E17. No other row is sourced at any of these three states.",
+      "impact": "These expected adverse outcomes leave the Effect set LIVE indefinitely. Parent work can never satisfy settled, clean, rollback completion, cancellation completion, or a terminal predicate, and an implementation would have to invent an undeclared exit.",
+      "recommendation": "Add explicit fail-closed exits for every false-guard partition: for example, known nonapplication with no authorized retry to a settled failure, and unverifiable applied/reconciled observations to a typed quarantine or reconciliation path. Define cancellation handling where safe and keep original-versus-compensation origin rules intact.",
+      "verification": "For every nonterminal Effect state, enumerate mutually exclusive trigger/guard outcomes, including stale authority, retry forbidden/exhausted, invalid receipt, and remote-identity mismatch. Assert exactly one legal exit or an explicitly bounded wait with a later exit.",
+      "confidence": "high",
+      "prior": "Residual event-partition defect not detected by the round-4 endpoint-only static check."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 4,
+    "medium": 0,
+    "low": 0,
+    "total": 4
+  },
+  "residual_uncertainty": [
+    "This is a plan-only audit. It does not claim implementation, model checking, operational safety, source truth, semantic entailment, or local outcome proof.",
+    "The planned immutable re-fetch and human semantic review remain future gates and were not required to have passed."
+  ],
+  "closure_criteria_pass": false
+}

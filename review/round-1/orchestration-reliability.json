@@ -1,0 +1,206 @@
+{
+  "reviewer": "orchestration-reliability",
+  "scope": "Adversarial review of the final plan and its orchestration protocols/proof gates for durable admission, ordering, dependencies, leases/fencing, heartbeats, retries, cancellation, outbox/receipts, GitHub drift, cleanup sagas, crash recovery, concurrency, SQL contracts, and factory composition. The checked-in prototype is treated as disposable evidence, not as the final deliverable.",
+  "strengths": [
+    "The plan clearly separates protected Git desired state, PostgreSQL runtime authority, and GitHub projection state. It correctly rejects labels, assignees, comments, and model output as authorization.",
+    "It identifies the right core mechanisms: exact-digest readiness, aggregate CAS, fenced leases, short-lived capabilities, transactional inbox/outbox, UNKNOWN effect reconciliation, read-after-write drift control, independent exact-SHA verification, and retryable cleanup.",
+    "The staged rollout begins read-only, keeps human control during early stages, defines freeze conditions, and avoids claiming that proposed thresholds prove universal safety or productivity.",
+    "The operations material includes practical stale-worker, unknown-effect, restore, permission-drift, and cleanup runbooks and calls for continuous reconciliation plus scheduled full inventory."
+  ],
+  "findings": [
+    {
+      "id": "ORCH-PLAN-001",
+      "severity": "high",
+      "title": "The plan has multiple incompatible canonical lifecycle graphs",
+      "requirement": "One protected, versioned lifecycle must define every legal state and transition used by reports, controller contracts, factories, runbooks, and proof tests.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md:63",
+          "docs/architecture.md:105-152",
+          ".agent-os/lifecycle.yaml:1-103",
+          "src/agent_os/lifecycle.py:3-19"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare the report graph (`CLARIFICATION_REQUIRED`, `EXECUTING`, `PROPOSED`, `REVIEW_REQUIRED`, `MERGE_READY`, `RELEASE_READY`, `CANARY`, `DEPLOYED`, `CLOSED`) with architecture/config (`NEEDS_CLARIFICATION`, `IMPLEMENTING`, `REVIEW`, `MERGE_QUEUED`, `DEPLOYING`, `OBSERVING`, `DONE`). Then compare protected YAML with Python: YAML permits TRIAGED->NEEDS_CLARIFICATION, MERGED->OBSERVING/DONE, and ROLLED_BACK->DONE, while Python rejects each.",
+      "impact": "The final plan is not decision-grade on legal entry/exit/recovery behavior. Different implementers can build incompatible ledgers, projections, migrations, and tests.",
+      "recommendation": "Choose one canonical state vocabulary and transition table in the plan. Generate docs, schemas, code, and factory adapters from it. If domain factories need different states, define an explicit mapping/product-state relation rather than presenting each as canonical.",
+      "verification": "Add a repository-wide graph-equivalence test and a generated transition matrix covering every legal/illegal edge, exception state, cancellation, stale attempt, cleanup, and terminal outcome.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-002",
+      "severity": "high",
+      "title": "Cancellation is terminal before the required quiescence saga is represented",
+      "requirement": "Cancellation must distinguish request/authority revocation from confirmed worker quiescence, effect reconciliation, and cleanup completion; terminal CANCELLED must mean the saga is complete.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md:194-200",
+          ".agent-os/lifecycle.yaml:27-103",
+          "docs/end-to-end.md:118-125,178",
+          "docs/operations.md:127-134"
+        ],
+        "urls": []
+      },
+      "reproduction": "The narrative requires incrementing cancellation epoch, revoking credentials, fencing, waiting, destroying the sandbox, reconciling effects, and only then marking cancellation complete. The protected graph instead allows active states to transition directly to terminal CANCELLED and defines no CANCELLING/QUIESCING/CLEANING state or completion predicate.",
+      "impact": "An implementation can truthfully follow the graph yet report terminal cancellation while a worker, token, unknown effect, or owned resource remains active. Retry/requeue can then overlap the old attempt.",
+      "recommendation": "Add explicit cancellation-requested and cleanup/quiescence state (or a mandatory orthogonal saga aggregate) with predicates for epoch bump, capability revocation, worker termination/timeout, effect disposition, and required cleanup receipts. Define escalation for unconfirmed quiescence without calling it complete.",
+      "verification": "Model-check and fault-test cancellation at every lifecycle/effect point, including lost heartbeat, send timeout, nonresponsive worker, cleanup failure, controller crash, and concurrent requeue. Assert no terminal state or new attempt until the required predicates hold.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-003",
+      "severity": "high",
+      "title": "The factory DSL cannot encode the typed orchestration semantics the plan says it compiles",
+      "requirement": "Factory-as-code must express a typed workflow DAG with data dependencies, deterministic guards, effect identity, lease/heartbeat/retry policy, cancellation/compensation, cleanup predicates, and versioned schemas.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md:227-239",
+          "docs/operations.md:229-240",
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/factories/build.yaml",
+          ".agent-os/factories/composition.yaml",
+          "src/agent_os/models.py:141-148"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect factory.schema.json: `tools` and `budgets` are unconstrained objects; guards, gates, escalation, and cleanup are free-form strings; transitions have no node/artifact dependency IDs, input/output schemas, effect keys, timeout/heartbeat policy, compensation edges, or terminal cleanup predicate. The shipped Pydantic FactoryDefinition is a different miniature shape, and `uv run agent-os demo --factory .agent-os/factories/build.yaml` fails validation.",
+      "impact": "The advertised compiler cannot deterministically validate or enforce the most important reliability properties. Free text can be interpreted differently across runners, and composition cannot prove bounded authority or cleanup ordering.",
+      "recommendation": "Define a normative, versioned IR and JSON Schema with stable node/edge IDs, typed inputs/outputs, deterministic guard identifiers and parameters, authority/effect scopes, lease renewal bounds, retry classes/backoff, compensation and cleanup nodes, and terminal predicates. Specify compilation and compatibility rules; treat prose only as documentation.",
+      "verification": "Build conformance fixtures for every built-in and composed factory. Reject cycles, missing producers, ambiguous guards, non-idempotent retry without reconciliation, capability widening, unbounded lease/retry, unreachable cleanup, and schema/model drift.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-004",
+      "severity": "high",
+      "title": "Heartbeat and lease-renewal semantics are underspecified at race boundaries",
+      "requirement": "The lease protocol must define authenticated renewal CAS, database clock use, renewal deadline, maximum lifetime, holder/fence/cancellation checks, reclaim sequencing, and behavior for in-flight calls at expiry.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md:100",
+          "docs/end-to-end.md:61-70,80-82",
+          "docs/operations.md:65,74,127-134",
+          "research/repository-agent-operating-system/report.md:125-137"
+        ],
+        "urls": []
+      },
+      "reproduction": "The plan says heartbeats are explicit and authenticated and that a sweeper runs within TTL, but gives no renewal transaction, max extension, authoritative clock, late-heartbeat rule, reclaim grace, or ordering between expiry/release, epoch bump, new fence, and token revocation. Consider a heartbeat racing the sweeper at expiry while an old remote call is in flight: both renewal and reassignment behaviors remain compatible with the prose.",
+      "impact": "Independent implementations can accept a late renewal, prolong a wedged lease indefinitely, or issue a new lease while old authority remains usable. This is the exact stale-worker hazard fencing is meant to close.",
+      "recommendation": "Add a protocol table/pseudocode using database time and compare-and-set on lease ID, holder, fence, cancellation epoch, unreleased state, and renewal deadline. Bound total lifetime, define grace only for cleanup (not writes), and require effect gateways to recheck current authority immediately before send.",
+      "verification": "Use deterministic-clock and two-session tests for heartbeat-before/at/after expiry, sweeper races, controller failover, delayed packets, cancellation, fence replacement, and in-flight effect completion.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-005",
+      "severity": "high",
+      "title": "External-effect idempotency assumes receiver behavior GitHub does not universally provide",
+      "requirement": "Each GitHub mutation must have an operation-specific at-least-once algorithm that prevents or detects duplicate effects even when the remote API has no caller-supplied idempotency key.",
+      "evidence": {
+        "files": [
+          "docs/database.md:63-69",
+          "docs/end-to-end.md:7,80",
+          "docs/architecture.md:102",
+          "docs/operations.md:31-42,136-145"
+        ],
+        "urls": [
+          "https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api"
+        ]
+      },
+      "reproduction": "The database contract says remote receivers must deduplicate an idempotency_key, but the plan targets GitHub APIs where many creates/updates do not accept a universal caller idempotency key. For a timeout after creating a comment, check run, Project item, deployment, or branch, \u201cquery remote state\u201d is not enough unless the plan defines a unique marker, authoritative lookup, ambiguity rule, and receipt match for that operation. Those per-effect contracts are absent.",
+      "impact": "A crash or lost response can create duplicate comments/items/deployments or cause the reconciler to attach the wrong remote object and suppress a required retry.",
+      "recommendation": "Create an effect catalog. For every mutation specify natural/embedded idempotency identity, lookup query and pagination, expected-before fingerprint/version, success receipt, ambiguity behavior, safe retry/compensation, and whether automatic retry is forbidden. Never claim receiver dedup unless the endpoint guarantees it.",
+      "verification": "Contract-test every catalog entry with response loss before send, after send, and after remote commit; duplicate lookalikes; pagination; concurrent human changes; rate limits; and stale observations. Require one logical result or a quarantined UNKNOWN, never blind retry.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-006",
+      "severity": "high",
+      "title": "Stage 2 enables write authority before a defined concurrency and crash-safety proof gate",
+      "requirement": "Before any agent can open a draft PR or mutate GitHub, deterministic safety tests must prove CAS transitions, current fencing, cancellation quiescence, outbox recovery, receipt binding, dependency admission, and cleanup restart behavior.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md:241-265",
+          "research/repository-agent-operating-system/review-protocol.md:43-54",
+          "tests-sql/001_integrity.sql",
+          "tests-sql/002_leases.sql",
+          "tests-sql/003_effects_and_roles.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Stage 2 enables atomic claim, worker credentials, draft PR writes, and cleanup, but its exit evidence measures zero accepted stale writes only after at least 50 attempts/30 days. It does not name pre-enable fault/concurrency suites. The prototype SQL tests only reject a never-issued token (`tok+1`), do not test a formerly valid released/expired token, and omit races, cancellation, crash recovery, dependencies, heartbeats, and cleanup.",
+      "impact": "A small happy-path pilot can satisfy the written entry conditions while severe race paths remain untested. \u201cZero observed stale writes\u201d is a lagging metric, not evidence that stale writes are rejected.",
+      "recommendation": "Insert a mandatory pre-Stage-2 safety gate with a published invariant-to-test matrix, PostgreSQL two-session tests, deterministic clock tests, process-kill fault injection, adapter response-loss tests, replay/restore tests, and independent review. Keep all writers disabled until it passes.",
+      "verification": "Require CI artifacts showing every invariant and fault point passed on the target PostgreSQL/controller/adapter version. Seed mutations that remove each guard and prove the corresponding test fails.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-007",
+      "severity": "high",
+      "title": "Dependency semantics are too vague for deterministic admission and cancellation",
+      "requirement": "The plan must define typed dependency edges, success/cancel/rollback semantics, versioned observations, cycle handling, cascade policy, and the exact atomic predicate used at admission.",
+      "evidence": {
+        "files": [
+          "docs/end-to-end.md:30-45,61-66",
+          "docs/architecture.md:152,159",
+          "research/repository-agent-operating-system/report.md:122-137",
+          ".agent-os/schemas/ticket.schema.json",
+          "src/agent_os/models.py:36-47"
+        ],
+        "urls": []
+      },
+      "reproduction": "The plan alternates between \u201chard dependencies satisfied or explicitly scheduled\u201d and \u201cdependency terminal success\u201d without defining whether DONE, MERGED, ROLLED_BACK, CANCELLED, waived, cross-repository, or merely scheduled dependencies qualify. Ticket dependencies are untyped strings, and no policy defines version/freshness, failure propagation, cycle repair, or cancellation cascade.",
+      "impact": "Two correct-looking controllers can admit different work, deadlock a DAG, or start dependents after a failed/rolled-back prerequisite. A dependency change racing admission has no specified result.",
+      "recommendation": "Specify an edge schema (type, required outcome, source/target scope and version, owner, waiver authority), DAG validation, cross-repository rules, failure/cancellation propagation, and the locked admission query. Separate ordering-only edges from hard success prerequisites.",
+      "verification": "Add model-based tests for cycles, diamonds, mixed outcomes, waiver expiry, cross-repository edges, dependency change during admission, upstream rollback after admission, and cancellation/requeue cascades.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-008",
+      "severity": "medium",
+      "title": "Admission ordering and resource-conflict policy has no normative contract",
+      "requirement": "Multiple eligible items must be ordered and isolated by an explicit, starvation-resistant, reproducible policy covering priority, aging, tenant/repository quotas, worker compatibility, and overlapping resource sets.",
+      "evidence": {
+        "files": [
+          "docs/end-to-end.md:64-65",
+          "docs/operations.md:94-101",
+          "docs/architecture.md:244",
+          ".agent-os/factories/build.yaml:29-36",
+          ".agent-os/schemas/ticket.schema.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "The end-to-end document names priority, aging, quotas, and nonoverlapping write/resource sets but gives no fields, tie breaker, aging formula, conflict-key normalization, fairness guarantee, or lock acquisition order. The ticket/factory contracts do not encode them. Construct two equal-priority items with overlapping glob/path/resource declarations: the plan does not determine which wins or how starvation is prevented.",
+      "impact": "Implementations can be nondeterministic, deadlock on multi-resource claims, starve low-priority repositories, or concurrently mutate logically shared resources missed by path-only checks.",
+      "recommendation": "Define the queue tuple and stable tie breaker, bounded aging/fairness, per-tenant/repository quotas, canonical resource keys/glob overlap semantics, lock ordering, and conservative ambiguity behavior in the normative runtime contract.",
+      "verification": "Property-test deterministic ordering, starvation bounds, quota isolation, overlapping globs/renames/generated files, multi-resource deadlock avoidance, and two-dispatcher claims.",
+      "confidence": "high"
+    },
+    {
+      "id": "ORCH-PLAN-009",
+      "severity": "medium",
+      "title": "GitHub reconciliation lacks a normative apply-time optimistic-concurrency contract",
+      "requirement": "Every reconciliation mutation must remain bound to the exact desired revision and observed remote fingerprint/version and must abort or replan if either changes before apply.",
+      "evidence": {
+        "files": [
+          "docs/operations.md:23-42",
+          "docs/architecture.md:102",
+          "src/agent_os/models.py:91-106",
+          "src/agent_os/reconciliation.py:4-29",
+          ".agent-os/schemas/factory.schema.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "The prose dry-run includes desired SHA and before fingerprints, but no normative schema is provided for them. The only executable ReconciliationPlan contract contains repository, operations, and preserved_unknown; it has no observation ID/version, desired SHA, plan hash, risk class, dependency edge, or expiry. The port accepts apply_reviewed_plan(plan) with no expected revision.",
+      "impact": "A human edit, Git update, or parallel reconcile between observe and apply can be overwritten by a plan that was safe only for an older snapshot.",
+      "recommendation": "Promote the dry-run fields into a versioned apply contract. Require compare-before-write for each operation, plan expiry, desired-config revalidation, dependency ordering, and re-observation on mismatch; classify conflicts instead of updating blindly.",
+      "verification": "Adapter tests must change desired Git and every managed remote resource between plan/apply and prove no stale mutation occurs; include pagination, duplicate logical keys, partial saga completion, and read-after-write mismatch.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No controller or target GitHub tenant was deployed, so endpoint-specific effect behavior, rate limits, permission/ruleset support, and race handling remain unverified. The plan appropriately calls for a target-tenant probe.",
+    "The prototype is explicitly disposable. Its contract mismatches and weak SQL tests are cited only where they show that the plan still lacks a normative contract or proof gate; they are not treated as a requirement to productionize this prototype.",
+    "Python tests passed (22 tests). SQL tests could not be executed because DATABASE_URL was not configured, so SQL examples require confirmation in PostgreSQL 16 during triage.",
+    "Recurring citations across research result files were not treated as independent corroboration. Findings are based mainly on inconsistencies or omissions in the final report, operating docs, protected contracts, and proof plan."
+  ]
+}

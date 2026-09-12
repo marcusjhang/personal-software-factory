@@ -1,0 +1,821 @@
+{
+  "scope": {
+    "definition": "Autonomous coding agent platforms are products or deployable agents that accept a repository-level goal, inspect code, execute tools in a development environment, edit multiple files, run verification, and hand back a branch or pull request. This item covers the issue/prompt-to-reviewed-PR stage, not autonomous product strategy, unrestricted production deployment, generic autocomplete, dependency bots, or a full survey of open-source orchestration frameworks [S01,S09,S13,S17].",
+    "systems_in_depth": [
+      "Cognition Devin (hosted cloud plus terminal/desktop surfaces and API)",
+      "OpenAI Codex cloud plus local CLI/IDE surfaces",
+      "GitHub Copilot cloud agent (formerly coding agent), including GitHub-hosted Claude and Codex partner agents",
+      "Anthropic Claude Code local/web plus GitHub Actions"
+    ],
+    "comparators": [
+      "Cursor Cloud Agents",
+      "Google Jules",
+      "OpenHands as a self-hostable/open-source comparator"
+    ],
+    "time_boundary": "Developments from 2019 through 2026-09-13, with SWE-bench (2023/2024) as a benchmark foundation. Product state is the live documentation visible on 2026-09-13; undated docs are not treated as historical proof."
+  },
+  "current_state": [
+    {
+      "status": "verified product capability",
+      "claim": "All four leading families can perform the bounded loop repo checkout/index -> plan -> edit -> shell/test -> diff/branch -> human review, asynchronously in cloud or interactively on a developer machine [S01,S09,S10,S13,S17,S19]."
+    },
+    {
+      "status": "verified product capability",
+      "claim": "Triggering has moved beyond chat: GitHub issues/PR comments and agent panels, Slack/Linear/Jira-style integrations, APIs, schedules and repository events can start work; Devin v3 exposes RBAC service users and session APIs, Claude exposes Actions/Agent SDK patterns, and GitHub cloud-agent automations can react to events [S03,S08,S09,S13,S16,S19,S23]."
+    },
+    {
+      "status": "verified safety boundary",
+      "claim": "Hosted agents normally isolate work in ephemeral containers/VMs and hand off a branch or draft PR. GitHub explicitly prevents its cloud agent from approving/merging and gates workflow execution; Codex blocks agent internet by default; Cursor describes an isolated-VM-to-draft-PR lifecycle [S10,S11,S14,S24]."
+    },
+    {
+      "status": "assessment",
+      "claim": "The solved unit is a well-scoped, testable engineering task, not unattended ownership of an evolving product. Vendors themselves recommend explicit criteria, easy verification, decomposition, and short/small tasks; external tests show large outcome variance [S01,S05,S06,S28]."
+    },
+    {
+      "status": "emerging",
+      "claim": "Automated issue triage, confidence thresholds, fleets/parallel sessions, automatic review fixes and cross-repository work exist, but important pieces remain preview, vendor-specific, or only workflow conveniences rather than enforceable security boundaries [S08,S15,S16,S23]."
+    }
+  ],
+  "representative_systems": [
+    {
+      "system": "Devin",
+      "status_as_of": "GA since 2024-12-10; current docs expose cloud, Slack/Teams, Linear/Jira, CLI/desktop/IDE handoff, GitHub integration, v3 organization/enterprise APIs and analytics [S01,S03,S05].",
+      "best_fit": "parallel, clear and mechanically verifiable backlog work; migrations, security fixes, tests and small tickets [S01,S06].",
+      "material_limit": "vendor describes senior codebase understanding but junior execution; requires decomposition/coaching and review [S05,S06]."
+    },
+    {
+      "system": "OpenAI Codex cloud",
+      "status_as_of": "available cloud service with GitHub and GitLab (Beta) repository connections and GitHub/GitLab/Linear/Slack starting points; local CLI/IDE also available [S09,S10].",
+      "best_fit": "parallel isolated tasks in reproducible environments, with AGENTS.md and post-run diff/follow-up [S09,S10].",
+      "material_limit": "useful setup often needs custom scripts; agent network is off by default and enabling it adds injection/exfiltration/dependency risks [S10,S11]."
+    },
+    {
+      "system": "GitHub Copilot cloud agent",
+      "status_as_of": "native GitHub asynchronous agent; can research, plan, change a branch, optionally open a PR, and run scheduled/event automations. Claude and Codex partner agents were still public preview in GitHub documentation [S13,S15,S16].",
+      "best_fit": "organizations whose issues, rulesets, Actions, security scanning, review and audit already live on GitHub [S13,S14].",
+      "material_limit": "consumes Actions plus AI credits; deep research/plan-first behavior is not uniform across every integration, and partner/automation features may be preview [S13,S15,S16]."
+    },
+    {
+      "system": "Claude Code",
+      "status_as_of": "agentic terminal, IDE, desktop, browser/web and GitHub Action; fine-grained permissions, sandboxing, hooks, SDK and OTel [S17-S21].",
+      "best_fit": "developer-driven local work or custom CI/issue-to-PR pipelines needing programmable hooks and provider/deployment flexibility [S19-S21].",
+      "material_limit": "local mode runs near valuable credentials and files unless policy/sandbox rules are engineered; automation cost varies strongly with model, context and concurrency [S18,S20,S22]."
+    },
+    {
+      "system": "Cursor Cloud Agents",
+      "status_as_of": "hosted isolated VMs, parallel and multi-repo environments, GitHub/GitLab/Bitbucket/Azure DevOps, Slack/Linear/API and draft-PR handoff [S23,S24].",
+      "best_fit": "teams already using Cursor that need background, browser-capable or multi-repo work.",
+      "material_limit": "broad VM/MCP/network capability expands credential and exfiltration surface; human draft-PR review remains the principal gate [S23,S24]."
+    },
+    {
+      "system": "Google Jules",
+      "status_as_of": "asynchronous GitHub coding agent, out of public beta since 2025-08-06, although its live getting-started page still calls it experimental [S25,S26].",
+      "best_fit": "GitHub-centric users wanting a simple hosted alternative.",
+      "material_limit": "the public-beta/experimental wording conflict signals evolving maturity and documentation semantics [S25,S26]."
+    },
+    {
+      "system": "OpenHands",
+      "status_as_of": "active open-source repository with local/self-hostable and hosted routes [S27].",
+      "best_fit": "organizations needing inspectable/extensible orchestration or self-hosting.",
+      "material_limit": "the buyer owns sandbox hardening, model/provider selection, reliability engineering, upgrades and operations [S27]."
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "Devin officially says it writes, runs and tests code, supports parallel sessions and multiple integrations, but advises clear completion criteria, easy verification and scoped work [S01,S05].",
+      "classification": "vendor documentation and guidance, not independent success proof"
+    },
+    {
+      "claim": "Devin v3 separates organization and enterprise scopes, supports RBAC service users, audit/session attribution, API-triggered sessions and usage controls [S03].",
+      "classification": "verified interface contract"
+    },
+    {
+      "claim": "Codex cloud provisions a container, checks out a selected revision, runs setup, applies network policy, loops over terminal/edit/check operations, then presents answer and diff [S10].",
+      "classification": "verified documented mechanics"
+    },
+    {
+      "claim": "Codex removes configured secrets after setup before the agent phase and blocks agent internet by default; optional allowlists and HTTP-method limits exist [S10,S11].",
+      "classification": "verified documented safeguard; not proof against every channel"
+    },
+    {
+      "claim": "GitHub cloud agent uses an Actions-powered ephemeral environment, one working branch and PR workflow; only write users can trigger, it cannot approve/merge, and Actions require approval by default [S13,S14].",
+      "classification": "verified documented authorization model"
+    },
+    {
+      "claim": "GitHub scans agent output with CodeQL, secret scanning and dependency advisory checks and exposes signed commits, session links and audit logs [S14,S15].",
+      "classification": "verified documented controls; scanners have coverage limits"
+    },
+    {
+      "claim": "Claude Code manual mode starts read-only and asks on edits/commands, while sandbox policy enforces filesystem/network boundaries; GitHub Action turns @claude or events into repository work [S18-S20].",
+      "classification": "verified documented controls and integration"
+    },
+    {
+      "claim": "GitHub issue automation can record rationale and high/medium/low confidence and hold actions below a configured threshold, but GitHub explicitly says this approval UI is not a security boundary [S16].",
+      "classification": "verified preview behavior and explicit limitation"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "result": "Answer.AI used Devin for 20 heterogeneous tasks in Dec 2024/Jan 2025: 3 succeeded, 14 failed and 3 were inconclusive. Reviewers found success hard to predict and preferred more developer-steered tools [S28].",
+      "caveat": "Small purposive sample, old Devin generation, unusual nbdev/FastHTML-heavy tasks; strong qualitative failure evidence, not a current population success rate."
+    },
+    {
+      "result": "METR randomized 246 real tasks from 16 experienced maintainers; early-2025 AI (mainly Cursor with Claude 3.5/3.7) increased completion time 19%, even though developers estimated a 20% speedup [S29].",
+      "caveat": "Measures synchronous experienced-maintainer work on mature repositories, not primarily unattended cloud agents or 2026 systems."
+    },
+    {
+      "result": "METR’s 2026 update had raw point estimates of 18% speedup for returning developers and 4% for new recruits, but both confidence intervals crossed zero; opt-out, task selection, lower compensation and concurrent-agent timing made the authors call the signal unreliable [S30].",
+      "caveat": "Useful direction/conflict, not a valid current productivity estimate."
+    },
+    {
+      "result": "SWE-Lancer used over 1,400 paid freelance tasks. On its Diamond split Claude 3.5 Sonnet resolved 26.2% of independent coding tasks and 44.9% of management choices; authors said most solutions remained incorrect [S33].",
+      "caveat": "2025 models/scaffolds and benchmark grading; not a production platform comparison."
+    },
+    {
+      "result": "SWE-rebench built 21,000+ continuously collected tasks and reported that some model scores on static SWE-bench Verified may be inflated by contamination [S32].",
+      "caveat": "Python-focused and performance depends on agent harness, budget and task vintage."
+    },
+    {
+      "result": "AgentDojo’s 97 tasks/629 security cases show tool-using agents can fail without attacks and existing attacks/defenses do not secure all properties [S34].",
+      "caveat": "General tool-agent benchmark, not specific coding-platform red-team certification."
+    }
+  ],
+  "metrics": {
+    "vendor_reported": [
+      {
+        "metric": "Devin: 67% of PRs merged versus 34% the previous year; 4x faster problem solving and 2x resource efficiency [S06].",
+        "interpretation": "Vendor aggregate; denominator, task routing, review policy and counterfactual human cost are not fully specified. Merge rate is selection- and workflow-dependent."
+      },
+      {
+        "metric": "Cognition reports hundreds of thousands of merged Devin PRs and 659 Devin PRs merged internally in one week [S06,S08].",
+        "interpretation": "Evidence of scale and process integration, not correctness, net productivity or independent ROI."
+      },
+      {
+        "metric": "Cognition productivity estimator reports log-scale correlation r_log=0.74 against human estimates [S07].",
+        "interpretation": "Promising aggregation tool but human-time-equivalent is not business value and individual predictions are imperfect."
+      },
+      {
+        "metric": "Anthropic documents average enterprise Claude Code cost around $13 per active developer-day and $150–250/month, with 90% below $30 per active day [S22].",
+        "interpretation": "Vendor observational billing guidance; depends on models, context and automation."
+      }
+    ],
+    "independent": [
+      {
+        "metric": "Answer.AI Devin sample: 15% success, 70% failure, 15% inconclusive (3/20, 14/20, 3/20) [S28].",
+        "interpretation": "Old small sample; do not extrapolate to 2026."
+      },
+      {
+        "metric": "METR early-2025 RCT: 19% slower; developers perceived 20% faster; n=16 developers, 246 tasks [S29].",
+        "interpretation": "Causal for that narrow setting, not all agentic workflows."
+      },
+      {
+        "metric": "METR later raw estimates: 18% speedup returning and 4% new developers, with CIs -38% to +9% and -15% to +9%; authors judge unreliable [S30].",
+        "interpretation": "Shows improvement may have occurred but cannot quantify it."
+      },
+      {
+        "metric": "SWE-bench original: 2,294 issues/12 Python repos; Claude 2 resolved 1.96% [S31]. SWE-Lancer Diamond IC best reported 26.2% [S33].",
+        "interpretation": "Capability rose sharply by 2025, yet majority failure on a more economic task distribution remained."
+      }
+    ],
+    "economic_rule": "Measure accepted engineering hours, review/rework, CI minutes, inference/credits, incidents and lead time. Never use token volume, lines changed, PR count or vendor merge rate alone [S07,S13,S22]."
+  },
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "candidate",
+      "trigger": "Issue created/labelled, scheduled maintenance event, failing CI/security alert, or approved human/API request.",
+      "mechanics": "A deterministic router checks repository allowlist, requester trust, task class, risk tier, estimated budget and whether acceptance tests exist. Untrusted public issue text is data, never authority [S11,S14,S16,S34].",
+      "output": "task envelope with source URL, target SHA, owner, risk tier, budget and deadline."
+    },
+    {
+      "step": 2,
+      "state": "needs-spec or ready",
+      "trigger": "candidate accepted",
+      "mechanics": "Generate a bounded plan and ask for clarification if behavior, acceptance criteria, interfaces or migrations are ambiguous. Require reproduction/test command, files/services in scope and explicit non-goals. Split work longer than a few hours or with multiple independent outcomes [S01,S05,S06].",
+      "human_gate": "Product/security owner approves high-impact plan; low-risk templates may auto-pass.",
+      "output": "versioned specification and verification contract."
+    },
+    {
+      "step": 3,
+      "state": "provisioning",
+      "trigger": "approved specification",
+      "mechanics": "Create fresh container/VM/worktree at immutable SHA; install only locked dependencies in setup; inject short-lived scoped credentials; remove setup secrets before agent loop where supported; default-deny network then allowlist domains and safe HTTP methods [S10,S11,S14,S20,S24].",
+      "output": "environment ID, policy digest, source/dependency attestations and cost ceiling."
+    },
+    {
+      "step": 4,
+      "state": "executing",
+      "trigger": "environment healthy",
+      "mechanics": "Agent reads repository instructions (AGENTS.md/CLAUDE.md or equivalent), reproduces issue, edits on a dedicated branch, runs targeted tests/linters/type checks/security checks, and records commands/diffs. Hooks/policy deny writes outside workspace, secret access, production mutation, arbitrary egress and privilege escalation [S10,S18-S21].",
+      "output": "signed/attributed commits, logs, evidence bundle and residual-risk notes."
+    },
+    {
+      "step": 5,
+      "state": "self-check or failed",
+      "trigger": "agent claims completion or reaches budget",
+      "mechanics": "Run deterministic checks outside the agent’s control, compare against acceptance tests, scan secrets/dependencies/SAST, inspect changed scope, detect flaky tests and cap repair loops. On repeated failure, stop and summarize rather than silently expand scope [S14,S15,S28].",
+      "output": "pass/fail matrix; failure returns to triage with artifacts."
+    },
+    {
+      "step": 6,
+      "state": "draft-review",
+      "trigger": "all mandatory machine gates pass",
+      "mechanics": "Open a draft PR with original request, plan, change summary, test evidence, agent/model/version, environment/policy, cost, session log and rollback instructions. Independent reviewer checks design, security, behavior and generated tests; requester cannot self-approve where rules support separation [S13-S16,S24].",
+      "output": "approved, changes-requested or rejected PR."
+    },
+    {
+      "step": 7,
+      "state": "mergeable",
+      "trigger": "human approval plus protected checks",
+      "mechanics": "Rebase and rerun trusted CI with deployment credentials still unavailable to the agent. Merge only via protected branch/ruleset; deploy through normal progressive delivery, never the agent’s shell [S14].",
+      "output": "merge commit, build provenance and deployment candidate."
+    },
+    {
+      "step": 8,
+      "state": "observed/closed",
+      "trigger": "deployment pipeline",
+      "mechanics": "Canary, observe SLO/error/security signals and auto-rollback on deterministic thresholds. Attribute incidents to agent PRs. Feed accepted/rejected outcomes, review time, rework, escaped defects and cost into per-task-class evaluation; update prompts/policies only by reviewed change [S13,S21].",
+      "output": "closed task, rollback or human incident; evaluation record."
+    }
+  ],
+  "integration_points": {
+    "source_control": "GitHub is common to all; Codex also documents GitLab Beta, Cursor documents GitLab/Bitbucket/Azure DevOps; agents use provider apps, branches, PR/MR comments, checks and rulesets [S09,S13,S15,S19,S23,S24].",
+    "work_intake": "Issues/PR comments and agent panels; Slack, Teams, Linear and Jira depending on product; Devin v3 REST can create/poll/message/terminate sessions, while Claude Actions/SDK and Cursor API support event-driven custom flows [S03,S08,S09,S13,S19,S23].",
+    "environment": "Vendor containers/VMs, GitHub Actions ephemeral jobs, or local terminal/worktree. Pin runtime and lockfiles; put setup commands in repository-owned configuration such as AGENTS.md and scripts [S10,S13,S20,S23].",
+    "verification": "Existing unit/integration/e2e tests, formatter/linter/type checker, protected CI, CodeQL, secret scan and dependency advisory validation. Keep validation credentials separate from agent credentials [S10,S14,S15].",
+    "tool_extensions": "MCP, hooks, CLI/SDK and external APIs widen access to databases, browsers and services. Each tool needs an explicit schema, allowlist, read/write classification, audit record and rate limit [S19-S21,S23,S34].",
+    "observability_and_finops": "Session logs, signed/attributed commits, GitHub audit/PR lifecycle APIs, Devin enterprise analytics and Claude OTel usage/cost/tool telemetry can feed a control plane [S03,S13,S14,S21].",
+    "deployment": "Treat PR merge as final agent boundary. Connect only to ordinary CI/CD with protected environments, approvals, provenance, canary and rollback; no cited platform proves safe unrestricted production operation."
+  },
+  "human_gates": [
+    {
+      "gate": "intake/specification",
+      "required_when": "user-facing behavior, vague requirements, architecture/data model, legal/licensing, destructive migration or high-cost task",
+      "why": "Agents cannot reliably infer product intent or missing constraints; ambiguity drives plausible but wrong work [S01,S05,S28]."
+    },
+    {
+      "gate": "permission escalation",
+      "required_when": "new network domain, dependency, secret, MCP tool, write outside branch/worktree, cloud or production action",
+      "why": "Prompt injection can convert external data into tool actions; UI confidence is not authorization [S11,S16,S18,S20,S34]."
+    },
+    {
+      "gate": "PR review",
+      "required_when": "every code-producing task; require domain/security specialist for high-risk changes",
+      "why": "GitHub explicitly makes human review mandatory for its agent, and benchmark/field evidence shows substantial incorrect output [S14,S28,S33]."
+    },
+    {
+      "gate": "trusted CI execution",
+      "required_when": "agent-authored workflow changes or code from untrusted trigger",
+      "why": "workflow code can steal credentials; GitHub therefore defaults to approve-and-run [S14]."
+    },
+    {
+      "gate": "merge/deploy",
+      "required_when": "always for production until task-class evidence supports narrow auto-merge; always manual for auth, payments, security policy, infra, migrations and safety-critical code",
+      "why": "passing agent-written tests is not independent evidence and no platform evidence establishes full-project autonomy."
+    },
+    {
+      "gate": "escalation/abort",
+      "required_when": "budget/time cap, repeated same failure, expanding diff, flaky/inconclusive tests, unclear root cause, secret/injection alert or low confidence",
+      "why": "prevents Devin-style days-long pursuit of impossible paths and controls economic loss [S28]."
+    }
+  ],
+  "failure_modes": {
+    "technical": [
+      "Incorrect but plausible patch; incomplete cross-cutting change; tests overfit to implementation; deleted/disabled tests; environment differs from CI/production; stale branch/merge conflict; non-deterministic tool or model behavior; context loss on large repos; failure to stop or recognize blocker [S06,S28,S33]."
+    ],
+    "security": [
+      "Direct/indirect prompt injection in issues, docs, web pages or dependencies; secret/code exfiltration; malicious dependency/license ingress; compromised MCP/tool; workflow-file credential theft; excessive repository/cloud permission; unsafe local command; cross-tenant persistence [S11,S14,S18,S20,S24,S34]."
+    ],
+    "product_quality": [
+      "Solves stated issue but violates unstated product intent, accessibility, performance, compatibility, operability or maintainability; generates code soup and review burden [S28]."
+    ],
+    "organizational": [
+      "Review becomes bottleneck; staff rubber-stamp large diffs; ownership/accountability unclear; agent-generated issue/PR storms; skills atrophy; vendor/model changes invalidate rules and evals [S08,S13]."
+    ],
+    "measurement": [
+      "Merge rate, PR count, LOC and tokens reward activity and hide selection, review/rework and escaped defects; static benchmark contamination and scaffold/budget differences mislead comparisons [S07,S31,S32]."
+    ],
+    "economic": [
+      "Parallel retries and long context consume credits/Actions/compute; setup and review time exceed saved implementation time; lock-in to proprietary environments/instructions; unpredictable rate limits and model retirement [S12,S15,S22,S28]."
+    ],
+    "availability_and_governance": [
+      "Hosted outage/queue, preview feature churn, model behavior drift, residency/retention mismatch and insufficient audit export; live Devin security docs also state default training may apply unless paid users opt out [S02,S15,S16]."
+    ]
+  },
+  "controls_and_mitigations": [
+    "Use provider apps/service users, repository allowlists and per-task short-lived identities. Grant one-branch push only; deny merge, deployment, admin, billing and production-data rights [S03,S14,S24].",
+    "Run in disposable containers/VMs/worktrees. Default-deny filesystem beyond workspace and network; separate setup from agent; use lockfiles, internal mirrors, domain/method allowlists, egress logs and secret removal/rotation [S10,S11,S20,S24].",
+    "Treat repository/issues/web/tool results as untrusted input. Sanitize hidden content, but assume filters are incomplete; enforce capabilities outside the model with policy-as-code and tool-level authorization [S11,S14,S16,S34].",
+    "Keep acceptance tests and final CI outside the writable agent context. Add mutation/negative tests for critical logic; block test deletion, suspicious workflow changes, new binaries, large scope growth, secrets and high/critical dependency findings [S14,S15].",
+    "Protect branches, require independent CODEOWNERS review, signed/attributed commits and a second approval for unattributed agent PRs; do not let requester/agent satisfy separation of duties [S14].",
+    "Set wall-clock, tool-call, token/credit, diff-size and retry budgets. Circuit-break repeated errors and queue pressure. Return a structured failure with attempted evidence and remaining unknowns [S03,S04,S12,S22,S28].",
+    "Log prompt/spec, source SHA, model/agent version, permissions, network/tool calls, commands, diffs, checks, costs and reviewers. Export OTel/audit metrics and retain per policy [S03,S14,S21].",
+    "Pilot per task class against a human/control baseline. Track accepted-without-major-rework rate, lead time, reviewer minutes, escaped defects, rollback/security events and total cost. Requalify on model/platform/config changes [S07,S29,S30,S32].",
+    "Use canary/progressive delivery and automatic rollback based on deterministic SLOs. Agents may propose remediation, but production write authority remains in protected deployment automation."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful and production-usable as a supervised issue-to-PR subsystem; emerging for event-driven triage/fleets; speculative and unsafe as an end-to-end self-managing software organization.",
+    "production_ready": [
+      "Low/medium-risk, well-specified, testable backlog tasks in repos with reproducible environments, mature CI and review [S01,S05,S09,S13].",
+      "Developer-steered local agents with explicit permissions/sandbox and hosted agents that produce draft PRs [S14,S18,S20,S24].",
+      "Parallel migrations, routine tests/docs and scanner-generated remediations after organization-specific pilots [S06]."
+    ],
+    "emerging": [
+      "Unattended scheduled/event agent runs, automated confidence-gated triage and third-party agents inside GitHub; several cited surfaces remain public preview [S15,S16].",
+      "Multi-repo and broad MCP/browser/tool access: capable but creates a larger security and review boundary [S23,S34]."
+    ],
+    "not_demonstrated": [
+      "Reliable autonomous requirements discovery, architecture governance, safe merge/deploy/operate loops, self-modifying policy, or sustained net ROI across representative organizations. Conflicting field and benchmark evidence prevents this conclusion [S28-S30,S32,S33]."
+    ],
+    "rationale": "The execution plumbing, isolation, integrations, audit and human handoff are real. Correctness predictability, adversarial robustness, economic measurement and product judgment remain limiting factors."
+  },
+  "build_vs_buy": {
+    "buy_hosted_when": "Choose GitHub Copilot cloud agent if GitHub-native rules/audit/security checks and low integration effort dominate [S13-S16]. Choose Codex cloud for isolated parallel tasks and OpenAI local/cloud continuity [S09-S12]. Choose Devin for enterprise fleet/API/analytics and migration-style workflows after a task-class pilot [S03,S06-S08]. Choose Cursor Cloud Agents for Cursor-centric, multi-repo/browser/MCP workflows [S23,S24]. Jules is a simpler Google alternative [S25,S26].",
+    "build_or_self_host_when": "Use Claude Code Action/SDK or OpenHands when custom triggers, provider choice, private infrastructure, bespoke tools or data residency outweigh operating cost [S19-S21,S27].",
+    "custom_engineering_still_required": [
+      "task intake/risk classifier and spec templates",
+      "reproducible images and setup ownership",
+      "credential broker/network policy/tool authorization",
+      "independent tests/security gates",
+      "durable queue/idempotency/cancellation/budgets",
+      "PR ownership and reviewer routing",
+      "telemetry/evaluation/FinOps",
+      "deployment/canary/rollback"
+    ],
+    "avoid": "Do not build a new general coding agent unless control, residency or domain tooling is strategic. Do not buy based on leaderboard or demo alone; run identical private tasks with identical budgets and acceptance tests [S28-S33]."
+  },
+  "recommended_pattern": {
+    "name": "bounded autonomous worker, human-owned control plane",
+    "architecture": "Keep issue tracker and Git as system of record. A deterministic control plane creates signed task envelopes, selects one approved agent, provisions a least-privilege ephemeral environment, enforces policy/budget, gathers evidence, and opens only a draft PR. Trusted CI, independent review, protected merge and progressive delivery remain outside the agent.",
+    "rollout": [
+      "Start read-only repository Q&A/plan generation, then docs/tests, then small bug fixes, then repetitive migrations/security remediation. Never start with production access.",
+      "Build a 50–200 task private evaluation stratified by repository and risk. Compare two agents plus human baseline on acceptance, major rework, reviewer minutes, latency, total cost and escaped defects; keep failures in the dataset [S29,S30,S32].",
+      "Auto-route only task classes whose lower-confidence performance and review economics beat baseline. Retain human spec, PR and deploy gates; consider auto-merge only for reversible, generated, low-risk files after sustained evidence.",
+      "Use vendor-agnostic repository instructions and a common task/result schema. Pin models/config where possible and canary upgrades to reduce lock-in/drift.",
+      "Review monthly: accepted-without-major-rework, cycle time, review burden, cost, incidents, abort reasons and selection effects. Expand rights only through reviewed policy changes."
+    ],
+    "selection_advice": "For a GitHub-first project, begin with Copilot cloud agent or Codex cloud for supervised draft PRs; add Claude Code/SDK for programmable local or CI tasks. Trial Devin only where parallel repeatable queues justify its fleet/analytics layer. Keep OpenHands as a control/self-host option. The right portfolio may use multiple workers behind one control plane rather than one agent with broad rights.",
+    "stop_condition": "If reviewer time plus compute exceeds the human baseline, escaped defects rise, or injection/policy incidents occur, reduce the eligible task class or revert to developer-driven assistance."
+  },
+  "open_questions": [
+    "What are 2026 accepted-without-major-rework and escaped-defect rates for each platform on the same recent private tasks, same compute budget and same repository setup?",
+    "How much of reported merge-rate/productivity improvement comes from model progress versus task selection, better environments, user learning or increased retries [S06,S29,S30]?",
+    "Can prompt-injection resistance be independently certified when an agent reads untrusted issues, repository content, MCP output and the web [S11,S34]?",
+    "Which hosted platforms provide contractual residency, retention deletion, model-training opt-out, incident notification, complete audit export and reproducible/pinned model versions for a given organization [S02]?",
+    "What is the full cost per accepted change after setup, retries, CI, review, rework, incidents and vendor credits—not tokens or PR count [S07,S12,S15,S22]?",
+    "How stable are current 2026 preview features, pricing, quotas, GitHub partner-agent behavior and API contracts [S03,S04,S12,S15,S16]?",
+    "When, if ever, is narrow auto-merge safer than human review, and what lower-bound sample size/defect rate should authorize it?",
+    "How should ownership, licensing/provenance and accountability work when multiple vendor agents edit one PR or automatically fix each other’s findings?"
+  ],
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Introducing Devin",
+      "publisher_or_author": "Cognition",
+      "url": "https://docs.devin.ai/",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Devin surfaces, autonomous write/run/test loop, task-selection and prompting guidance, known documentation caveat"
+      ]
+    },
+    {
+      "id": "S02",
+      "title": "Security at Cognition",
+      "publisher_or_author": "Cognition",
+      "url": "https://docs.devin.ai/admin/security",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "encryption, SOC 2 Type II claim, data use/retention and training controls"
+      ]
+    },
+    {
+      "id": "S03",
+      "title": "API Overview",
+      "publisher_or_author": "Cognition",
+      "url": "https://docs.devin.ai/api-reference/overview",
+      "publication_or_update_date": "unknown; live v3 documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official API documentation",
+      "supported_claims": [
+        "v3 organization/enterprise APIs, RBAC service users, attribution, auditability, legacy v1/v2 deprecation"
+      ]
+    },
+    {
+      "id": "S04",
+      "title": "Self-serve plans",
+      "publisher_or_author": "Cognition",
+      "url": "https://docs.devin.ai/admin/billing/self-serve",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing documentation",
+      "supported_claims": [
+        "Free/Pro/Max/Teams structure, $20/$200/$80 minimum/$40 seat pricing, quotas and on-demand credits"
+      ]
+    },
+    {
+      "id": "S05",
+      "title": "Devin is now generally available",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/devin-generally-available",
+      "publication_or_update_date": "2024-12-10",
+      "access_date": "2026-09-13",
+      "source_type": "vendor announcement",
+      "supported_claims": [
+        "GA date, recommended small scoped tasks, under-three-hour session guidance, Slack/GitHub/IDE/API workflow"
+      ]
+    },
+    {
+      "id": "S06",
+      "title": "Devin's 2025 Performance Review: Learnings From 18 Months of Agents At Work",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/devin-annual-performance-review-2025",
+      "publication_or_update_date": "2025-11-14",
+      "access_date": "2026-09-13",
+      "source_type": "vendor performance report",
+      "supported_claims": [
+        "vendor-reported hundreds of thousands of merged PRs, 67% PR merge rate versus 34%, 4x speed and 2x resource-efficiency improvement, strongest/weakest task patterns"
+      ]
+    },
+    {
+      "id": "S07",
+      "title": "Estimating the Productivity of an Autonomous AI Software Engineer",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/ai-productivity",
+      "publication_or_update_date": "2026-06-04",
+      "access_date": "2026-09-13",
+      "source_type": "vendor methodology report",
+      "supported_claims": [
+        "vendor productivity-estimation method, r_log 0.74 claim, limits of activity metrics and individual predictions"
+      ]
+    },
+    {
+      "id": "S08",
+      "title": "How Cognition Uses Devin to Build Devin",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/how-cognition-uses-devin-to-build-devin",
+      "publication_or_update_date": "2026-02-27",
+      "access_date": "2026-09-13",
+      "source_type": "first-party case study",
+      "supported_claims": [
+        "659 internal Devin PRs merged in one week, repository indexing, Slack/Linear/API and automated-review workflow, review bottleneck"
+      ]
+    },
+    {
+      "id": "S09",
+      "title": "Codex cloud",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "parallel isolated cloud tasks, GitHub/GitLab/Linear/Slack entry points, diff/follow-up/PR handoff"
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Cloud environments",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud/environments",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "container lifecycle, checkout/setup/agent/test/diff flow, AGENTS.md, secret removal before agent phase"
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Agent internet access",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud/internet-access",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "agent network off by default, setup network access, allowlists/method restrictions, prompt-injection/exfiltration/malware/license risks"
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Pricing",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/pricing",
+      "publication_or_update_date": "unknown; live pricing as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing documentation",
+      "supported_claims": [
+        "Codex/ChatGPT Work shared usage, subscription/API-key options, credit and usage-limit model"
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "repository research/plan/code/test/branch/PR functions, Actions-powered ephemeral environment, integrations, enterprise PR outcome metrics"
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "write-user trigger boundary, one-branch scope, human-only merge, workflow approval, restricted internet, signed commits/session and audit logs, automated-trigger risks"
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "About third-party coding agents",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/about-third-party-coding-agents",
+      "publication_or_update_date": "unknown; public preview as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official preview documentation",
+      "supported_claims": [
+        "Claude and Codex partner agents on GitHub, issue/PR/Agents/VS Code/mobile entry points, CodeQL/secret/dependency validation, Actions and AI-credit consumption"
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "About rationale, confidence, and approvals for issues",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automation-rationale-and-approvals",
+      "publication_or_update_date": "unknown; public preview as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official preview documentation",
+      "supported_claims": [
+        "confidence thresholds and review suggestions for issue triage, rationale audit trail, explicit warning that approval UI is not a security boundary"
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "Claude Code overview",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/overview",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "terminal/IDE/desktop/browser surfaces; reads, edits, commands and tool integrations"
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "Claude Code security",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/security",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "manual read-only start, approvals, auto-mode classifier, sandbox and working-directory protections"
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "Claude Code GitHub Actions",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/github-actions",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official integration documentation",
+      "supported_claims": [
+        "@claude and event-triggered issue-to-PR workflows, app/workflow setup, GitHub Actions execution"
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "Configure the sandboxed Bash tool",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/sandboxing",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "filesystem/network OS-enforced sandbox, macOS/Linux/WSL2 support and native-Windows limitation, unsafe escape controls"
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "Monitoring",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/monitoring-usage",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official observability documentation",
+      "supported_claims": [
+        "OpenTelemetry metrics/events/traces for usage, cost and tool activity"
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "Manage costs effectively",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/costs",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official cost documentation",
+      "supported_claims": [
+        "vendor-reported $13 average active developer-day and $150–250 monthly enterprise cost; wide variation and pilot recommendation"
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "Cloud Agents",
+      "publisher_or_author": "Cursor",
+      "url": "https://cursor.com/docs/cloud-agent",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "isolated VM agents, parallel and multi-repository work, Git providers/Slack/Linear/API, branch and PR handoff"
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "Cloud Agents: Security overview",
+      "publisher_or_author": "Cursor",
+      "url": "https://cursor.com/docs/cloud-agent/security",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "VM lifecycle, app plus user authorization, inherited access, draft-PR handoff, persistence and deletion lifecycle"
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "Getting started with Jules",
+      "publisher_or_author": "Google",
+      "url": "https://jules.google/docs/",
+      "publication_or_update_date": "unknown; live documentation as accessed",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Jules experimental label as displayed, autonomous GitHub task flow, AGENTS.md and task review mechanics"
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "Jules, Google’s asynchronous AI coding agent, is out of public beta",
+      "publisher_or_author": "Google",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/google-labs/jules-now-available/",
+      "publication_or_update_date": "2025-08-06",
+      "access_date": "2026-09-13",
+      "source_type": "vendor announcement",
+      "supported_claims": [
+        "Jules left public beta and was available on public plans in 2025"
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "OpenHands repository",
+      "publisher_or_author": "All-Hands-AI contributors",
+      "url": "https://github.com/All-Hands-AI/OpenHands",
+      "publication_or_update_date": "rolling; repository accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": [
+        "comparable open-source local/hosted agent option and extensibility/self-hosting trade-off"
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "Thoughts On A Month With Devin",
+      "publisher_or_author": "Hamel Husain, Isaac Flath, Johno Whitaker; Answer.AI",
+      "url": "https://www.answer.ai/posts/2025-01-08-devin.html",
+      "publication_or_update_date": "2025-01-08",
+      "access_date": "2026-09-13",
+      "source_type": "independent operational evaluation",
+      "supported_claims": [
+        "20-task evaluation: 3 successes, 14 failures, 3 inconclusive; unpredictability and preference for developer-driven workflow"
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Joel Becker, Nate Rush, Elizabeth Barnes, David Rein; METR",
+      "url": "https://arxiv.org/abs/2507.09089",
+      "publication_or_update_date": "2025-07-25 v2",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled study/preprint",
+      "supported_claims": [
+        "16 developers, 246 tasks, early-2025 tools caused 19% longer completion while developers believed 20% faster; scope limits"
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_or_author": "Joel Becker et al.; METR",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "publication_or_update_date": "2026-02-24",
+      "access_date": "2026-09-13",
+      "source_type": "independent research update",
+      "supported_claims": [
+        "later raw estimates suggested 18% speedup for returning developers and 4% for new recruits but confidence intervals cross zero; serious selection and measurement bias makes signal unreliable"
+      ]
+    },
+    {
+      "id": "S31",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Carlos E. Jimenez et al.; Princeton/ICLR 2024",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2024-11-11 v3; ICLR 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed benchmark paper",
+      "supported_claims": [
+        "2,294 tasks from 12 Python repositories; original best Claude 2 resolved 1.96%; repository-level benchmark foundation"
+      ]
+    },
+    {
+      "id": "S32",
+      "title": "SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents",
+      "publisher_or_author": "Ibragim Badertdinov et al.; NeurIPS 2025",
+      "url": "https://arxiv.org/abs/2505.20411",
+      "publication_or_update_date": "2025-11-04 v2; NeurIPS 2025",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed benchmark paper",
+      "supported_claims": [
+        "over 21,000 interactive Python tasks, continuous fresh evaluation, evidence that some SWE-bench Verified results may be inflated by contamination"
+      ]
+    },
+    {
+      "id": "S33",
+      "title": "SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?",
+      "publisher_or_author": "Samuel Miserendino et al.; OpenAI",
+      "url": "https://arxiv.org/abs/2502.12115",
+      "publication_or_update_date": "2025-05-29 v4",
+      "access_date": "2026-09-13",
+      "source_type": "research benchmark paper",
+      "supported_claims": [
+        "over 1,400 Upwork tasks worth $1M; Claude 3.5 Sonnet resolved 26.2% independent-coding Diamond tasks and 44.9% management tasks; majority solutions incorrect"
+      ]
+    },
+    {
+      "id": "S34",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher_or_author": "Edoardo Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "publication_or_update_date": "2024-11-24 v3",
+      "access_date": "2026-09-13",
+      "source_type": "academic security benchmark",
+      "supported_claims": [
+        "97 realistic tasks and 629 security tests; tool-using agents fail benign tasks and attacks/defenses provide incomplete security"
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "High for documented mechanics and security boundaries; medium for current market status/cost because live docs change and many pages are undated; low-to-medium for productivity and comparative quality because independent evidence is narrow, aging relative to 2026 and methodologically conflicted.",
+    "high": [
+      "Container/VM/branch/PR mechanics [S09-S14,S17-S20,S23-S24]",
+      "documented permission/network/review/audit controls [S10-S16,S18-S21,S24]",
+      "specific independent study designs and reported results [S28-S34]"
+    ],
+    "medium": [
+      "Product status and pricing as observed on 2026-09-13 [S04,S12,S15,S16,S25,S26]",
+      "vendor adoption, merge-rate, throughput and cost aggregates [S06-S08,S22]"
+    ],
+    "low": [
+      "Cross-platform ranking, current generalized success rate, net ROI, and safety of autonomous merge/deploy; no apples-to-apples 2026 independent study was found."
+    ]
+  },
+  "conflicts": [
+    {
+      "conflict": "Cognition reports Devin’s PR merge rate reached 67% and large deployments, while Answer.AI found only 3 successes in 20 tasks [S06,S28].",
+      "likely_explanation": "Different product generations, customer/task selection, coaching/environment maturity and outcome definitions. Merge rate excludes tasks never converted to PR and is not equivalent to correct-first-attempt success."
+    },
+    {
+      "conflict": "METR early-2025 randomized work measured a 19% slowdown, while developers perceived speedup and the later 2025 cohort had raw speedup point estimates [S29,S30].",
+      "likely_explanation": "Rapid tool changes plus different user/task selection and concurrent-agent workflows. METR says later estimates are biased and statistically inconclusive, so neither supports a universal 2026 effect."
+    },
+    {
+      "conflict": "SWE-bench leaderboards show rapidly rising resolution, yet SWE-Lancer’s best reported independent-coding result was 26.2% and SWE-rebench flags contamination inflation [S31-S33].",
+      "likely_explanation": "Different task distributions, freshness, hidden tests, scaffold/tool budgets and possible training contamination; benchmark scores do not measure review cost, security or operations."
+    },
+    {
+      "conflict": "Google announced Jules was out of public beta, while its live getting-started documentation still calls it experimental [S25,S26].",
+      "likely_explanation": "“experimental” may describe capability risk rather than release phase, or documentation wording may lag; status should not be read as production assurance."
+    },
+    {
+      "conflict": "Vendors market autonomous engineering, but their own safeguards require scoped branches, constrained networks, tests and human merge [S01,S09,S13,S14,S18,S24].",
+      "likely_explanation": "Autonomy describes execution inside a bounded task, not accountability or full SDLC authority."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "open_questions"
+  ]
+}

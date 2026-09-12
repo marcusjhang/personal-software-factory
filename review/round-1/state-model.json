@@ -1,0 +1,200 @@
+{
+  "reviewer": "round-1-state-model-adversarial-reviewer",
+  "scope": "Independent adversarial state-model review of lifecycle and factory DSL, Python implementation, PostgreSQL schema/roles/tests, operational and architecture docs, and lifecycle/domain-extension research. Repository implementation artifacts were treated as primary evidence; repeated research summaries were not counted as independent corroboration. Focus: ideation, build, maintenance, deep research, self-improvement, composition, cancellation, invalidation, stale work, rollback, cleanup, and terminal behavior.",
+  "strengths": [
+    "The architecture clearly separates desired Git configuration, canonical PostgreSQL runtime state, and GitHub projection authority.",
+    "The documents explicitly require proposal-only agents, exact-digest human gates, fencing, unknown-effect reconciliation, clean verification, and rollback/cleanup runbooks.",
+    "The top-level YAML names cancellation and rollback terminal concepts, and the SQL schema includes durable inbox/outbox, leases, attempt statuses, receipts, observations, and append-only evidence records.",
+    "The Python approval and readiness code has focused stale-digest, expiry, human-approval, and self-approval tests."
+  ],
+  "findings": [
+    {
+      "id": "STATE-001",
+      "severity": "high",
+      "title": "Canonical lifecycle transitions disagree across YAML, Python, and documentation",
+      "requirement": "There must be one fail-closed lifecycle definition, and all declared states must have consistent legal entry, exit, cancellation, rollback, cleanup, and terminal behavior.",
+      "evidence": {
+        "files": [
+          ".agent-os/lifecycle.yaml",
+          "src/agent_os/lifecycle.py",
+          "docs/architecture.md",
+          "docs/end-to-end.md",
+          "migrations/0002_schema.sql",
+          "tests/test_core.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare .agent-os/lifecycle.yaml transitions with src/agent_os/lifecycle.py::_ALLOWED. YAML omits TRIAGED->BLOCKED while Python permits it; YAML permits MERGED->OBSERVING and MERGED->DONE while Python permits neither; YAML permits ROLLED_BACK->DONE while Python makes ROLLED_BACK terminal; and the BLOCKED return sets differ. Then run `uv run pytest -q`: all 22 tests pass because only a few transition samples are tested.",
+      "impact": "The same requested transition can be accepted by one component and rejected by another. Rollback completion can deadlock, direct MERGED-to-DONE can skip observation/cleanup under the YAML policy, and controller behavior depends on which definition it uses.",
+      "recommendation": "Generate the Python enum/transition table and SQL state constraint from one versioned lifecycle artifact, or add a compiler that rejects any cross-layer mismatch. Resolve each listed edge against the documented invariants before generation.",
+      "verification": "Add a matrix test that compares every state pair in YAML, generated Python, and the database transition function. Assert the intended paths for TRIAGED blocking, no-deploy observation, cleanup failure, rollback verification, cancellation, and every terminal.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-002",
+      "severity": "high",
+      "title": "Every factory exceptional path enters an undeclared dead-end BLOCKED state",
+      "requirement": "Ideation, build, maintenance, and deep-research factories need explicit initial, normal, retry, cancellation, stale-work, cleanup, rollback, and terminal transitions; blocked work must have a legal recovery or terminal path.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/build.yaml",
+          ".agent-os/factories/maintenance.yaml",
+          ".agent-os/factories/deep-research.yaml",
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/bin/validate.py",
+          ".agent-os/factories/README.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "For each of the four factory YAML files, enumerate `phases` and transition targets. `BLOCKED` is not in `phases`, yet every nonterminal phase targets it, and no transition leaves it. No factory declares a CANCELLED transition, cleanup phase, rollback/compensation transition, initial phase, or terminal-state set. The schema and validate.py only shape-check transition strings and do not require targets to be phases, reachability, exits, cancellation, or cleanup-before-completion. Ideation additionally says exhaustion goes to NEEDS_CLARIFICATION, which is neither a phase nor a transition target.",
+      "impact": "Budget exhaustion, escalation, human delay, cancellation, or cleanup failure strands a run with no defined controller action. An external controller must invent behavior not bound by the reviewed factory digest, so exceptional execution is neither portable nor auditable.",
+      "recommendation": "Extend the DSL with initial/terminal/exception states and typed transitions for retry, cancel, stale lease, invalidation, compensation/rollback, cleanup, and resume. Add explicit BLOCKED exits tied to saved continuation state or safe re-planning, and make successful cleanup a completion guard.",
+      "verification": "Compile every factory into a graph and fail validation for unknown states, unreachable phases, nonterminal sinks, exception states without recovery/cancel, retry targets without edges, and COMPLETE reachable before cleanup receipts. Add table-driven normal and exceptional traces for all four factories.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-003",
+      "severity": "high",
+      "title": "Documented durable ideation and maintenance lifecycles are not represented by the shipped factory DSL or database",
+      "requirement": "Sub-lifecycle work must be durable and resumable rather than hidden in chat/logs, with linked parent/child factory instances and preserved causality.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md",
+          "docs/operations.md",
+          "docs/end-to-end.md",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/maintenance.yaml",
+          ".agent-os/factories/deep-research.yaml",
+          ".agent-os/factories/composition.yaml",
+          "migrations/0002_schema.sql",
+          "src/agent_os/models.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Docs define IDEATION as CAPTURED->RESEARCHING->SYNTHESIZING->DECISION_REVIEW->DECIDED with NEEDS_INPUT/BLOCKED/CANCELLED, but ideation.yaml defines DISCOVER->DIVERGE->CLARIFY->SYNTHESIZE->TICKET_REVIEW->COMPLETE. Docs define the maintenance SIGNAL_RECEIVED...RESOLVED lifecycle, while maintenance.yaml defines SCAN...COMPLETE. Search migrations and models for factory instance, node/run state, parent/child link, ideation state, or maintenance state: none exists; work_items stores only the top-level lifecycle enum.",
+      "impact": "A restart cannot deterministically resume the documented domain workflow or establish which exact node, retry, decision revision, cleanup, or child composition is authoritative. The docs and reviewed DSL describe different state identities, preventing faithful replay and migration.",
+      "recommendation": "Choose canonical sub-lifecycle names and semantics, version them, and add durable factory_instance, node_run/attempt, transition event, artifact digest, continuation, and parent-child records scoped to repository/project. Bind the DSL/compiler and projections to those records.",
+      "verification": "Create an instance for each factory, crash at every phase and exception edge, restore from PostgreSQL alone, and prove it resumes the same pinned node/fence with all parent-child and artifact links. Assert docs, DSL, models, and migration enums are generated or cross-validated.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-004",
+      "severity": "high",
+      "title": "The Python factory loader cannot load any registered factory contract",
+      "requirement": "The repository-agent factory contract must be consumable by the implementation and pin the same reviewed DSL that validation and documentation describe.",
+      "evidence": {
+        "files": [
+          "src/agent_os/loaders.py",
+          "src/agent_os/models.py",
+          ".agent-os/factories/registry.yaml",
+          ".agent-os/factories/build.yaml",
+          ".agent-os/schemas/factory.schema.json",
+          "tests/test_loaders_cli.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `uv run python -c \"from agent_os.loaders import load_factory; load_factory('.agent-os/factories/build.yaml')\"`. Pydantic raises 15 validation errors: FactoryDefinition requires name/version/runner and rejects schema_version/id/roles/phases/transitions/artifacts/tools/budgets/gates/escalation/retry/cleanup. tests/test_loaders_cli.py only loads a separate ad hoc name/version/runner document, not a registry entry.",
+      "impact": "The checked registry advertises enabled factories that the shipped Python API cannot parse. Any caller using load_factory must use an unreviewed second format and loses the phase, gate, retry, and cleanup state contract.",
+      "recommendation": "Replace FactoryDefinition with a model matching factory.schema.json (including semantic graph validation), or clearly separate and rename the selection/runner descriptor and implement a real contract loader. Make registry resolution load and digest the referenced contract.",
+      "verification": "For every enabled registry entry, resolve the path through the public loader and assert round-trip equivalence to schema validation and a stable digest. Reject the current ad hoc test fixture if it is not a valid contract.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-005",
+      "severity": "high",
+      "title": "BLOCKED recovery cannot return to the saved prior state and can skip gates",
+      "requirement": "A recorded unblock must return to the explicitly saved prior state and never skip a gate. Stale approvals and changed inputs must route through re-planning/review.",
+      "evidence": {
+        "files": [
+          "docs/architecture.md",
+          ".agent-os/lifecycle.yaml",
+          "src/agent_os/lifecycle.py",
+          "src/agent_os/models.py",
+          "migrations/0002_schema.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect work_items and Ticket: neither stores blocked_from/continuation state. validate_transition accepts only source and target, with no transition context. Python therefore accepts BLOCKED->REVIEW, BLOCKED->VERIFYING, or BLOCKED->IMPLEMENTING regardless of where blocking occurred, while YAML permits a different arbitrary subset such as BLOCKED->READY. There is no way for either validator to prove the target equals the saved prior gated state.",
+      "impact": "A work item blocked during early planning can be resumed directly into implementation/review under the Python table, bypassing readiness, lease, or verification predicates if a caller treats transition validity as sufficient. Legitimate blocked states also deadlock when their prior state is not in the selected table.",
+      "recommendation": "Persist a blocked continuation containing prior_state, reason, required resolution, bound input/version, owner, and expiry. Validate unblock under aggregate lock and route stale/materially changed work to PLANNING or READY_REVIEW rather than accepting a caller-selected target.",
+      "verification": "For every nonterminal source, block it, attempt every possible unblock target, and assert only the recorded continuation (or policy-mandated replan target) is accepted. Mutate approval/base/risk while blocked and assert fail-closed invalidation.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-006",
+      "severity": "high",
+      "title": "PostgreSQL does not enforce compare-and-append transitions, so arbitrary state jumps and uncoupled cancellation are possible",
+      "requirement": "Only the controller may atomically append a legal transition with expected aggregate version; cancellation must fence/revoke active work and preserve cleanup evidence.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql",
+          "migrations/0003_security.sql",
+          "docs/architecture.md",
+          "docs/database.md",
+          "src/agent_os/lifecycle.py",
+          "tests-sql/001_integrity.sql",
+          "tests-sql/002_leases.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Schema inspection shows work_items has a mutable lifecycle_state enum but no aggregate_version and no trigger/function that checks the source-target edge or requires an event_ledger append. migrations/0003_security.sql grants polar_runtime UPDATE and DELETE on all tables. Thus a runtime-role transaction can execute `UPDATE polar.work_items SET lifecycle_state='DONE' WHERE lifecycle_state='INBOX'` without an event, and can set CANCELLED while an unreleased lease/RUNNING attempt remains. Existing SQL tests do not attempt either case.",
+      "impact": "A bug or compromised runtime path can manufacture terminal/ready states, lose the authoritative history, and leave cancelled zombie work with live fencing/capability state. The database advertised as canonical cannot detect or reject this illegal path.",
+      "recommendation": "Expose a least-privilege transition stored procedure or transaction API with expected version, legal-edge/guard checks, mandatory event/audit insert, approval invalidation, and cancellation epoch/lease closure. Revoke direct lifecycle UPDATE from normal runtime roles.",
+      "verification": "As the deployed runtime role, prove direct lifecycle UPDATE is denied. Test every state pair through the transition API, concurrent expected-version races, and cancellation with active lease/attempt/effects; assert the fence advances, capabilities are revoked/lease closed, cleanup is queued, and one event is committed atomically.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-007",
+      "severity": "high",
+      "title": "Self-improvement promotion states permit bypass and disagree between Python and SQL",
+      "requirement": "Improvement must follow proposal -> curation -> offline -> shadow -> canary review/admission -> independent exact-digest human approval -> promotion, with rollback; protected evaluation and promotion cannot be self-approved or skipped.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py",
+          "src/agent_os/improvement.py",
+          "migrations/0002_schema.sql",
+          "docs/architecture.md",
+          "docs/end-to-end.md",
+          "tests/test_improvement.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Python defines CANARY_REVIEW->APPROVED->PROMOTED, but validate_improvement_promotion explicitly returns valid for a CANARY_REVIEW proposal when given an approval, before the APPROVED transition occurs. SQL uses different stages (OFFLINE/SHADOW/CANARY), has no APPROVED stage/history constraint, and allows a row to be inserted or updated directly to PROMOTED when model_or_policy_sha256 and any promotion_approval_id are non-null. The foreign key does not bind that approval's subject digest, kind, work item, proposer separation, expiry, or canary results to the candidate.",
+      "impact": "A caller can treat a CANARY_REVIEW validation as promotion authorization, and the canonical SQL record can claim PROMOTED without proving ordered evaluation or exact-digest independent approval. Rollback evidence and known-good pointer are also not required by the table/model.",
+      "recommendation": "Unify names and transitions in one improvement state model. Make validation require APPROVED for promotion; atomically verify ordered immutable stage events, exact candidate/eval/config/result digest, independent approver/quorum/expiry, canary admission/results, and rollback pointer before PROMOTED.",
+      "verification": "Add negative tests for direct PROPOSED/CANARY-to-PROMOTED writes, unrelated/wrong-kind/expired/self approvals, skipped stages, changed results, and missing rollback pointer in both Python and SQL. Add a full valid ordered trace and rollback trace.",
+      "confidence": "high"
+    },
+    {
+      "id": "STATE-008",
+      "severity": "medium",
+      "title": "Validation and tests do not enumerate reachability or exceptional state coverage",
+      "requirement": "All declared states must have tested legal entry, exit, cancellation, stale/retry, cleanup, and terminal behavior, and invalid transitions/stale approvals must fail closed.",
+      "evidence": {
+        "files": [
+          ".agent-os/bin/validate.py",
+          ".agent-os/schemas/factory.schema.json",
+          "tests/test_core.py",
+          "tests/test_improvement.py",
+          "tests/test_loaders_cli.py",
+          "tests-sql/001_integrity.sql",
+          "tests-sql/002_leases.sql",
+          "tests-sql/003_effects_and_roles.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `uv run pytest -q`; 22 tests pass despite STATE-001 and STATE-004. test_core checks only READY->LEASED, INBOX->MERGED, and DONE->IMPLEMENTING. Improvement tests sample only a few edges. validate.py checks top-level lifecycle target membership but never compares Python/SQL, computes reachability, or checks cancellation/cleanup; for factory transitions it invokes only JSON Schema, whose transition `from` and `to` are unconstrained strings. SQL tests do not test lifecycle transitions, cancellation, rollback, or improvement stage order.",
+      "impact": "CI gives a false green signal while normal and exceptional graphs conflict or are non-executable. Future missing edges, illegal shortcuts, and terminal ambiguity can ship unnoticed.",
+      "recommendation": "Add a reusable graph conformance suite that enumerates all state pairs and required scenarios across lifecycle, factories, composition, and improvement. Include model-based traces for cancellation, retry exhaustion, stale lease/output, invalidation, unknown effect, cleanup failure, rollback, crash/restart, and every terminal.",
+      "verification": "Seed each known defect from this review as a mutation and show validation/CI fails for it. Require coverage reports listing every state and required exceptional behavior, not only line coverage.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "The repository explicitly says its factories are desired contracts and that an external controller is not included. An unreviewed external controller may implement some missing durability and transition guards, but there is no pinned interface or evidence here to verify that possibility.",
+    "PostgreSQL integration tests were not executed in this review because no database service result was available; SQL findings are based on migration and test inspection and use statements permitted by the declared grants.",
+    "The research reports and docs often restate the same design claims. They were used for intended requirements, not treated as independent proof of implemented behavior.",
+    "No production workload, crash trace, or controller deployment evidence was present, so operational frequency and exploitability cannot be measured; the reported paths remain structurally reproducible from checked-in artifacts."
+  ]
+}

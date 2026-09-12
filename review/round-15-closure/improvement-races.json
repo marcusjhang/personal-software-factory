@@ -1,0 +1,199 @@
+{
+  "reviewer": "round-15 independent improvement race closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-14 correction",
+    "specialty": "Attempt cancellation, degradation versus rollback, cancellation versus IH reconciliation, and Effect/digest/revocation races.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-14-resolution.md",
+      "review/round-14-closure/cross-consistency.json",
+      "review/round-14-closure/evidence-requirements.json",
+      "review/round-14-closure/formal-model.json",
+      "review/round-14-closure/improvement-races.json",
+      "review/round-14-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model proof",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md states: This repository intentionally contains a plan, not a working controller or deployed factory.",
+        "Recomputed PLAN.md SHA-256 is 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271."
+      ],
+      "basis": "The two digests reproduce review/round-14-resolution.md and material-claims.json generated_against."
+    },
+    {
+      "area": "round_14_inventory_and_manifest_shape",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-14-closure JSON files parse and report 0 critical and 5 high findings in total.",
+        "review/round-14-resolution.md maps all 5/5 raw high findings to 5 unique defects.",
+        "Independent literal first-column parsing reproduces 794 unique normative-manifest edge IDs with no duplicate; the resolution reports 96 canonical and 698 private/product rows."
+      ],
+      "basis": "Historical findings were checked as correction contracts and were not automatically carried into this audit."
+    },
+    {
+      "area": "schema_3_candidate_boundary",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 and regeneration_checkpoint round-14.",
+        "Its internal validation records 37 corpus result files, 25 source observations, 20 material claims, 36 evidence edges, 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, 0 refutes, and 28 normative-manifest headings."
+      ],
+      "basis": "The graph remains candidate-only and explicitly does not establish fresh retrieval or semantic entailment."
+    },
+    {
+      "area": "release_attempt_cancellation_subordination",
+      "result": "pass",
+      "exact_text": [
+        "IA09-IA15 require matching whole-work cancellation context and are canonical stutters under IX dominance.",
+        "IA14 schedules attempt-local cleanup only; IA15 seals only the attempt-local CANCELLED disposition.",
+        "IX03 is the sole parent cancellation cleanup owner and IX04 the sole parent CANCELLED owner."
+      ],
+      "basis": "The round-14 release-attempt-only parent-terminal defect is closed at plan-contract level."
+    },
+    {
+      "area": "protected_x_rollback_adoption",
+      "result": "pass",
+      "exact_text": [
+        "IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO partition matching rollback REQUESTED, ROLLING_BACK, VERIFYING, VERIFIED, FAILED, REMEDIATION_WAIT, and nonterminal ROLLED_BACK.",
+        "Each row requires work_cancel_state=NONE, records TELEMETRY_DEGRADED, preserves exact rollout, Effect, rollback identity/state and immutable origin, and creates neither a second saga nor cleanup."
+      ],
+      "basis": "This closes the settlement-first degradation gap while cancellation remains NONE."
+    },
+    {
+      "area": "ih06_ix_settlement_exclusion",
+      "result": "pass",
+      "exact_text": [
+        "Every IH06-WX/WN/PX/PN guard now requires work_cancel_state=NONE.",
+        "After IX01 or IX02, the matching IX06 REQUESTED/QUIESCING X/N row, not IH06, owns settlement and IX03 remains the sole parent cleanup owner."
+      ],
+      "basis": "The round-14 IH06/IX continuation ambiguity is textually removed."
+    },
+    {
+      "area": "degradation_after_cancellation",
+      "result": "fail",
+      "exact_text": [
+        "PLAN \u00a78.4 says: Control degradation always commits durably and atomically fences active exposure before any later receipt.",
+        "Manifest \u00a715.5 says that while cancellation is not NONE, ordinary control rows, including every IH01/IH06 row, are rejected.",
+        "The IX safety allowlist contains no edge that changes control_health_state from HEALTHY to TELEMETRY_DEGRADED."
+      ],
+      "basis": "If IX01 wins first, a later degradation cannot satisfy the unconditional durable-recording contract. Finding R15-IR-001."
+    },
+    {
+      "area": "revocation_during_cancellation_from_stale_or_frozen_candidate",
+      "result": "fail",
+      "exact_text": [
+        "Manifest \u00a715.5 rejects ordinary candidate rows while cancellation is not NONE.",
+        "The IC32 checker nevertheless requires its cancellation-side IX06 revocation relation to cover candidate sources SHADOW_PASSED, FROZEN, and EVIDENCE_STALE.",
+        "IX06-UR and IX06-XR specify SHADOW_PASSED->REVOKED on a revocation trigger or preservation of already REVOKED; no IX06 row specifies FROZEN->REVOKED or EVIDENCE_STALE->REVOKED."
+      ],
+      "basis": "A revocation arriving after cancellation at either omitted candidate source has no legal disposition edge. Finding R15-IR-002."
+    },
+    {
+      "area": "round_14_graph_status",
+      "result": "fail",
+      "exact_text": [
+        "review/round-14-resolution.md says: No research source-evidence record, evidence-edge semantic relation, or generated material-graph byte was changed in round 14.",
+        "The same memo says the current schema-3 graph is round 14 and matches the corrected formal sources; README says round-14 graph regeneration is complete.",
+        "material-claims.json records regeneration_checkpoint round-14 and the corrected round-14 PLAN/manifest digests."
+      ],
+      "basis": "A digest/checkpoint regeneration necessarily changes generated graph bytes, so the resolution's byte-unchanged claim contradicts the current artifact and reader status. Finding R15-IR-003."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R15-IR-001",
+      "severity": "high",
+      "title": "Cancellation-first makes the unconditional degradation event unrecordable",
+      "requirement": "PLAN \u00a78.4 requires control degradation to always commit durably before any later receipt, while the manifest claims a closed, total legal-edge model.",
+      "evidence": [
+        "IX01 may win at every reachable nonterminal tuple and changes work_cancel_state NONE->REQUESTED.",
+        "Manifest \u00a715.5 then rejects every IH01 and IH06 row for REQUESTED, QUIESCING, CLEANING, or CANCELLED.",
+        "IX01 and IX06 fence or classify safety, but none changes HEALTHY->TELEMETRY_DEGRADED or records the generation-bound degradation/continuity fact.",
+        "The rollback-adoption repair cannot apply because every IH01-RA* guard expressly requires work_cancel_state=NONE."
+      ],
+      "adversarial_trace": [
+        "Reach HEALTHY + EVIDENCE_STALE + WIDENING_RECONCILING with the exact original Effect unsettled and cancellation NONE.",
+        "Commit IX01 first, producing cancellation REQUESTED while health remains HEALTHY.",
+        "Deliver a continuity/SLO degradation before Effect settlement.",
+        "IH01-WR and every other IH01/IH06 row reject because cancellation is not NONE; no IX row durably records TELEMETRY_DEGRADED.",
+        "Later IX06 settles X/N and rollback/cleanup can proceed, but the promised degradation event and continuity ordering were never recorded."
+      ],
+      "impact": "The formal model contradicts its unconditional degradation durability contract. Audit/history and generation-bound continuity can report HEALTHY despite an observed control failure, or an implementation must invent an edge outside the normative manifest.",
+      "required_correction": "Either add an exact cancellation-side degradation-recording family for every reachable IX REQUESTED/QUIESCING safety coordinate, preserving IX rollback and cleanup ownership, or narrow the PLAN invariant explicitly and define the durable equivalent degradation receipt under IX. Race IX01/IX02 before and after degradation and Effect settlement under one tuple-version CAS."
+    },
+    {
+      "id": "R15-IR-002",
+      "severity": "high",
+      "title": "The IX revocation partition cannot move FROZEN or EVIDENCE_STALE candidates to REVOKED",
+      "requirement": "Manifest \u00a715.2 requires revocation at every actually reachable candidate/rollout/Effect/rollback/cancellation coordinate, and \u00a715.5 permits only IX safety rows once cancellation is pending.",
+      "evidence": [
+        "The IC32 checker explicitly includes candidate source SHADOW_PASSED|FROZEN|EVIDENCE_STALE in the union of IC32 guards for cancellation NONE and IX06 synchronized revocation-safety guards for REQUESTED/QUIESCING.",
+        "IX06-UR names only candidate SHADOW_PASSED->REVOKED when revocation triggers, or candidate already REVOKED on replay/continuation.",
+        "IX06-XR likewise names only SHADOW_PASSED->REVOKED or preservation of REVOKED; IX06-NR/NQ and IX06-XQ do not supply the omitted candidate edges.",
+        "IC32-F/E would provide FROZEN|EVIDENCE_STALE->REVOKED, but ordinary candidate rows are expressly rejected while cancellation is not NONE."
+      ],
+      "adversarial_trace": [
+        "Reach EVIDENCE_STALE + WIDENING_RECONCILING through IC24-A with an unsettled Effect.",
+        "Commit IX01, producing cancellation REQUESTED.",
+        "Deliver a distinct authenticated revocation before settlement.",
+        "IC32-E rejects under cancellation dominance. IX06-UR may reconcile the Effect but cannot perform the required EVIDENCE_STALE->REVOKED candidate edge stated nowhere in its guard/effects.",
+        "The same hole exists for FROZEN after IX01, in X, N, or unsettled classes."
+      ],
+      "impact": "A valid revocation is dropped, misrepresented as mere cancellation fencing, or requires an inferred candidate transition. This falsifies the exact IC32/IX06 equality and leaves stale/frozen revocation disposition undefined during cancellation.",
+      "required_correction": "Add exact REQUESTED and QUIESCING synchronized IX revocation rows, or extend each IX06 X/N/UNSETTLED partition, for FROZEN->REVOKED and EVIDENCE_STALE->REVOKED. Preserve Effect/rollback identity, create no duplicate saga or cleanup, and prove exact equality and pairwise exclusion against IC32-F/E at the IX01 race boundary."
+    },
+    {
+      "id": "R15-IR-003",
+      "severity": "high",
+      "title": "The round-14 resolution falsely says no generated material-graph byte changed",
+      "requirement": "Reader-facing status must distinguish historical checkpoints from the current schema-3 candidate graph without a material overclaim or contradiction.",
+      "evidence": [
+        "The round-14 resolution's Scope and counts section states that no generated material-graph byte was changed in round 14.",
+        "The same resolution's Preserved coverage section states that the current schema-3 candidate-only material graph is round 14 and matches current formal sources.",
+        "README states round-14 schema-3 regeneration is complete.",
+        "material-claims.json itself records regeneration_checkpoint round-14 and the round-14 PLAN and manifest SHA-256 values, which differ from the round-13 formal-source values."
+      ],
+      "impact": "The correction register gives incompatible provenance for the current evidence artifact and materially misstates whether generated bytes changed.",
+      "required_correction": "Replace the byte-unchanged sentence with the exact boundary: no research source-observation record or evidence-edge semantic relation changed, while generated metadata, source digests, checkpoint, coverage locations if any, and therefore material-graph bytes were regenerated for round 14."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "total": 3,
+    "round_14_review_files_reviewed": 5,
+    "round_14_raw_critical_findings_reviewed": 0,
+    "round_14_raw_high_findings_reviewed": 5,
+    "round_14_unique_defects_reviewed": 5,
+    "manifest_rows_reproduced": 794,
+    "canonical_rows_reported": 96,
+    "private_and_product_rows_reported": 698,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_evidence_edges_checked": 36,
+    "current_normative_headings": 28
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static adversarial audit. It does not claim implementation, exhaustive model execution, runtime safety, or production validation.",
+    "Fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, and deterministic reviewed-edge regeneration remain accepted future gates."
+  ],
+  "closure_criteria_pass": false
+}

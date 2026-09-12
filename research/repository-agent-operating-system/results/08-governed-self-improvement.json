@@ -1,0 +1,1121 @@
+{
+  "scope": {
+    "definition": "Repository-native, governed conversion of agent/user/CI/runtime evidence into reviewed postmortems, versioned evaluation cases, and minimal prompt/workflow/tool/code proposals; then offline replay, non-authoritative shadowing, bounded canary, promotion or rollback.",
+    "in_scope": [
+      "feedback/telemetry provenance and triage",
+      "postmortem and eval curation",
+      "proposal/evidence contracts",
+      "GitHub PR/Actions/Projects integration",
+      "independent promotion policy, canary, rollback and audit",
+      "drift reconciliation between Git declarations and GitHub remote state"
+    ],
+    "out_of_scope": [
+      "autonomous product intent or roadmap choice",
+      "online training on raw feedback",
+      "an agent approving its own grader, permissions, policy, release, or audit mutation",
+      "claim that repository files themselves are actual GitHub Project or deployment state"
+    ],
+    "boundary": "The agent is a proposer and bounded experiment subject. A separately owned evaluator, policy authority and deployment identity decide. High-impact or irreversible changes remain human-authorized."
+  },
+  "current_capabilities": [
+    {
+      "capability": "GitHub Projects v2 automation",
+      "verified": "GraphQL exposes ProjectV2 objects and mutations including updateProjectV2ItemFieldValue; GitHub documents API automation and projects_v2_item webhooks. Git YAML is not the service database: field/option/item node IDs and current values live remotely (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects; https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue; https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item).",
+      "limit": "A commit only states desired state. A credentialed reconciler must read, diff, mutate and verify remote state; webhooks can be missed/duplicated, so scheduled full scans remain necessary."
+    },
+    {
+      "capability": "Protected proposal and promotion",
+      "verified": "CODEOWNERS can require review of protected paths; repository/organization rulesets expose enforcement and bypass controls; Actions environments can require reviewers, prevent self-review, gate secrets, and delay jobs (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners; https://docs.github.com/en/rest/repos/rules; https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+      "limit": "These features must be configured in GitHub remote settings. CODEOWNERS alone does not enforce review. Environment reviewer semantics and availability vary by plan/repository; only one of up to six listed reviewers must approve, so use a team/process or external policy when two-person approval is required."
+    },
+    {
+      "capability": "Least-privilege reusable automation",
+      "verified": "Workflow/job permissions can reduce GITHUB_TOKEN scopes, reusable workflows centralize typed inputs/secrets, secure-use guidance recommends full-SHA pinning, and artifact attestations add verifiable provenance (https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions; https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations; https://docs.github.com/en/actions/reference/security/secure-use; https://docs.github.com/en/actions/concepts/security/artifact-attestations).",
+      "limit": "A reusable workflow is not a trust boundary if it checks out and runs attacker-controlled code with write tokens/secrets. Third-party actions and mutable tool/model endpoints remain dependencies."
+    },
+    {
+      "capability": "Eval and observability primitives",
+      "verified": "OpenTelemetry provides portable traces/metrics/logs; OpenAI and Anthropic document representative datasets, continuous evaluation, trajectory/outcome grading, repeated trials and human calibration (https://opentelemetry.io/docs/specs/otel/overview/; https://developers.openai.com/api/docs/guides/evaluation-best-practices; https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents).",
+      "limit": "GenAI/agent schemas and graders are evolving. Vendor guidance demonstrates a method, not independent outcome validity."
+    },
+    {
+      "capability": "Progressive delivery",
+      "verified": "Argo Rollouts can pause, promote or abort canaries from metric analysis; Google SRE describes control/canary comparison and rollback discipline (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/; https://sre.google/workbook/canarying-releases/).",
+      "limit": "Rare, delayed, tenant-specific and irreversible effects can escape a canary. Inconclusive evidence must pause, not auto-pass."
+    }
+  ],
+  "representative_systems": [
+    {
+      "layer": "repository/change control",
+      "systems": [
+        "GitHub pull requests",
+        "CODEOWNERS",
+        "rulesets",
+        "Actions reusable workflows",
+        "environments",
+        "artifact attestations"
+      ],
+      "role": "version and review declarations, run evidence-producing jobs, require independent deployment approval"
+    },
+    {
+      "layer": "remote coordination",
+      "systems": [
+        "GitHub Projects v2 GraphQL API",
+        "projects_v2_item webhooks",
+        "scheduled reconciliation"
+      ],
+      "role": "materialized operational view; never confused with desired YAML in Git"
+    },
+    {
+      "layer": "evidence/evaluation",
+      "systems": [
+        "OpenTelemetry/W3C Trace Context",
+        "portable repository eval runner",
+        "OpenAI/Anthropic eval patterns"
+      ],
+      "role": "correlate run→feedback→case and compare candidate/current on frozen and fresh slices"
+    },
+    {
+      "layer": "policy/release",
+      "systems": [
+        "OPA policy-as-code pattern",
+        "GitHub environments",
+        "Argo Rollouts or equivalent feature-flag controller"
+      ],
+      "role": "independent decision, narrow exposure, abort/rollback"
+    },
+    {
+      "layer": "operational learning",
+      "systems": [
+        "Google SRE postmortems, SLOs and error budgets",
+        "NIST AI RMF GenAI Profile"
+      ],
+      "role": "blameless causal learning, owned actions, monitoring/incident/recourse governance"
+    },
+    {
+      "layer": "challenge evidence",
+      "systems": [
+        "SWE-Bench+",
+        "AgentDojo",
+        "METR experienced-developer RCT",
+        "How Complex Systems Fail"
+      ],
+      "role": "test leakage, prompt-injection control failure, productivity optimism and monocausal postmortems"
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "GitHub Project fields/items are remote GraphQL resources changed by mutations; project item events are webhook inputs, not a Git-native state store.",
+      "evidence": [
+        "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+        "https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue",
+        "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item"
+      ],
+      "design_consequence": "Keep desired schema/mappings in Git, observed snapshots in artifacts/audit storage, and reconcile by stable logical keys plus resolved node IDs."
+    },
+    {
+      "claim": "GitHub supplies protected review/deployment and least-privilege workflow mechanisms.",
+      "evidence": [
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+        "https://docs.github.com/en/rest/repos/rules",
+        "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners"
+      ],
+      "design_consequence": "Protect policy/eval/workflow paths and use a separate deployment identity/environment; deny proposer self-review and ruleset bypass."
+    },
+    {
+      "claim": "Eval practice calls for representative data, continuous evaluation, explicit task/success definitions, trajectory/outcome inspection, regression suites and human calibration.",
+      "evidence": [
+        "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "https://developers.openai.com/api/docs/guides/trace-grading",
+        "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+      ],
+      "design_consequence": "Every promoted control version carries dataset/harness/grader hashes, repeated-trial slice results and human adjudication for ambiguous/high-risk cases."
+    },
+    {
+      "claim": "Mature SRE practice connects incident evidence to blameless postmortems, owned preventive actions, SLO/error-budget decisions and controlled canaries.",
+      "evidence": [
+        "https://sre.google/sre-book/postmortem-culture/",
+        "https://sre.google/workbook/implementing-slos/",
+        "https://sre.google/workbook/canarying-releases/"
+      ],
+      "design_consequence": "Failures and rollbacks create reviewed eval candidates and actions, never automatic training data."
+    },
+    {
+      "claim": "NIST AI 600-1 recommends pre-deployment testing, ongoing monitoring/review, incident handling, provenance and feedback/recourse; NIST SP 800-204C describes policy-as-code CI/CD and conflict/update checks.",
+      "evidence": [
+        "https://doi.org/10.6028/NIST.AI.600-1",
+        "https://csrc.nist.gov/pubs/sp/800/204/c/final"
+      ],
+      "design_consequence": "Treat eval/policy/data lineage and appeals as governed lifecycle records, not model-local memory."
+    },
+    {
+      "claim": "SLSA provenance binds an artifact to build inputs/process; GitHub artifact attestations implement provenance evidence.",
+      "evidence": [
+        "https://slsa.dev/spec/v1.2/provenance",
+        "https://docs.github.com/en/actions/concepts/security/artifact-attestations"
+      ],
+      "design_consequence": "Promote immutable prompt/tool/workflow bundles by digest, never a mutable branch/tag alone."
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "SWE-Bench+ reported 32.67% solution leakage, 31.08% suspicious passes due to weak tests, and resolution falling 12.47%→3.97% after filtering.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "implication": "A benchmark pass is not ground truth; isolate hidden/private temporal holdouts, audit tests and preserve fresh production cases."
+    },
+    {
+      "finding": "AgentDojo evaluates prompt-injection attacks in tool-using agents and found attacks/defenses materially trade off utility and security; no benchmark proves general prompt-injection immunity.",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "implication": "Treat telemetry, issues, PR text and tool output as hostile data; do not expose promotion credentials or policy writes to the evaluated agent."
+    },
+    {
+      "finding": "GitHub Security Lab explains pwn-request risks when privileged workflow_run jobs consume artifacts/code from untrusted pull requests.",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "implication": "Split untrusted candidate execution from privileged promotion; validate artifact identity/content and never execute PR scripts after privilege elevation."
+    },
+    {
+      "finding": "METR’s randomized study of experienced open-source developers reported AI tools made assigned tasks 19% slower while participants had expected 24% faster and still believed afterward they were 20% faster.",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "implication": "Baseline local cycle time and retained outcome; do not promote from subjective speed or benchmark rank."
+    },
+    {
+      "finding": "Cook warns complex-system failures have multiple contributing conditions and that hindsight overstates a single root cause.",
+      "url": "https://how.complexsystems.fail/",
+      "implication": "Postmortems must capture failed defenses and interacting changes rather than auto-label one causal prompt/tool."
+    },
+    {
+      "finding": "SPACE rejects a single developer-productivity metric across satisfaction, performance, activity, communication and efficiency.",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "implication": "Pair speed/cost with quality, stability, security, human load and user outcomes to resist metric gaming."
+    }
+  ],
+  "metrics_and_limits": {
+    "promotion_scorecard": [
+      "task success and invariant pass by declared risk/slice with trial count and confidence interval",
+      "near-100% regression reliability for mature must-pass cases; any critical safety/authorization violation is a hard fail",
+      "escaped-defect, rollback, unsafe-action and policy-violation rate",
+      "user/SLO outcome, change-failure and recurrence rate over a declared delayed-outcome window",
+      "latency/token/compute/reviewer/on-call cost per retained improvement",
+      "grader-to-blinded-expert agreement and disagreement by slice",
+      "dataset age, provenance coverage, deduplication/contamination findings",
+      "shadow divergence and attempted side effects; canary exposure, abort, inconclusive and rollback latency"
+    ],
+    "exact_known_limits": [
+      "GitHub environment protection can list up to six required reviewers and only one listed reviewer must approve; prevent-self-review is configurable (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+      "Anthropic illustrates stochastic compounding: at 75% per-trial success, three consecutive successes occur about 42% of the time; report pass@1/pass@k/pass^k rather than one run (https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents).",
+      "SWE-Bench+ 12.47%→3.97% after filtering quantifies one benchmark’s oracle/leakage risk, not a universal correction factor (https://arxiv.org/abs/2410.06992).",
+      "METR’s 19% slowdown is for 16 experienced developers, 246 tasks and the studied early-2025 tools; it is not a universal productivity estimate (https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/)."
+    ],
+    "no_universal_threshold": "Power, minimum detectable effect, observation window, non-inferiority margin and risk threshold must be predeclared per task class. Low event counts and rare harms make many canaries inconclusive. Never auto-promote an inconclusive result or optimize one composite score."
+  },
+  "recommended_design": {
+    "name": "Separated evidence-to-change controller with Git-desired/remote-actual reconciliation",
+    "planes": {
+      "runtime": "Agent runs with read and task-branch proposal rights only; emits versioned evidence.",
+      "evidence": "Append-only restricted store indexes redacted OTel envelopes and immutable artifacts; Git records references/hashes, not secrets or raw PII.",
+      "learning": "Curators turn reviewed failures/successes into fixtures. Hidden holdouts and grader configuration are invisible/read-only to proposer.",
+      "change": "A PR contains one hypothesis and minimal prompt/workflow/tool/code delta plus rollback handle.",
+      "governance": "Independent GitHub App/workflow evaluates policy; protected environment/human gate promotes immutable digests; a separate controller can abort/restore last-known-good."
+    },
+    "project_status_model": "Git owns desired field names/options, transition policy and logical mappings. GitHub Projects owns actual item/field/node IDs and live status. Reconciler reads actual, produces a drift plan, mutates only explicitly managed fields, re-reads to verify, records observed revision/hash and opens drift issues for destructive/ambiguous differences. Human-owned/unmanaged fields are report-only.",
+    "identity_separation": [
+      "proposer: issues read, branch/PR write; no Actions secrets, project-policy mutation, holdout, deploy or audit-delete",
+      "evaluator: read candidate and hidden tests; write signed report only; no proposal mutation or deployment",
+      "reconciler: narrow Projects/Issues write for allowlisted org/project/fields; no repository contents or deploy",
+      "promoter/rollback controller: read signed evidence and protected policy; environment/deploy rights only; no candidate authoring",
+      "human policy owners/break-glass: protected approval, expiry and audit; hardware/SSO-backed where possible"
+    ],
+    "default_decision": "Fail closed on identity, digest, provenance, policy or safety-invariant failure. Pause on missing, stale, conflicting or underpowered evidence. Roll back automatically only to a tested compatible digest with reversible side effects."
+  },
+  "state_and_event_contract": {
+    "states": [
+      "OBSERVED",
+      "TRIAGED",
+      "POSTMORTEM_REQUIRED",
+      "CURATION_PENDING",
+      "EVAL_REVIEW",
+      "EVAL_APPROVED",
+      "PROPOSED",
+      "OFFLINE_RUNNING",
+      "OFFLINE_FAILED",
+      "OFFLINE_PASSED",
+      "SHADOW_RUNNING",
+      "SHADOW_FAILED",
+      "CANARY_PENDING_APPROVAL",
+      "CANARY_RUNNING",
+      "PROMOTED",
+      "ROLLED_BACK",
+      "REJECTED",
+      "CLOSED"
+    ],
+    "allowed_flow": "OBSERVED→TRIAGED→(POSTMORTEM_REQUIRED)→CURATION_PENDING→EVAL_REVIEW→EVAL_APPROVED→PROPOSED→OFFLINE_RUNNING→OFFLINE_PASSED→SHADOW_RUNNING→CANARY_PENDING_APPROVAL→CANARY_RUNNING→PROMOTED→CLOSED. Any check can go to FAILED/REJECTED; shadow/canary/late outcome can go to ROLLED_BACK then OBSERVED with a new case. Skipping a stage requires a signed, expiring exception; policy/permission/evaluator changes cannot skip human approval.",
+    "event_envelope": {
+      "schema_version": "semver",
+      "event_id": "UUID/ULID unique",
+      "event_type": "feedback.received|incident.declared|eval.approved|proposal.opened|eval.completed|shadow.completed|canary.started|promotion.approved|release.promoted|rollback.completed|drift.detected",
+      "occurred_at": "UTC RFC3339",
+      "received_at": "UTC RFC3339",
+      "actor": "immutable workload/user identity and role",
+      "repo": "owner/name",
+      "subject": "case/proposal/release id",
+      "correlation_id": "trace/change/incident id",
+      "causation_id": "prior event id",
+      "head_sha": "candidate commit",
+      "versions": "model,prompt,tool,workflow,policy,evaluator,dataset,harness and environment digests",
+      "risk_and_scope": "risk tier, allowed actions, cohort, spend/time/traffic limits",
+      "evidence": "content-addressed URIs plus redaction/retention/provenance labels",
+      "decision": "policy result, rule version, approver identities, reason and expiry"
+    },
+    "idempotency": "Persist unique (event_id) and (subject, transition, candidate_digest, policy_version). Duplicate delivery returns prior result. Consumers checkpoint after durable side effect. Every external mutation uses a deterministic marker/clientMutationId where supported and verifies by re-read.",
+    "ordering_and_concurrency": "Reject stale head/dataset/policy digests. Serialize per subject with a lease or compare observed revision/hash before mutation. Out-of-order events are stored then replayed; impossible transitions open an exception, never infer success.",
+    "reconciliation": "Webhook gives fast hints; scheduled full scan is authoritative recovery. Resolve logical Project field/option names to current node IDs each run, compare desired/actual, classify additive/safe, conflicting, destructive or unmanaged drift, plan before apply, mutate allowlisted managed fields only, re-query, and audit before/after. Destructive option deletion/rename or human-edited conflict requires review."
+  },
+  "repository_artifacts": {
+    "files": [
+      {
+        "path": ".github/agent-os/config.schema.json",
+        "purpose": "JSON Schema for repository/risk/project/improvement configuration"
+      },
+      {
+        "path": ".github/agent-os/config.yaml",
+        "purpose": "enabled task classes, logical Project reference, managed fields, SLOs, budgets and external evidence-store references"
+      },
+      {
+        "path": ".github/agent-os/project.desired.yaml",
+        "purpose": "desired logical fields/options/views/mappings and ownership mode managed|observe; never claimed as actual remote state"
+      },
+      {
+        "path": ".github/agent-os/project.snapshot.schema.json",
+        "purpose": "schema for generated observed revision, node-ID map, drift and last verified time; snapshots stored as CI artifacts/audit records, not blindly committed"
+      },
+      {
+        "path": ".github/agent-os/schemas/event.schema.json",
+        "purpose": "state/event envelope validation"
+      },
+      {
+        "path": ".github/agent-os/schemas/feedback.schema.json",
+        "purpose": "feedback consent, provenance, severity and trace link"
+      },
+      {
+        "path": ".github/agent-os/schemas/proposal.schema.json",
+        "purpose": "hypothesis, change class, digests, metrics, thresholds, exposure and rollback"
+      },
+      {
+        "path": ".github/agent-os/schemas/eval-case.schema.json",
+        "purpose": "fixture reference, oracle/invariants, provenance/privacy, slices and split"
+      },
+      {
+        "path": ".github/agent-os/improvement/evals/manifest.yaml",
+        "purpose": "versioned public/regression case manifests and content hashes; private holdout only by opaque ID/hash"
+      },
+      {
+        "path": ".github/agent-os/improvement/postmortems/PM-template.md",
+        "purpose": "impact, timeline, contributors/failed defenses, mitigation, evidence, owned actions and eval candidates"
+      },
+      {
+        "path": ".github/agent-os/improvement/promotion-policy.rego",
+        "purpose": "deny/pause/approve rules tested and owned independently"
+      },
+      {
+        "path": ".github/agent-os/improvement/release-manifest.schema.json",
+        "purpose": "immutable component digests, compatibility, previous digest and kill/rollback handle"
+      },
+      {
+        "path": ".github/CODEOWNERS",
+        "purpose": "independent owners for workflows, policy, schemas and eval manifests"
+      },
+      {
+        "path": ".github/workflows/improvement-intake.yml",
+        "purpose": "validate/redact/link events without executing untrusted payload"
+      },
+      {
+        "path": ".github/workflows/eval-offline.yml",
+        "purpose": "reusable hermetic repeated evaluation with read-only tokens"
+      },
+      {
+        "path": ".github/workflows/project-reconcile.yml",
+        "purpose": "plan/apply remote Project drift using narrow GitHub App identity"
+      },
+      {
+        "path": ".github/workflows/improvement-shadow.yml",
+        "purpose": "live mirror with tools forced to no-side-effect adapters"
+      },
+      {
+        "path": ".github/workflows/improvement-canary.yml",
+        "purpose": "protected-environment deployment of signed digest and analysis"
+      },
+      {
+        "path": ".github/workflows/improvement-rollback.yml",
+        "purpose": "restore approved compatible last-known-good and verify"
+      },
+      {
+        "path": "tests/agent-os/{schema,state,policy,reconcile,permissions,eval,rollback}/",
+        "purpose": "contract, property, negative security, replay and drill tests"
+      },
+      {
+        "path": "docs/runbooks/{eval-contamination,project-drift,canary-abort,rollback-failed,break-glass}.md",
+        "purpose": "owned failure procedures and escalation"
+      }
+    ],
+    "protection": "Ruleset + CODEOWNERS require independent review of all control files. Workflows/actions are pinned to full commit SHA; generated evidence is attested and retained externally. Raw telemetry, secrets, holdouts, credentials and mutable actual Project snapshots do not enter ordinary Git history."
+  },
+  "workflow_steps": [
+    {
+      "step": 1,
+      "state": "OBSERVE",
+      "input": "user feedback, review edits, CI/security/dependency event, rollback, trace/SLO signal or sampled success",
+      "action": "Normalize and deduplicate. Correlate trace/change IDs and exact component digests. DLP/redact before storage; quarantine untrusted text.",
+      "output": "immutable evidence envelope",
+      "stop": "drop/aggregate unauthorized, duplicate or unverifiable input; page incident path for active harm."
+    },
+    {
+      "step": 2,
+      "state": "TRIAGE",
+      "input": "evidence envelope",
+      "action": "Classify risk/privacy/severity, reproduce where safe, assign owner/SLA, and compare with SLO/error budget.",
+      "output": "case and route",
+      "stop": "ambiguous intent, security/privacy impact or exhausted error budget requires human."
+    },
+    {
+      "step": 3,
+      "state": "LEARN/CURATE",
+      "input": "qualifying incident or repeated/sampled outcome",
+      "action": "Write blameless multi-factor postmortem. Minimize/de-identify reproduced case; record licensing/consent/provenance; independently label and time-split holdout.",
+      "output": "reviewed postmortem, owned actions, eval candidate",
+      "stop": "no verified oracle, consent/provenance failure, secret/PII leakage or unresolved label disagreement."
+    },
+    {
+      "step": 4,
+      "state": "EVAL_REVIEW",
+      "input": "eval candidate",
+      "action": "Curator checks expected invariants, counterexamples, split/leakage and rubric; separate public capability from near-100% regression suite.",
+      "output": "signed dataset version or rejection",
+      "stop": "proposer cannot approve inclusion or see hidden expected results."
+    },
+    {
+      "step": 5,
+      "state": "PROPOSE",
+      "input": "approved gap",
+      "action": "Agent opens a small PR changing one prompt/router/tool/workflow/code component with hypothesis, affected classes, expected value, risk, budgets, thresholds and compatible rollback digest.",
+      "output": "proposal manifest + diff",
+      "stop": "reject bundled permission/policy/hidden-eval/audit changes or missing rollback."
+    },
+    {
+      "step": 6,
+      "state": "OFFLINE_VERIFY",
+      "input": "immutable candidate SHA and frozen dataset/policy",
+      "action": "Use clean sandbox; deterministic tests/scans, repeated stochastic trials, public+private temporal holdouts, adversarial/metamorphic slices, cost/latency, expert-calibrated grading; attest raw results.",
+      "output": "signed evidence bundle",
+      "stop": "any critical invariant/authorization failure; stale/missing digest; material regression; insufficient evidence pauses."
+    },
+    {
+      "step": 7,
+      "state": "GATE",
+      "input": "attested evaluation bundle",
+      "action": "Independent policy engine evaluates risk, provenance, thresholds, error budget, reviewer and rollback drill. GitHub protected paths/environment bind approval to exact SHA/digests.",
+      "output": "deny, clarify, approve shadow/canary",
+      "stop": "agent author/committer cannot satisfy independent gate; sensitive classes require named human owner."
+    },
+    {
+      "step": 8,
+      "state": "SHADOW",
+      "input": "approved candidate",
+      "action": "Mirror representative live inputs with zero-authority tool adapters; compare decision/trajectory, safety, cost and latency against control; label all candidate outputs non-operative.",
+      "output": "shadow report",
+      "stop": "attempted side effect, data-policy breach, divergence/safety threshold failure or inconclusive window."
+    },
+    {
+      "step": 9,
+      "state": "CANARY",
+      "input": "shadow pass and deployment approval",
+      "action": "Deploy signed digest to smallest representative cohort with concurrent control, fixed max traffic/time/actions/spend/error burn, automated abort and manual kill switch.",
+      "output": "promote, pause or rollback decision",
+      "stop": "predeclared fail threshold aborts; inconclusive pauses; rollback failure becomes incident."
+    },
+    {
+      "step": 10,
+      "state": "PROMOTE/VERIFY",
+      "input": "canary pass",
+      "action": "Atomically point registry to immutable digest, preserve previous; observe delayed/segmented outcome and re-read deployment/Project actual state.",
+      "output": "retained release or rollback, linked audit chain",
+      "stop": "late regression restores last-known-good and opens new case; never silently edit evidence."
+    },
+    {
+      "step": 11,
+      "state": "RECONCILE/REVIEW",
+      "input": "webhook plus scheduled scan",
+      "action": "Reconcile Git-desired config with GitHub Project/rules/environment actual state; review recurrence, drift, action age, evaluator agreement, sampling and exception expiry monthly.",
+      "output": "verified actual snapshot, drift plan/issues, control improvements",
+      "stop": "destructive/ambiguous/unmanaged drift is report-only until human approval."
+    }
+  ],
+  "human_gates": [
+    {
+      "gate": "intent/ground truth",
+      "required_when": "new product behavior, ambiguous report, new rubric/oracle, high label/grader disagreement, protected-class or legal/privacy impact",
+      "binding": "named owner approves exact case/rubric/dataset digest; approval invalid after digest change"
+    },
+    {
+      "gate": "control-plane change",
+      "required_when": "policy, grader/evaluator, hidden-test inclusion rule, permissions, secrets, identity, workflow trust, retention/audit, ruleset/CODEOWNERS/environment or Project schema/destructive drift",
+      "binding": "independent CODEOWNER/ruleset plus protected environment; proposer cannot count; exact head SHA and policy/evidence digests recorded"
+    },
+    {
+      "gate": "high-risk release",
+      "required_when": "security/IAM, destructive or irreversible side effect, schema/data migration, production incident repair, public API/legal/safety behavior, large blast radius or exhausted error budget",
+      "binding": "domain owner and accountable release/incident owner approve bounded exposure and compensation plan; two-person confirmation where feasible"
+    },
+    {
+      "gate": "inconclusive/exception",
+      "required_when": "underpowered/conflicting metrics, failed check override, rollback incompatibility, expired evidence or emergency bypass",
+      "binding": "record failed rule/hashes, reason, owner, scope, compensating controls, start/expiry, rollback/kill switch, approvers and follow-up case; never convert inconclusive to pass"
+    },
+    {
+      "gate": "post-release/appeal",
+      "required_when": "material incident, user appeal, rollback/on-call action or repeated failure",
+      "binding": "review postmortem, eval inclusion and action closure; an agent may draft but not close its own governance action"
+    }
+  ],
+  "security_and_failure_modes": [
+    {
+      "mode": "control capture/self-approval",
+      "attack_or_fault": "agent edits grader, holdout, threshold, CODEOWNERS/ruleset, permissions or audit, then declares success",
+      "mitigation": "separate identities/stores; deny proposer writes; remote rulesets/environments; protected branches; independent attestation/policy; human gate for all controller changes"
+    },
+    {
+      "mode": "prompt/feedback poisoning",
+      "attack_or_fault": "issue, trace, PR, comment or tool output instructs agent/evaluator to leak secrets or weaken policy",
+      "mitigation": "treat content as data, structured parsers, no credentials in evaluated context, allowlisted tools/egress, DLP/quarantine, AgentDojo-style injection tests (https://arxiv.org/abs/2406.13352)"
+    },
+    {
+      "mode": "privilege crossover in Actions",
+      "attack_or_fault": "workflow_run or privileged job downloads artifact/checks out untrusted PR and executes it",
+      "mitigation": "untrusted job has permissions:{contents:read}; privileged job never executes candidate, validates run/repo/SHA/digest/schema/size and attestation, uses approved interpreter; follow GitHub Security Lab pwn-request guidance (https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/)"
+    },
+    {
+      "mode": "supply-chain substitution",
+      "attack_or_fault": "mutable action tag, tool image, model alias or artifact changes between eval and deploy",
+      "mitigation": "full-SHA action pins, image/model/prompt/tool digests, lockfiles, SLSA/GitHub attestation, signature verification and exact-digest environment approval"
+    },
+    {
+      "mode": "evaluation gaming/leakage",
+      "attack_or_fault": "weak tests, visible oracle, repeated tuning or LLM judge preference inflates score",
+      "mitigation": "private temporal holdout, proposer/evaluator separation, deterministic invariants, blinded expert calibration, multiple graders/trials, contamination and suspicious-pass audit (https://arxiv.org/abs/2410.06992)"
+    },
+    {
+      "mode": "telemetry privacy/retention failure",
+      "attack_or_fault": "prompts/traces contain PII, secrets, proprietary code or hostile payload; deletion does not propagate",
+      "mitigation": "data minimization, SDK+collector redaction, opaque object references, consent/license/retention tags, tiered access, lineage-aware delete and access audit (https://opentelemetry.io/docs/security/handling-sensitive-data/)"
+    },
+    {
+      "mode": "canary false confidence",
+      "attack_or_fault": "small biased cohort misses rare/delayed harm or overlapping releases confound cause",
+      "mitigation": "representative segmented cohort, concurrent control, one isolated change, delayed window, confidence/power plan, pause inconclusive, error-budget freeze"
+    },
+    {
+      "mode": "rollback illusion",
+      "attack_or_fault": "schema/external side effect is irreversible or previous bundle is incompatible; rollback job fails",
+      "mitigation": "expand-and-contract compatibility, compensation plan, preflight/drilled restore, last-known-good artifact, automatic abort only for proven reversible class, incident escalation on failure"
+    },
+    {
+      "mode": "Project drift/race",
+      "attack_or_fault": "human/bot changes remote field/options while stale reconciler overwrites; webhook lost/duplicated",
+      "mitigation": "managed-field ownership, logical-key resolution, plan/re-read/verify, per-project lease, idempotency, scheduled scan, report-only destructive/ambiguous drift; never treat YAML as observed truth"
+    },
+    {
+      "mode": "metric gaming/organizational harm",
+      "attack_or_fault": "agent closes more issues or cuts cost while defects, review load or user harm rise",
+      "mitigation": "hard safety invariants and multi-dimensional SPACE/SLO/DORA-style outcomes; raw denominators; no single composite promotion target"
+    },
+    {
+      "mode": "outage/dependency degradation",
+      "attack_or_fault": "GitHub/API/eval model/metrics unavailable, rate-limited or changes behavior",
+      "mitigation": "bounded retries with jitter, durable queue, circuit breaker, stale-evidence expiry, freeze promotion fail-closed, preserve current release and manual runbook"
+    }
+  ],
+  "validation_and_tests": {
+    "premerge": [
+      "JSON/YAML schema validation and golden fixtures for every contract/version migration",
+      "state-machine property tests: only allowed transitions; duplicates/out-of-order events and retry after crash are idempotent",
+      "OPA/promotion policy unit/coverage and mutation tests, including missing/stale/conflicting evidence→deny/pause",
+      "permission negative tests proving proposer cannot read secrets/holdouts, write protected paths/Project policy, approve environment, bypass ruleset or delete audit",
+      "workflow static checks for explicit permissions, full-SHA pins, untrusted expression/shell injection and workflow_run privilege crossover",
+      "reconciler contract tests against recorded GraphQL responses: ID churn, pagination, renamed/deleted option, rate limit, concurrent human edit, webhook duplicate/loss and dry-run no mutation",
+      "eval harness hermeticity, frozen seed/tool mocks where possible, repeatability budget, oracle audit, contamination/dedup and adversarial/metamorphic/AgentDojo-style cases",
+      "artifact/attestation negative tests: wrong repo/run/SHA/digest, unsigned, oversized, path traversal and malformed bundle all rejected"
+    ],
+    "preproduction": [
+      "shadow test asserts zero real side effects and alerts on any attempted write",
+      "canary simulator tests success/fail/inconclusive branches, representative routing, budget limits and concurrent-control labels",
+      "rollback drill restores exact compatible digest and verifies service/agent SLO plus Project/release registry; chaos test unavailable metrics/API and partial rollback",
+      "break-glass tabletop verifies two-person/expiry/audit/follow-up behavior"
+    ],
+    "acceptance": "No critical unauthorized action; all required deterministic regressions pass; statistical/non-inferiority and cost/latency thresholds are declared before results; independent reviewer binds evidence to exact digests; shadow passes; canary and rollback drill pass. Missing or inconclusive evidence pauses.",
+    "postrelease": [
+      "delayed outcome/SLO review",
+      "random human audit stratified by risk and disagreement",
+      "monthly recurrence, escape, drift, grader agreement, dataset freshness, false promotion/rollback and exception-expiry review"
+    ]
+  },
+  "operational_maintenance": {
+    "cadence": [
+      "continuous: durable event intake, SLO/security alerts, canary abort and webhook processing",
+      "daily: scheduled Project/rules/environment drift scan, failed queue/retry/dead-letter review, stale lease cleanup",
+      "weekly: new eval triage, action-item aging, dataset leakage/privacy checks, candidate cost and false-decision review",
+      "monthly: policy/evaluator calibration, Project schema drift, access/token inventory, sampled promotion audit, exception expiry and rollback drill status",
+      "quarterly: threat model, dependency/action pin upgrades, disaster restore, holdout refresh/time split, autonomy tier and build-vs-buy review"
+    ],
+    "recovery": "Freeze new promotions but keep current known-good on evidence/policy/metrics outage. Retry only idempotent operations. Restore registry/audit/evidence from tested backups; rotate compromised GitHub App/environment credentials; reconcile remote actual state; open incident/postmortem/eval before re-enable.",
+    "cleanup": "Expire raw telemetry by policy; propagate lawful deletion through derived objects while retaining non-sensitive audit tombstone; remove orphan shadow resources, branches/worktrees and artifacts; archive—not silently erase—failed evals/releases; retire stale cases only through reviewed manifest change.",
+    "upgrade": "Renovate/dependency PR proposes pinned action/tool/schema updates; replay fixed+fresh evals, shadow and canary like any control change. Model aliases are forbidden for promotion unless resolved to immutable provider version and separately evaluated.",
+    "runbooks": [
+      "eval contamination/leak",
+      "GitHub Project reconciliation conflict/rate limit",
+      "GitHub Actions credential or artifact compromise",
+      "metrics unavailable/inconclusive canary",
+      "automatic rollback failed or incompatible",
+      "privacy deletion and evidence legal hold",
+      "break-glass with expiry and post-incident backfill"
+    ]
+  },
+  "maturity_and_uncertainty": {
+    "production_ready": [
+      "Git PR/CODEOWNERS/ruleset review when correctly enforced",
+      "least-privilege Actions and protected environments",
+      "OTel trace/metric/log foundation",
+      "blameless postmortems and owned actions",
+      "deterministic tests, signed artifacts, bounded canary and tested rollback",
+      "read/diff/apply reconciliation against GitHub APIs"
+    ],
+    "conditional": [
+      "LLM/trajectory graders after domain expert calibration",
+      "automatic low-risk promotion after sustained repository-specific evidence",
+      "Project desired-state reconciliation because APIs, IDs, plans, races and human edits require careful ownership",
+      "telemetry-to-eval automation because privacy, provenance, oracle and selection bias need curation"
+    ],
+    "experimental": [
+      "automatic causal clustering/postmortem drafting",
+      "agent-generated metamorphic cases and judge ensembles",
+      "cross-provider stable agent telemetry and outcome schemas"
+    ],
+    "unsupported": [
+      "recursive self-modification",
+      "proposer access to hidden eval answers or release credentials",
+      "agent approval of policy/permissions/graders/audit changes",
+      "benchmark-only promotion",
+      "automatic high-impact or irreversible production repair"
+    ],
+    "key_uncertainties": [
+      "offline-to-production validity for long stateful trajectories",
+      "sample size/window for rare delayed harms",
+      "grader robustness under proposer adaptation",
+      "net value after review/compute/on-call costs",
+      "stable immutable model/version semantics across vendors",
+      "GitHub plan-specific enforcement and Project API behavior in the target organization"
+    ],
+    "overall": "High confidence in separation, versioning, reconciliation and progressive-delivery mechanics; medium in agent-eval practice; low that any general unattended self-improving repository is safe or economically proven."
+  },
+  "implementation_recommendation": {
+    "core_decision": "Build a governed proposal/eval/promotion loop, not a self-owning agent. Git is the desired policy/configuration ledger; GitHub Projects and deployment settings are remote actual state reconciled and audited by narrow independent controllers.",
+    "mvp_0_4_weeks": [
+      "Add schemas, component/version envelope, CODEOWNERS/ruleset protection, explicit Actions permissions and full-SHA pins.",
+      "Instrument trace/change/version IDs and a restricted redacted evidence store. Baseline outcomes, review cost and current error/rollback rates.",
+      "Implement read-only Project GraphQL inventory and dry-run drift report; do not mutate until ownership mappings and negative tests pass.",
+      "Start human-reviewed postmortem→regression-case curation. Agents may draft cases/proposals only."
+    ],
+    "stage_2_4_8_weeks": [
+      "Add portable hermetic offline runner, deterministic invariants, repeated trials, private temporal holdout, expert calibration and attested evidence bundle.",
+      "Use separate GitHub App identities for proposer, Project reconciler and evaluator. Reconciler mutates only allowlisted managed fields and verifies by re-read.",
+      "Deploy non-authoritative shadow with side-effect sinks; retain all promotion decisions as PR/check artifacts."
+    ],
+    "stage_3_after_evidence": [
+      "Canary only reversible low-risk prompt/router/tool/workflow bundles with exact digest, protected environment, budgets, concurrent control, abort and drilled rollback.",
+      "Allow auto-promotion only for narrow proven classes after predeclared local thresholds, sufficient denominators, zero critical unauthorized actions and sampled human audit. Never auto-promote control-plane changes."
+    ],
+    "do_not_build_first": [
+      "custom multi-agent learner",
+      "automatic raw-feedback fine-tuning",
+      "write-capable Project reconciliation without dry-run/ownership model",
+      "unified score optimizer",
+      "permission/policy mutation agent"
+    ],
+    "exit_criteria": "Expand authority only if retained improvements beat baseline on user/SLO/stability and net cost, false promotion/rollback is understood, evaluator agreement is acceptable by slice, rollback drills succeed, and no critical unauthorized action occurs. Otherwise keep proposal-first or retire the loop."
+  },
+  "sources": [
+    {
+      "title": "Using the API to manage Projects",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "ProjectV2 GraphQL queries/mutations and automation examples",
+        "remote node IDs and field values"
+      ]
+    },
+    {
+      "title": "GraphQL mutations: updateProjectV2ItemFieldValue",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official API reference",
+      "supported_claims": [
+        "mutation contract for Project v2 field values"
+      ]
+    },
+    {
+      "title": "Webhook events and payloads: projects_v2_item",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official webhook reference",
+      "supported_claims": [
+        "Project item event payloads and delivery surface"
+      ]
+    },
+    {
+      "title": "REST API endpoints for repository rules",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/rest/repos/rules",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official API reference",
+      "supported_claims": [
+        "rulesets, enforcement, bypass actor API surface"
+      ]
+    },
+    {
+      "title": "About code owners",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "CODEOWNERS location and review ownership",
+        "need branch protection/rules for enforcement"
+      ]
+    },
+    {
+      "title": "Deployments and environments",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "environment required reviewers",
+        "prevent self-review",
+        "secrets wait for protection rules",
+        "reviewer limits and plan caveats"
+      ]
+    },
+    {
+      "title": "Workflow syntax: permissions",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "workflow/job GITHUB_TOKEN permission reduction"
+      ]
+    },
+    {
+      "title": "Reusing workflow configurations",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "reusable workflows and typed inputs/secrets",
+        "permission inheritance constraints"
+      ]
+    },
+    {
+      "title": "Secure use reference",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "full commit SHA pinning",
+        "untrusted input and credential guidance"
+      ]
+    },
+    {
+      "title": "Events that trigger workflows: workflow_run",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "workflow_run privilege behavior and warnings"
+      ]
+    },
+    {
+      "title": "Artifact attestations",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "build provenance attestations and verification"
+      ]
+    },
+    {
+      "title": "Reviewing the audit log for your organization",
+      "publisher": "GitHub",
+      "url": "https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "organization audit search/export and retention context"
+      ]
+    },
+    {
+      "title": "Evaluation best practices",
+      "publisher": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "first-party vendor documentation",
+      "supported_claims": [
+        "representative datasets",
+        "continuous evaluation",
+        "human calibration and anti-patterns"
+      ]
+    },
+    {
+      "title": "Trace grading",
+      "publisher": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/trace-grading",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "first-party vendor documentation",
+      "supported_claims": [
+        "grading agent traces and workflow-level errors"
+      ]
+    },
+    {
+      "title": "Demystifying evals for AI agents",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "publication_or_update_date": "2026-01-09",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering guidance",
+      "supported_claims": [
+        "agent eval harnesses and transcripts",
+        "capability vs regression suites",
+        "repeated stochastic trials",
+        "production failures to tests"
+      ]
+    },
+    {
+      "title": "OpenTelemetry overview",
+      "publisher": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/specs/otel/overview/",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open standard documentation",
+      "supported_claims": [
+        "portable traces, metrics and logs architecture"
+      ]
+    },
+    {
+      "title": "Handling sensitive data",
+      "publisher": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/security/handling-sensitive-data/",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source security guidance",
+      "supported_claims": [
+        "data minimization, filtering, redaction and access risk"
+      ]
+    },
+    {
+      "title": "Trace Context",
+      "publisher": "W3C",
+      "url": "https://www.w3.org/TR/trace-context/",
+      "publication_or_update_date": "2021-11-23",
+      "access_date": "2026-09-13",
+      "source_type": "W3C Recommendation",
+      "supported_claims": [
+        "cross-process trace context",
+        "privacy/security limits"
+      ]
+    },
+    {
+      "title": "Postmortem Culture: Learning from Failure",
+      "publisher": "Google SRE",
+      "url": "https://sre.google/sre-book/postmortem-culture/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "blameless postmortem structure",
+        "owned preventive actions"
+      ]
+    },
+    {
+      "title": "Implementing SLOs",
+      "publisher": "Google SRE",
+      "url": "https://sre.google/workbook/implementing-slos/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "SLO/error-budget policy and review"
+      ]
+    },
+    {
+      "title": "Canarying Releases",
+      "publisher": "Google SRE",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "control/canary comparison",
+        "canary limits and rollout practice"
+      ]
+    },
+    {
+      "title": "Analysis and progressive delivery",
+      "publisher": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_or_update_date": "current stable docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source official documentation",
+      "supported_claims": [
+        "metric analysis, success/failure/inconclusive",
+        "pause, abort and promotion"
+      ]
+    },
+    {
+      "title": "Canary deployment strategy",
+      "publisher": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/canary/",
+      "publication_or_update_date": "current stable docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source official documentation",
+      "supported_claims": [
+        "weighted steps, pauses and staged rollout"
+      ]
+    },
+    {
+      "title": "Open Policy Agent documentation",
+      "publisher": "Open Policy Agent/CNCF",
+      "url": "https://www.openpolicyagent.org/docs",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source official documentation",
+      "supported_claims": [
+        "separation of policy decision and enforcement",
+        "policy tests/bundles"
+      ]
+    },
+    {
+      "title": "NIST AI 600-1: Generative Artificial Intelligence Profile",
+      "publisher": "NIST; Autio et al.",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "publication_or_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/profile",
+      "supported_claims": [
+        "pre-deployment testing",
+        "ongoing monitoring/review",
+        "incidents, provenance, feedback and recourse"
+      ]
+    },
+    {
+      "title": "NIST SP 800-204C: Implementation of DevSecOps for a Microservices-based Application with Service Mesh",
+      "publisher": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/204/c/final",
+      "publication_or_update_date": "2022-03-29",
+      "access_date": "2026-09-13",
+      "source_type": "government guidance",
+      "supported_claims": [
+        "policy-as-code CI/CD, periodic update and conflict checks"
+      ]
+    },
+    {
+      "title": "SLSA Provenance v1.2",
+      "publisher": "SLSA project/OpenSSF",
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "publication_or_update_date": "2025-04",
+      "access_date": "2026-09-13",
+      "source_type": "open supply-chain specification",
+      "supported_claims": [
+        "artifact provenance predicate and immutable build inputs"
+      ]
+    },
+    {
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher": "Yang et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint",
+      "supported_claims": [
+        "solution leakage, weak-test suspicious passes and filtered resolution results"
+      ]
+    },
+    {
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher": "Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "publication_or_update_date": "2024-06-19",
+      "access_date": "2026-09-13",
+      "source_type": "academic paper/preprint",
+      "supported_claims": [
+        "tool-agent prompt-injection benchmark",
+        "utility/security tradeoffs"
+      ]
+    },
+    {
+      "title": "Preventing pwn requests",
+      "publisher": "GitHub Security Lab",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_or_update_date": "2021-08-20",
+      "access_date": "2026-09-13",
+      "source_type": "independent/first-party security research",
+      "supported_claims": [
+        "privileged workflow_run and untrusted artifact/code attack patterns",
+        "safe workflow split"
+      ]
+    },
+    {
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher": "METR",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_or_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled study",
+      "supported_claims": [
+        "19% measured slowdown",
+        "developer forecast/perception mismatch",
+        "study scope and limitations"
+      ]
+    },
+    {
+      "title": "The SPACE of Developer Productivity",
+      "publisher": "Forsgren et al., ACM Queue",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "publication_or_update_date": "2021-03-06",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed framework",
+      "supported_claims": [
+        "multi-dimensional productivity measurement",
+        "limits of activity metrics"
+      ]
+    },
+    {
+      "title": "How Complex Systems Fail",
+      "publisher": "Richard I. Cook",
+      "url": "https://how.complexsystems.fail/",
+      "publication_or_update_date": "1998; web edition current",
+      "access_date": "2026-09-13",
+      "source_type": "independent human-factors synthesis",
+      "supported_claims": [
+        "multiple contributing failure conditions",
+        "hindsight and root-cause limits"
+      ]
+    },
+    {
+      "title": "The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction",
+      "publisher": "Breck et al., Google Research",
+      "url": "https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/",
+      "publication_or_update_date": "2017",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed/industry paper",
+      "supported_claims": [
+        "production ML test categories and monitoring debt"
+      ]
+    },
+    {
+      "title": "Hidden Technical Debt in Machine Learning Systems",
+      "publisher": "Sculley et al., Google Research",
+      "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/",
+      "publication_or_update_date": "2015",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed/industry paper",
+      "supported_claims": [
+        "data/model dependency and feedback-loop technical debt"
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "Git declarations versus GitHub operational state",
+      "claims": "Repository YAML is reviewable and reproducible, but Projects fields/items, rulesets and environment approvals are remote resources changed by API/UI (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects; https://docs.github.com/en/rest/repos/rules).",
+      "resolution": "Name YAML desired state only. Read remote actual, plan/apply/re-read with managed-field ownership; surface conflicts/destructive drift rather than overwrite."
+    },
+    {
+      "topic": "continuous automated eval versus trustworthy ground truth",
+      "claims": "OpenAI/Anthropic advocate continuous automation and graders (https://developers.openai.com/api/docs/guides/evaluation-best-practices; https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents), while SWE-Bench+ finds leakage and weak-test passes (https://arxiv.org/abs/2410.06992).",
+      "resolution": "Automate replay, not authority: private temporal holdouts, deterministic invariants, expert calibration, proposer/evaluator separation and suspicious-pass audit."
+    },
+    {
+      "topic": "environment approval versus strong multi-party separation",
+      "claims": "GitHub can prevent self-review, but one approval from a list of up to six reviewers is sufficient and features vary by plan (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+      "resolution": "Use environment approval for exact-digest gating, but add external/two-person policy for sensitive releases and test target-plan behavior."
+    },
+    {
+      "topic": "privileged workflow chaining versus untrusted evaluation",
+      "claims": "workflow_run enables a privileged follow-on even if the triggering workflow was unprivileged (https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run); Security Lab shows artifact/cache/code abuse patterns (https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/).",
+      "resolution": "Privilege stage validates metadata/attestation and never executes candidate-controlled content; promotion consumes a small declarative evidence bundle only."
+    },
+    {
+      "topic": "agent productivity optimism versus measured outcome",
+      "claims": "Benchmark/vendor narratives suggest faster work, but METR’s scoped RCT found experienced developers 19% slower despite optimistic forecasts/perceptions (https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/).",
+      "resolution": "No universal claim: run repository-specific baseline, shadow and retained-outcome experiment including review/on-call cost."
+    },
+    {
+      "topic": "automatic rollback versus irreversible state",
+      "claims": "Argo can abort/rollback a rollout from analysis (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/), but external side effects and schema/data changes may not reverse.",
+      "resolution": "Auto-rollback only proven compatible immutable bundles or reversible flags; destructive changes need compensation and human approval."
+    },
+    {
+      "topic": "blameless root cause versus systems causality",
+      "claims": "SRE postmortems include root causes (https://sre.google/sre-book/postmortem-culture/), while Cook warns complex accidents lack one isolated cause (https://how.complexsystems.fail/).",
+      "resolution": "Record trigger, contributors, conditions and failed defenses; avoid automated single-cause attribution."
+    }
+  ],
+  "confidence": {
+    "overall": "High for GitHub/API/security contracts and mature SRE/progressive-delivery mechanics; medium for agent-specific evaluation design; low for unattended improvement, universal thresholds or net economic benefit.",
+    "high": [
+      "GitHub Project state is remote and mutation-driven, so declarative Git needs reconciliation",
+      "ruleset/CODEOWNERS/environment/Actions permission mechanisms as documented",
+      "identity separation, immutable digests, idempotency and rollback rehearsal are necessary controls",
+      "OTel/SRE/NIST lifecycle primitives"
+    ],
+    "medium": [
+      "trajectory graders plus expert calibration predict repository outcomes",
+      "automatic promotion of narrow reversible low-risk control bundles after local evidence",
+      "Project reconciliation can safely coexist with manual edits under explicit field ownership"
+    ],
+    "low": [
+      "general recursive self-improvement",
+      "benchmark score predicts production user value",
+      "a universal canary sample/window or automation threshold",
+      "future GitHub plan/API/model-provider behavior after the as-of date"
+    ],
+    "currency_note": "The requested cutoff is 2026-09-13. Several documentation pages are continuously updated without a visible revision date. Exact target organization plan, rulesets, GitHub App permissions and GraphQL schema must be probed during implementation."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "metrics_and_limits",
+    "maturity_and_uncertainty",
+    "implementation_recommendation"
+  ]
+}

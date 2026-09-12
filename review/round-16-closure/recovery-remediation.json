@@ -1,0 +1,106 @@
+{
+  "reviewer": "round-16 independent recovery/remediation closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-15 correction",
+    "specialty": "All obligation, rollback, block release, cleanup, cancellation, and release-attempt paths, including BUILD, MAINTENANCE, and IMPROVEMENT parent/subaggregate terminal ownership.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-15-resolution.md",
+      "review/round-15-closure/formal-model.json",
+      "review/round-15-closure/improvement-races.json",
+      "review/round-15-closure/cross-consistency.json",
+      "review/round-15-closure/recovery-remediation.json",
+      "review/round-15-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-product model execution, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation are explicitly accepted unperformed. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "authority_status_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md identifies PLAN.md as the primary plan-only deliverable and docs/state-transition-manifests.md as its incorporated normative legal-edge authority.",
+        "Recomputed PLAN.md SHA-256 is 9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d.",
+        "The normative manifest contains exactly 799 uniquely identified edge rows with no duplicate edge ID: 96 canonical and 703 private/product rows, matching review/round-15-resolution.md.",
+        "README.md, requirements traceability, and the round-15 resolution expressly disclaim implementation, exhaustive reachable-product proof, fresh semantic evidence validation, production safety, and independent closure."
+      ]
+    },
+    {
+      "area": "round_15_resolution_inventory",
+      "result": "pass",
+      "exact_text": [
+        "All five round-15 closure JSON files parse. Their exact raw high-ID set is R15-IR-001, R15-IR-002, R15-IR-003, R15-XC-001, R15-REC-001, and R15-ER-001, with zero critical findings.",
+        "review/round-15-resolution.md maps all 6/6 raw highs to four unique defects.",
+        "The recovery defect R15-REC-001 is mapped to IA18-F/IA18-C, work-cancellation guards on IA16/IA17, and generated before/after failure-cleanup cancellation witnesses."
+      ]
+    },
+    {
+      "area": "remediation_obligations_and_block_release",
+      "result": "pass",
+      "exact_text": [
+        "RO00-B, RO00-M, and RO00-I are the only rollback-safety absent-to-OPEN creation transactions. Each binds deterministic obligation/link/child/event identities, retains the exact exposure/resource blocks, and creates no CleanupItem or C11 transition.",
+        "RO09 closes the rollback-safety remediation child but releases no rollback-safety block. BUILD still requires B74 then B34 then B38; MAINTENANCE still requires M62 then M25 then M29; IMPROVEMENT still requires IRB09 then IRB03 then exactly one of IRB07-N/R/Q.",
+        "Only B38, M29, or the selected IRB07-N/R/Q removes its exact purpose/generation/key-set blocks while atomically sealing or adopting genuine ROLLED_BACK and emitting the bound BlockReleaseReceipt.",
+        "RO11-RO13 atomically revoke and fence active remediation with child quiescence and effect settlement or reconciliation. RO14 is the sole reauthorization row; CLOSED is immutable; later signals create a new deterministic generation."
+      ]
+    },
+    {
+      "area": "build_and_maintenance_rollback_cancellation_cleanup",
+      "result": "pass",
+      "exact_text": [
+        "B37/M28 enter the distinct nonterminal ROLLBACK_REMEDIATION_WAIT and atomically create the protected rollback-safety obligation. B77/M65 keeps unresolved remediation visible and cannot clean, terminalize cancellation, resume ordinary work, or release resources.",
+        "B75/M63 records cancellation during remediation without bypassing settlement. After genuine restoration and independent verification, B38/M29 alone releases blocks and B71-P/M59-P continues the already-persisted cancellation.",
+        "B71/M59, B71-P/M59-P, and B71-R/M59-R separate first post-rollback cancellation, persisted-during-rollback continuation, and byte-identical replay. Their expected-version/disposition CAS excludes the ordinary B39/M30 cleanup race."
+      ]
+    },
+    {
+      "area": "improvement_rollback_and_parent_cleanup_terminal_ownership",
+      "result": "pass",
+      "exact_text": [
+        "IRB07-N/R/Q is the exact NONE/REQUESTED/QUIESCING rollback-settlement partition. IRB08 owns non-WIDENING_ABORT cleanup only under NONE; IR13C-X owns exposed WIDENING_ABORT cleanup only under NONE; IX03 owns cancellation cleanup under QUIESCING.",
+        "IX03 requires terminal or quiescence-closed children, settled effects, and either complete protected no-exposure proof with rollback IDLE or actual ROLLED_BACK plus every applicable rollback-safety BlockReleaseReceipt.",
+        "IX04 remains the sole improvement-parent CANCELLED owner and requires previously committed clean receipts plus no live child, authority, effect, rollback, or release attempt."
+      ]
+    },
+    {
+      "area": "release_attempt_failure_cleanup_cancellation_correction",
+      "result": "pass",
+      "exact_text": [
+        "IA16 and IA17 now require work_cancel_state=NONE, so an IX01 winner excludes ordinary failure settlement by expected-version CAS.",
+        "IA18-F covers failure-origin FAILURE_PENDING_CLEANUP in REQUESTED, QUIESCING, or CLEANING cancellation context, adopts the existing IA07/IA08 attempt cleanup, preserves the one parent CleanupManifest byte-for-byte, and creates no duplicate cleanup, saga, or parent terminal.",
+        "IA18-C covers failure-origin CLEANING after attempt-local clean receipts in REQUESTED, QUIESCING, or CLEANING cancellation context and seals only attempt-local CANCELLED while preserving IX parent ownership.",
+        "IX05 may adopt an already-canonical CLEANING parent without settling the release attempt; IA18-F/IA18-C then provide the missing attempt-local continuation, and IX04 remains blocked until both attempt-local and full parent cleanup guards pass.",
+        "The generated-witness contract races IX01 immediately before and after IA16 and immediately before IA17, requires exact IX-dominant stutters, byte-identical preservation/replay, conflict rejection, no duplicate cleanup owner, and eventual IX04 only after all guards pass."
+      ]
+    },
+    {
+      "area": "schema_3_evidence_boundary_and_traceability",
+      "result": "pass",
+      "exact_text": [
+        "requirements-traceability.md keeps the requirements register structurally mapped 16/16 and describes the round-15 formal/status boundary without claiming implementation, empirical validation, exhaustive proof, or closure.",
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-15, and its recorded PLAN and normative-manifest SHA-256 values match the current bytes.",
+        "The graph records 37 corpus result files, 25 source observations, 20 material claims, and 36 evidence edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 PLAN numbered sections and all 28 dynamically derived normative-manifest headings are marked reviewed.",
+        "The graph explicitly remains editorial_candidate_associations_only with legacy_unverified provenance; it claims neither immutable fresh retrieval nor semantic entailment validation."
+      ]
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "total": 0
+  },
+  "residual_uncertainty": [
+    "Implementation and exhaustive generated reachable-product/full-product model execution remain future gates and were accepted as unperformed.",
+    "Fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation remain future gates and were accepted as unperformed."
+  ],
+  "closure_criteria_pass": true
+}

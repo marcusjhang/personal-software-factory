@@ -1,0 +1,117 @@
+{
+  "reviewer": "round-17 independent formal-model closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-16 correction and schema-3 graph regeneration",
+    "specialty": "All 801 normative manifest rows, with emphasis on IX06-HUR/HUQ, IXH active/no-generation degradation receipts, exact generated unions, deterministic reducer behavior, canonical adjacency, terminal ownership, and preservation of prior repairs.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-16-resolution.md",
+      "review/round-16-closure/formal-model.json",
+      "review/round-16-closure/improvement-races.json",
+      "review/round-16-closure/cross-consistency.json",
+      "review/round-16-closure/recovery-remediation.json",
+      "review/round-16-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-product model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for a true unmet requirement, contradiction, unsafe or undefined path, or material overclaim. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "independent_checks": {
+    "manifest_edge_rows_parsed": 801,
+    "unique_manifest_edge_ids": 801,
+    "duplicate_manifest_edge_ids": 0,
+    "markdown_table_width_mismatches": 0,
+    "canonical_rows": 96,
+    "private_or_product_rows": 705,
+    "canonical_symbols": 27,
+    "canonical_symbols_reachable_from_INBOX": 27,
+    "canonical_sinks": [
+      "CANCELLED",
+      "DONE",
+      "FAILED"
+    ],
+    "unlisted_literal_canonical_projection_adjacencies": 0,
+    "ix06_hur_huq_present_as_canonical_stutters": true,
+    "cancellation_revocation_exact_union": [
+      "IX06-UR",
+      "IX06-UQ",
+      "IX06-HUR",
+      "IX06-HUQ",
+      "IX06-NR",
+      "IX06-NQ",
+      "IX06-XR",
+      "IX06-XQ"
+    ],
+    "ixh_rows": [
+      "IXH01-R",
+      "IXH01-Q",
+      "IXH01-C"
+    ],
+    "ixh_generation_partitions": [
+      "ACTIVE_GENERATION",
+      "NO_ACTIVE_GENERATION"
+    ],
+    "schema_version": "3.0.0",
+    "schema_checkpoint": "round-16",
+    "plan_sha256": "31a7c01db2def3d0d708c448dc5f2bbbe60aa53346261e24c2c873ec5bdf6e6f",
+    "normative_manifest_sha256": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+    "schema_plan_digest_matches_current_bytes": true,
+    "schema_manifest_digest_matches_current_bytes": true,
+    "schema_graph_counts": {
+      "source_observations": 25,
+      "material_claims": 20,
+      "evidence_edges": 36,
+      "candidate_support": 23,
+      "candidate_refute": 5,
+      "context_only": 8,
+      "supports": 0,
+      "refutes": 0
+    },
+    "schema_graph_unique_edge_ids": 36,
+    "normative_manifest_headings_current_and_reviewed": 28,
+    "requirements_structurally_mapped": "16/16"
+  },
+  "contract_reproduction": [
+    {
+      "area": "801_row_inventory_canonical_adjacency_and_terminals",
+      "result": "pass",
+      "basis": "Independent first-column parsing found 801 unique edge IDs: 96 canonical and 705 private/product. All 27 canonical symbols are reachable from INBOX; exact sinks are CANCELLED, DONE, and FAILED. Every literal multi-step canonical projection uses listed adjacency."
+    },
+    {
+      "area": "ix06_already_reconciling_unsettled_revocation",
+      "result": "pass",
+      "basis": "IX06-HUR/HUQ provide REQUESTED/QUIESCING ownership for authenticated revocation while WIDENING_RECONCILING or PROMOTION_RECONCILING retains the original UNSETTLED Effect. Both are canonical stutters, preserve the fence and all Effect/reconciliation/rollback/cleanup identities and states, and create no saga or cleanup. The named revocation relation is exactly the eight-row IX06 union and states pairwise exclusion, CAS, replay/conflict behavior, and before/after reconciliation and settlement witnesses."
+    },
+    {
+      "area": "ixh_active_and_no_generation_degradation",
+      "result": "pass",
+      "basis": "IXH01-R/Q/C cover HEALTHY REQUESTED, QUIESCING, and CLEANING tuples through exact ACTIVE_GENERATION and NO_ACTIVE_GENERATION partitions. CancellationDegradationReceipt V1 uses canonical nullable generation identity and binds repository, work, cancellation epoch/control event, pre-event tuple, and degradation event. Replay/conflict rules are exact, no generation is invented, identities and ownership are preserved, and terminal coordinates are excluded."
+    },
+    {
+      "area": "reducer_adjacency_terminal_and_prior_repairs",
+      "result": "pass",
+      "basis": "The reducer has closed coordinate vocabularies, ordered predicates, rejection for unknown/ambiguous tuples, exact terminal conjunctions, cancellation and rollback dominance, and sole cleanup/terminal owners. IXH reduces through REDUCE-V1; IX06-HUR/HUQ stutter. The round-16 changes preserve earlier failure-cleanup cancellation, X/N classification, exact Effect identity, single rollback origin/saga, parent cleanup ownership, and immutable terminals."
+    },
+    {
+      "area": "status_requirements_and_schema3_graph",
+      "result": "pass",
+      "basis": "README, traceability, and the round-16 register consistently identify round 16 as current and round 15 as historical while retaining the plan-only boundary. The schema-3 candidate graph binds the recomputed current PLAN and manifest hashes, covers the exact 28 current manifest headings, uses only candidate_support, candidate_refute, and context_only relations, and makes no semantic-validation claim. All R-01 through R-16 remain structurally mapped."
+    }
+  ],
+  "findings": [],
+  "severity_summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "closure_criteria_pass": true,
+  "verdict": "PASS \u2014 no critical or high plan-only closure defect found. Future implementation, exhaustive full-product execution, fresh immutable evidence retrieval, same-run semantic review, and production validation remain explicit gates rather than findings."
+}

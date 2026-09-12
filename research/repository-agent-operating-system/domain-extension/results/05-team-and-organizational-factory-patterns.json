@@ -1,0 +1,1502 @@
+{
+  "scope": {
+    "question": "Which documented organizational factory patterns can inform a repository-native, factory-as-code runtime, and which claims have outcome evidence?",
+    "comparators": [
+      "Warp Factories",
+      "Anthropic",
+      "OpenAI",
+      "Microsoft/GitHub",
+      "GitLab",
+      "Cognition/Devin",
+      "Google SRE/DORA",
+      "GTM operations and governance exemplars"
+    ],
+    "boundaries": [
+      "Engineering ships first. The design does not claim a universal agent/plugin platform.",
+      "GTM is a separate repository and domain configuration. It remains disabled until explicit engineering-maturity and GTM value/risk gates pass.",
+      "A documented feature or vendor case is not an audited outcome. Product UI screenshots, testimonials and internal anecdotes are labeled accordingly.",
+      "The study compares roles, workflows, artifacts, evals, human gates, domain ownership, cross-repo handoffs and protected improvement. It does not rank foundation models."
+    ],
+    "time": "2023-present for agent products, with older SRE/standards foundations where relevant; evidence cutoff 2026-09-13."
+  },
+  "verified_capabilities": [
+    {
+      "system": "Warp Factories",
+      "documented": "Factory-as-code docs and v1alpha1 schemas cover factory, agent, automation, runner, benchmark task/suite/scorer, skill and webhook definitions (S45-S47). The default workflow is Intake→Triage→optional Planning→human spec approval→Build→Review↔Build→human handoff; Review is advisory and Complete means handed to a human, not merged (S48,S49). Product pages describe foreman orchestration, human gates and human merge (S1). Scorers are LLM classification judges with thresholds/sampling; self-improvement groups 25 failures or the oldest 7 days and opens a config PR for human review (S50,S51).",
+      "outcome_status": "Warp reports an internal 30-task replay costing $2,130.57 and a routing change associated with $80→$30 cost/completed PR and 69%→87% task-compliance score (S2). This is first-party, small, LLM-judged and not audited; no raw benchmark dataset/variance/delayed defect denominator. Docs state third-party harness comparison was unavailable and A/B testing remained future (S2,S52)."
+    },
+    {
+      "system": "Anthropic",
+      "documented": "Claude Research uses a lead orchestrator, parallel subagents, persistent checkpoints/artifacts and a separate citation stage. Anthropic reports an internal 90.2% lift over single-agent on its research eval and up to 90% latency reduction, but about 15× chat tokens and limited suitability for less-parallel coding work (S3). Anthropic’s general patterns are chaining, routing, parallelization, orchestrator-workers and evaluator-optimizer, with advice to begin simply (S4). Agent evals combine outcomes/traces with deterministic, model and human graders, repeated trials, capability vs regression suites and domain-owned tasks (S5).",
+      "outcome_status": "Anthropic reports shared workspace rosters, manual review→task-class earned autonomy, doer/verifier splits, batched questions and explicit human owners (S55), plus an intent→spec→plan→diff/tests→PR→incident artifact playbook (S56). Internal Claude Code use across functions shows domain-specific artifacts (S6). These are selected first-party reports; claims such as “500 fixes” and reported time savings lack complete denominators/audit."
+    },
+    {
+      "system": "OpenAI",
+      "documented": "Codex cloud supports repository-connected isolated tasks, parallel/background work, tests/diffs and PR handoff; environment setup, secrets removal, default-off internet and layered AGENTS.md are explicit but instructions are not authority (S7,S8,S63-S66). Symphony specifies issue/status as durable identity, one workspace/agent per open task, restart/reconciliation, WORKFLOW.md, CI shepherding and review packets, with humans admitting follow-ups (S61,S62). OpenAI evals/trace grading support task datasets and diagnostic trace evidence (S9,S10).",
+      "outcome_status": "Harness Engineering reports ~1M LOC and ~1,500 merged PRs with 3→7 engineers and extensive docs/structural tests/observability, but allows agent review/self-merge and is an unaudited, unusual greenfield case; it also reports a prior ~20% cleanup burden (S60). Symphony’s “500%” landed-PR increase lacks denominator/defect/reviewer cost (S61). A separate internal trace monitor is evidence for oversight but is asynchronous and first-party (S67)."
+    },
+    {
+      "system": "Microsoft/GitHub",
+      "documented": "Copilot cloud agent runs research→plan→one repo/branch→code/test→optional PR in an ephemeral Actions environment (documented 59-minute maximum); it cannot ready, approve or merge its PR, and workflow execution normally requires a write-authorized human approval (S12,S68). Custom Markdown-YAML profiles distribute specialist prompts/tools/MCP, but omitted tools default broadly and profiles are neither identities nor approvals (S13,S70). Copilot automations are creator-private and not Git-versioned; confidence approval UI is not a server-side security boundary (S71,S72). Agentic Workflows compiles Markdown to Actions and was public preview (S73). Microsoft’s Agentic SDLC Starter shows reference roles/artifacts (S17).",
+      "outcome_status": "The GitHub billing team reports narrow technical-debt usefulness but hours of human review and warns against 100+-file PRs (S14). No controlled counterfactual/defect denominator. Agentic Workflow testimonials are marketing, and network/firewall coverage excludes some setup/MCP paths (S69,S73)."
+    },
+    {
+      "system": "GitLab",
+      "documented": "Duo Agent Platform offers catalog, project enablement, custom flows, triggers, sessions and runners (S18-S22,S75). YAML separates Agent, Tool, AI Task and Human Input; publishing and enablement are separate Maintainer/Owner actions (S75). Composite identity intersects initiator/service-account authority for runner flows, not Agentic Chat (S76).",
+      "outcome_status": "Material caveat: runner flows have no present user, do not support Always Ask, and an unspecified tool rule defaults Allow; audit storage/forwarding may be opt-in; “zero retention everywhere” is not supported (S77-S80). Thus background GTM cannot carry publish/send/CRM-write authority and rely on an interactive gate. Documentation establishes mechanics, not outcome/security audit."
+    },
+    {
+      "system": "Other/contrary evidence",
+      "documented": "Cognition describes dogfooding Devin (S23); Answer.AI documents supervision and task-selection limits (S24). METR found experienced maintainers slower with early-2025 tools on familiar repositories despite positive expectations (S25). DORA says AI outcomes depend on the wider delivery system (S26).",
+      "outcome_status": "These conflict with simple vendor productivity narratives and justify local, workflow-level controlled evaluation."
+    },
+    {
+      "system": "GTM exemplars",
+      "documented": "GitLab’s public marketing operations/campaign handbook shows DRI, systems-of-record and measurement artifacts (S28,S29). Warp’s open GTM, social and CRO references show evidence-rich account handoffs for rep review, social drafts routed to Slack/human publication, and experiment changes via PR with human prioritization/merge (S81-S86). HubSpot offers designated pre-publication approval objects (S89); Adobe offers versioned brand guidance/approval (S33,S34).",
+      "outcome_status": "CRMArena/Pro report substantial CRM failure and weak inherent confidentiality awareness (S87,S88). FTC/ICO and Gmail make consent/suppression/content/authentication/complaint controls operational gates, not prompt advice (S35,S36,S90). No source establishes generic autonomous GTM lift or safety."
+    }
+  ],
+  "evidence_and_limits": {
+    "evidence_grade": {
+      "A": "Standards, regulator rules, public source/config behavior (S15-S18,S35-S44).",
+      "B": "First-party engineering reports with concrete methods/numbers but no external audit (S2,S3,S14,S23).",
+      "C": "Vendor docs/announcements/handbook statements proving intended capability only (S1,S6-S13,S18-S22,S28-S34).",
+      "challenge": "Independent study/practitioner evidence (S24-S26), which is credible but scoped to its population/version."
+    },
+    "what_is_not_proven": [
+      "No comparator publishes a third-party audit of a general factory spanning ideation→production→learning.",
+      "Warp v1alpha1 defines desired files, not an authoritative live work-item/event/effect store; public RunState is only run status. Prompt-configured review/spec behavior is not authorization enforcement (S45,S46,S48-S50,S54). Factory MCP pickup does not claim/lock/pause work and account access is not per-factory scope (S53).",
+      "WarpBench has 30 curated tasks, uses LLM-as-judge, lacks raw runs/confidence intervals/delayed defect data and evaluated retrospective similarity; causal attribution remains uncertain (S2).",
+      "Internal use stories omit failed-task denominators, reviewer time, selection policy, opportunity cost and long-term escaped defects (S6,S7,S14,S23).",
+      "Configuration and gates prove enforceable mechanics only when the hosting rules, identities and bypass lists are independently reconciled (S15,S16).",
+      "GTM tool support does not prove incremental revenue, valid attribution, consent, factual accuracy or brand safety (S28-S37).",
+      "Anthropic’s multi-agent research numbers are internal; its human-agent-team and Claude Code reports are selected anecdotes. There is no released task-level replication or full reviewer/cost/defect denominator (S3,S6,S55,S56).",
+      "OpenAI’s Harness Engineering and Symphony show a highly instrumented internal environment and high activity, not independently audited quality/value. Agent self-merge/minimal blocking gates conflict with conservative separation and should not transfer by default (S60,S61).",
+      "GitHub cloud-agent safeguards and Agentic Workflows controls are documented mechanics, not an independent security/ROI audit; firewall exclusions for MCP/setup steps remain (S68-S73).",
+      "Open GTM agent kits prove inspectable workflow/artifact patterns, not real deployment, ROI or compliance; CRMArena results actively challenge unrestricted CRM writes (S81-S88)."
+    ],
+    "measurement_rule": "Every claim must bind claim_id→source IDs→factory/version→task cohort→baseline→denominator→human minutes→cost→quality/incident outcomes→measurement window. Label vendor-reported, internally reproduced, independently replicated or audited.",
+    "date_caveat": "The requested cutoff is 2026-09-13. Living documents were read as current to that cutoff. Future changes after cutoff are excluded; pages with no stable date are marked living."
+  },
+  "actors_and_authority": {
+    "shared_runtime_roles": [
+      "dispatcher (authenticates event; no content authority)",
+      "scheduler/lease manager (budgets and concurrency)",
+      "runner identity (ephemeral, least privilege)",
+      "artifact/provenance service",
+      "policy decision/enforcement point",
+      "evaluator runner isolated from candidate",
+      "human gate service",
+      "auditor/reconciler",
+      "cross-repo broker"
+    ],
+    "engineering_owned_roles": [
+      "product/issue owner",
+      "planner/spec author",
+      "implementer",
+      "independent verifier/security reviewer",
+      "CODEOWNER",
+      "release/on-call owner"
+    ],
+    "gtm_owned_roles": [
+      "campaign DRI",
+      "market/ICP researcher",
+      "positioning owner",
+      "content producer/editor",
+      "brand owner",
+      "privacy/legal/compliance reviewer",
+      "CRM/data steward",
+      "channel/publishing owner",
+      "revenue-operations/attribution analyst"
+    ],
+    "separation": "Agents may draft, analyze, test and propose. They cannot approve their own artifact, alter protected evaluators/policy/audit history, expand permissions, spend money, publish externally, bulk-contact people, mutate consent/suppression data, merge protected code or deploy high-risk changes. Path owners and rulesets enforce repository authority (S15,S16); excessive-agency guidance supports minimum tools/permissions (S39). Anthropic’s reported practice adds explicit rosters, one human owner per agent/task class, manual review for new agents and doer/verifier separation (S55). GitHub gives a strong concrete boundary: the cloud agent cannot ready, approve or merge its own PR and attributed requester work cannot self-approve (S12,S68). Custom profiles/agent confidence do not create principals or security approval (S70,S72). GitLab’s composite identity is a useful initiator∩service-account model for background flows, but only where explicitly supported (S76). Its runner tool policy cannot pause for Always Ask and defaults unspecified tools to Allow, so effectful GTM uses a deny-only worker plus separately approved publisher principal (S77).",
+    "identity": "One workload identity per factory/domain/stage, short-lived credentials, explicit repo/channel/CRM object scopes. Human approvals record authenticated principal, role, artifact digest, policy version, decision, expiry and rationale. No shared “agent” superuser."
+  },
+  "complete_state_catalog": {
+    "normal": [
+      "DRAFT",
+      "READY",
+      "QUEUED",
+      "LEASED",
+      "RUNNING",
+      "VERIFYING",
+      "APPROVAL_PENDING",
+      "APPROVED",
+      "PUBLISH_OR_MERGE_PENDING",
+      "SUCCEEDED",
+      "ARCHIVED"
+    ],
+    "waiting": [
+      "WAITING_CLARIFICATION",
+      "WAITING_HUMAN",
+      "WAITING_DEPENDENCY",
+      "WAITING_WINDOW",
+      "WAITING_RATE_LIMIT",
+      "PAUSED_BUDGET"
+    ],
+    "failure": [
+      "FAILED_RETRYABLE",
+      "FAILED_FATAL",
+      "POLICY_DENIED",
+      "EVAL_FAILED",
+      "APPROVAL_REJECTED",
+      "CONFLICTED"
+    ],
+    "cancellation": [
+      "CANCEL_REQUESTED",
+      "CANCELLING",
+      "CANCELLED"
+    ],
+    "staleness_and_invalidation": [
+      "LEASE_EXPIRED",
+      "STALE_INPUT",
+      "INVALIDATED_BY_SOURCE_CHANGE",
+      "SUPERSEDED"
+    ],
+    "rollback": [
+      "ROLLBACK_REQUESTED",
+      "ROLLING_BACK",
+      "ROLLED_BACK",
+      "ROLLBACK_FAILED"
+    ],
+    "cross_repo": [
+      "HANDOFF_PREPARED",
+      "HANDOFF_SENT",
+      "HANDOFF_ACCEPTED",
+      "HANDOFF_REJECTED",
+      "HANDOFF_EXPIRED",
+      "HANDOFF_RECONCILING"
+    ],
+    "terminal_rule": "SUCCEEDED means the declared artifact contract and gates passed, not that downstream business value is proven. Only SUCCEEDED, CANCELLED, FAILED_FATAL, POLICY_DENIED, APPROVAL_REJECTED, ROLLED_BACK and ARCHIVED are terminal; late events create a reconciliation record rather than silently reopening."
+  },
+  "transition_contract": {
+    "event_envelope": "Use CloudEvents fields id/source/type/specversion/time/subject plus project_id, domain, work_id, attempt, factory_version, artifact_refs/digests, correlation/causation IDs, actor identity and policy version (adapted from S41).",
+    "guards": [
+      "schema/version accepted",
+      "event signature and audience valid",
+      "expected state/version compare-and-swap",
+      "lease owned and unexpired",
+      "inputs/digests current",
+      "budget/quota available",
+      "actor authorized for action and domain",
+      "required deterministic checks/evals passed",
+      "required approval binds exact digest and is unexpired"
+    ],
+    "effects": "Append immutable event; atomically update projection/outbox; mint least-privilege task capability; store content-addressed artifact/provenance; schedule or cancel next stage; emit receipt.",
+    "idempotency": "Unique (project_id,event_id) and (work_id,transition,attempt,input_digest). Duplicate side effects use destination idempotency keys; external publish/CRM/spend operations require read-after-write reconciliation.",
+    "invalidation": "Source commit, requirements, brand guide, consent/suppression list, CRM schema, audience, pricing or policy changes invalidate derived artifacts and approvals. Re-evaluate from the earliest affected stage.",
+    "reconciliation": "Poll authoritative Git/CI/CRM/channel state; compare desired/applied versions; quarantine orphaned runs; recover expired leases; never infer approval from a comment string."
+  },
+  "artifact_contracts": {
+    "common_envelope": [
+      "artifact_id",
+      "artifact_type",
+      "domain",
+      "schema_version",
+      "producer identity",
+      "factory/run/version",
+      "created_at",
+      "source_refs with immutable revisions",
+      "content URI and sha256 digest",
+      "classification/PII flags",
+      "claims/evidence links",
+      "eval results and scorer versions",
+      "approvals bound to digest",
+      "retention/residency",
+      "supersedes/derived_from"
+    ],
+    "engineering": [
+      "issue/readiness record",
+      "spec/ADR",
+      "plan/task graph",
+      "patch/commit/tree",
+      "test and security reports",
+      "review findings/dispositions",
+      "PR",
+      "build provenance/SBOM",
+      "release/canary/rollback evidence",
+      "postmortem/eval case",
+      "WORKFLOW.md/status link and visual review packet/video where UI behavior is acceptance evidence (S61)"
+    ],
+    "gtm": [
+      "research brief with claim/evidence ledger",
+      "ICP/audience definition and allowed data fields",
+      "positioning/message house",
+      "campaign brief/budget/channel plan",
+      "brand guideline/version",
+      "content variant and rights/factual substantiation",
+      "legal/privacy/brand approval record",
+      "CRM change-set preview and receipt",
+      "consent/suppression snapshot",
+      "publication package/receipt",
+      "experiment allocation",
+      "UTM/campaign IDs",
+      "attribution dataset/model/version",
+      "lift/quality/complaint report"
+    ],
+    "boundary": "A chat transcript is evidence/context, never the sole contract. A PR/MR, signed approval, manifest or publication receipt is the durable handoff. SLSA-style subject digests and builder identity are adapted beyond builds (S43); JSON Schema validates structure (S42). Anthropic’s SDLC playbook independently converges on intent/spec/plan/diff-tests/PR-review/incident artifacts (S56), but remains guidance rather than audited outcome evidence."
+  },
+  "conversation_and_handoffs": {
+    "interaction": "The foreman/supervisor may be one conversational voice, as Warp proposes, but it must not become one authority (S1). Each question becomes a typed NEED record: missing field, choices, recommendation, impact, deadline and safe default. Human response becomes a DECISION artifact bound to affected inputs.",
+    "checkpoint": "After each stage store objective, accepted inputs, open questions, decisions/rationale, artifact digests, remaining budget, leases, next allowed transitions and compacted evidence citations. Resume reloads typed state and verifies source revisions; it does not rely on model memory. OpenAI’s Symphony likewise treats issue/workspace and WORKFLOW.md as durable identity/state rather than a chat session, and can return PRs or analysis/review packets (S61,S62).",
+    "cross_repo_handoff": "Producer repo creates a signed manifest containing schema/version/digests/purpose/data class/requested action/expiry/policy verdict. Broker sends only the manifest and authorized content references. Consumer repo validates, records ACCEPT/REJECT with reason, copies or references immutable artifacts under its retention policy, and emits receipt. No agent receives blanket read/write across both repos.",
+    "examples": [
+      "Engineering→GTM: only an approved release manifest, feature facts, limitations, security/privacy statements and docs digests; not source secrets or speculative roadmap.",
+      "GTM→Engineering: aggregated, consent-safe insight/experiment result or a typed product request with evidence; not raw CRM export unless an approved contract requires it."
+    ],
+    "compaction": "Summaries must retain claims→sources, dissent, rejected options, approvals, classification and hashes; lossy natural-language summary cannot replace the originals."
+  },
+  "orchestration_and_composition": {
+    "pattern": "Use deterministic workflows around bounded agents. Router chooses task class; orchestrator may fan out only independent research/tests; join requires declared quorum/completeness and preserves disagreement. Anthropic’s research system reports strong internal breadth/latency results but ~15× chat tokens and poor fit where coding tasks do not decompose; its general guidance says start simply (S3,S4).",
+    "subfactories": "Engineering v1 composes intake→spec→implement→verify→PR→human merge→deploy/observe. Research, review and incident response are bounded subfactories with their own artifacts/evals. GTM later composes research→ICP/positioning→campaign/content→approval→publish/CRM→measure, but remains separately configured.",
+    "budgets": "Per work item: wall clock, tokens/cost, tool calls, concurrency, retries and external side effects. Fanout requires estimated marginal value; join cancels stragglers only under a declared completeness policy.",
+    "cleanup": "Revoke credentials, stop compute, delete/retain sandbox per policy, release leases, finalize artifact indexes and reconcile external side effects even on cancellation/failure.",
+    "anti_pattern": "Do not encode human job titles as endlessly chatting personas. Encode authority, required artifacts, transitions and acceptance tests. Microsoft starter/custom agents are useful templates (S13,S17), not proof that more roles improve outcomes."
+  },
+  "human_need_policy": {
+    "deterministic_stop_or_approval": [
+      "missing required spec/audience/data-lawful-basis field",
+      "policy/schema/permission/evaluator/hidden-test change",
+      "security/privacy/legal/financial/high-blast-radius artifact",
+      "production deploy or protected-branch merge according to local risk tier",
+      "all external GTM publication, paid-spend start/increase, new audience activation, personalized outbound, bulk CRM write/delete/merge, consent/suppression mutation, sensitive-data export, brand exception, regulated claim or rights/licensing uncertainty",
+      "input changed after approval; approval expired; conflict of interest; retry/budget limit reached; credible prompt injection or secret exposure"
+    ],
+    "probabilistic_triggers": "Local, pre-registered examples—not vendor defaults: ask clarification if calibrated completeness/correctness confidence <0.85; escalate if independent graders disagree by >0.15 probability or any safety grader fails; stop on out-of-distribution score above the validated 99th-percentile threshold; randomly human-audit ≥5% of low-risk successes and 100% during canary. Thresholds must be calibrated per domain/task and never override deterministic safety gates.",
+    "approval_contract": "Approver must own the affected domain and see exact artifact digest, diff, evidence/evals, data classes, audience/channel, costs and rollback. No rubber-stamp buttons without context. Two-person approval for permission/policy changes and high-impact GTM actions.",
+    "safe_default": "Timeout means pause or cancel, never publish/merge/spend. Human edits invalidate prior scores and rerun affected checks. Model confidence/rationale is an escalation signal only; GitHub explicitly says its approval UI is not the underlying security boundary (S72)."
+  },
+  "factory_as_code_schema": {
+    "shared_now": [
+      "apiVersion/kind/metadata",
+      "domain and repository binding",
+      "triggers with filter/dedupe",
+      "actor/workload identity references",
+      "artifact schemas",
+      "states/transitions",
+      "steps/dependencies/retry/timeout/budgets",
+      "policy and human gates",
+      "eval suites/scorers/thresholds",
+      "secrets/data classes/egress",
+      "observability/audit/retention",
+      "adapter references",
+      "rollout/rollback"
+    ],
+    "domain_owned": [
+      "role names and instructions",
+      "artifact payload schemas",
+      "workflow graph/stage vocabulary",
+      "risk taxonomy and gate matrix",
+      "eval datasets/rubrics/acceptance thresholds",
+      "tool allowlists and channel/CRM adapters",
+      "regulatory/brand/retention policy",
+      "metrics/value model",
+      "versioned shared automations: reject creator-private/non-reviewed automation storage for production governance; compile/generated workflow must have reviewed source and provenance (S71,S73)"
+    ],
+    "example": "apiVersion: factory.acme.dev/v1alpha1\nkind: Factory\nmetadata: {name: engineering-default, owner: platform-eng}\nspec:\n  domain: engineering\n  repository: {id: eng-repo, refPolicy: protected-main}\n  triggers:\n    - {type: github.issue.ready, dedupe: \"$.delivery_id\"}\n  workflowRef: engineering/issue-to-pr@1.0.0\n  actors:\n    implementer: {identity: eng-impl, tools: [git,ci], permissions: [contents:write-branch]}\n    verifier: {identity: eng-verify, independenceFrom: [implementer]}\n  artifacts: {spec: schemas/eng-spec-1.json, patch: schemas/patch-1.json}\n  gates:\n    - {before: merge, policy: risk-tier, approvers: [CODEOWNERS], bindDigest: true}\n  evals: {suite: evals/engineering-regression@7, promotion: no_safety_regression}\n  improvement: {mode: propose_pr_only, protected: [policies/**, evals/hidden/**]}\n---\napiVersion: factory.acme.dev/v1alpha1\nkind: Factory\nmetadata: {name: gtm-campaign, owner: revenue-ops}\nspec:\n  enabled: false\n  activationGate: {ref: decisions/gtm-activation.json, require: approved}\n  domain: gtm\n  repository: {id: gtm-repo, refPolicy: protected-main}\n  workflowRef: gtm/research-to-measure@0.1.0\n  policies: [privacy, consent, brand, claims, channel]\n  gates:\n    - {before: crm_write, approvers: [data-steward], bindDigest: true}\n    - {before: publish_or_spend, approvers: [campaign-dri, brand-owner], bindDigest: true}",
+    "avoid_premature_universality": "Keep one internal v1alpha1 kernel and hard-coded engineering adapter set. Warp’s actual v1alpha1 schemas are a useful desired-configuration reference but explicitly do not supply the live lifecycle/effect store (S45,S46); its examples are young and config-only (S47). Do not promise third-party plugins or a stable cross-domain SDK until two implemented domains expose repeated stable abstractions and compatibility tests."
+  },
+  "end_to_end_workflows": {
+    "engineering_first": [
+      "Authenticated issue/spec trigger; readiness and risk classification.",
+      "Human product owner approves ambiguous/high-impact spec.",
+      "Controller leases isolated task to implementer; branch-only token.",
+      "Implementer produces patch/tests/evidence and draft PR.",
+      "Independent verifier rebuilds exact head and runs deterministic, security and stochastic task evals.",
+      "CODEOWNER reviews digest-bound diff; ruleset/merge queue enforces checks.",
+      "Release owner approves environment where required; canary/rollback are deterministic.",
+      "Telemetry creates proposals/postmortems/eval cases; no automatic protected-policy mutation."
+    ],
+    "gtm_after_activation": [
+      "Researcher creates sourced market/ICP brief; privacy filter blocks unjustified personal data.",
+      "Positioning owner approves claims/message house and prohibited claims.",
+      "Campaign DRI creates audience, channel, budget, experiment and attribution plan with baseline and success/stop criteria.",
+      "Content agents draft variants against versioned brand/rights/claim artifacts; factual, brand, accessibility, privacy and channel checks run.",
+      "Legal/privacy/brand/data steward review exact digests when policy requires. Adobe shows explicit guideline/approval objects; this supports the pattern but not automatic correctness (S33,S34).",
+      "CRM writer produces dry-run change set; steward approves; scoped adapter writes with idempotency and stores receipt. Suppression/consent lists are protected (S35,S36).",
+      "Publisher previews destination payload; channel owner approves external publication/spend; system stores destination ID/time/rendered capture and rollback/takedown path.",
+      "Analyst joins exposure, cost, funnel and revenue outcomes using versioned attribution assumptions; reports incremental lift where experiment supports it, otherwise labels correlation. Complaints, unsubscribes, privacy requests and brand incidents feed stop/learning."
+    ],
+    "publication_boundaries": "Internal draft and sandbox CRM are automatable. External send/post/ad activation, material budget, regulated/public claims, targeting using personal/sensitive data and production CRM destructive writes are never inferred from “campaign approved”; each is a distinct gate. Never give one web-reading/background agent sensitive CRM plus autonomous send/publish access: GitLab describes that combination as the prompt-injection “lethal trifecta” (S79).",
+    "metrics": [
+      "Engineering: accepted PR rate with denominator, cycle/queue/human time, cost/accepted PR, rework, escaped defects/security findings, rollback/change-failure rate and developer experience.",
+      "GTM: research citation coverage, approval/rework latency, brand/claim defect rate, consent/suppression violations=0, send/publish failure, complaint/unsubscribe, qualified pipeline/revenue, incremental lift and confidence interval, CAC/payback, cost per approved artifact—not raw volume or vanity clicks alone."
+    ]
+  },
+  "self_improvement_boundary": {
+    "loop": [
+      "Capture correlated run/decision/outcome evidence.",
+      "Human curator turns failure/success into versioned eval case with provenance and privacy review.",
+      "Observer may propose a minimal config/prompt/router/tool change as a PR; Warp documents this proposal pattern (S1).",
+      "Independent evaluator replays frozen task/environment/config snapshots and fresh holdout/adversarial cases; compare quality, safety, latency, cost and human effort.",
+      "Independent owner approves shadow→bounded canary; predeclared abort rules.",
+      "Promote immutable version or rollback; measure delayed defects/business outcomes and revert on regression."
+    ],
+    "protected_invariants": [
+      "executing agent cannot edit its evaluator, hidden cases, expected outputs, inclusion rules, promotion threshold, permissions/gates, audit/provenance, consent/suppression, legal/brand controls or rollback mechanism",
+      "candidate and evaluator identities/data stores separated",
+      "no scalar average can compensate for a safety/privacy/legal invariant failure",
+      "raw GTM personal data cannot become training/eval data without approved purpose, minimization, retention and deletion path"
+    ],
+    "promotion": "Require no invariant regression, statistically/operationally meaningful improvement on pre-registered metrics, bounded cost, human sign-off and reversible version. Warp’s 25-failure/7-day mechanism opens a config PR and keeps adoption human-reviewed, a transferable proposal pattern but not validated promotion (S51). LLM scorers need independent calibration because Warp documents classification/threshold behavior without a protected grader (S50); WarpBench is hypothesis evidence, not an automatic router mandate (S2,S5,S9,S10)."
+  },
+  "validation_strategy": {
+    "schema_and_transition": [
+      "JSON Schema positive/negative fixtures; backward/forward compatibility (S42).",
+      "Model-check allowed transitions, terminality and authorization; property tests for duplicate/out-of-order events, stale approvals, lease expiry, cancellation and rollback.",
+      "Contract tests for GitHub/GitLab/CRM/channel sandboxes; idempotent replay and read-after-write reconciliation."
+    ],
+    "security_privacy": [
+      "Threat-model every repo/web/CRM/email/tool input as untrusted; prompt-injection corpus and egress/secret exfiltration tests (S38).",
+      "Least-privilege identity tests; attempts to self-approve, expand tools, read other repo/domain, alter evals/audit or bypass rules must fail (S39).",
+      "PII discovery/minimization, consent/suppression, retention/deletion, residency, audit and incident exercises (S35-S37,S40).",
+      "For GitLab-like runners test explicit deny for every unspecified effect tool, composite-identity intersection, audit forwarding/storage/readback and retention routing; do not infer these from UI presence (S76-S80)."
+    ],
+    "evaluations": [
+      "Frozen replay plus time-split fresh/holdout cases; repeated trials and confidence intervals.",
+      "Deterministic outcome checks first; trace graders for diagnosis; blinded calibrated human panels for semantic/brand/factual claims (S5,S9,S10).",
+      "Adversarial, metamorphic and cross-domain leakage cases; score abstention/escalation precision and false-negative rate.",
+      "Compare against no-agent/current workflow and include reviewer time, retries, cost, escaped defects/complaints and delayed outcomes."
+    ],
+    "acceptance": [
+      "Engineering pilot: stable event/provenance/audit, zero authority escapes, rollback drill passes, and predeclared workflow metrics improve without quality/stability regression.",
+      "GTM pilot: shadow/draft only first; zero consent/publication/spend authority escapes; brand/legal reviewers meet agreement target; controlled experiment shows enough expected value to cover operations/review risk."
+    ]
+  },
+  "implementation_recommendation": {
+    "decision": "BUILD A NARROW DOMAIN-NEUTRAL KERNEL, SHIP AN ENGINEERING FACTORY FIRST, AND DEFER GTM EXECUTION. Do not build a universal factory marketplace/plugin SDK now.",
+    "phase_0": "Implement shared event/state/artifact/provenance/identity/gate/eval/audit kernel; one GitHub/GitLab adapter; engineering issue→draft PR workflow; protected config repository; dashboards with denominators.",
+    "phase_1": "Add independent verification, risk-tier gates, deployment/rollback and governed eval→proposal PR loop. Pilot narrow classes such as test maintenance, dependency changes or failing-CI repair, consistent with bounded team cases (S14,S22).",
+    "engineering_extraction_gate": [
+      "≥2 materially different engineering workflows use the same kernel without copy-pasted controller logic",
+      "≥100 accepted/terminal runs across ≥2 repositories and ≥8 weeks (illustrative minimum)",
+      "zero unresolved authority/secrets/cross-project isolation escapes; rollback and disaster recovery exercised",
+      "event/artifact schema changes stabilized and migration/compatibility tests pass",
+      "measured value survives reviewer-time, failure and delayed-quality accounting; owners approve support burden"
+    ],
+    "domain_sdk_gate": "Extract only repeated seams—artifact type registry, policy/eval provider interface and adapters—after a second real domain proves them. Keep domain workflow DSL and roles private/unstable before then.",
+    "gtm_activation_gate": [
+      "named GTM, brand, RevOps/data and privacy/legal owners; separate protected repository and identities",
+      "one bounded use case with baseline/expected value (e.g., evidence-backed draft content or campaign QA), not autonomous outbound",
+      "approved data inventory/lawful-purpose/retention/residency and CRM/channel contracts; sandbox/dry-run available",
+      "brand/claim/rights/consent/suppression eval set with human agreement calibration",
+      "publication/spend/CRM gates and takedown/reversal drill proven; audit receipt end-to-end",
+      "engineering kernel meets extraction gate and cross-repo manifest/receipt isolation tests pass"
+    ],
+    "gtm_first_release": "Draft-only research→content package and campaign QA. No personal-data enrichment, automated personalized outreach, auto-publish, budget change or destructive CRM write. Expand one side effect at a time after canary evidence. Earn autonomy by task class after repeated success and sustainable review load, not by granting a repository-wide “trusted agent” status (S55).",
+    "buy_vs_build": "Use vendor harnesses/runners behind adapters where useful; own authoritative policy, identities, artifacts, eval datasets, approval records and audit. Vendor factory claims (S1,S7,S18) do not justify outsourcing governance."
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Warp Factories",
+      "publisher_or_authors": "Warp",
+      "source_type": "official product/early-access page",
+      "publication_or_version_date": "2026 (page copyright; no stable publication date)",
+      "accessed": "2026-09-13",
+      "url": "https://www.warp.dev/factories",
+      "claim_supported": "Factory-as-code example; foreman/stage workflow; spec/code/QA gates; human merge; integrations; eval/self-improvement and data-placement claims.",
+      "limitations": "Vendor page for a closed/early-access product; example metrics and customer quotation lack methods or independent audit."
+    },
+    {
+      "id": "S2",
+      "title": "WarpBench: Measuring, testing and improving coding agents on your own codebase",
+      "publisher_or_authors": "Zach Lloyd / Warp",
+      "source_type": "first-party internal case study",
+      "publication_or_version_date": "2026-09-02",
+      "accessed": "2026-09-13",
+      "url": "https://www.warp.dev/factories/benchmarks/warpbench",
+      "claim_supported": "30-task replay benchmark; 3h46m/$2,130.57 run; reported $80-to-$30 cost/PR and 69%-to-87% task compliance; git-rehydrated config and LLM judges.",
+      "limitations": "Single vendor-run internal study, small curated set, no raw task/results, external audit, confidence intervals, or delayed quality measure; newer routing result still baking."
+    },
+    {
+      "id": "S3",
+      "title": "How we built our multi-agent research system",
+      "publisher_or_authors": "Jeremy Hadfield, Barry Zhang, Kenneth Lien, Florian Scholz, Jeremy Fox, Daniel Ford / Anthropic",
+      "source_type": "first-party engineering report",
+      "publication_or_version_date": "2025-06-13",
+      "accessed": "2026-09-13",
+      "url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+      "claim_supported": "Lead agent decomposes work and delegates parallel subagents; citations/artifacts and evaluator-driven engineering; breadth helps parallelizable research.",
+      "limitations": "Anthropic system and self-reported performance/cost observations, not an independent organizational audit."
+    },
+    {
+      "id": "S4",
+      "title": "Building effective agents",
+      "publisher_or_authors": "Erik Schluntz and Barry Zhang / Anthropic",
+      "source_type": "first-party engineering guidance",
+      "publication_or_version_date": "2024-12-19",
+      "accessed": "2026-09-13",
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "claim_supported": "Workflow patterns: prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer; start simple and add autonomy only when it improves outcomes.",
+      "limitations": "Guidance and examples, not comparative production outcome evidence."
+    },
+    {
+      "id": "S5",
+      "title": "Demystifying evals for AI agents",
+      "publisher_or_authors": "Mikaela Grace, Jeremy Hadfield, Rodrigo Olivares, Jiri De Jonghe / Anthropic",
+      "source_type": "first-party evaluation guide",
+      "publication_or_version_date": "2026-01-09",
+      "accessed": "2026-09-13",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "claim_supported": "Task suites, transcripts/outcomes, deterministic/model/human graders, capability vs regression evals and trial repetition.",
+      "limitations": "Recommended practice; does not prove any factory is safe or effective."
+    },
+    {
+      "id": "S6",
+      "title": "How Anthropic teams use Claude Code",
+      "publisher_or_authors": "Anthropic / Claude",
+      "source_type": "first-party internal-use case compilation",
+      "publication_or_version_date": "2025-07-24",
+      "accessed": "2026-09-13",
+      "url": "https://claude.com/blog/how-anthropic-teams-use-claude-code",
+      "claim_supported": "Different functions use the same coding harness for distinct artifacts and review patterns, supporting domain-owned roles rather than one universal agent.",
+      "limitations": "Selected self-reported anecdotes without denominators or controlled baselines."
+    },
+    {
+      "id": "S7",
+      "title": "Codex is now generally available",
+      "publisher_or_authors": "OpenAI",
+      "source_type": "official product announcement and internal-use claims",
+      "publication_or_version_date": "2025-10-06",
+      "accessed": "2026-09-13",
+      "url": "https://openai.com/index/codex-now-generally-available/",
+      "claim_supported": "Parallel cloud tasks, reviewable work artifacts and organizational administration; vendor reports internal adoption.",
+      "limitations": "Vendor announcement; adoption and quality claims are not independently audited."
+    },
+    {
+      "id": "S8",
+      "title": "Codex cloud",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/codex/cloud",
+      "claim_supported": "Repository-connected isolated cloud tasks, environment setup and task-to-change workflow.",
+      "limitations": "Documents supported interface, not success rates or safe autonomy."
+    },
+    {
+      "id": "S9",
+      "title": "Evaluation best practices",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official evaluation guidance",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "claim_supported": "Eval-driven development; task-specific criteria; automated scoring combined with human judgment; continuous evaluation.",
+      "limitations": "Guidance, not audited results; platform APIs can change."
+    },
+    {
+      "id": "S10",
+      "title": "Trace grading",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official evaluation documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/api/docs/guides/trace-grading",
+      "claim_supported": "Grades full agent traces to identify workflow-level failures and supports datasets/evals.",
+      "limitations": "Model graders require calibration and may share correlated failure modes."
+    },
+    {
+      "id": "S11",
+      "title": "About GitHub Copilot coding agent",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-copilot-coding-agent",
+      "claim_supported": "Issue/PR-triggered agent works in GitHub Actions-backed environment and returns a PR for review.",
+      "limitations": "Product behavior, not outcome evidence; plan and preview/GA status vary."
+    },
+    {
+      "id": "S12",
+      "title": "Risks and mitigations for GitHub Copilot coding agent",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official security documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-copilot-coding-agent#risks-and-mitigations",
+      "claim_supported": "Security restrictions, branch/approval boundaries, prompt-injection and human review expectations.",
+      "limitations": "Vendor threat model cannot establish absence of vulnerabilities."
+    },
+    {
+      "id": "S13",
+      "title": "Creating custom agents for Copilot coding agent",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official configuration documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/customizing-copilot/creating-custom-agents-for-copilot-coding-agent",
+      "claim_supported": "Repository-owned custom agent profiles with prompts/tools, showing role definitions as versioned artifacts.",
+      "limitations": "Configuration support only; proliferation can fragment policy and evaluation."
+    },
+    {
+      "id": "S14",
+      "title": "How the GitHub billing team uses the coding agent in GitHub Copilot to continuously burn down technical debt",
+      "publisher_or_authors": "GitHub Blog",
+      "source_type": "first-party team case study",
+      "publication_or_version_date": "2025-07-17",
+      "accessed": "2026-09-13",
+      "url": "https://github.blog/ai-and-ml/github-copilot/how-the-github-billing-team-uses-the-coding-agent-in-github-copilot-to-continuously-burn-down-technical-debt/",
+      "claim_supported": "Narrow recurring backlog workflow and team review, useful evidence for starting with bounded task classes.",
+      "limitations": "Self-selected internal case; no controlled counterfactual or complete defect/cost denominator."
+    },
+    {
+      "id": "S15",
+      "title": "About code owners",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official repository-governance documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "claim_supported": "Path-scoped human ownership and required review can protect domain artifacts.",
+      "limitations": "Requires correct ruleset/branch settings; CODEOWNERS alone is not enforcement."
+    },
+    {
+      "id": "S16",
+      "title": "About rulesets",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official repository-governance documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "claim_supported": "Layered protected-branch/tag rules, bypass control and enforcement status.",
+      "limitations": "Platform control; cannot assess semantic correctness."
+    },
+    {
+      "id": "S17",
+      "title": "Agentic SDLC Starter",
+      "publisher_or_authors": "Microsoft",
+      "source_type": "first-party open-source reference repository",
+      "publication_or_version_date": "repository main accessed at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/microsoft/agentic-sdlc-starter",
+      "claim_supported": "Concrete repository reference for specs, specialized SDLC roles/instructions, work products and human-controlled Git workflow.",
+      "limitations": "Starter/sample, not a validated product or production outcome study; repository evolves."
+    },
+    {
+      "id": "S18",
+      "title": "GitLab Duo Agent Platform",
+      "publisher_or_authors": "GitLab",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation; GitLab 18.x era",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/",
+      "claim_supported": "Platform concepts, agents/flows, GitLab-native identities and lifecycle integration.",
+      "limitations": "Some capabilities depend on tier/version/feature flags; docs do not prove outcomes."
+    },
+    {
+      "id": "S19",
+      "title": "Developer Flow",
+      "publisher_or_authors": "GitLab",
+      "source_type": "official flow documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/developer/",
+      "claim_supported": "Interactive development workflow and artifacts within repository context.",
+      "limitations": "Vendor-documented capability; no comparative production denominator."
+    },
+    {
+      "id": "S20",
+      "title": "Software Development Flow",
+      "publisher_or_authors": "GitLab",
+      "source_type": "official flow documentation",
+      "publication_or_version_date": "generally available in GitLab 18.8 per docs",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/",
+      "claim_supported": "Issue-to-plan/implementation/merge-request flow and role handoffs.",
+      "limitations": "Availability and exact safeguards are version-specific."
+    },
+    {
+      "id": "S21",
+      "title": "Code Review Flow",
+      "publisher_or_authors": "GitLab",
+      "source_type": "official flow documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/code_review/",
+      "claim_supported": "Review as a separate flow producing comments/findings, supporting independent verifier role.",
+      "limitations": "Agent review is not a substitute for required human/code-owner review."
+    },
+    {
+      "id": "S22",
+      "title": "Fix CI/CD Pipeline Flow",
+      "publisher_or_authors": "GitLab",
+      "source_type": "official flow documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/fix_pipeline/",
+      "claim_supported": "Narrow incident/failing-pipeline diagnosis and proposed repair workflow.",
+      "limitations": "Does not establish reliable autonomous merge or deployment."
+    },
+    {
+      "id": "S23",
+      "title": "How Cognition uses Devin to build Devin",
+      "publisher_or_authors": "Cognition",
+      "source_type": "first-party dogfooding case study",
+      "publication_or_version_date": "2026-02-27",
+      "accessed": "2026-09-13",
+      "url": "https://cognition.com/blog/how-cognition-uses-devin-to-build-devin",
+      "claim_supported": "Team queue/delegation and bounded autonomous engineering examples.",
+      "limitations": "Vendor self-report; selection effects and unresolved-task costs may be omitted."
+    },
+    {
+      "id": "S24",
+      "title": "Thoughts on a month with Devin",
+      "publisher_or_authors": "Answer.AI",
+      "source_type": "independent practitioner report",
+      "publication_or_version_date": "2025-01-08",
+      "accessed": "2026-09-13",
+      "url": "https://www.answer.ai/posts/2025-01-08-devin.html",
+      "claim_supported": "Independent account of supervision overhead, task-selection limits and uneven outcomes, challenging autonomous-worker framing.",
+      "limitations": "One team, one period and product version; not broadly generalizable."
+    },
+    {
+      "id": "S25",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_authors": "METR",
+      "source_type": "independent randomized controlled trial/report",
+      "publication_or_version_date": "2025-07-10",
+      "accessed": "2026-09-13",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "claim_supported": "Experienced developers on familiar repositories were measured slower despite expecting speedups; counters vendor anecdotes.",
+      "limitations": "Specific developers, repos and early-2025 tools; does not directly test factories or later agents."
+    },
+    {
+      "id": "S26",
+      "title": "State of AI-assisted Software Development 2025",
+      "publisher_or_authors": "DORA / Google Cloud",
+      "source_type": "independent industry research report",
+      "publication_or_version_date": "2025",
+      "accessed": "2026-09-13",
+      "url": "https://dora.dev/research/2025/dora-report/",
+      "claim_supported": "AI adoption effects interact with delivery system quality; supports measuring throughput, stability and organizational outcomes together.",
+      "limitations": "Observational/survey evidence has confounding and self-report limitations."
+    },
+    {
+      "id": "S27",
+      "title": "Postmortem culture: learning from failure",
+      "publisher_or_authors": "Google SRE",
+      "source_type": "first-party operations book chapter",
+      "publication_or_version_date": "2016",
+      "accessed": "2026-09-13",
+      "url": "https://sre.google/sre-book/postmortem-culture/",
+      "claim_supported": "Blameless, artifact-based incident learning and tracked remediation rather than automatic policy rewriting.",
+      "limitations": "General SRE practice, not agent-specific experimental evidence."
+    },
+    {
+      "id": "S28",
+      "title": "Marketing Operations Handbook",
+      "publisher_or_authors": "GitLab",
+      "source_type": "first-party public company handbook",
+      "publication_or_version_date": "living handbook",
+      "accessed": "2026-09-13",
+      "url": "https://handbook.gitlab.com/handbook/marketing/marketing-operations/",
+      "claim_supported": "GTM systems of record, operational ownership and repeatable processes; evidence that GTM work is more than copy generation.",
+      "limitations": "Handbook states intended process, not audited compliance or performance."
+    },
+    {
+      "id": "S29",
+      "title": "Integrated Marketing Handbook",
+      "publisher_or_authors": "GitLab",
+      "source_type": "first-party public company handbook",
+      "publication_or_version_date": "living handbook",
+      "accessed": "2026-09-13",
+      "url": "https://handbook.gitlab.com/handbook/marketing/integrated-marketing/",
+      "claim_supported": "Campaign planning, cross-functional DRI/handoffs and measurement artifacts.",
+      "limitations": "Living internal-process description; implementation may vary."
+    },
+    {
+      "id": "S30",
+      "title": "Use Breeze social media agent",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official product/knowledge-base documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/social/use-breeze-social-agent",
+      "claim_supported": "AI-assisted social draft generation integrated with connected accounts and publication workflow.",
+      "limitations": "Vendor capability documentation; generated-content quality and business lift not independently established."
+    },
+    {
+      "id": "S31",
+      "title": "HubSpot AI security and privacy",
+      "publisher_or_authors": "HubSpot",
+      "source_type": "official security documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/ai-tools/understand-hubspot-ai-security",
+      "claim_supported": "Data handling and AI settings relevant to CRM/customer-data boundaries.",
+      "limitations": "Statements require contract/configuration verification and do not replace a DPIA or legal review."
+    },
+    {
+      "id": "S32",
+      "title": "Einstein GPT: AI trust and risk safeguards",
+      "publisher_or_authors": "Salesforce",
+      "source_type": "official trust/product explanation",
+      "publication_or_version_date": "2023-03-07",
+      "accessed": "2026-09-13",
+      "url": "https://www.salesforce.com/news/stories/what-is-the-einstein-gpt-trust-layer/",
+      "claim_supported": "CRM grounding, data masking/retention and audit/safety claims for enterprise generative AI.",
+      "limitations": "Vendor claims; precise controls depend on product, contract and configuration."
+    },
+    {
+      "id": "S33",
+      "title": "Brand guidelines overview in GenStudio for Performance Marketing",
+      "publisher_or_authors": "Adobe Experience League",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://experienceleague.adobe.com/en/docs/genstudio-for-performance-marketing/user-guide/guidelines/overview",
+      "claim_supported": "Versioned brand guidelines constrain AI content generation/scoring.",
+      "limitations": "Automated brand scoring is advisory and does not prove legal or factual correctness."
+    },
+    {
+      "id": "S34",
+      "title": "Reviews and approvals in GenStudio for Performance Marketing",
+      "publisher_or_authors": "Adobe Experience League",
+      "source_type": "official workflow documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://experienceleague.adobe.com/en/docs/genstudio-for-performance-marketing/user-guide/approvals/overview",
+      "claim_supported": "Review/approval artifacts and publication boundary for generated marketing content.",
+      "limitations": "Product workflow support; organizations must map actual approvers and channels."
+    },
+    {
+      "id": "S35",
+      "title": "CAN-SPAM Act: A Compliance Guide for Business",
+      "publisher_or_authors": "U.S. Federal Trade Commission",
+      "source_type": "government compliance guidance",
+      "publication_or_version_date": "2023-08 (page current)",
+      "accessed": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business",
+      "claim_supported": "Commercial email duties: truthful headers/subjects, ad identification, address, opt-out and honoring opt-outs.",
+      "limitations": "U.S. federal overview; other jurisdictions and sector rules may be stricter."
+    },
+    {
+      "id": "S36",
+      "title": "Direct marketing guidance",
+      "publisher_or_authors": "UK Information Commissioner’s Office",
+      "source_type": "regulator guidance",
+      "publication_or_version_date": "living guidance",
+      "accessed": "2026-09-13",
+      "url": "https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/direct-marketing-guidance/",
+      "claim_supported": "Consent, lawful basis, suppression and channel rules for personal-data-driven outreach.",
+      "limitations": "UK-focused; legal applicability requires counsel and current jurisdictional analysis."
+    },
+    {
+      "id": "S37",
+      "title": "NIST Privacy Framework 1.0",
+      "publisher_or_authors": "NIST",
+      "source_type": "government framework",
+      "publication_or_version_date": "2020-01-16",
+      "accessed": "2026-09-13",
+      "url": "https://www.nist.gov/privacy-framework/privacy-framework",
+      "claim_supported": "Privacy risk governance and data processing controls for shared runtimes and CRM handoffs.",
+      "limitations": "Voluntary framework; not a compliance certificate."
+    },
+    {
+      "id": "S38",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_or_authors": "OWASP GenAI Security Project",
+      "source_type": "independent security guidance",
+      "publication_or_version_date": "2025",
+      "accessed": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "claim_supported": "Treat repo, CRM, web, email and agent messages as untrusted content; isolate instructions from data.",
+      "limitations": "Risk guidance, not a complete control implementation or outcome audit."
+    },
+    {
+      "id": "S39",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_or_authors": "OWASP GenAI Security Project",
+      "source_type": "independent security guidance",
+      "publication_or_version_date": "2025",
+      "accessed": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "claim_supported": "Minimize tools, permissions and autonomy; require approval for consequential actions.",
+      "limitations": "General risk guidance; thresholds remain organization-specific."
+    },
+    {
+      "id": "S40",
+      "title": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile, NIST AI 600-1",
+      "publisher_or_authors": "NIST",
+      "source_type": "government risk-management profile",
+      "publication_or_version_date": "2024-07-26",
+      "accessed": "2026-09-13",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "claim_supported": "Govern, map, measure and manage lifecycle risks; provenance, incident and human-oversight practices.",
+      "limitations": "Voluntary profile, not proof of product conformity."
+    },
+    {
+      "id": "S41",
+      "title": "CloudEvents Specification v1.0.2",
+      "publisher_or_authors": "CNCF CloudEvents",
+      "source_type": "vendor-neutral standard",
+      "publication_or_version_date": "2022-02-05",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "claim_supported": "Portable event envelope for cross-repository handoffs and correlation.",
+      "limitations": "Envelope semantics only; domain payload, authorization and delivery guarantees are local."
+    },
+    {
+      "id": "S42",
+      "title": "JSON Schema Core Draft 2020-12",
+      "publisher_or_authors": "JSON Schema project",
+      "source_type": "open standard",
+      "publication_or_version_date": "2022-06-10",
+      "accessed": "2026-09-13",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "claim_supported": "Versioned validation vocabulary for factory and artifact contracts.",
+      "limitations": "Schema validation cannot prove semantic correctness or policy compliance."
+    },
+    {
+      "id": "S43",
+      "title": "SLSA v1.2 Provenance",
+      "publisher_or_authors": "OpenSSF SLSA",
+      "source_type": "supply-chain standard",
+      "publication_or_version_date": "v1.2",
+      "accessed": "2026-09-13",
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "claim_supported": "Artifact provenance model with subject digests and builder identity, transferable to factory outputs/handoffs.",
+      "limitations": "Designed for software supply chain; applying it to GTM/research artifacts is an adaptation."
+    },
+    {
+      "id": "S44",
+      "title": "OpenGitOps Principles",
+      "publisher_or_authors": "OpenGitOps Working Group",
+      "source_type": "vendor-neutral principles",
+      "publication_or_version_date": "v1.0 / living site",
+      "accessed": "2026-09-13",
+      "url": "https://opengitops.dev/",
+      "claim_supported": "Declarative, versioned, immutable, pulled and reconciled desired state supports protected factory configuration.",
+      "limitations": "Principles do not define agent evaluation or domain workflows."
+    },
+    {
+      "id": "S45",
+      "title": "Factory as Code",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "v1alpha1 at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/factory-as-code/",
+      "claim_supported": "Repository definitions for factory, agents, automations, runners, benchmarks/tasks/scorers, skills and webhooks.",
+      "limitations": "Desired/config schema only; does not define authoritative live work-item/event/metric storage."
+    },
+    {
+      "id": "S46",
+      "title": "Factory file JSON Schemas v1alpha1",
+      "publisher_or_authors": "Warp API",
+      "source_type": "official machine-readable schema endpoint",
+      "publication_or_version_date": "v1alpha1 at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://app.warp.dev/api/v1/factory-files/schemas/v1alpha1",
+      "claim_supported": "Parser-generated machine-readable schemas for factory-as-code files.",
+      "limitations": "Unauthenticated endpoint and alpha version may change; schema coverage is configuration, not runtime correctness."
+    },
+    {
+      "id": "S47",
+      "title": "Warp factory examples, pinned commit 84e7c952",
+      "publisher_or_authors": "Warp",
+      "source_type": "first-party public source repository",
+      "publication_or_version_date": "commit 84e7c952f1506c4bd2784d96fd40a6f4d6398cad accessed 2026-09-13",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev/warp-factory-examples/tree/84e7c952f1506c4bd2784d96fd40a6f4d6398cad",
+      "claim_supported": "Versioned examples of factory/agent/automation configuration.",
+      "limitations": "At pinned commit repository had little history and no public benchmark dataset; examples are not runtime evidence."
+    },
+    {
+      "id": "S48",
+      "title": "How factories work",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official workflow documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/how-factories-work/",
+      "claim_supported": "Default Intake→Triage→optional Planning→human spec approval→Build→Review↔Build→human handoff; Complete/Cancelled semantics.",
+      "limitations": "Review is advisory and Complete means handed to a human, not merged; prompts can be edited."
+    },
+    {
+      "id": "S49",
+      "title": "Factory agents",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official role documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/factory-agents/",
+      "claim_supported": "Foreman and specialized factory-agent roles and prompt-configured behavior.",
+      "limitations": "Prompt instructions are not authorization enforcement."
+    },
+    {
+      "id": "S50",
+      "title": "Scorers",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official evaluation documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/scorers/",
+      "claim_supported": "LLM classification judge, 0..1 label scores, pass thresholds, sampling and rescoring behavior.",
+      "limitations": "No documented independent calibration/protected grader; rescoring replaces previous result."
+    },
+    {
+      "id": "S51",
+      "title": "Self-improvement",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official self-improvement documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/self-improvement/",
+      "claim_supported": "Grouped failure-triggered proposal run (25 failures or oldest 7 days) opens a factory-definition PR; human review required.",
+      "limitations": "Proposal automation, not autonomous validated promotion; quality depends on scorers and reviewer."
+    },
+    {
+      "id": "S52",
+      "title": "Benchmarks",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official benchmark documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/benchmarks/",
+      "claim_supported": "Fixed tasks/start SHAs/configs/repetitions/scorers; documents current comparison behavior.",
+      "limitations": "Docs state third-party harness comparison unavailable at cutoff; benchmarks do not automatically establish external validity."
+    },
+    {
+      "id": "S53",
+      "title": "Factory MCP",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official integration documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/factory-mcp/",
+      "claim_supported": "Task send/pick-up integration and account-level access behavior.",
+      "limitations": "Local pickup does not claim/lock/pause remote work; account scope is not a per-factory least-privilege boundary."
+    },
+    {
+      "id": "S54",
+      "title": "Agent RunState enum",
+      "publisher_or_authors": "Warp / oz-sdk-python",
+      "source_type": "first-party source code",
+      "publication_or_version_date": "commit de8a441f945aa93cb3b8a5ef34a93d4786d3fe5a",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev/oz-sdk-python/blob/de8a441f945aa93cb3b8a5ef34a93d4786d3fe5a/src/oz_agent_sdk/types/agent/run_state.py#L1-L10",
+      "claim_supported": "Public run-state enum for agent SDK.",
+      "limitations": "Run state is not a complete durable work-item lifecycle or transition contract."
+    },
+    {
+      "id": "S55",
+      "title": "Building effective human-agent teams",
+      "publisher_or_authors": "Kristen Swanson / Anthropic",
+      "source_type": "first-party internal-practice report",
+      "publication_or_version_date": "2026-06-24",
+      "accessed": "2026-09-13",
+      "url": "https://claude.com/blog/building-effective-human-agent-teams",
+      "claim_supported": "Shared workspaces, explicit human/agent roster, task-type earned autonomy, doer/verifier split, review budgeting and batched questions.",
+      "limitations": "Selected internal practice and claims such as 500 fixes lack full denominator, reviewer cost, defect/revert data and independent audit."
+    },
+    {
+      "id": "S56",
+      "title": "The AI-Native SDLC playbook",
+      "publisher_or_authors": "Louis Claxton / Anthropic Applied AI",
+      "source_type": "vendor best-practice guide",
+      "publication_or_version_date": "2026-08-21",
+      "accessed": "2026-09-13",
+      "url": "https://claude.com/blog/the-ai-native-sdlc-playbook",
+      "claim_supported": "Artifact chain intent→spec→plan→diff/tests→PR/review→incident and domain-specific skills/human gates.",
+      "limitations": "Playbook and expected indicators, not a controlled or audited outcome study."
+    },
+    {
+      "id": "S57",
+      "title": "Warp Factories overview",
+      "publisher_or_authors": "Warp Docs",
+      "source_type": "official overview documentation",
+      "publication_or_version_date": "last updated 2026-09-11",
+      "accessed": "2026-09-13",
+      "url": "https://docs.warp.dev/factories/",
+      "claim_supported": "One factory boundary, early-access status, supported concepts and recommendation to group repositories/product surfaces that ship together.",
+      "limitations": "Early access/limited-team product mechanics, not outcome evidence."
+    },
+    {
+      "id": "S58",
+      "title": "factory-agents-template eval harness at pinned commit",
+      "publisher_or_authors": "Warp / warpdotdev-demos",
+      "source_type": "first-party public demo repository",
+      "publication_or_version_date": "commit f2807f04539237e895e2b408faee94c1d94f0391, 2026-08-04",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev-demos/factory-agents-template/tree/f2807f04539237e895e2b408faee94c1d94f0391/evals",
+      "claim_supported": "Public evaluation harness structure.",
+      "limitations": "Results directory contained no public result corpus at cutoff; proves harness existence only."
+    },
+    {
+      "id": "S59",
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_or_authors": "Joel Becker, Nate Rush, Tom Cunningham, David Rein, Khalid Mahamud / METR",
+      "source_type": "independent methodology/update report",
+      "publication_or_version_date": "2026-02-24",
+      "accessed": "2026-09-13",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "claim_supported": "2026 point estimates with confidence intervals including zero and detailed selection/randomization/time-accounting problems.",
+      "limitations": "Evolving design; cannot establish a clean later-tool causal speedup."
+    },
+    {
+      "id": "S60",
+      "title": "Harness engineering: leveraging Codex in an agent-first world",
+      "publisher_or_authors": "OpenAI",
+      "source_type": "first-party internal case study",
+      "publication_or_version_date": "page undated; describes late-August 2025 first commit and following five months",
+      "accessed": "2026-09-13",
+      "url": "https://openai.com/index/harness-engineering/",
+      "claim_supported": "Greenfield agent-first repository: reported ~1M LOC, ~1,500 merged PRs, 3→7 engineers, repo docs/plans/structural tests/observability, agent review/merge and recurring cleanup.",
+      "limitations": "No external audit; activity and estimated time are not business/quality outcomes; unusual greenfield/instrumented setting. Humans previously spent ~20% of time cleaning AI output, and long-run coherence is unknown."
+    },
+    {
+      "id": "S61",
+      "title": "An open-source spec for Codex orchestration: Symphony",
+      "publisher_or_authors": "OpenAI",
+      "source_type": "first-party specification and internal adoption report",
+      "publication_or_version_date": "2026-04-27",
+      "accessed": "2026-09-13",
+      "url": "https://openai.com/index/open-source-codex-orchestration-symphony/",
+      "claim_supported": "Issue state drives one isolated workspace/agent per open task; supervisor restart, WORKFLOW.md, multi-PR or analysis outputs, CI/rebase shepherding, review packet/video; humans admit follow-ups.",
+      "limitations": "Reported 500% landed-PR increase on some teams lacks baseline/team count/defect/reviewer-cost denominator and audit."
+    },
+    {
+      "id": "S62",
+      "title": "Symphony repository",
+      "publisher_or_authors": "OpenAI",
+      "source_type": "first-party open-source repository",
+      "publication_or_version_date": "repository state at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/openai/symphony",
+      "claim_supported": "Inspectable orchestration specification/source supporting issue/workspace durable identity.",
+      "limitations": "Repository/tag behavior must be pinned and tested; source availability is not production outcome proof."
+    },
+    {
+      "id": "S63",
+      "title": "Cloud environments",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/codex/cloud/environments",
+      "claim_supported": "Repo checkout→setup→agent work→tests→diff; setup secrets removed before agent phase; workspace cache behavior.",
+      "limitations": "Workspace-shared caches and changing environment semantics need tenant/invalidation tests."
+    },
+    {
+      "id": "S64",
+      "title": "Agent internet access",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official security documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/codex/cloud/internet-access",
+      "claim_supported": "Internet off by default with admin allowlists; documents prompt injection, exfiltration, malware/dependency and license risks.",
+      "limitations": "Allowlists reduce but do not eliminate content/supply-chain risk."
+    },
+    {
+      "id": "S65",
+      "title": "AGENTS.md",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official repository-instruction documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/codex/guides/agents-md",
+      "claim_supported": "Layered repository/subtree instructions and inspection of loaded guidance.",
+      "limitations": "Instruction is context, not an authorization/security boundary."
+    },
+    {
+      "id": "S66",
+      "title": "Enterprise admin setup for Codex",
+      "publisher_or_authors": "OpenAI Developers",
+      "source_type": "official administration documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://developers.openai.com/codex/enterprise/admin-setup",
+      "claim_supported": "Workspace roles, repositories/environments, integrations/secrets, representative identity testing, analytics/compliance ownership and access review.",
+      "limitations": "Documented controls need contract/config/runtime verification."
+    },
+    {
+      "id": "S67",
+      "title": "How we monitor internal coding agents for misalignment",
+      "publisher_or_authors": "OpenAI",
+      "source_type": "first-party internal safety report",
+      "publication_or_version_date": "live by 2026-09-11; rendered date unstated",
+      "accessed": "2026-09-13",
+      "url": "https://openai.com/index/how-we-monitor-internal-coding-agents-misalignment/",
+      "claim_supported": "Separate monitor over internal coding-agent traces, severity triage and human incident response; self-reported five months/tens of millions trajectories, ~1,000 moderate alerts and <0.1% traffic outside coverage.",
+      "limitations": "Asynchronous monitor cannot block irreversible action; self-defined labels/coverage, monitorability assumptions and no external audit."
+    },
+    {
+      "id": "S68",
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_authors": "GitHub Docs",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+      "claim_supported": "Research→plan→one repository/branch→code/test→optional PR in an ephemeral Actions environment; max 59 minutes; parallel sessions; throughput metrics.",
+      "limitations": "Plan/tier dependent; PR/merge metrics do not establish quality or net productivity."
+    },
+    {
+      "id": "S69",
+      "title": "Customize the firewall for GitHub Copilot",
+      "publisher_or_authors": "GitHub Docs",
+      "source_type": "official security documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-the-firewall",
+      "claim_supported": "Network-control surface and disclosed coverage limits.",
+      "limitations": "MCP servers/setup-step processes are outside firewall coverage and sophisticated bypass may be possible; defense in depth only."
+    },
+    {
+      "id": "S70",
+      "title": "About custom agents",
+      "publisher_or_authors": "GitHub Docs",
+      "source_type": "official configuration documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-custom-agents",
+      "claim_supported": "Repo/org/enterprise Markdown-YAML profiles define prompt, tools and MCP, and can distribute specialist profiles.",
+      "limitations": "Tools default broadly if omitted; profile is guidance/capability selection, not independent identity or approval."
+    },
+    {
+      "id": "S71",
+      "title": "About Copilot automations",
+      "publisher_or_authors": "GitHub Docs",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automations",
+      "claim_supported": "Scheduled/event cloud sessions, tool selection, untrusted-event handling and approval behavior.",
+      "limitations": "Automations are private to creator and not Git-versioned/PR-reviewed; weak fit for shared governed factories."
+    },
+    {
+      "id": "S72",
+      "title": "Rationale, confidence, and approvals",
+      "publisher_or_authors": "GitHub Docs",
+      "source_type": "official public-preview documentation",
+      "publication_or_version_date": "public preview at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-automation-rationale-and-approvals",
+      "claim_supported": "Confidence/rationale and repository thresholds to auto-apply or hold issue changes.",
+      "limitations": "GitHub says UI approval is workflow convenience, not server-side security boundary; API rights remain authoritative."
+    },
+    {
+      "id": "S73",
+      "title": "GitHub Agentic Workflows is now in public preview",
+      "publisher_or_authors": "GitHub",
+      "source_type": "official changelog announcement",
+      "publication_or_version_date": "2026-06-11",
+      "accessed": "2026-09-13",
+      "url": "https://github.blog/changelog/2026-06-11-github-agentic-workflows-is-now-in-public-preview",
+      "claim_supported": "Markdown compiled to Actions, reusable workflow catalogs, cross-repo capability, read-only/sandbox/firewall/output/threat-detection claims.",
+      "limitations": "Public preview; customer quotations are testimonials, not audits; compiled/runtime controls require verification."
+    },
+    {
+      "id": "S74",
+      "title": "Measuring the Self-Reported Impact of Early-2026 AI on Technical Worker Productivity",
+      "publisher_or_authors": "Joel Becker / METR",
+      "source_type": "independent survey report",
+      "publication_or_version_date": "2026-05-11",
+      "accessed": "2026-09-13",
+      "url": "https://metr.org/blog/2026-05-11-ai-usage-survey/",
+      "claim_supported": "349 technical workers self-reported value/speed, while authors warn self-estimates can diverge sharply from causal effects.",
+      "limitations": "Self-reported survey is adoption/perception evidence, not causal productivity evidence."
+    },
+    {
+      "id": "S75",
+      "title": "Custom flows",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official product documentation",
+      "publication_or_version_date": "live history through cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/custom/",
+      "claim_supported": "YAML distinguishes Agent, deterministic Tool, single-call AI Task and optional Human Input; publication and enablement/trigger attachment are separate; Maintainer/Owner permission.",
+      "limitations": "Feature/version/tier dependent; flow declaration does not prove safe runner enforcement."
+    },
+    {
+      "id": "S76",
+      "title": "Composite identity",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official identity documentation",
+      "publication_or_version_date": "live history through cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/composite_identity/",
+      "claim_supported": "Runner-flow authority intersects initiating user and service account and attributes both.",
+      "limitations": "Explicitly does not apply to Agentic Chat; exact service-account/config boundary must be tested."
+    },
+    {
+      "id": "S77",
+      "title": "Agent tool governance",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official governance documentation",
+      "publication_or_version_date": "beta/live history through cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/ai-governance/tool-governance/",
+      "claim_supported": "Always Allow/Ask/Deny governance and runner-specific behavior.",
+      "limitations": "Runner has no present user, supports Always Allow/Deny only, and an unspecified rule defaults Allow; background high-impact tools must be denied or separated."
+    },
+    {
+      "id": "S78",
+      "title": "Audit AI events",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official audit documentation",
+      "publication_or_version_date": "beta/live history through cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/ai-governance/ai-audit-events/",
+      "claim_supported": "AI event forwarding/storage and dashboard behavior.",
+      "limitations": "Storage was opt-in/disabled by default in documented history; self-managed gateway needs forwarding. Readback must be tested."
+    },
+    {
+      "id": "S79",
+      "title": "Security threats in agentic systems",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official threat-model documentation",
+      "publication_or_version_date": "living documentation",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/security_threats/",
+      "claim_supported": "Prompt injection from repos/issues/web/MCP and lethal-trifecta framing: secrets + untrusted content + autonomous action.",
+      "limitations": "Threat documentation does not prove controls prevent compromise."
+    },
+    {
+      "id": "S80",
+      "title": "GitLab Duo data usage",
+      "publisher_or_authors": "GitLab Docs",
+      "source_type": "official data-use documentation",
+      "publication_or_version_date": "living documentation at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://docs.gitlab.com/user/gitlab_duo/data_usage/",
+      "claim_supported": "Workflow/chat history, anti-abuse/expanded logging, model retention/cache exceptions and contractual no-training claims.",
+      "limitations": "Not universal zero retention; details depend on deployment/model/contract/config."
+    },
+    {
+      "id": "S81",
+      "title": "Go-to-Market Agent",
+      "publisher_or_authors": "Warp Agent Kits",
+      "source_type": "vendor reference/product page",
+      "publication_or_version_date": "living undated page",
+      "accessed": "2026-09-13",
+      "url": "https://www.warp.dev/agent-kits/go-to-market-agent",
+      "claim_supported": "GTM reference: product usage + CRM signals, account scoring, evidence-rich sales handoff and connector list.",
+      "limitations": "Reference/vendor page; no controlled outcome denominators."
+    },
+    {
+      "id": "S82",
+      "title": "GTM Agents",
+      "publisher_or_authors": "Warp / warpdotdev",
+      "source_type": "first-party open-source reference repository",
+      "publication_or_version_date": "main at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev/go-to-market-agent-oss",
+      "claim_supported": "Inspectable GTM skills/models/reference artifacts; HubSpot writeback for representative review and shared CRM support library.",
+      "limitations": "Reference implementation/configuration, not audited safety or ROI."
+    },
+    {
+      "id": "S83",
+      "title": "Social Monitoring Agent",
+      "publisher_or_authors": "Warp Agent Kits",
+      "source_type": "vendor reference/product page",
+      "publication_or_version_date": "living undated page",
+      "accessed": "2026-09-13",
+      "url": "https://www.warp.dev/agent-kits/social-monitoring-agent",
+      "claim_supported": "Mention monitoring, draft/suggest/skip, Slack review and sentiment-report workflow.",
+      "limitations": "Vendor reference without comparative outcome data."
+    },
+    {
+      "id": "S84",
+      "title": "Social Monitoring Agent OSS",
+      "publisher_or_authors": "Warp / warpdotdev",
+      "source_type": "first-party open-source reference repository",
+      "publication_or_version_date": "main at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev/social-monitoring-agent-oss",
+      "claim_supported": "Voice guide, review cards and human-publication boundary in inspectable reference.",
+      "limitations": "Reference behavior may not match hosted product or real deployment."
+    },
+    {
+      "id": "S85",
+      "title": "Conversion Ratio Optimization Agent",
+      "publisher_or_authors": "Warp Agent Kits",
+      "source_type": "vendor reference/product page",
+      "publication_or_version_date": "living undated page",
+      "accessed": "2026-09-13",
+      "url": "https://www.warp.dev/agent-kits/conversion-ratio-optimization-agent",
+      "claim_supported": "CRO status/experiment workflow and vendor shorthand about winner shipment.",
+      "limitations": "Marketing shorthand can conceal the repository’s human merge boundary; no ROI audit."
+    },
+    {
+      "id": "S86",
+      "title": "CRO Agent OSS",
+      "publisher_or_authors": "Warp / warpdotdev",
+      "source_type": "first-party open-source reference repository",
+      "publication_or_version_date": "main at cutoff",
+      "accessed": "2026-09-13",
+      "url": "https://github.com/warpdotdev/cro-agent-oss",
+      "claim_supported": "Notion backlog, measurement sources, experiment PR, monitor/analyze, ship-or-kill PR, human prioritization/merge; declares reference implementation.",
+      "limitations": "Sanitized identifiers/credentials/data; will not run as-is and gives no controlled outcome denominator."
+    },
+    {
+      "id": "S87",
+      "title": "CRMArena: Understanding the Capacity of LLM Agents to Perform Professional CRM Tasks in Realistic Environments",
+      "publisher_or_authors": "Kung-Hsiang Huang et al.",
+      "source_type": "independent academic preprint",
+      "publication_or_version_date": "2024-11-04",
+      "accessed": "2026-09-13",
+      "url": "https://arxiv.org/abs/2411.02305",
+      "claim_supported": "Reported leading agent success below 40% with ReAct and below 55% with function calling on realistic CRM tasks.",
+      "limitations": "Benchmark/simulated environments and model vintages differ from a production CRM factory."
+    },
+    {
+      "id": "S88",
+      "title": "CRMArena-Pro: Holistic Assessment of LLM Agents Across Diverse Business Scenarios and Interactions",
+      "publisher_or_authors": "Kung-Hsiang Huang et al.",
+      "source_type": "independent academic preprint",
+      "publication_or_version_date": "2025-05-24",
+      "accessed": "2026-09-13",
+      "url": "https://arxiv.org/abs/2505.18878",
+      "claim_supported": "Reported ~58% single-turn/~35% multi-turn leading-agent performance and near-zero inherent confidentiality awareness; targeted prompting traded off performance.",
+      "limitations": "Preprint/benchmark; production policies/connectors may differ, but failure/confidentiality evidence is directly relevant."
+    },
+    {
+      "id": "S89",
+      "title": "Approve HubSpot content",
+      "publisher_or_authors": "HubSpot Knowledge Base",
+      "source_type": "official workflow documentation",
+      "publication_or_version_date": "last updated 2026-06-12",
+      "accessed": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/website-and-landing-pages/approve-hubspot-content",
+      "claim_supported": "Designated review before publish/schedule, roles/permissions/override, and content-type coverage.",
+      "limitations": "Workflow mechanics; does not assure substantive/legal approval quality."
+    },
+    {
+      "id": "S90",
+      "title": "Email sender guidelines",
+      "publisher_or_authors": "Google Gmail Help",
+      "source_type": "provider requirements",
+      "publication_or_version_date": "requirements effective 2024 onward; living guidance",
+      "accessed": "2026-09-13",
+      "url": "https://support.google.com/mail/answer/81126?hl=en",
+      "claim_supported": "Authentication and spam-rate requirements, including stronger bulk-sender SPF/DKIM/DMARC and complaint controls.",
+      "limitations": "Provider-specific/live rules; other channels/jurisdictions differ."
+    }
+  ],
+  "conflicts": [
+    {
+      "claim": "More agents/roles improve work.",
+      "evidence_for": "Anthropic reports benefit for broad parallel research but high token cost and limited coding parallelism (S3); vendor platforms expose specialized roles/flows (S1,S13,S17-S22,S55).",
+      "evidence_against": "Anthropic advises simple workflows first (S4); coordination/token costs grow and role diagrams lack outcome proof.",
+      "resolution": "Use fanout only for separable work with a measurable join condition. Prefer typed stage authority over persona count."
+    },
+    {
+      "claim": "Factory self-improvement can automatically optimize routing/config.",
+      "evidence_for": "Warp documents replay and grouped-failure proposals as reviewed config PRs, and reports cost/compliance improvements from routing (S1,S2,S51).",
+      "evidence_against": "Small curated retrospective, LLM classification judge without public calibration, no raw data/CI/delayed defects; third-party harness comparison and A/B testing were not available at cutoff (S2,S50,S52).",
+      "resolution": "Observer proposes PR only; frozen plus fresh evals, independent approval, shadow/canary and rollback."
+    },
+    {
+      "claim": "Coding agents increase productivity.",
+      "evidence_for": "GitHub/Cognition/OpenAI/Anthropic publish selected internal cases (S6,S7,S14,S23).",
+      "evidence_against": "METR found a 19% slowdown in its early-2025 scoped RCT; its 2026 follow-up estimates had confidence intervals including zero and serious selection/randomization/time-accounting limits; Answer.AI reports supervision limits (S24,S25,S59). DORA stresses system context (S26).",
+      "resolution": "No universal multiplier. Measure local task cohorts with reviewer time, denominators, quality and delayed effects."
+    },
+    {
+      "claim": "One factory abstraction should span engineering and GTM.",
+      "evidence_for": "Both have triggers, actors, artifacts, state, gates, evaluation, provenance and side effects; standards support shared envelopes (S41-S44).",
+      "evidence_against": "Authority, artifact semantics, risk, metrics, data and terminal actions differ sharply; generic agent/chat abstractions hide these differences (S28-S37).",
+      "resolution": "Share the small control-plane kernel only. Keep repositories, schemas, workflows, identities, policies, evals and adapters domain-owned until repeated evidence justifies extraction."
+    },
+    {
+      "claim": "Human review makes agent output safe.",
+      "evidence_for": "Warp, GitHub, GitLab and Adobe expose approval/review stops (S1,S11,S15,S16,S21,S34).",
+      "evidence_against": "Review can be rubber-stamped; reviewers need exact digests, independent evidence and enforceable rules. Security/privacy law is not delegated by a UI (S35-S40).",
+      "resolution": "Digest-bound role-authorized gates, independent trusted checks, sampled audit and deny-by-default timeouts."
+    },
+    {
+      "claim": "A foreman should be the single voice and authority.",
+      "evidence_for": "Warp’s single reporting voice simplifies interaction (S1).",
+      "evidence_against": "Concentrating approval, execution and evaluation violates separation and creates correlated failure.",
+      "resolution": "One conversational facade is acceptable; retain separate workload identities, policy engine, evaluator and human owners."
+    },
+    {
+      "claim": "Human review/merge is always required for agent code.",
+      "evidence_for": "Warp and GitHub default to human handoff/review plus repository enforcement (S11,S12,S15,S16,S48).",
+      "evidence_against": "OpenAI’s internal Harness Engineering permits mostly agent-to-agent review and sometimes agent self-merge, reporting high throughput in a heavily instrumented greenfield repository (S60).",
+      "resolution": "Treat this as a context-specific exception, not general proof. Engineering v1 requires independent trusted checks and risk-tier human merge/deploy. Any later relaxation needs task-class evidence, isolation, sampled human audit, incident budget and rapid rollback."
+    },
+    {
+      "claim": "Background-flow human-input/tool “ask” gates protect external effects.",
+      "evidence_for": "GitLab custom flows define optional Human Input and interactive governance supports Always Ask (S75,S77).",
+      "evidence_against": "GitLab explicitly says runner flows have no present user, do not apply interactive human-in-loop, support Allow/Deny only and default unspecified rules to Allow (S77).",
+      "resolution": "Worker identity has deterministic deny for publish/send/spend/CRM mutations. A durable digest-bound approval triggers a separate least-privilege effect executor; timeout/unspecified means deny."
+    },
+    {
+      "claim": "GTM agents can safely automate CRM and publication with prompts/review.",
+      "evidence_for": "Warp/HubSpot/Adobe expose draft, review and handoff workflows (S33,S34,S81-S89).",
+      "evidence_against": "CRMArena-Pro finds low CRM reliability/confidentiality awareness; regulator/provider duties and prompt-injection risks remain (S35,S36,S79,S87,S88,S90).",
+      "resolution": "Read/analyze/draft first. CRM dry-run patch sets and external effects require deterministic compliance checks and separate authorized humans/executors; expand only by task class after measured canary evidence."
+    }
+  ],
+  "uncertainties": [
+    {
+      "field": "verified_capabilities",
+      "unknown": "Warp Factories used v1alpha1 config schemas at cutoff. Public docs covered desired files and a prompt-configured workflow, but not a complete authoritative live event/effect store or hard enforcement semantics (S45-S54).",
+      "impact": "High for buy/build and interoperability; treat examples as vendor claims until pilot/contract test."
+    },
+    {
+      "field": "evidence_and_limits",
+      "unknown": "No raw data or independent replication for WarpBench and most internal team cases; total failed runs, reviewer time and delayed defects are absent.",
+      "impact": "High; cannot infer causal ROI or safe automation percentage."
+    },
+    {
+      "field": "human_need_policy",
+      "unknown": "Probability thresholds and audit sample rates are illustrative; calibration data does not yet exist for this organization or GTM task.",
+      "impact": "High for false approvals/escalation load; remain conservative and collect shadow data."
+    },
+    {
+      "field": "factory_as_code_schema",
+      "unknown": "Exact common schema may change after implementation; multi-domain compatibility is unproven.",
+      "impact": "Medium/high; keep v1alpha1 internal and avoid public plugin promises."
+    },
+    {
+      "field": "end_to_end_workflows",
+      "unknown": "GTM vendor docs show intended features, not incremental pipeline/revenue outcomes or approval quality. Applicable privacy/marketing law varies by jurisdiction/channel.",
+      "impact": "High; GTM stays draft-only and disabled until legal/value gates pass."
+    },
+    {
+      "field": "conversation_and_handoffs",
+      "unknown": "Cross-repository manifest/receipt design is proposed, not shown as one end-to-end feature by compared vendors.",
+      "impact": "Medium; prototype with contract/fault/security tests."
+    },
+    {
+      "field": "as_of",
+      "unknown": "Several official documents are living and may not expose stable publication/version dates.",
+      "impact": "Medium for reproducibility; archive snapshots/commit hashes during implementation procurement."
+    },
+    {
+      "field": "actors_and_authority",
+      "unknown": "GitLab composite identity and tool-governance behavior differ between runner flows and Agentic Chat and are version-specific; actual tenant defaults are unverified.",
+      "impact": "High for authority isolation; require representative-principal and deny-default tests before use."
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate-high for the recommended separation, gates and evidence discipline; moderate for exact shared schema; low-to-moderate for vendor ROI and cross-domain generality.",
+    "claim_level": {
+      "documented product/workflow surfaces": "high when supported by official docs, but availability/version must be confirmed",
+      "WarpBench numeric report": "high that Warp published the numbers; low that they generalize or establish causal quality-preserving ROI",
+      "organizational productivity": "low-to-moderate because internal anecdotes conflict with scoped independent evidence",
+      "shared kernel design": "moderate-high, triangulated with standards and prior validated studies but still a proposed synthesis",
+      "GTM autonomy/value": "low; controls are well supported, outcomes are not",
+      "regulatory duties": "high for cited general requirements, low for organization-specific legal applicability without counsel"
+    },
+    "source_mix": "90 claim-linked records: official product/team documentation and public repositories, standards/regulators, first-party cases, and independent challenge evidence."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "verified_capabilities",
+    "evidence_and_limits",
+    "human_need_policy",
+    "factory_as_code_schema",
+    "end_to_end_workflows",
+    "conversation_and_handoffs",
+    "as_of",
+    "actors_and_authority"
+  ]
+}

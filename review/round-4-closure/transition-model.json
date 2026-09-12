@@ -1,0 +1,252 @@
+{
+  "reviewer": "round-4-transition-model-closure",
+  "scope": [
+    "Final plan-only closure audit of PLAN.md and its normative docs/state-transition-manifests.md.",
+    "Cross-checked README.md, requirements traceability, round-1 resolutions, all round-2 reviews and resolution, all four round-3 closure reviews and round-3 resolution.",
+    "Reproduced transition-table reachability, sink, endpoint, canonical-adjacency, private-to-canonical projection, cancellation, retry/exhaustion, child-composition, effect-origin, cleanup, quiescence, and improvement-reducer claims from the current snapshot.",
+    "Reviewed the named evidence artifacts and accepted the explicit plan-only scope; no implementation or future-gate pass was required."
+  ],
+  "strengths": [
+    "The plan now declares one normative manifest, a closed canonical edge catalog, explicit built-in tables, separate runtime/Wait/Effect/Cleanup/UnconfirmedQuiescence aggregates, and a generated-proof admission gate.",
+    "All ordinary canonical projection strings in the built-in tables use adjacent pairs present in the canonical edge catalog; a local parse found no misspelled canonical adjacency in those strings.",
+    "The runtime Attempt, Wait, Effect, CleanupItem, and UnconfirmedQuiescence tables materially improve cancellation, stale-result, UNKNOWN-effect, cleanup-resurface, and unfinished-attempt semantics over round 3.",
+    "Lease boundaries, typed tenant/ScopeRef rules, distinct improvement decisions, sandbox selection, and dual-owner cross-scope envelopes address the other transition/security findings raised in round 3.",
+    "The evidence artifacts bind the exact current PLAN and manifest SHA-256 digests and clearly label retrieval provenance and semantic entailment unverified; they do not claim the future fresh-run gate passed."
+  ],
+  "findings": [
+    {
+      "id": "R4-TM-001",
+      "severity": "high",
+      "title": "BUILD and DEEP-RESEARCH bypass the sole canonical initial state",
+      "requirement": "R-08/P-08 and manifest \u00a7\u00a71, 2, and 16 require one canonical initial state, exact legal projections, reachability, and compiler-derived replay; every built-in must use that contract.",
+      "evidence": [
+        "docs/state-transition-manifests.md:23 declares INBOX initial",
+        "docs/state-transition-manifests.md:152-158 declares BUILD initial INTAKE, with first projections beginning at TRIAGED",
+        "docs/state-transition-manifests.md:277-286 declares DEEP-RESEARCH initial SCOPING, with first projections beginning at PLANNING",
+        "PLAN.md:365-370 maps INTAKE->TRIAGED and SCOPING->PLANNING",
+        "docs/state-transition-manifests.md:684-686 requires exactly one initial state and reachability"
+      ],
+      "reproduction": "Initialize each built-in at its declared private initial state and compare its mapped canonical state with canonical INBOX. IDEATION and MAINTENANCE have entry rows INBOX>TRIAGED; BUILD has no INBOX>TRIAGED entry and DEEP-RESEARCH has no INBOX>TRIAGED>PLANNING entry. Thus their first recorded private edges cannot replay a canonical aggregate from its declared initial state.",
+      "impact": "Creation semantics are implementation-defined and two built-ins can begin after mandatory canonical gates. The promised one-initial-state compiler proof cannot accept the tables as written.",
+      "recommendation": "Add explicit factory-creation/entry rows from canonical INBOX to each private initial projection, or map private initials to INBOX and enumerate the subsequent edges. Make creation an authored edge, not an implicit initializer.",
+      "verification": "Generate each built-in from an empty event stream at canonical INBOX; require its first private event sequence to consist only of \u00a72 edges and end at the declared private-state projection.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-001",
+        "STATE-R2-001",
+        "SO-RC-1"
+      ]
+    },
+    {
+      "id": "R4-TM-002",
+      "severity": "high",
+      "title": "IDEATION HANDOFF has contradictory projection and an impossible cancellation trace",
+      "requirement": "R-03/P-03 and R-08/P-08 require deterministic conversational handoff, child composition, and cancellation through the sole canonical lifecycle.",
+      "evidence": [
+        "PLAN.md:367 maps HANDOFF->PLANNING",
+        "docs/state-transition-manifests.md:129 I09 maps ACCEPTED->HANDOFF to S",
+        "docs/state-transition-manifests.md:130 I10 starts HANDOFF cleanup at READY",
+        "docs/state-transition-manifests.md:141 I21 maps HANDOFF->CANCEL_REQUESTED to S",
+        "docs/state-transition-manifests.md:143 I23 requires CANCEL_REQUESTED>QUIESCING",
+        "PLAN.md:373 says the IDEATION parent stays at READY while the BUILD child starts at PLANNING"
+      ],
+      "reproduction": "Follow I07 to private ACCEPTED/canonical READY, then I09. Because I09 is S, the parent remains canonical READY although the lookup says HANDOFF is PLANNING. Taking I21 also stutters, leaving canonical READY while private state becomes CANCEL_REQUESTED; I23 then starts from canonical CANCEL_REQUESTED and cannot apply.",
+      "impact": "The handoff cannot have one canonical projection, and cancellation during an active child handoff is unreplayable. This can strand the parent or let implementations invent a shortcut.",
+      "recommendation": "Map HANDOFF to the parent canonical READY, keep the BUILD child projection separate, and change I21 to the exact READY>CANCEL_REQUESTED edge with explicit child-cancel propagation.",
+      "verification": "Model-check both child-success and cancel-at-HANDOFF traces and assert private lookup, persisted canonical state, child state, and every row projection agree after each event.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-001",
+        "CEC-R3-001",
+        "STATE-R2-001"
+      ]
+    },
+    {
+      "id": "R4-TM-003",
+      "severity": "high",
+      "title": "BUILD B58 records a terminal canonical cancellation while leaving the private state CANCEL_REQUESTED",
+      "requirement": "R-05/P-05 and R-08/P-08 require exact private/canonical projection, safe UNKNOWN-effect disposition, cancellation, cleanup, and terminal predicates.",
+      "evidence": [
+        "docs/state-transition-manifests.md:213 B58 is UNKNOWN_EFFECT->CANCEL_REQUESTED but projects QUARANTINED>CLEANING>CANCELLED and marks terminal cancelled",
+        "docs/state-transition-manifests.md:215-217 expects CANCEL_REQUESTED->QUIESCING->CLEANING->CANCELLED",
+        "PLAN.md:368 maps CANCEL_REQUESTED->CANCEL_REQUESTED and CANCELLED->CANCELLED",
+        "docs/state-transition-manifests.md:182-196 provides the analogous UNKNOWN_EFFECT/QUARANTINED paths"
+      ],
+      "reproduction": "Apply B58 from private UNKNOWN_EFFECT/canonical QUARANTINED. Its atomic projection ends canonical CANCELLED, but its target is private CANCEL_REQUESTED. The only next private row, B60, requires canonical CANCEL_REQUESTED, while the lookup also contradicts the persisted CANCELLED value.",
+      "impact": "Private and canonical aggregates diverge at an UNKNOWN external effect, exactly where retry and cancellation must fail closed. A compiler cannot produce one target state or legal continuation.",
+      "recommendation": "Either target private CANCELLED with the exact typed effect-disposition and clean guards, as B59 does, or target CANCEL_REQUESTED and use B60-B62 without projecting directly to CANCELLED.",
+      "verification": "Compile B58 and assert that the target private-state lookup equals the last canonical state, the terminal marker matches the target, and the selected UNKNOWN disposition/effect settlement is explicit.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-001",
+        "R3-STATESEC-011",
+        "R3-STATESEC-009"
+      ]
+    },
+    {
+      "id": "R4-TM-004",
+      "severity": "high",
+      "title": "Built-in failure, exhaustion, and child-outcome branches are not total",
+      "requirement": "R-05/P-05, R-06/P-06, R-08/P-08, and PLAN \u00a76.3 require complete failure/retry/exhaustion paths and deterministic propagation of child success, failure, cancellation, and cleanup.",
+      "evidence": [
+        "docs/state-transition-manifests.md:165-166 gives BUILD VERIFYING only budgeted repair or pass; no exhausted-failure row exists",
+        "docs/state-transition-manifests.md:297-298 gives DEEP-RESEARCH COMPLETION_VALIDATION only retry-on-gap or pass; no exhausted/final-gap row exists",
+        "docs/state-transition-manifests.md:129-134 gives IDEATION HANDOFF one child-terminal cleanup path and only a success exit",
+        "docs/state-transition-manifests.md:234-235 gives MAINTENANCE EXECUTING only child-success advancement",
+        "PLAN.md:176 says child failures flow up and parent resume waits for terminal cleanup",
+        "docs/state-transition-manifests.md:686 requires retry/exhaustion and no-nonterminal-sink tests"
+      ],
+      "reproduction": "Trace four declared outcomes: BUILD oracle failure with repair budget exhausted; DEEP-RESEARCH validation gap with no changed source/retry remaining; a failed/cancelled BUILD child under IDEATION HANDOFF; and a failed/cancelled child under MAINTENANCE EXECUTING. In each case no matching private row records the required failed/blocked/cleanup result. Structural endpoint checks miss these guard-conditioned sinks.",
+      "impact": "Normal failure scenarios can strand work or force an implementation to infer undeclared edges. IDEATION can also misclassify a failed child as success because I10 does not bind the child outcome and I14 is its only normal terminal exit.",
+      "recommendation": "Add explicit guarded rows for verification exhaustion/final gaps and separate child SUCCEEDED, FAILED, and CANCELLED propagation for every composition. Bind child terminal receipt and cleanup result to the parent outcome.",
+      "verification": "Generate outcome-partition tests per nonterminal state: enumerate PASS/FAIL/UNKNOWN, budget remains/exhausted, and every child terminal disposition; require exactly one legal edge for each reachable event class.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-001",
+        "R3-STATESEC-009",
+        "SO-RC-2",
+        "EE-RC-5"
+      ]
+    },
+    {
+      "id": "R4-TM-005",
+      "severity": "high",
+      "title": "The improvement reducer is not total for declared REDUCE-V1 edges",
+      "requirement": "R-12/P-12 and the round-3 correction require one versioned improvement tuple, exactly one fail-closed reducer result for every component edge, and only legal canonical projections.",
+      "evidence": [
+        "docs/state-transition-manifests.md:543-549 requires exactly one derived canonical result",
+        "docs/state-transition-manifests.md:551-570 reducer precedence omits CURATION_FAILED, OFFLINE_FAILED, SHADOW_FAILED, CANARY_ABORTING, and CANARY_ABORTED",
+        "docs/state-transition-manifests.md:582,587,592 sends candidate failure intermediates through REDUCE-V1",
+        "docs/state-transition-manifests.md:625,628-631 sends canary abort/failure states through REDUCE-V1",
+        "docs/state-transition-manifests.md:682 claims every coordinate edge has one legal reducer result"
+      ],
+      "reproduction": "From reachable CURATION_REVIEW, apply IC04. CURATION_FAILED is not one of the declared terminal candidate dispositions and no reducer predicate names it, so no row matches. If vague priority 16 is treated as matching, it derives CLEANING, while IC05 immediately assumes a REVIEW source. Likewise IR10 reaches CANARY_ABORTING, which no precedence row names. The same failure occurs for IC09/IC14 and IR12.",
+      "impact": "The central round-3 concurrency closure is not executable. Failure and abort events can have zero or contradictory canonical results, so model checking and safe promotion/rollback cannot be generated from this contract.",
+      "recommendation": "Enumerate every coordinate symbol explicitly in mutually exclusive reducer predicates. For each failure/abort intermediate, define its exact canonical state and synchronize cleanup/rollback edges rather than relying on \u201cfinal failure\u201d prose.",
+      "verification": "Enumerate all reachable tuples and every IC/IR/IA/IH/Effect/Cleanup/Rollback row; require exactly one reducer match and an old-to-new projection equal to S, one \u00a72 edge, or its explicitly named synchronized sequence.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-002",
+        "R3-REQ-002",
+        "CEC-R3-001"
+      ]
+    },
+    {
+      "id": "R4-TM-006",
+      "severity": "high",
+      "title": "Several atomic failure/cancel sequences require cleanup before cleanup can run",
+      "requirement": "R-08/P-08 and the universal terminal invariant require CLEANING to persist until actual clean receipts exist; DONE/FAILED/CANCELLED may occur only under clean.",
+      "evidence": [
+        "docs/state-transition-manifests.md:7 says every edge in A>B>C commits in one transaction and every intermediate guard is rechecked",
+        "docs/state-transition-manifests.md:19,23 requires terminal states under clean",
+        "docs/state-transition-manifests.md:146 I26 projects PLANNING>CLEANING>FAILED while listing cleanup as an effect",
+        "docs/state-transition-manifests.md:583,588,593,606-607 projects candidate failures through CLEANING to FAILED while listing cleanup as an effect",
+        "docs/state-transition-manifests.md:213 B58 similarly projects to CANCELLED"
+      ],
+      "reproduction": "Apply I26 or IC10 when the work owns a cleanup item that is not already CLEANED. The transaction enters CLEANING and must immediately recheck canonical CW20 clean before the listed cleanup effect can execute. The row therefore cannot commit. If an implementation ignores the guard, it terminates dirty; if it honors it, no row persists the intermediate CLEANING state.",
+      "impact": "Failure and cancellation can either deadlock or violate cleanup/terminal safety. This contradicts the plan\u2019s strongest terminal invariant.",
+      "recommendation": "Split each such row at CLEANING. The first row records the failed/cancel disposition and schedules cleanup; a separate CLEANING->FAILED/CANCELLED row requires verified cleanup or the narrowly eligible escalation predicate.",
+      "verification": "Run each failure/cancel row with at least one pending cleanup item; assert the first transaction ends at CLEANING and terminal advancement is rejected until the exact cleanup predicate passes.",
+      "confidence": 0.98,
+      "prior": [
+        "R3-STATESEC-001",
+        "R3-STATESEC-012",
+        "SO-RC-5"
+      ]
+    },
+    {
+      "id": "R4-TM-007",
+      "severity": "high",
+      "title": "Compensation reconciliation can take original-effect exits",
+      "requirement": "R-05/P-05 and PLAN \u00a78.3 require UNKNOWN effects and UNKNOWN compensations to reconcile without blind replay and with an unambiguous settled disposition.",
+      "evidence": [
+        "docs/state-transition-manifests.md:489 E27 maps COMPENSATION_UNKNOWN->RECONCILING",
+        "docs/state-transition-manifests.md:475-480 E13/E16/E18 are unqualified RECONCILING exits for original effects",
+        "docs/state-transition-manifests.md:490-491 E28/E29 are compensation-origin exits",
+        "PLAN.md:226 says unknown compensation enters the same lookup template and never blind-retries"
+      ],
+      "reproduction": "Enter RECONCILING through E27. With zero matches, E13 has no original-origin guard, so the machine can reach ABSENCE_PROVED->RETRY_AUTHORIZED->READY_TO_SEND and replay the original business effect. With one match, E16/E17 can classify the compensation as original RECEIPT_VERIFIED. The compensation-specific E28/E29 do not make these branches exclusive.",
+      "impact": "An ambiguous compensation can replay the wrong consequential operation or receive the wrong terminal classification. This is an undefined unsafe implementation path.",
+      "recommendation": "Persist an immutable reconciliation origin/target effect ID and make original-effect and compensation-effect exit guards explicitly disjoint. Compensation absence must never enter original-effect retry authorization.",
+      "verification": "Generate both original and compensation lookup cases for zero, one, multiple, timeout, and conflicting matches; assert exactly one origin-correct exit and prove no path from compensation-origin reconciliation reaches E14/E15.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-011",
+        "SO-RC-7"
+      ]
+    },
+    {
+      "id": "R4-TM-008",
+      "severity": "high",
+      "title": "IMPROVEMENT lacks whole-work cancellation outside four active release-attempt states",
+      "requirement": "R-09/P-09 and R-12/P-12 require owner cancellation with quiescence/cleanup across the full self-improvement lifecycle.",
+      "evidence": [
+        "PLAN.md:234 says improvement cancellation is CANCEL_REQUESTED->QUIESCING->CLEANING->CANCELLED",
+        "docs/state-transition-manifests.md:659-665 defines cancellation only from release-attempt READY, LEASED, EXECUTING, VERIFYING",
+        "docs/state-transition-manifests.md:574-679 contains no cancellation edge in candidate, rollout, or control-health machines and none from release-attempt IDLE or SUCCEEDED",
+        "docs/state-transition-manifests.md:686 requires generated cancellation tests"
+      ],
+      "reproduction": "Try cancellation while candidate is PROPOSED/CURATION_REVIEW, rollout is ENABLEMENT_REVIEW/CANARY_PENDING_APPROVAL/PROMOTING/OBSERVING, or after IA05 has made the release-attempt SUCCEEDED. No declared component row accepts the event, so the tuple cannot enter the cancellation chain claimed by PLAN.",
+      "impact": "Owners cannot reliably stop improvement before admission, during approval/canary/promotion phases, or after evaluator completion. Implementers must invent cross-machine cancellation semantics, risking live rollout effects.",
+      "recommendation": "Add a whole-work cancellation coordinate or explicitly synchronized cancellation rows for every reachable nonterminal improvement tuple, with effect stop/reconciliation, rollback dominance, child cancellation, quiescence, and cleanup.",
+      "verification": "Enumerate cancellation from every reachable improvement tuple and require exactly one legal path to CANCELLED or a safety-dominant rollback/quarantine state, never an inferred edge.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-002",
+        "R3-STATESEC-009",
+        "SO-RC-5",
+        "SO-RC-8"
+      ]
+    },
+    {
+      "id": "R4-TM-009",
+      "severity": "high",
+      "title": "Quiescence cleanup guards do not restrict the \u00a714 result to CLOSED",
+      "requirement": "R-05/P-05, R-08/P-08, and the round-3 UnconfirmedQuiescence correction require exact fail-closed authority reissue and cancellation predicates; DENIED or active disjoint-only status must not satisfy quiescence.",
+      "evidence": [
+        "docs/state-transition-manifests.md:89 CW-QC allows \u201cquiescence receipt or \u00a714 disposition\u201d",
+        "docs/state-transition-manifests.md:363,401,664 repeats the broad \u00a714 wording for FactoryInstance, NodeRun, and improvement release attempts",
+        "docs/state-transition-manifests.md:524 declares both DENIED and CLOSED terminal saga states",
+        "docs/state-transition-manifests.md:539 says active disposition never makes cancellation terminal and requires U09 plus Attempt A18",
+        "PLAN.md:321 preserves shared-resource blocking until closure"
+      ],
+      "reproduction": "Follow U01->U02 to terminal DENIED, then evaluate CW-QC/F28/N30/IA14 literally. \u201c\u00a714 disposition\u201d does not name U09 CLOSED, the closure receipt, or Attempt A18, so DENIED is an eligible reading even though \u00a714 says it must keep shared work blocked. ACTIVE_DISJOINT_ONLY is also a disposition but expressly nonterminal.",
+      "impact": "A broad implementation can enter cleanup and eventually terminal cancellation without proving old-attempt termination/effect classification, reopening overlap and stale-authority risks that round 3 intended to close.",
+      "recommendation": "Replace every \u201c\u00a714 disposition\u201d guard with an exact predicate requiring saga state CLOSED via U09, its bound closure receipt, Attempt A18, and all shared-resource/effect predicates. State explicitly that DENIED, REVIEW, ACTIVE_DISJOINT_ONLY, and REVOKED do not satisfy it.",
+      "verification": "Model-check every \u00a714 state against CW-QC/F28/N30/IA14; only the exact CLOSED+closure-receipt+Attempt-A18 combination may pass.",
+      "confidence": 0.98,
+      "prior": [
+        "R3-STATESEC-010",
+        "SO-RC-6"
+      ]
+    },
+    {
+      "id": "R4-TM-010",
+      "severity": "medium",
+      "title": "DEEP-RESEARCH QUARANTINED is unreachable",
+      "requirement": "R-10/P-10 and R-08/P-08 require a complete resumable research lifecycle whose declared states are reachable and whose unknown/untrusted evidence can fail closed.",
+      "evidence": [
+        "docs/state-transition-manifests.md:277 declares SCOPING initial",
+        "docs/state-transition-manifests.md:281-328 contains QUARANTINED only as source in D28 and D45",
+        "docs/state-transition-manifests.md:342 and other aggregates demonstrate explicit quarantine entry patterns",
+        "docs/state-transition-manifests.md:686 requires state-symbol reachability"
+      ],
+      "reproduction": "Parse every DEEP-RESEARCH source/target pair and compute graph reachability from SCOPING. All 21 other symbols are reachable, but QUARANTINED is not: no row targets it. Therefore D28 and D45 can never execute from a valid run.",
+      "impact": "The built-in fails its own declared compiler reachability gate and has no private fail-closed quarantine route for an unknown research condition. The missing edge is localized but contractually real.",
+      "recommendation": "Add explicit guarded entry edge(s) to QUARANTINED from the exact research phases that can produce unknown/untrusted evidence, with wait/effect settlement and typed disposition, or remove the dead state/rows if quarantine is intentionally owned elsewhere.",
+      "verification": "Re-run directed reachability from SCOPING and require every declared non-migration state, including QUARANTINED, to be reachable with legal canonical projections.",
+      "confidence": 0.99,
+      "prior": [
+        "R3-STATESEC-001",
+        "R3-STATESEC-009",
+        "FCD-004"
+      ]
+    }
+  ],
+  "residual_uncertainty": [
+    "No compiler or model checker exists by explicit scope, so this audit reproduced the normative tables with local parsing and manual guard traces rather than accepting any claimed future proof result.",
+    "The evidence corpus remains legacy/provenance-unverified and semantically unvalidated exactly as the current plan states; that disclosed future gate is not a closure defect.",
+    "Several guard labels remain prose-like shorthand. Findings below are limited to cases where the current rows are contradictory, unsafe, unreachable, or lack a required outcome\u2014not stylistic preferences."
+  ],
+  "closure_criteria_pass": false
+}

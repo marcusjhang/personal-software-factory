@@ -1,0 +1,206 @@
+{
+  "reviewer": "round-11 independent evidence/requirements closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-10 combined correction and schema-3 regeneration",
+    "specialty": "Current evidence/status/digests; all 16 requirements; architecture, roadmap, security, owner UX, dogfood/GTM boundaries, cross-document consistency, and the round-10 correction contracts.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-10-resolution.md",
+      "review/round-10-closure/formal-model.json",
+      "review/round-10-closure/evidence-status.json",
+      "review/round-10-closure/improvement-races.json",
+      "review/round-10-closure/recovery-adversary.json",
+      "review/round-10-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, direct contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": "Future implementation, exhaustive reachable-product/full-model proof, fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, deterministic reviewed-edge regeneration, later increment admission, and production validation are accepted unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "current_digest_identity_and_schema_3_status",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json schema_version: \u20183.0.0\u2019.",
+        "material-claims.json generated_against.plan_sha256: \u201829804814db262399090c60bbd5d6c15527ed9fdce2f72cecce7eea0be9d31063\u2019.",
+        "material-claims.json generated_against.normative_manifest_sha256: \u2018d8e3c02cdffd28a7b8c33ab2cb9133ecc5dd4be8e99cf3a251b9ced50af65599\u2019.",
+        "material-claims.json generated_against.regeneration_checkpoint: \u2018round-10\u2019.",
+        "material-claims.json semantic_status: \u2018editorial_candidate_associations_only\u2019; provenance_status: \u2018legacy_unverified\u2019.",
+        "material-claims.json internal counts: 37 corpus files, 20 material claims, 25 source observations, 36 edges (23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, 0 refutes), and 28 normative-manifest headings."
+      ],
+      "basis": "Independent SHA-256 recomputation matches both generated_against digests. Dynamic enumeration matches the recorded ordered 28-heading set. All 37 research-manifest inventory paths exist and their SHA-256 values match. The candidate-only banners and zero promoted supports/refutes avoid a provenance or entailment overclaim."
+    },
+    {
+      "area": "requirements_owner_journey_architecture_and_ux",
+      "result": "partial",
+      "exact_text": [
+        "review/requirements-traceability.md \u00a79: \u2018Requirements structurally mapped: **16/16**; unmapped: **0**.\u2019",
+        "PLAN.md \u00a72 begins: \u2018The owner installs a pinned control-product release by pull request.\u2019",
+        "review/requirements-traceability.md \u00a73: \u2018Each command has session-derived identity, displayed digest/diff, durable event/receipt, wait/error response, replay behavior and retention/export rules.\u2019",
+        "PLAN.md \u00a710: \u2018Silence never grants authority.\u2019",
+        "PLAN.md \u00a720: \u2018This section is the only increment-numbering authority.\u2019"
+      ],
+      "basis": "R-01 through R-16 remain mapped to PLAN clauses, roadmap increments, validation, and human gates. The owner journey, authority separation, no-write Release 0, persistence-before-writes ordering, second-repository isolation gate, engineering-first scope, and read-only GTM boundary are present. R-08 is not fully closed because the normative status model contains the direct IH01 legality contradiction reported below."
+    },
+    {
+      "area": "round_10_correction_register",
+      "result": "pass",
+      "exact_text": [
+        "review/round-10-resolution.md: \u2018All **9/9 raw high findings** in all **5/5** `review/round-10-closure/*.json` files are mapped below.\u2019",
+        "review/round-10-resolution.md: \u2018The schema-3 candidate-only material graph was subsequently regenerated and now matches the current PLAN/manifest digests and all 28 headings.\u2019",
+        "README.md: \u2018Independent closure re-review remains pending.\u2019"
+      ],
+      "basis": "All five round-10 reviews were read and their nine raw high findings are individually represented in the resolution register. The current status language distinguishes mapped formal corrections and regenerated editorial evidence from implementation, model, semantic, production, and independent-closure gates. Retaining the historical pre-correction findings is not itself an open defect."
+    },
+    {
+      "area": "round_10_control_health_correction_reproduction",
+      "result": "fail",
+      "exact_text": [
+        "Manifest \u00a715.7: \u2018`CANARY_RUNNING`, `WIDENING_EFFECT`, `APPROVED`, `PROMOTING`, `PROMOTED`, `OBSERVING`, and every canary/exposure progress or receipt-consumption row require both `control_health_state=HEALTHY` and `CURRENT_CONTINUITY`.\u2019",
+        "Manifest \u00a715.7: \u2018IH01 is legal only outside that active set.\u2019",
+        "Manifest \u00a715.7: \u2018IH01-C/W/WV/A/P/PV/D/O exhaustively and atomically record degradation for every member and every reachable Effect interval.\u2019",
+        "Manifest IH01-W: source `HEALTHY`, guard \u2018exact synchronized rollout `WIDENING_EFFECT->WIDENING_RECONCILING`\u2019.",
+        "Manifest IH01-P: source `HEALTHY`, guard \u2018exact synchronized rollout `PROMOTING->PROMOTION_RECONCILING`\u2019."
+      ],
+      "basis": "The active set explicitly contains WIDENING_EFFECT and PROMOTING, while IH01-W and IH01-P require those exact rollout states. The universal prose simultaneously forbids IH01 inside that set and requires the IH01 family to handle every member. The normative manifest gives no precedence rule that selects the rows over the contradictory invariant."
+    },
+    {
+      "area": "status_and_material_overclaim",
+      "result": "pass",
+      "exact_text": [
+        "README.md: \u2018This repository intentionally contains a plan, not a working controller or deployed factory.\u2019",
+        "README.md: \u2018This does not prove implementation, full reachable-product model checking, legacy evidence provenance, semantic validity, production safety, or independent closure.\u2019",
+        "review/round-10-resolution.md: \u2018This memo does **not** claim independent closure, implementation, full reachable-product proof, semantic evidence validation, or production safety.\u2019"
+      ],
+      "basis": "README, traceability, round-10 resolution, evidence banners, and current graph identity consistently limit the checkout to a plan and candidate-only legacy evidence. No separate material evidence/status overclaim was found."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "partial",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R11-ER-001",
+      "severity": "high",
+      "title": "IH01 degradation handlers are both forbidden and required in the declared active rollout set",
+      "requirement": "R-08 requires a complete, unambiguous status model, and the round-10 effect-first correction requires a legal degradation path for every active rollout/Effect interval.",
+      "evidence": [
+        "docs/state-transition-manifests.md \u00a715.7 defines the active set to include `CANARY_RUNNING`, `WIDENING_EFFECT`, `APPROVED`, `PROMOTING`, `PROMOTED`, and `OBSERVING`.",
+        "The same normative paragraph states, without a qualifier, \u2018IH01 is legal only outside that active set.\u2019",
+        "The next sentence requires IH01-C/W/WV/A/P/PV/D/O to handle every member, and the IH01-W/P rows specifically source WIDENING_EFFECT/PROMOTING."
+      ],
+      "impact": "A conforming compiler or checker cannot decide whether degradation transitions are legal from active rollout states. Enforcing the prohibition leaves the effect-first degradation path undefined; enforcing the rows violates the universal invariant. This is a direct normative contradiction on a safety path.",
+      "required_correction": "Replace \u2018IH01 is legal only outside that active set\u2019 with an exact rule that distinguishes ordinary progress/exposure rows from the IH01 degradation-interrupt rows. State explicitly that IH01-C/W/WV/A/P/PV/D/O are the only legal HEALTHY-to-degraded interrupts for the enumerated active states, then require the generated checker to reject all other rows once health or continuity is not current. Regenerate the schema-3 graph and current digests after the normative-byte change."
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 15,
+    "requirements_partial": 1,
+    "round_10_review_files_reviewed": 5,
+    "round_10_raw_critical_findings_reviewed": 0,
+    "round_10_raw_high_findings_reviewed": 9,
+    "research_manifest_files_hash_checked": 37,
+    "current_normative_headings": 28,
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "This audit establishes plan-contract and checked-in evidence/status consistency only; it does not establish implementation enforcement, exhaustive reachable-product/full-model proof, operational safety, or production validation.",
+    "Fresh immutable retrieval, external source-truth validation, same-run human semantic edge review, and deterministic reviewed-edge regeneration remain accepted future gates.",
+    "The schema-3 graph is structurally current but must be regenerated if R11-ER-001 changes the normative manifest bytes."
+  ],
+  "closure_criteria_pass": false
+}

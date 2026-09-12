@@ -1,0 +1,186 @@
+{
+  "reviewer": "round-6 independent architecture and requirements closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-5 corrections",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-5-resolution.md",
+      "review/round-5-closure/architecture-consistency.json",
+      "review/round-5-closure/evidence-integrity.json",
+      "review/round-5-closure/formal-transition.json",
+      "review/round-5-closure/improvement-product.json",
+      "review/round-5-closure/requirements-authority.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "All 16 requirements; the full owner journey; authority and delegated admission; monitoring-only unconfirmed quiescence; dependencies and scopes; Release 0; PostgreSQL and RLS gates; dogfood and GTM; Issue/CLI; readability and status; and schema-3 material-claim integrity.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. This audit did not require implementation proof, a completed full model check, or completion of the fresh immutable evidence gate."
+  },
+  "contract_reproduction": [
+    {
+      "area": "requirements_and_owner_journey",
+      "result": "pass",
+      "basis": "R-01 through R-16 remain mapped 16/16 to exact PLAN contracts, roadmap increments, validation, and human gates. PLAN \u00a7\u00a72, 9, 10.1, 14, 15, and 17 give a readable install-to-ideation/research-to-READY-to-execution-to-review/effect/outcome/cleanup journey. The Issue and future CLI surface includes identity-derived replay-safe commands, typed decisions, waits, status/why, exception, review, merge-policy, UNKNOWN reconciliation, feedback, release rollback, export, and uninstall."
+    },
+    {
+      "area": "authority_and_delegated_admission",
+      "result": "pass",
+      "basis": "Protected contract, human issuance, custody, runtime validation, the dedicated policy_admission_receipt_issuer, actuators, durable facts, external resources, and workers have separated powers. Delegation is limited to closed R0/R1 bounds after every human-needed predicate is false; the issuer has a purpose-only key and append-only receipt role with quota CAS; runtime cannot append the receipt; bound changes, expiry, revocation, R2+, or any human-needed predicate force an exact human wait."
+    },
+    {
+      "area": "unconfirmed_quiescence",
+      "result": "pass",
+      "basis": "PLAN \u00a713 and manifest \u00a7\u00a710 and 14 keep the old Attempt unfinished and block node admission. U03-U09 authorize only monitoring, isolation, kill, reconciliation, and closure. They cannot create a successor Attempt, Lease, fence, context, workspace, credential, output, business command/effect, or alternate authority carrier. Exact termination, U09, and A18 are required before successor work."
+    },
+    {
+      "area": "dependencies_scopes_and_persistence",
+      "result": "pass",
+      "basis": "Dependency dispatch is closed over hard_success, ordering, data, evidence, and approval. Every cross-boundary type needs a dual-owner scoped envelope, narrow disclosed fields/ports, expiry/revocation, and import receipt. Tenant plus typed ScopeRef is immutable throughout. Release 0 is no-write and recoverable; any external writer waits for PostgreSQL restricted-role/CAS/outbox/restore/race proof, and a second repository additionally waits for FORCE ROW LEVEL SECURITY or stronger isolation plus substitution tests and Increment 8 admission."
+    },
+    {
+      "area": "delivery_dogfood_and_gtm",
+      "result": "pass",
+      "basis": "Review, merge, UNKNOWN reconciliation, outcome, rollback, and separate cleanup are explicit. Auto-merge is off through Release 0 and the draft-PR pilot and is later limited to one earned R1 profile. Consumer releases are pinned, fully inventoried, rehashed, reversible, and rolled out through self-test, isolated dogfood, and opt-in rings. The second repository and fleet remain separately gated. GTM starts only after engineering admission as owned read-only discovery; publish, spend, or contact remains human-gated."
+    },
+    {
+      "area": "round_5_formal_repairs",
+      "result": "pass",
+      "basis": "The ten resolution clauses reproduce in the normative rows: schema-3 candidate-only relations; monitoring-only U saga; IA01/IA05 stutters with IC06/IC13 ownership; synchronized IR19/IR22 and IRB settlement; legal widening UNKNOWN projection; NoExposureReceipt abort branch; no-publication Release 0 research; dispatch-before-verification promotion; generated cancellation eligibility; and exhaustive Effect outcome partitions. The five round-5 reviews contain the declared 14 raw findings (12 high, 2 low)."
+    },
+    {
+      "area": "evidence_digests_and_candidate_semantics",
+      "result": "partial",
+      "basis": "material-claims.json schema 3 matches the current PLAN SHA-256 27dd19254d98cf346812b2f5980f47f5a7168bac71534ebeba5115db7777c483 and manifest SHA-256 6994ec9c5c4c701f3b4b62f2207ba65d8a053d14c82d2abb0b3459c37d244e92. Its 36 legacy edges are 23 candidate_support, 5 candidate_refute, and 8 context_only; all 36 have semantic_disposition unreviewed_candidate and none uses supports/refutes. However, its claimed current normative-manifest heading coverage does not reproduce, as detailed in R6-ARCH-001."
+    },
+    {
+      "area": "readability_and_status",
+      "result": "pass",
+      "basis": "README, PLAN status, traceability, and round-5 resolution consistently describe a plan-only repository, completed current-digest round-5 corrections/schema-3 regeneration, and separate future implementation/model/evidence gates. Release 0 is consistently distinguished from risk tier R0, and \u00a720 is the sole increment-numbering authority."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R6-ARCH-001",
+      "severity": "high",
+      "title": "Schema-3 material claims overstate review coverage of the current normative manifest",
+      "requirement": "A current-digest material-claim package must accurately report the scope of its structural and editorial review. A validation claim that all current normative state-machine material was reviewed must include every current heading or explicitly disclose omissions.",
+      "evidence": [
+        "docs/state-transition-manifests.md currently has 27 numbered level-2/level-3 headings from \u00a71 through \u00a717.",
+        "material-claims.json coverage_validation.normative_manifest_heading_count_reviewed is 25 and normative_manifest_headings_reviewed lists 25 headings.",
+        "The list omits current \u00a715.3.1 'Improvement rollback-coordinate machine v1' and \u00a715.8 'Exact tuple witnesses required by the plan checker', both added or materially used by the round-5 rollback and reducer repairs.",
+        "The same object says normative_manifest_reviewed=true and assesses that the manifest's proposed state machines and completeness gates were reviewed. internal_validation.checks.all_25_normative_manifest_headings_reviewed=true and internal_validation.overall_status=pass merely validate the stale hard-coded set, not the 27-heading current manifest.",
+        "The artifact is bound to the current manifest digest, so this is not explained by regeneration against an older manifest."
+      ],
+      "reproduction": "Extract every Markdown heading matching levels 2-4 from docs/state-transition-manifests.md, excluding the document title, and compare the 27 numbered headings with material-claims.json coverage_validation.normative_manifest_headings_reviewed. The set difference is exactly {15.3.1 Improvement rollback-coordinate machine v1, 15.8 Exact tuple witnesses required by the plan checker}.",
+      "impact": "The evidence package reports complete current-manifest editorial review while omitting the two sections that carry key round-5 rollback and exact-tuple corrections. This is a material audit-coverage overclaim. It can cause a plan approver to treat those corrected contracts as included in a completed evidence review when the machine-readable coverage record does not establish that.",
+      "recommendation": "Review the two omitted sections, regenerate the coverage list and count from the current manifest headings rather than a hard-coded expected set, rename the check to all_current_normative_manifest_headings_reviewed, and fail validation on any current-heading set difference. If they were not reviewed, mark them omitted with an explicit reason and remove the complete-review assertion.",
+      "verification": "The regenerated artifact's heading count and exact heading set equal the current manifest's numbered heading set, including \u00a7\u00a715.3.1 and 15.8; the validation check derives that equality from the current bytes and no longer passes a stale 25-heading expectation.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "round_5_review_files_reviewed": 5,
+    "round_5_raw_findings_reproduced": 14,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0
+  },
+  "residual_uncertainty": [
+    "No implementation, full reachable-product/model proof, operational safety proof, external source retrieval, or human semantic entailment review was required or inferred by this plan-only audit.",
+    "The plan's future Increment 0/1 and later admission gates remain future work and are not findings."
+  ],
+  "closure_criteria_pass": false
+}

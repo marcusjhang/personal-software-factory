@@ -1,0 +1,134 @@
+{
+  "reviewer": "round-15-cross-consistency",
+  "scope": {
+    "mode": "independent final plan-only closure audit after round-14 correction",
+    "documents_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-14-resolution.md",
+      "review/round-14-closure/cross-consistency.json",
+      "review/round-14-closure/evidence-requirements.json",
+      "review/round-14-closure/formal-model.json",
+      "review/round-14-closure/improvement-races.json",
+      "review/round-14-closure/recovery-remediation.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json"
+    ],
+    "specialty": "Cross-document vocabulary, status, guards, references, reducer, and unsafe terminal scan.",
+    "acceptance_boundary": "Future implementation, exhaustive reachable-product/full-model execution, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation were explicitly accepted as unperformed and were not treated as defects.",
+    "severity_filter": "Only critical/high unmet requirements, contradictions, unsafe or undefined paths, and material overclaims are reported."
+  },
+  "contract_reproduction": [
+    {
+      "area": "formal_source_identity_and_plan_only_boundary",
+      "result": "pass",
+      "exact_text": [
+        "Recomputed PLAN.md SHA-256: 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd.",
+        "Recomputed docs/state-transition-manifests.md SHA-256: 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271.",
+        "Both digests match review/round-14-resolution.md and material-claims.json generated_against.",
+        "PLAN.md and README.md retain the plan-only boundary and do not claim implementation, full-model proof, semantic evidence validation, production safety, or autonomous self-government."
+      ],
+      "basis": "Independent byte hashing reproduced the current formal-source identity; accepted future gates remain explicit."
+    },
+    {
+      "area": "round_14_inventory_and_requirements",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-14-closure JSON files parse.",
+        "They contain 0 critical and 5 high findings with exact IDs R14-IR-001, R14-IR-002, R14-IR-003, R14-XC-001, and R14-REC-001; every ID appears in review/round-14-resolution.md.",
+        "The five raw findings represent five unique defects.",
+        "review/requirements-traceability.md retains R-01 through R-16 and states 16/16 structural mapping without implementation or empirical closure."
+      ],
+      "basis": "The prior findings were treated as correction contracts rather than automatically carried forward."
+    },
+    {
+      "area": "normative_manifest_shape_references_reducer_and_terminals",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest contains 794 unique literal edge IDs: 96 CW canonical and 698 private/product rows.",
+        "No literal edge ID is duplicated, and every Markdown data row has the width declared by its table header.",
+        "All 27 canonical symbols are reachable from INBOX; canonical sinks are exactly DONE, FAILED, and CANCELLED.",
+        "FactoryInstance, NodeRun, Attempt, and release-attempt rows have no outgoing row from any symbol declared terminal.",
+        "Reducer priority 13 maps release_attempt_state=CANCEL_REQUESTED|QUIESCING|CLEANING|CANCELLED to SAVED; IX04 remains required for canonical CANCELLED.",
+        "IA09-IA15, IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO, IH06-WX/WN/PX/PN, and their targeted PLAN, manifest, resolution, invariant, and witness references are present."
+      ],
+      "basis": "Independent table parsing, canonical traversal, declared-terminal source intersection, reducer inspection, and targeted reference searches found no duplicate edge, unsafe terminal reopening, missing correction ID, or undefined canonical result."
+    },
+    {
+      "area": "round_14_cancellation_degradation_and_settlement_guards",
+      "result": "pass",
+      "exact_text": [
+        "IA09-IA15 require a matching non-NONE whole-work IX cancellation context and are canonical stutters; IA14 owns attempt-local cleanup only, IA15 seals attempt-local CANCELLED only, IX03 alone owns parent cancellation cleanup, and IX04 alone derives canonical parent CANCELLED.",
+        "The closed interrupt union is stated identically as IH01-C/W/WR/WV/A/P/PR/PV/D/O plus residual IH01-RX/RN plus rollback-adoption IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO in PLAN and the manifest invariant/validation text.",
+        "RollbackAdoptionInterruptCoordinatesV1 partitions exactly REQUESTED, ROLLING_BACK, VERIFYING, VERIFIED, FAILED, REMEDIATION_WAIT, and nonterminal ROLLED_BACK; every row requires work_cancel_state=NONE and preserves the existing saga/origin while creating no second saga or cleanup.",
+        "Every IH06-WX/WN/PX/PN guard requires work_cancel_state=NONE; the IX01/IX02-winning branch rejects IH06 and assigns X/N settlement to matching IX06 REQUESTED/QUIESCING rows with IX03 as sole parent cleanup owner."
+      ],
+      "basis": "The exact row guards and adjacent ownership/equality/witness contracts close the round-14 formal defects at plan-contract level. Generated execution remains an accepted future gate."
+    },
+    {
+      "area": "schema_3_candidate_graph_structure",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-14 and binds both recomputed current formal-source digests.",
+        "It contains 25 unique source observations, 20 unique claims, and 36 unique edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 pointed source records reproduce byte-semantically; every record-value digest and result-file digest matches; all 31 exact PLAN excerpts match; the dynamically derived set of all 28 numbered normative-manifest headings matches exactly.",
+        "All 37 research-manifest result paths are unique and their recorded SHA-256 digests match current bytes.",
+        "The graph remains candidate-only with unreviewed legacy provenance."
+      ],
+      "basis": "Local deterministic schema-3 structure, references, excerpts, and byte identity reproduce. This does not establish retrieval provenance or semantic entailment."
+    },
+    {
+      "area": "round_14_generated_graph_change_boundary",
+      "result": "fail",
+      "exact_text": [
+        "review/round-14-resolution.md line 3 says current-digest schema-3 candidate-graph regeneration is complete for round 14.",
+        "review/round-14-resolution.md line 7 says: ‘No research source-evidence record, evidence-edge semantic relation, or generated material-graph byte was changed in round 14.’",
+        "review/round-14-resolution.md line 17 gives the intended boundary: no research source-evidence record or evidence-edge semantic relation changed, while generated graph metadata, current-source digests, checkpoint, and coverage locations were regenerated.",
+        "material-claims.json generated_against.regeneration_checkpoint is round-14 and binds PLAN digest 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd and manifest digest 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271.",
+        "README.md lines 22, 34, and 40 and review/requirements-traceability.md lines 127, 179, and 185 consistently identify the regenerated round-14 graph as current."
+      ],
+      "basis": "The register simultaneously says that generated graph bytes did not change and that generated metadata/digests/checkpoint/coverage locations were regenerated. Those generated field changes necessarily change material-claims.json bytes."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R15-XC-001",
+      "severity": "high",
+      "title": "The round-14 register denies the generated graph byte changes that its own regeneration record requires",
+      "requirement_or_contract": "The current-checkpoint status must distinguish unchanged research source-evidence records and edge semantic relations from regenerated graph metadata, current-source digests, checkpoint, and coverage locations; it must not claim that no generated material-graph byte changed when those generated fields changed.",
+      "evidence": [
+        "review/round-14-resolution.md:3 calls current-digest schema-3 candidate-graph regeneration complete for round 14.",
+        "review/round-14-resolution.md:7 states that no generated material-graph byte changed in round 14.",
+        "review/round-14-resolution.md:17 says generated graph metadata, current-source digests, checkpoint, and coverage locations were regenerated.",
+        "research/repository-agent-operating-system/material-claims.json#/generated_against records regeneration_checkpoint round-14 and the new current PLAN/manifest digests.",
+        "README.md:22, README.md:34, README.md:40, review/requirements-traceability.md:127, review/requirements-traceability.md:179, and review/requirements-traceability.md:185 all describe the round-14 graph/regeneration as current."
+      ],
+      "impact": "The correction register gives mutually exclusive accounts of whether the checked-in generated artifact changed. This reintroduces the material graph-checkpoint ambiguity that R14-XC-001 was meant to close and prevents a reader from reproducing a single exact round-14 change boundary.",
+      "required_correction": "In review/round-14-resolution.md line 7, replace ‘No research source-evidence record, evidence-edge semantic relation, or generated material-graph byte was changed in round 14.’ with: ‘No research source-evidence record or evidence-edge semantic relation changed in round 14; generated graph metadata, current-source digests, checkpoint, and coverage locations were regenerated.’ Keep the same boundary everywhere.",
+      "references": [
+        "review/round-14-resolution.md:3",
+        "review/round-14-resolution.md:7",
+        "review/round-14-resolution.md:17",
+        "review/round-14-resolution.md:23",
+        "README.md:22",
+        "README.md:34",
+        "README.md:40",
+        "review/requirements-traceability.md:127",
+        "review/requirements-traceability.md:179",
+        "review/requirements-traceability.md:185",
+        "research/repository-agent-operating-system/material-claims.json#/generated_against"
+      ]
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1
+  },
+  "residual_uncertainty": [
+    "This was a plan-contract audit. Future implementation and full reachable-product/generated witness execution were not performed.",
+    "Schema-3 checks reproduced local structure and byte identity only; fresh immutable retrieval, same-run human semantic review, and deterministic reviewed-edge regeneration remain pending by contract."
+  ],
+  "closure_criteria_pass": false
+}

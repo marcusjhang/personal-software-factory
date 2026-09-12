@@ -1,0 +1,91 @@
+{
+  "reviewer": "cross-domain-dogfood",
+  "scope": "Round-2 review of PLAN.md for engineering-first boundaries, neutral IR, DEEP-RESEARCH, consumer distribution/dogfooding, privacy, upgrades, and the gated GTM branch. This is a plan-only review; absence of implementation was not treated as a defect.",
+  "strengths": [
+    "The plan keeps GTM out of Release 0 and requires domain-specific artifacts, authority, graders, consent, compliance, and human gates before external action.",
+    "The single closed Factory IR, typed ports, authority intersection, compiler rejection rules, and explicit separation of engineering-domain nouns are a strong base for limiting cross-domain privilege leakage.",
+    "Consumer releases are pinned and signed, upgrades are PR-based, raw code and conversations remain local by default, telemetry gaps pause rollout, and cross-consumer results retain denominators and cohort/version splits.",
+    "DEEP-RESEARCH now has immutable run identity, typed claim/evidence/conflict records, evidence-family handling, freshness, conflict review, and validation that distinguishes schema presence from semantic evidence."
+  ],
+  "findings": [
+    {
+      "id": "CDD-R2-001",
+      "severity": "high",
+      "title": "Consumer install and upgrade integrity is not closed over the installed file set",
+      "requirement": "P-13 / R-13 and round-1 factory-contracts correction 6 require verifiable install, update, rollback, compatibility, effective configuration, and managed-file integrity. The correction explicitly requires install/verify/update/rollback tooling to verify every managed file and reject tampering, mutable refs, capability expansion, and unexplained commit/workflow pin divergence.",
+      "evidence": [
+        "PLAN.md \u00a712 (repository bootstrap)",
+        "PLAN.md \u00a717 (Consumer releases, dogfood, canaries, and feedback)",
+        "PLAN.md \u00a720 increment 8",
+        "review/requirements-traceability.md P-13, R-13, FC-RC-06",
+        "review/round-1-resolutions/factory-contracts.md \u00a76 items 1-3"
+      ],
+      "reproduction": "Read PLAN.md \u00a717. The manifest binds a release digest/signature, compatibility data, enabled factories, capability maximum, overlays, and installation identity; upgrade PRs add hashes and diffs. Then search PLAN.md for `managed file`, `tamper`, `mutable ref`, `pin divergence`, and adapter compatibility: none defines a verifier or fail-closed rule for drift in the installed bootstrap/workflow/catalog files. An effective-config report alone does not prove that every installed authority-bearing file matches the signed manifest.",
+      "impact": "A later consumer updater could validate the release object while retaining or accepting locally altered bootstrap, workflow, command-catalog, or adapter files. That can create an unexplained authority or capability expansion across upgrades. The plan therefore does not yet provide a safe implementation contract for consumer verification and rollback.",
+      "recommendation": "Add a normative ConsumerManifest/install contract with a named managed-file inventory and hashes, exact controller/schema/domain/factory/adapter pins or ranges, required permissions, effective-config digest/provenance, migration state, rollback pin, tenant/project/environment/installation identity, and release channel. Require install, verify, update, and rollback to re-hash every managed file and fail closed on tampering, mutable refs, capability growth, unsupported combinations, or unexplained commit/workflow divergence. Define the signed verification and rollback receipts.",
+      "verification": "A contract review can map every factory-contracts \u00a76.1-\u00a76.2 field/rule to PLAN.md. Acceptance fixtures must reject a modified managed file, a mutable action/tool ref, an unapproved permission increase, an adapter/controller incompatibility, and commit/workflow pin divergence; a compatible signed upgrade and a tested rollback must produce complete receipts.",
+      "confidence": "high"
+    },
+    {
+      "id": "CDD-R2-002",
+      "severity": "high",
+      "title": "Dogfood and domain-extraction gates remain qualitative and cannot authorize or stop the GTM branch reproducibly",
+      "requirement": "P-14 and P-15 require engineering admission thresholds, measured reuse, denominators, stop criteria, and a reviewed pilot before kernel extraction or another domain. Round-1 factory-contracts correction 6 additionally calls for owned evidence artifacts for a stable shadow window, multiple consumer repositories and workflows, adapter stability, and a documented duplication threshold.",
+      "evidence": [
+        "PLAN.md \u00a717-\u00a718",
+        "PLAN.md \u00a720 increments 8 and 10",
+        "PLAN.md \u00a721.6",
+        "review/requirements-traceability.md P-14, P-15, R-14, R-15",
+        "review/round-1-resolutions/factory-contracts.md \u00a76 items 4-5"
+      ],
+      "reproduction": "PLAN.md \u00a718 permits extraction after `at least three factories and two repositories demonstrate repeated port/tool/grader patterns, version compatibility, independent ownership, and lower change coupling`. Increment 10 repeats only `Three factories/two repos show reuse`. No named time window, denominator, quantitative or adjudicated definition of repeated reuse/lower coupling, required materially different workflows, adapter stability period, duplication threshold, evidence artifact, or gate-change procedure is supplied. \u00a721.6 lists generic pilot evidence but does not bind pass/stop values to this extraction decision.",
+      "impact": "Two favorable repositories could be used to justify a shared kernel or GTM work without reproducible evidence that the seam is stable. Reviewers cannot independently reach the same admit/stop decision. This is a direct unmet engineering-first boundary and blocks safe implementation of increment 10 and any later GTM pilot.",
+      "recommendation": "Add an owned DomainExtractionDecision/scorecard. Bind a predeclared observation window, repository/workflow sample, denominators, adapter/version stability, duplication and change-coupling measures, safety/privacy incidents, human burden, and explicit pass/stop values. State how thresholds can change only through an evidence-backed decision recorded before evaluation. Preserve the proposal-only/read-only GTM pilot and define its own consent, privacy, quality, authority, volume, rollback, and no-go gates.",
+      "verification": "Given the same dogfood evidence bundle, two reviewers can compute the same extraction result. Tests reject missing denominators/windows, post-hoc gate edits, homogeneous workflow samples, insufficient adapter stability, privacy incidents above the stop rule, or any GTM write/contact/spend authority before its separate approval gate.",
+      "confidence": "high"
+    },
+    {
+      "id": "CDD-R2-003",
+      "severity": "medium",
+      "title": "DEEP-RESEARCH names resume and refresh states but does not define checkpoint reuse and dependency invalidation precisely",
+      "requirement": "P-10 / R-10 require a resumable research factory with partial-run resume, snapshot/digest lineage, freshness/staleness refresh, and validator receipts. Round-1 factory-contracts correction 3 requires resume to reuse only schema-valid artifacts whose input/config/source digests match and refresh to invalidate only declared dependents.",
+      "evidence": [
+        "PLAN.md \u00a74",
+        "PLAN.md \u00a76.2",
+        "PLAN.md \u00a78.1 BLOCKED semantics",
+        "PLAN.md \u00a714.4",
+        "PLAN.md \u00a721.5",
+        "review/requirements-traceability.md P-10, R-10, FC-RC-04",
+        "review/round-1-resolutions/factory-contracts.md \u00a73 item 3"
+      ],
+      "reproduction": "PLAN.md \u00a714.4 lists `REFRESH_WAIT`, `BLOCKED`, `STALE`, outputs, and completion checks. \u00a76.2 says refresh invalidates dependent claims. The plan does not specify a research checkpoint record/boundary, the exact input/config/schema/source-observation digests that authorize reuse, how a resumed collection avoids mixing observations from another run, or how declared dependency edges determine the minimal transitive invalidation set. \u00a721.5 tests mixed runs and stale-source invalidation, but an expected operational rule is absent.",
+      "impact": "Implementers can produce incompatible resume behaviors: full restart, unsafe reuse from an old configuration, or excessive/insufficient refresh invalidation. This risks mixed-run synthesis and stale evidence while still passing basic state and presence checks.",
+      "recommendation": "Define ResearchCheckpoint and ResearchArtifact lineage in the IR. Bind each reusable output to run ID, schema/validator/config/input digests, source observation/snapshot digests, producer node/attempt, and declared dependency edges. Specify atomic checkpoint commit, resume selection, changed-source comparison, minimal transitive invalidation, conflict/coverage recomputation, and completion prohibition while any required dependent is stale.",
+      "verification": "Model tests crash after each research phase and resume without duplicate or mixed-run outputs. Mutation tests change one input, schema, validator, config, source digest, or evidence-family assignment and assert exactly the declared dependent claims/conflicts/coverage/synthesis become stale and are recomputed before completion.",
+      "confidence": "high"
+    },
+    {
+      "id": "CDD-R2-004",
+      "severity": "medium",
+      "title": "The supposedly domain-neutral durable contract requires repository identity on every artifact and record",
+      "requirement": "P-14/P-15 and R-15 require a domain-neutral shared kernel that does not erase domain semantics, while repository isolation still requires repository identity wherever repository authority applies.",
+      "evidence": [
+        "PLAN.md \u00a75.1 opening invariant",
+        "PLAN.md \u00a76 opening artifact envelope",
+        "PLAN.md \u00a716 tenant boundary",
+        "PLAN.md \u00a718",
+        "review/requirements-traceability.md P-14, P-15, R-15"
+      ],
+      "reproduction": "PLAN.md \u00a75.1 says every durable record uses `tenant/repository identity`; \u00a76 says each artifact has `tenant_id, repository_id`; \u00a716 says every stored, queued, cached, object-stored, and audited record carries both. \u00a718 nevertheless calls the runtime nouns domain-neutral and anticipates GTM artifacts such as accounts, consent, campaigns, suppression, and attribution. Those objects can span repositories or have no repository as their authority boundary. The plan provides no optional/sum-type scope model and no rule preventing a repository ID from becoming a fabricated or misleading owner for non-engineering data.",
+      "impact": "The future shared kernel either forces non-engineering records into an artificial repository boundary, weakens the stated invariant ad hoc, or requires a breaking schema migration during extraction. It also risks applying repository export/retention authority to consent- or account-scoped data.",
+      "recommendation": "Separate neutral identity from engineering scope. Use a typed ScopeRef or mandatory tenant plus an explicit domain-owned scope tuple; require repository ID for engineering repository effects and records, but reject it as a substitute for account/consent/campaign authority. Define cross-scope authorization and export rules, and make extraction prove that the neutral core contains no repository-only field assumptions outside an engineering adapter/package.",
+      "verification": "Schema tests accept a repository-scoped engineering artifact and a repository-independent GTM research artifact with its required domain scope, reject missing required domain authority, and reject use of a repository ID to authorize account/contact data. A dependency scan shows repository-specific fields and policies reside in the engineering package or a typed repository scope variant.",
+      "confidence": "medium"
+    }
+  ],
+  "residual_uncertainty": [
+    "No runtime exists, so consumer isolation, upgrade recovery, research-resume correctness, and extraction metrics remain hypotheses to validate in later increments.",
+    "Exact local numeric thresholds should be selected before each pilot from its risk and baseline; this review requires that they be predeclared and auditable, not that this plan invent unsupported universal values.",
+    "A deliberately repository-native GTM installation could keep repository identity as deployment metadata, but the plan still needs to distinguish deployment location from the authority and ownership scope of non-repository data."
+  ]
+}

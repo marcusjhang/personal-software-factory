@@ -1,0 +1,247 @@
+{
+  "reviewer": "security-red-team",
+  "scope": "Adversarial review of the decision-grade plan and its explicitly non-shipping prototype contracts, focused on GitHub/App/webhook trust, prompt injection, credentials, sandboxing, supply chain, SQL roles, approvals, tenancy, effect replay, audit, and self-modification. Prototype gaps are expressed as implementation and admission gates, not as claims that the prototype ships.",
+  "strengths": [
+    "The threat model correctly treats issues, repository content, logs, tool output, and model output as untrusted data and keeps authorization in deterministic gateways.",
+    "The plan separates proposal, approval, execution, verification, merge, deployment, and promotion identities and calls for exact-digest approvals and current lease fences.",
+    "GitHub guidance covers raw-body HMAC validation, durable deduplication, authoritative rereads, minimum App permissions, full-SHA Actions, fork isolation, and merge_group checks.",
+    "Operations explicitly stop blind retries for unknown effects, revoke capabilities before cleanup, and require isolated author/verifier environments.",
+    "Documents clearly label the controller and production controls as proposed, which avoids overstating prototype maturity."
+  ],
+  "findings": [
+    {
+      "id": "SEC-R1-001",
+      "severity": "critical",
+      "title": "Prototype SQL has no repository or installation tenant boundary",
+      "requirement": "The multi-repository plan requires an immutable tenant key on every row and database-enforced cross-repository isolation.",
+      "evidence": {
+        "files": [
+          "docs/security.md:196-202",
+          "docs/operations.md:292-299",
+          "docs/database.md:30",
+          "migrations/0002_schema.sql:32-40",
+          "migrations/0003_security.sql:8-18"
+        ],
+        "urls": []
+      },
+      "reproduction": "Apply migrations, insert work_items for repos A and B, then SET ROLE polar_runtime; SELECT * FROM polar.work_items; both are visible and either row is updateable. polar_auditor can likewise read every webhook payload. No table enables RLS.",
+      "impact": "A credential scoped operationally to one repository can read or mutate another repository, and global keys/queues can collide across tenants. This blocks any multi-tenant deployment, although the prototype is explicitly non-shipping.",
+      "recommendation": "Add an immutable installation/tenant FK to every record, namespace inbox/idempotency/effect keys by it, use FORCE RLS or tenant-specific connection roles, and make cross-tenant denial a production-admission gate.",
+      "verification": "Negative SQL tests under every role must prove cross-tenant SELECT/INSERT/UPDATE/DELETE and cross-tenant FK substitution fail, including prepared statements and owner-bypass cases.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-002",
+      "severity": "high",
+      "title": "Approval records are self-asserted rather than authenticated and purpose-bound",
+      "requirement": "Every consequential approval must prove a verified human principal, authorized role/quorum, independence, exact action/content scope, and expiry.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:112-125",
+          "src/agent_os/approval.py:6-25",
+          "src/agent_os/context.py:10-17",
+          ".agent-os/schemas/approval.schema.json",
+          "migrations/0002_schema.sql:56-79",
+          "migrations/0002_schema.sql:171-198",
+          "docs/security.md:152-164"
+        ],
+        "urls": []
+      },
+      "reproduction": "Construct ApprovalEnvelope(approved_by='attacker-claims-human', approver_kind='human', expires_at=None) over an attacker-computed digest and call create_run_context; it succeeds. In SQL, a rejected, expired MERGE approval with a matching hash can back a READY decision; deployments/eval promotions accept an unrelated approval_id.",
+      "impact": "An agent or compromised service can manufacture apparent human authorization, reuse the wrong approval purpose, or create a never-expiring approval.",
+      "recommendation": "Require cryptographically/authenticated principal provenance, role snapshot, source review ID, quorum set, purpose/action scope, finite expiry, and purpose-dependent candidate/artifact/environment fields. Make approval creation append-only through a narrow gate and bind all fields into the digest.",
+      "verification": "Add negative Python/schema/SQL tests for forged kind, absent expiry, self-approval, wrong role/quorum/purpose/item/SHA/environment, rejected/expired/invalidated records, and approval replay.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-003",
+      "severity": "high",
+      "title": "The fail-closed validator accepts capability and factory privilege expansion",
+      "requirement": "Mandatory denies, maximum capabilities, tools, secrets, network, budgets, and composition must be typed and non-overridable.",
+      "evidence": {
+        "files": [
+          ".agent-os/bin/validate.py:78-87",
+          ".agent-os/bin/validate.py:115-119",
+          ".agent-os/schemas/factory.schema.json:75-100",
+          ".agent-os/capabilities/implementer.yaml:4-13",
+          "docs/security.md:55-63",
+          "docs/operations.md:227-241"
+        ],
+        "urls": []
+      },
+      "reproduction": "In a temp copy set implementer network.default=allow, secrets=[production], github_permissions={administration: write}, or add unrestricted_shell to factory tools. python .agent-os/bin/validate.py still prints 'validation passed'.",
+      "impact": "A protected-config mistake or malicious PR can be validator-green while granting exactly the powers the plan says factories cannot acquire.",
+      "recommendation": "Create strict schemas and semantic allowlists for capabilities, factories, registry, and composition. Enforce inherited mandatory denies, capability intersections, known tool/secret/egress classes, safe registry paths, and non-weakenable gates.",
+      "verification": "Maintain malicious fixtures for each escalation dimension and require every fixture to fail validation.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-004",
+      "severity": "high",
+      "title": "Workflow validation misses .yaml files and does not enforce Actions security policy",
+      "requirement": "All workflows must receive semantic checks for least privilege, immutable actions, untrusted triggers, secret separation, and unsafe interpolation.",
+      "evidence": {
+        "files": [
+          ".agent-os/bin/validate.py:48-51",
+          ".github/workflows/agent-os-validate.yml",
+          "docs/security.md:65-77"
+        ],
+        "urls": [
+          "https://docs.github.com/en/actions/reference/security/secure-use",
+          "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/"
+        ]
+      },
+      "reproduction": "Add .github/workflows/evil.yaml containing invalid YAML; the validator exits 0 because it scans only **/*.yml. A valid .yml using an unpinned action or privileged pull_request_target is merely parsed and also passes.",
+      "impact": "An unsafe workflow can pass the named desired-config gate and expose tokens or run fork-controlled code in a privileged context.",
+      "recommendation": "Scan both extensions and add actionlint/zizmor plus policy checks for top/job permissions, full-SHA uses, dangerous event/checkout combinations, secrets, environments, caches, and expression-to-shell flows.",
+      "verification": "Run the gate against fixtures for .yaml syntax failure, mutable action refs, write-all permissions, privileged pull_request_target checkout, unsafe shell interpolation, and fork secret exposure.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-005",
+      "severity": "high",
+      "title": "Untrusted planning output is represented as executable command strings",
+      "requirement": "Issue/repository/model prose must never become executable authority; commands must be protected IDs with typed arguments resolved outside the model.",
+      "evidence": {
+        "files": [
+          ".agent-os/prompts/planner.md",
+          ".agent-os/schemas/ticket.schema.json:144-160",
+          ".agent-os/checks.yaml:19-32",
+          ".agent-os/bin/validate.py:36-43",
+          "docs/security.md:91-106"
+        ],
+        "urls": []
+      },
+      "reproduction": "Place shell metacharacters or a second command in a ticket verification_commands value or REPOSITORY_TEST_COMMAND. The published schemas/validator accept the string and define no command catalog or argv boundary.",
+      "impact": "If a future controller shells these documented fields, issue/repository prompt injection becomes command execution and can cross the worker boundary.",
+      "recommendation": "Define a plan schema that carries command IDs and typed argv only. Resolve IDs against a protected, digest-pinned catalog in the capability proxy; forbid shell evaluation and bind resolved argv/catalog digest to approval.",
+      "verification": "Adversarial tests must show command substitution, metacharacters, newlines, environment expansion, path escapes, and injected command IDs are rejected before sandbox execution.",
+      "confidence": "medium"
+    },
+    {
+      "id": "SEC-R1-006",
+      "severity": "high",
+      "title": "Effect records allow blind UNKNOWN replay and mutable intent/receipt substitution",
+      "requirement": "Unknown outcomes must stop retry; effect intent must be immutable and attempts/receipts must remain bound to one effect.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql:126-150",
+          "migrations/0003_security.sql:12-15",
+          "tests-sql/003_effects_and_roles.sql:4-14",
+          "docs/security.md:144-150"
+        ],
+        "urls": []
+      },
+      "reproduction": "As polar_reconciler UPDATE an UNKNOWN outbox row back to PENDING or change its payload/hash/key; both are granted. Insert two unfinished effect_attempts. Create E1/E2, attempt A for E1, then a receipt with effect_id=E2 and attempt_id=A; the independent FKs accept it.",
+      "impact": "A reconciler bug or compromise can replay an ambiguous external action, rewrite the approved intent, or forge evidence that the wrong effect succeeded.",
+      "recommendation": "Make intent fields immutable; expose CAS transition procedures; allow UNKNOWN to leave only with a bound observation/receipt or reviewed decision; allow one unfinished attempt; add composite (attempt_id,effect_id) receipt binding.",
+      "verification": "Concurrency and crash tests must prove UNKNOWN cannot be queued blindly, only one active attempt exists, payload/key cannot change, and cross-effect receipts fail.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-007",
+      "severity": "high",
+      "title": "Database grants collapse controller, lifecycle, approval, deploy, promotion, and audit authority",
+      "requirement": "A compromised component or one service credential must not manufacture the entire authorization and delivery history.",
+      "evidence": {
+        "files": [
+          "migrations/0003_security.sql:8-18",
+          "migrations/0002_schema.sql:32-42",
+          "migrations/0002_schema.sql:200-219",
+          "docs/security.md:41-52",
+          "docs/security.md:180-193"
+        ],
+        "urls": []
+      },
+      "reproduction": "SET ROLE polar_runtime, then INSERT an approval, UPDATE work_items.lifecycle_state directly to DONE, INSERT a deployment/promoted candidate, and INSERT an audit row claiming another actor. The blanket all-table DML grant permits these operations; lifecycle has only an enum check.",
+      "impact": "One runtime credential bypasses separation of duties and can forge both the protected action and its apparent audit trail. polar_reconciler can also append canonical event_ledger rows despite the controller-only invariant.",
+      "recommendation": "Split ingress, controller, dispatcher, reconciler, merger, deployer, promoter, and audit-writer roles. Revoke raw DML on authority tables and expose narrow checked procedures deriving actor identity from authenticated session context. Anchor audit externally.",
+      "verification": "A full SET ROLE matrix must prove every identity can perform only its intended transitions and cannot forge actor, approval, lifecycle, deployment, promotion, or audit facts.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-008",
+      "severity": "high",
+      "title": "Cross-work-item foreign keys permit authorization and evidence substitution",
+      "requirement": "Specs, attempts, approvals, deployments, outcomes, observations, and receipts must be bound to the same tenant and work item.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql:38-54",
+          "migrations/0002_schema.sql:118-123",
+          "migrations/0002_schema.sql:145-149",
+          "migrations/0002_schema.sql:152-186"
+        ],
+        "urls": []
+      },
+      "reproduction": "Create W1/W2 and spec S2 owned by W2, then UPDATE work_items SET current_spec_revision_id=S2 WHERE id=W1 and COMMIT; it succeeds. Similar bare-ID relationships accept another item's attempt, approval, deployment, or observation.",
+      "impact": "A valid high-trust artifact or approval from one work item can be substituted into another, becoming cross-tenant privilege escalation once multi-repository operation is enabled.",
+      "recommendation": "Carry tenant/work_item in each dependent key and use composite foreign keys consistently; keep semantic purpose/digest checks in locked gate procedures.",
+      "verification": "Add one negative mismatch test per relationship and randomized integrity tests across multiple tenants/items.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-009",
+      "severity": "medium",
+      "title": "The context contract permits unsigned, non-worker-bound bundles",
+      "requirement": "Workers must verify a signed, expiring context bound to issuer, audience, attempt, fence, cancellation epoch, and exact capability scope.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:133-147",
+          "src/agent_os/context.py:10-26",
+          ".agent-os/schemas/context.schema.json",
+          "docs/architecture.md:73-84"
+        ],
+        "urls": []
+      },
+      "reproduction": "Call create_run_context without signing_key; it returns signature_scheme='none'. The repository context schema has no signature/key ID, worker identity, issuer/audience, path/command/egress/secret scope, or cancellation epoch and forbids additional fields.",
+      "impact": "A future runner following the current contract cannot distinguish an authentic scoped controller bundle from an unsigned/replayed one without an undocumented external mechanism.",
+      "recommendation": "Make signed envelopes mandatory at execution admission, define verification/key rotation/replay behavior, and bind all authority fields including worker audience, expiry, attempt/fence, cancellation epoch, and capabilities.",
+      "verification": "Round-trip sign/verify tests must reject unsigned, wrong audience/key, expired, revoked-epoch, altered capability, and stale-fence bundles.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-010",
+      "severity": "medium",
+      "title": "Validator bootstrap is version-pinned but not integrity-pinned",
+      "requirement": "The policy gate supply chain must use fully resolved, hash-verified dependencies and a digest-pinned execution image.",
+      "evidence": {
+        "files": [
+          ".agent-os/requirements.txt",
+          ".github/workflows/agent-os-validate.yml:20-26",
+          "docs/security.md:134-142"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect .agent-os/requirements.txt: it pins two direct versions but supplies no --hash entries or transitive lock; the workflow installs from the default index without --require-hashes.",
+      "impact": "Index, package, or transitive compromise can execute during installation or corrupt the validator that protects policy.",
+      "recommendation": "Generate a fully resolved hash lock, install with --require-hashes from an approved mirror, pin the runner/container toolchain digest where possible, and record it in evidence.",
+      "verification": "CI must fail for a changed wheel hash, unlisted transitive dependency, non-approved index, or mutable validator image.",
+      "confidence": "high"
+    },
+    {
+      "id": "SEC-R1-011",
+      "severity": "medium",
+      "title": "Role migration preserves dangerous pre-existing role attributes and grants",
+      "requirement": "Role installation must fail closed when named roles already have LOGIN, privilege attributes, memberships, or stale direct grants.",
+      "evidence": {
+        "files": [
+          "migrations/0001_roles.sql:1-10",
+          "migrations/0003_security.sql:3-6",
+          "tests-sql/003_effects_and_roles.sql:16-20"
+        ],
+        "urls": []
+      },
+      "reproduction": "Before migration CREATE ROLE polar_agent LOGIN; then run migrations. The conditional CREATE leaves LOGIN and memberships/attributes intact, while security migration revokes PUBLIC only and the test checks only schema usage and one table privilege.",
+      "impact": "A reused or pre-provisioned role name can retain login, BYPASSRLS, inherited membership, or stale grants despite comments and tests claiming an isolated marker role.",
+      "recommendation": "Assert and normalize NOSUPERUSER, NOBYPASSRLS, NOCREATEROLE, NOCREATEDB, NOLOGIN, memberships, ownership, direct/default privileges, or abort installation on mismatch.",
+      "verification": "Seed hostile pre-existing roles and grants, run migrations, and verify the full attributes/membership/object/default-privilege matrix.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No webhook ingress, GitHub App broker, capability proxy, sandbox launcher, merger, or deployer exists here for dynamic attack; those controls remain unverified until implementation.",
+    "SQL reproductions require PostgreSQL with migrations applied. Static grants and constraints make the described paths deterministic, but DATABASE_URL was unavailable in this review environment.",
+    "External GitHub rulesets, required CODEOWNER enforcement, App installation permissions, environment protection, and secret-store policy were not observable.",
+    "Python unit tests passed. The desired-config validator passed with its dependencies, but neither result exercises a production control plane."
+  ]
+}

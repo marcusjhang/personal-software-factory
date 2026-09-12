@@ -1,0 +1,54 @@
+{
+  "reviewer": "round-5 independent evidence-integrity closure auditor",
+  "scope": "Final PLAN-only closure audit of the current snapshot after round-4 repairs. Reviewed PLAN.md, README.md, docs/state-transition-manifests.md, review/requirements-traceability.md, review/round-4-resolution.md, all six review/round-4-closure JSON files, and the current material-claims, research-manifest, synthesis-coverage, evidence-repair, evidence-index, evidence-cutoff, and link-check artifacts. Reproduced local hashes, digests, pointers, edge references, excerpts, and index counts. Did not require implementation proof, passed future gates, a completed fresh retrieval, or model-checking results.",
+  "strengths": [
+    "The 37-file manifest is mechanically sound. Filesystem enumeration gives 14 self-managing, 10 RAOS core, 8 lifecycle, and 5 domain result JSONs; all parse; all 37 byte hashes match; the declared source totals reproduce; and referenced fields/validator digests match.",
+    "material-claims.json is bound to the current PLAN.md and normative-manifest bytes. All 25 SourceObservation IDs, JSON pointers, canonical record hashes, result hashes, URLs, and verbatim record values reproduce. All 36 edge references resolve, edge IDs are unique, all observations are used, all plan excerpts match, and five refutes edges remain.",
+    "The regenerated evidence index has exactly 23 track sections in the declared 10/8/5 split. Source-field paths and field types resolve; underlying/indexed/omitted counts reproduce; URLs occur in the corresponding records; the 40-entry cap holds; and no character-iteration artifact remains.",
+    "The cutoff artifacts consistently treat 2026-09-12T23:59:59Z as a decision-scope boundary, explicitly disclaim the former UTC+08 story, and keep the fresh same-run immutable retrieval plus human semantic review as a future gate before Increment 1 rather than claiming it passed."
+  ],
+  "findings": [
+    {
+      "id": "R5-EVID-001",
+      "severity": "high",
+      "title": "Current plan and claim graph still state semantic support/refutation for evidence globally declared unreviewed",
+      "requirement": "The evidence package must not turn structurally linked legacy records into semantic support or refutation before the mandatory fresh immutable run and human entailment review. Round-4 ARCH-R4-001 and its resolution explicitly require external propositions to remain candidate associations until that gate.",
+      "evidence": [
+        "PLAN.md:73 and 82 say the legacy corpus has no semantic validation and that the repaired artifacts do not establish semantic support; the latter requires human review of every material support/refute edge.",
+        "PLAN.md:79 nevertheless presents the current graph as typed supports|refutes|context_only edges; PLAN.md:84 says 'Platform documentation supports primitives' and makes the current queue-mode assertion; PLAN.md:541 says 'Research supports individual mechanisms.' These are current assertions, not text labeled as candidate legacy associations.",
+        "material-claims.json scope_and_method.semantic_status is 'not_verified' and provenance_policy.semantic_entailment says entailment is unverified, but its current claims and edge rationales affirm that sources 'support' and 'refute' propositions. It has no per-edge candidate/unreviewed semantic disposition. MC-002 is especially material: it asserts current mutable GitHub queue-mode behavior while its own second edge records a version conflict and its uncertainty says no fresh response bytes or snapshot exist.",
+        "evidence-repair.md:24-32 correctly uses 'Unverified candidate proposition inventory' and says legacy records merely associate sources with candidate propositions. The current PLAN and claim graph do not consistently preserve that repaired status.",
+        "review/round-4-resolution.md maps ARCH-R4-001 to a completed removal of semantic-support overclaims, but the affirmative language above remains."
+      ],
+      "reproduction": "Read PLAN.md lines 73-84 and 541 together. Then inspect material-claims.json scope_and_method.semantic_status, provenance_policy.semantic_entailment, MC-002, and the relation/rationale fields of the current edges. Compare them with evidence-repair.md's candidate-only rule and the ARCH-R4-001 verification condition. The package simultaneously says semantic support is unverified and expresses unreviewed edges and conclusions as supports/refutes without a candidate or unreviewed edge status.",
+      "impact": "A plan approver can read the current graph and PLAN prose as established semantic evidence even though only local pointer and byte identity were checked. This is a material evidence overclaim and can improperly influence the pre-implementation evidence/admission decision.",
+      "recommendation": "Until the future gate passes, label plan-level external conclusions as legacy-record candidate associations. Add an explicit per-edge semantic disposition such as unreviewed/candidate, or use candidate_support/candidate_refute for the editorial graph and reserve supports/refutes for reviewed fresh observations. In particular, make MC-002 a candidate mutable-documentation proposition rather than a current platform fact. Regenerate dependent digests after edits.",
+      "verification": "A current-artifact search and graph inspection must show that every legacy external-content edge is explicitly candidate/unreviewed, while supports/refutes is reserved for human-reviewed observations from the same immutable run. PLAN.md, evidence-repair.md, synthesis-coverage.md, and material-claims.json must give the same semantic status. Recompute covered digests and rerun the deterministic pointer/hash checks.",
+      "confidence": "high",
+      "prior": "ARCH-R4-001 (semantic half not fully closed)"
+    },
+    {
+      "id": "R5-EVID-002",
+      "severity": "low",
+      "title": "Requirements traceability still reports completed evidence repairs as pending",
+      "requirement": "Current status text must distinguish completed current-digest editorial repair from the still-future immutable retrieval, human semantic review, and independent closure review.",
+      "evidence": [
+        "review/requirements-traceability.md:108 says the named round-4 evidence/provenance edits remain assigned to a separate repair and that the update does not claim those artifacts are repaired.",
+        "review/requirements-traceability.md:116 says named evidence-artifact work remains pending the combined deliverable; line 104 also retains the older requirement for a final regenerated material-claim register.",
+        "README.md:22, review/round-4-resolution.md:33-40 and 69-72, evidence-repair.md:13-18 and 133, and the matching current PLAN/manifest digests in material-claims.json all say the editorial repairs and regeneration are complete. Only the distinct future evidence gate and independent re-review remain pending."
+      ],
+      "reproduction": "Compare review/requirements-traceability.md lines 104, 108, and 116 with README.md line 22, review/round-4-resolution.md's G3/count sections, and material-claims.json generated_against digests. Recompute the PLAN and normative-manifest SHA-256 values; they match the claim graph, so the pending-regeneration status is stale.",
+      "impact": "Readers receive contradictory closure status and may redo completed editorial work or misunderstand what remains blocked. This does not by itself create an unsafe implementation path because the future evidence gate remains stated elsewhere.",
+      "recommendation": "Update the round-3 text as historical status and revise round-4/current coverage to say the current-digest editorial repairs are complete while immutable re-fetch, human semantic review, and independent closure review remain pending.",
+      "verification": "The traceability document agrees with README.md, round-4-resolution.md, and the current digests, and contains no present-tense statement that current-digest evidence repair or material-claim regeneration is still pending.",
+      "confidence": "high",
+      "prior": "R4-CONS-005 (stale-status portion not fully closed)"
+    }
+  ],
+  "residual_uncertainty": [
+    "No fresh source retrieval, source-authenticity check, or human entailment review was performed. Those are correctly future gates and their non-completion is not itself a finding.",
+    "This audit validates local artifact mechanics and internal evidence language. It does not assert external source truth, current platform behavior, implementation correctness, or production safety.",
+    "Finding counts: critical 0, high 1, medium 0, low 1."
+  ],
+  "closure_criteria_pass": false
+}

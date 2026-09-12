@@ -1,0 +1,199 @@
+{
+  "artifact": "final-delta-audit",
+  "performed_at_utc": "2026-09-12T23:31:47.921820Z",
+  "scope": "Independent final delta audit of current staged/worktree plan-contract snapshot; no implementation, external source retrieval, semantic evidence validation, or production validation.",
+  "comparisons": {
+    "plan": {
+      "baseline": "/tmp/PLAN.round17-closure.md",
+      "current": "PLAN.md",
+      "baseline_sha256": "31a7c01db2def3d0d708c448dc5f2bbbe60aa53346261e24c2c873ec5bdf6e6f",
+      "current_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+      "byte_identical": false,
+      "trailing_whitespace_normalized_bytes_identical": true,
+      "non_whitespace_bytes_identical": true,
+      "delta": "one removed two-space Markdown hard-break after the status line; no semantic/non-whitespace delta",
+      "pass": true
+    },
+    "normative_manifest": {
+      "baseline": "/tmp/manifest.round17-closure.md",
+      "current": "docs/state-transition-manifests.md",
+      "baseline_sha256": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+      "current_sha256": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+      "byte_identical": true,
+      "pass": true
+    }
+  },
+  "material_graph": {
+    "path": "research/repository-agent-operating-system/material-claims.json",
+    "schema_version": "3.0.0",
+    "checkpoint": "round-16",
+    "plan_digest_match": true,
+    "manifest_digest_match": true,
+    "current_plan_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+    "current_manifest_sha256": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+    "counts": {
+      "corpus_result_files": 37,
+      "source_observations": 25,
+      "material_claims": 20,
+      "evidence_edges": 36,
+      "candidate_support_edges": 23,
+      "candidate_refute_edges": 5,
+      "context_only_edges": 8,
+      "supports_edges": 0,
+      "refutes_edges": 0,
+      "plan_sections_reviewed": 25,
+      "normative_manifest_headings_reviewed": 28
+    },
+    "reproduced_checks": {
+      "graph_schema3": true,
+      "graph_plan_digest": true,
+      "graph_manifest_digest": true,
+      "corpus_37_exact": true,
+      "corpus_hashes": true,
+      "observations_reproduced": true,
+      "claim_ids_unique": true,
+      "canonical_work_ids_unique": true,
+      "edge_integrity": true,
+      "relations_counts": true,
+      "plan_excerpts": true,
+      "manifest_headings_28_exact": true,
+      "plan_sections_25": true,
+      "link_hash_current": true,
+      "link_24_http200": true,
+      "link_urls_current": true,
+      "all_internal_flags_true": true
+    },
+    "internal_validation_status": "pass",
+    "all_declared_internal_checks_true": true,
+    "pass": true
+  },
+  "plan_link_check": {
+    "path": "review/plan-link-check.json",
+    "recorded_plan_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+    "current_plan_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+    "hash_match": true,
+    "url_count": 24,
+    "http_200_count": 24,
+    "all_urls_match_current_plan": true,
+    "pass": true
+  },
+  "round_17_closure": {
+    "audits": [
+      {
+        "file": "review/round-17-closure/cross-consistency.json",
+        "findings_len": 0,
+        "critical_observed": 0,
+        "high_observed": 0,
+        "closure_criteria_pass": true,
+        "reported_counts": {
+          "critical": 0,
+          "high": 0
+        }
+      },
+      {
+        "file": "review/round-17-closure/evidence-requirements.json",
+        "findings_len": 0,
+        "critical_observed": 0,
+        "high_observed": 0,
+        "closure_criteria_pass": true,
+        "reported_counts": {
+          "requirements_reviewed": 16,
+          "requirements_pass": 16,
+          "requirements_partial": 0,
+          "round_16_review_files_reviewed": 5,
+          "round_16_raw_critical_findings_reviewed": 0,
+          "round_16_raw_high_findings_reviewed": 4,
+          "round_16_unique_defects_reviewed": 3,
+          "normative_manifest_edge_rows": 801,
+          "canonical_edge_rows": 96,
+          "private_and_product_edge_rows": 705,
+          "research_manifest_files_hash_checked": 37,
+          "schema_3_source_observations_checked": 25,
+          "schema_3_material_claims_checked": 20,
+          "schema_3_edges_checked": 36,
+          "current_normative_headings": 28,
+          "critical": 0,
+          "high": 0,
+          "total": 0
+        }
+      },
+      {
+        "file": "review/round-17-closure/formal-model.json",
+        "findings_len": 0,
+        "critical_observed": 0,
+        "high_observed": 0,
+        "closure_criteria_pass": true,
+        "reported_counts": {
+          "critical": 0,
+          "high": 0
+        }
+      },
+      {
+        "file": "review/round-17-closure/improvement-races.json",
+        "findings_len": 0,
+        "critical_observed": 0,
+        "high_observed": 0,
+        "closure_criteria_pass": true,
+        "reported_counts": {
+          "critical": 0,
+          "high": 0,
+          "total": 0,
+          "manifest_rows_reproduced": 801,
+          "canonical_rows_reproduced": 96,
+          "private_and_product_rows_reproduced": 705,
+          "round_16_review_files_reviewed": 5,
+          "round_16_raw_high_findings_reviewed": 4,
+          "round_16_unique_defects_reviewed": 3,
+          "schema_3_source_observations_checked": 25,
+          "schema_3_material_claims_checked": 20,
+          "schema_3_edges_checked": 36
+        }
+      },
+      {
+        "file": "review/round-17-closure/recovery-remediation.json",
+        "findings_len": 0,
+        "critical_observed": 0,
+        "high_observed": 0,
+        "closure_criteria_pass": true,
+        "reported_counts": {
+          "critical": 0,
+          "high": 0,
+          "total": 0
+        }
+      }
+    ],
+    "audit_count": 5,
+    "critical": 0,
+    "high": 0,
+    "pass": true
+  },
+  "status_coherence": {
+    "pass": true,
+    "assessment": "README and round-17 summary identify plan-only round-17 closure with 0 critical/high and retain all future gates. Round-16 resolution and the five round-17 audit files bind the pre-normalization PLAN digest; their source PLAN is non-whitespace-identical to current. review/final-validation.json is a timestamped pre-delta validation with pending-git-diff-check, not a false current pass. Current material-claims.json and plan-link-check.json bind the normalized PLAN digest."
+  },
+  "git_snapshot": {
+    "staged_path_count_before_audit_artifact": 189,
+    "staged_paths_are_repository_population": true,
+    "unstaged_tracked_path_count_before_audit_artifact": 6,
+    "unstaged_tracked_paths_before_audit_artifact": [
+      "PLAN.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/self-managing-software-projects/workflow-blueprint-draft.md",
+      "research/self-managing-software-projects/workflow-blueprint.md",
+      "review/plan-link-check.json"
+    ],
+    "unstaged_delta_assessment": "PLAN and three supporting Markdown files only remove trailing spaces; material-claims.json refreshes timestamp/current PLAN digest; plan-link-check.json refreshes current PLAN digest. No unexpected semantic delta observed.",
+    "untracked_path_count_before_audit_artifact": 0,
+    "pass": true
+  },
+  "findings": [],
+  "severity_summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "pass": true,
+  "verdict": "PASS — zero critical/high findings."
+}

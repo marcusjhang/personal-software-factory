@@ -1,0 +1,139 @@
+{
+  "reviewer": "round-6 independent improvement-recovery closure auditor",
+  "scope": {
+    "mode": "final PLAN-only closure audit after round-5 corrections",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-5-resolution.md",
+      "review/round-5-closure/evidence-integrity.json",
+      "review/round-5-closure/requirements-authority.json",
+      "review/round-5-closure/formal-transition.json",
+      "review/round-5-closure/improvement-product.json",
+      "review/round-5-closure/architecture-consistency.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "Complete improvement product/reducer and recovery, cancellation, rollback, effects, cleanup, asynchronous child creation, widening, promotion, EvidenceBundle expected-set completeness, and protected authority.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Implementation proof, full model proof, and completion of the fresh evidence gate were not required."
+  },
+  "contract_reproduction": [
+    {
+      "area": "round_5_improvement_repairs",
+      "result": "pass_with_residual_findings",
+      "basis": "Direct tuple replay reproduces the corrected IA01/IA05 stutters and IC06/IC13 ownership; synchronized IR19/IR22 rollback entry; the ordinary no-cancel rollback witness through IRB08 and later cleanup; widening UNKNOWN through REVIEW>BLOCKED>QUARANTINED with verified/no-apply exits; the two pre-exposure abort branches; and pre-MERGED promotion dispatch, UNKNOWN reconciliation, verified apply, and proved no-apply. Findings R6-IMP-001 and R6-IMP-002 cover reachable cases outside those published happy-path witnesses."
+    },
+    {
+      "area": "effect_and_cleanup_partitions",
+      "result": "pass",
+      "basis": "E30-E39 close the formerly omitted invalid, stale, forbidden, exhausted, identity-mismatch, reconstructed-receipt, compensation-ambiguity, and deadline outcomes. ORIGINAL and COMPENSATION reconciliation remain disjoint. Cleanup entry and terminalization remain separate, and eligible retained-risk cleanup cannot make DONE."
+    },
+    {
+      "area": "unconfirmed_quiescence",
+      "result": "pass",
+      "basis": "ACTIVE_DISJOINT_ONLY is removed. U01-U10 permit only monitoring, isolation, kill, reconciliation, and closure, forbid every successor authority carrier, and keep the node blocked and the old Attempt unfinished until exact termination, U09, and A18."
+    },
+    {
+      "area": "whole_work_cancellation",
+      "result": "partial_pass",
+      "basis": "IX01 names the generated reachable-nonterminal tuple set and blocks non-safety work; IX02-IX05 require child/effect/rollback/quiescence settlement and separate cleanup. Rollback settlement while cancellation is pending still disagrees with IRB07/IRB08 projections as detailed in R6-IMP-001."
+    },
+    {
+      "area": "asynchronous_canary_child",
+      "result": "partial_pass",
+      "basis": "IR04 no longer fabricates a child lifecycle and IR27-IR35 consume durable child receipts one at a time. The self-loop does not, however, guard or constrain child-link cardinality, as detailed in R6-IMP-002."
+    },
+    {
+      "area": "evidence_bundle_and_authority",
+      "result": "partial_pass",
+      "basis": "The protected independent evaluation owner, protected evidence service, exact expected tuple fields, counts, schema digests, duplicate-free set comparison, and distinct enablement/canary/widening/promotion authorities are present. The missing/failed/inconclusive exception wording conflicts with the unconditional pass rule as detailed in R6-IMP-003."
+    },
+    {
+      "area": "schema_3_material_claims",
+      "result": "pass",
+      "basis": "The stored PLAN and normative-manifest SHA-256 digests reproduce. The graph contains 20 claims, 25 source observations, and 36 edges; all legacy edges use candidate_support, candidate_refute, or context_only with semantic_disposition=unreviewed_candidate, while supports/refutes counts are zero. The package does not claim the fresh immutable retrieval or human semantic gate passed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R6-IMP-001",
+      "severity": "high",
+      "title": "Rollback settlement is not projection-total when whole-work cancellation is pending",
+      "requirement": "R-08/P-08 and R-12/P-12 require every reachable improvement component event to reduce to its declared legal canonical projection, including cancellation adopted during a safety rollback.",
+      "evidence": [
+        "Manifest \u00a715.1 priority 2 exposes rollback only while rollback_state is REQUESTED, ROLLING_BACK, VERIFYING, VERIFIED, or FAILED. Once it becomes ROLLED_BACK, priorities 3 or 4 immediately project the already-persisted work_cancel_state as CANCEL_REQUESTED or QUIESCING.",
+        "IRB07 nevertheless declares only ROLLBACK_VERIFIED>ROLLED_BACK for VERIFIED->ROLLED_BACK. If IX01 (and optionally IX02) has committed during rollback, the target tuple reduces directly to CANCEL_REQUESTED or QUIESCING, not ROLLED_BACK.",
+        "The canonical graph contains ROLLED_BACK>CANCEL_REQUESTED (CW-C64), but IRB07 does not declare the needed guarded sequence ROLLBACK_VERIFIED>ROLLED_BACK>CANCEL_REQUESTED, nor a QUIESCING variant. Universal rule \u00a71 forbids an unlisted/inferred sequence.",
+        "IRB08 is likewise stated as the sole ROLLED_BACK cleanup scheduler with projection ROLLED_BACK>CLEANING, but with cancellation REQUESTED or QUIESCING its target tuple remains CANCEL_REQUESTED or QUIESCING under the higher priorities. The cancellation path instead expects IX03 to schedule cleanup, yet IRB08 has no no-cancellation guard separating the two owners."
+      ],
+      "reproduction": [
+        "Reach rollback_state=VERIFYING with no cancellation, then apply IX01. Priority 2 leaves canonical ROLLBACK_VERIFYING while work_cancel_state becomes REQUESTED. IRB03 advances rollback to VERIFIED and correctly yields ROLLBACK_VERIFIED.",
+        "Apply IRB07. The named coordinate becomes ROLLED_BACK while work_cancel_state remains REQUESTED. Priority 2 no longer matches and priority 3 yields CANCEL_REQUESTED. This disagrees with IRB07's declared ROLLBACK_VERIFIED>ROLLED_BACK projection.",
+        "If IX02 was committed before IRB07, the same target instead reduces to QUIESCING, also not the declared projection. If IRB08 is then attempted before IX03, its cleanup delta cannot yield its declared ROLLED_BACK>CLEANING projection."
+      ],
+      "impact": "A cancellation arriving during the safety rollback reaches a required settlement event that the sole contract says must be rejected. An implementation must ignore the reducer, infer an undeclared canonical sequence, or strand the cancellation/rollback lifecycle.",
+      "recommendation": "Split rollback settlement and cleanup scheduling by exact work_cancel_state. Declare the complete legal canonical sequence for each cancellation-pending IRB07 case, and forbid IRB08 when cancellation owns cleanup (using IX03), or revise precedence and rows so one explicit owner yields the same projection. Add witnesses for IX01/IX02 at every rollback state through IRB07, cleanup, and CANCELLED.",
+      "verification": "Enumerate IX01 and IX02 interleavings with IRB01-IRB08. Every reachable event must have one row owner, one exact reducer result, listed canonical adjacency, separate cleanup scheduling/receipt/terminal transactions, and a reachable CANCELLED result after settled rollback.",
+      "confidence": "high"
+    },
+    {
+      "id": "R6-IMP-002",
+      "severity": "high",
+      "title": "The asynchronous canary-child creation self-loop permits more than one bound child",
+      "requirement": "R-12/P-12 requires bounded, deterministic canary execution with one causally bound child whose receipts, exposure, rollback, cancellation, and cleanup determine the parent outcome.",
+      "evidence": [
+        "IR04 is CANARY_READY->CANARY_READY and creates a CompositionLink and child at INBOX. Its guard is only 'create CompositionLink and child only'; it does not require that no canary child/link already exists or bind a deterministic unique child/link identity.",
+        "Because the parent private and canonical state stutter, a later distinct valid IR04 event can satisfy the same source again. Compare-and-append and same-key replay prevent a concurrent stale version or same-key duplicate, but do not reject a sequential second event with a different idempotency key.",
+        "IR27-IR35, \u00a715.7, and PLAN \u00a7\u00a78.4/6.3 refer to 'the' or a singular bound child and its receipts, but no reducer coordinate, reachability invariant, or CompositionLink cardinality rule selects one child or defines joining multiple IR04 children."
+      ],
+      "reproduction": [
+        "Reach rollout_state=CANARY_READY and commit IR04 with key K1, creating child C1 while the parent remains CANARY_READY.",
+        "Before C1 emits WorkerStarted, submit the same row as a new authorized event with key K2 and the current tuple version. The exact source still matches, and no published guard rejects creation of child C2.",
+        "The later singular IR27-IR35 receipt guards do not say whether C1, C2, either, or both control exposure, rollback, cleanup, and parent terminal eligibility."
+      ],
+      "impact": "The contract admits duplicate canary children with separate grants, effects, and cleanup obligations but supplies no deterministic join or safety bound. This can multiply exposure or let one child's receipts mask another live or failed child.",
+      "recommendation": "Give the canary child and CompositionLink a deterministic identity derived from the parent/stage/decision digest, require an atomic absent-or-same CAS, and make IR04 reject any distinct existing child. State exact-one cardinality and bind every IR27-IR35 receipt, cancellation, rollback, and terminal predicate to that identity.",
+      "verification": "From every CANARY_READY tuple, two IR04 calls with the same bytes replay one result, while any different key/child identity after the first is rejected without creating authority. Product tests must prove at most one bound live or terminal canary child and total receipt/cancel/cleanup handling.",
+      "confidence": "high"
+    },
+    {
+      "id": "R6-IMP-003",
+      "severity": "high",
+      "title": "EvidenceBundle completeness gives missing, failed, and inconclusive results an ambiguous protected-manifest exception",
+      "requirement": "R-12/P-12 requires protected expected-set completeness and unconditional fail-closed admission: every executable safety case maps one-to-one to passing evidence, and missing, duplicate, unexpected, failed, or inconclusive results cannot authorize enablement, widening, or promotion.",
+      "evidence": [
+        "PLAN \u00a78.5 first requires duplicate-free expected/received set equality and exact per-class/total counts.",
+        "The next sentence says a missing, duplicate, unexpected, failed, inconclusive, or unaccounted excluded tuple 'denies unless' the protected pre-execution manifest names its fail-closed disposition. Grammatically, this creates an exception to denial for the same conditions that violate set equality.",
+        "PLAN \u00a78.5 then states without exception that 100% of executable safety-manifest cases map one-to-one to passing evidence and that INCONCLUSIVE or missing mapping denies. The protected-authority rule does not resolve whether its disposition may waive the denial or may only select a denial/abort/retry route."
+      ],
+      "reproduction": [
+        "Seal an otherwise valid ExpectedEvaluationManifest that names a fail-closed disposition for expected tuple T.",
+        "Produce a bundle in which T is missing or INCONCLUSIVE. Exact set/pass completeness says deny, but the preceding 'denies unless' clause says the named protected disposition is an exception. Both readings are authoritative text and lead to opposite admission results."
+      ],
+      "impact": "A conforming implementation can interpret a predeclared disposition as permission to admit an incomplete or non-passing safety bundle. Protected authorship prevents candidate tampering but does not make waiver of the stated 100% pass gate safe.",
+      "recommendation": "Remove the exception to denial. State that a protected disposition may choose only the fail-closed next state or remediation path (deny, abort, quarantine, or rerun under a newly sealed manifest) and can never count the tuple as received/passing, satisfy set equality, or authorize a decision. Define accounted exclusions as members of a separate protected excluded set and state whether they are outside the executable expected set before execution.",
+      "verification": "For every missing, duplicate, unexpected, failed, inconclusive, or unaccounted result, all enablement/canary/widening/promotion guards deterministically deny regardless of disposition. Disposition changes only the explicit recovery route; all admitted bundles retain exact duplicate-free set/count equality and 100% passing required cases.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "low": 0,
+    "total": 3
+  },
+  "residual_uncertainty": [
+    "This is a PLAN-only contract audit. It does not claim implementation, committed compiler/model tests, full reachable-product proof, operational safety, or local outcome proof.",
+    "The fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and later independent evidence closure remain future gates; their non-completion was not treated as a finding.",
+    "No material evidence overclaim was found in the schema-3 candidate-only package."
+  ],
+  "closure_criteria_pass": false
+}

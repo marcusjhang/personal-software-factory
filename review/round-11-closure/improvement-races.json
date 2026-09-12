@@ -1,0 +1,105 @@
+{
+  "reviewer": "round-11 independent improvement/races closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-10 combined correction",
+    "specialty": "Cancellation/effect/degradation/revocation orderings and rollback/cleanup ownership.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-10-resolution.md",
+      "review/round-10-closure/formal-model.json",
+      "review/round-10-closure/evidence-status.json",
+      "review/round-10-closure/improvement-races.json",
+      "review/round-10-closure/recovery-adversary.json",
+      "review/round-10-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim. Future implementation, exhaustive/full reachable-product model checking, fresh immutable retrieval, and same-run human semantic review are accepted gates. closure_criteria_pass iff critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "effect_first_degradation_and_rollback_dispatch",
+      "result": "pass",
+      "exact_text": [
+        "IH01-W/P atomically fence sends and move an unsettled `WIDENING_EFFECT|PROMOTING` to `WIDENING_RECONCILING|PROMOTION_RECONCILING` without starting rollback.",
+        "IH01-WV/PV cover the post-E06/pre-IR38-or-IR18 intervals and atomically create the one rollback saga because verified E06 is protected exposure.",
+        "IH06-WX/WN/PX/PN classify the reconciled Effect; IRB01 rejects dispatch while the original mutation Effect is live, unsettled, or still in either reconciliation rollout."
+      ],
+      "basis": "PLAN \u00a78.4 and normative \u00a7\u00a715.3.1 and 15.6 preserve effect-before-rollback ordering for the named degradation paths."
+    },
+    {
+      "area": "rollback_and_cleanup_ownership",
+      "result": "pass_with_cancellation_totality_failure_reported_below",
+      "exact_text": [
+        "For cancellation NONE, `rollback_origin=WIDENING_ABORT` reaches IR13A then IR13C; every other rollback origin uses IRB08.",
+        "For cancellation REQUESTED or QUIESCING, IRB07-R/Q settle to ROLLED_BACK and IX03 alone schedules cleanup.",
+        "IRB06 leaves final rollback failure in REMEDIATION_WAIT/BLOCKED; only RO09, genuine restoration, IRB09, IRB03, and IRB07 can reach ROLLED_BACK before cleanup.",
+        "ICL01-ICL03 own ordinary final cleanup folds and IX04 separately owns cancellation terminality."
+      ],
+      "basis": "The origin partition and remediation ordering are explicit. The finding below concerns tuples for which the cancellation allowlist cannot produce the settlement evidence that IX03 requires."
+    },
+    {
+      "area": "revocation_and_generation_fencing",
+      "result": "pass_with_revocation_totality_failure_reported_below",
+      "exact_text": [
+        "IC32 X rows atomically fence authority and create one rollback saga; N rows create no rollback; U rows reconcile first.",
+        "IC32 abort-state rows preserve an existing rollback and forbid duplicate saga creation.",
+        "IR34/IR35 atomically mint a generation-bound NoExposureReceipt only after rechecking the whole current generation Effect set, and a racing exposure rejects the N row."
+      ],
+      "basis": "These contracts are exact for their named candidate sources and rollout coordinates. They do not define every reachable candidate-state ordering reported below."
+    },
+    {
+      "area": "schema_3_evidence_status",
+      "result": "pass",
+      "exact_text": [
+        "`material-claims.json` declares schema `3.0.0`, checkpoint `round-10`, candidate-only editorial associations, legacy-unverified provenance, and future fresh retrieval/human semantic review gates.",
+        "Its bound current SHA-256 values reproduce exactly: PLAN.md `29804814db262399090c60bbd5d6c15527ed9fdce2f72cecce7eea0be9d31063`; docs/state-transition-manifests.md `d8e3c02cdffd28a7b8c33ab2cb9133ecc5dd4be8e99cf3a251b9ced50af65599`.",
+        "README and traceability do not promote candidate associations to verified support or claim implementation, full-model proof, production safety, or independent closure."
+      ],
+      "basis": "No material evidence or implementation overclaim was found."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R11-RACE-001",
+      "severity": "high",
+      "title": "The cancellation safety allowlist cannot settle pre-send Effects or mint required no-exposure proof for all reachable tuples",
+      "requirement": "PLAN \u00a78.4 requires cancellation from every reachable nonterminal improvement tuple, effect reconciliation, genuine rollback wherever exposure may exist, and eventual separately owned cleanup only after protected settlement.",
+      "evidence": [
+        "Normative \u00a715.5 says that while cancellation is not NONE, ordinary candidate, rollout, control, widening, promotion, and new business-effect edges are rejected. Its closed safety allowlist names IX06 variants, IRB01-IRB07/IRB09, Effect reconciliation rows, U09/A18, and IX cleanup.",
+        "E02 `INTENT_RECORDED->CANCELLED_BEFORE_SEND` and E03 `READY_TO_SEND->CANCELLED_BEFORE_SEND` are cancellation settlement edges, not reconciliation rows, and are not named in that allowlist. A reachable IX01-first race after IR37 has created a widening Effect at INTENT_RECORDED (or after E01 at READY_TO_SEND) therefore leaves the Effect live once ordinary Effect edges are rejected.",
+        "IX06-UR/UQ can move the rollout to reconciliation but preserve the original Effect; no Effect edge from INTENT_RECORDED or READY_TO_SEND enters RECONCILING. IX06-NR/NQ can preserve an N classifier, but they do not transition the Effect to a terminal, so IX03's `all effects settled` guard still cannot pass.",
+        "A separate reachable case is IX01 at `CANARY_READY` after IR04 created the active child but before WorkerStarted. IR34/IR35 are ordinary rollout rows and thus rejected after cancellation; IX06-NR/NQ omit CANARY_READY; IX03 with rollback IDLE requires a protected NoExposureReceipt, but no allowed row creates that generation-bound receipt. Pre-canary DISABLED/ENABLEMENT_REVIEW/CANARY_PENDING_APPROVAL cancellation has the same undefined receipt-production problem when IX03 insists on a protected all-target NoExposureReceipt.",
+        "The round-10 correction claims IX01-first witnesses and a closed X/N/unsettled cancellation partition, but the listed source and Effect-state gaps remain in the normative rows."
+      ],
+      "impact": "Permitted cancellation-first orderings deadlock before IX03/IX04 even though no external application occurred. An implementation that invents an unlisted receipt or Effect transition would violate the closed-manifest rule; relaxing IX03 instead could permit cleanup without proved classification.",
+      "required_correction": "Extend the closed cancellation safety allowlist with exact synchronized pre-send Effect cancellation/settlement rows and exact N-classifier production for every reachable pre-exposure rollout, including CANARY_READY with an active generation. Each row must fence the generation, settle the precise Effect set, create or bind the protected no-exposure receipt once, preserve deterministic replay, and leave IX03 as the sole cancellation cleanup owner. Add IX01-before-E02/E03, IX01-at-each-pre-exposure-rollout, and child-terminal-before/after-IX01 witnesses."
+    },
+    {
+      "id": "R11-RACE-002",
+      "severity": "high",
+      "title": "Candidate revocation and evidence invalidation are undefined after FROZEN or during an active rollout",
+      "requirement": "PLAN \u00a78.4 requires digest changes to enter EVIDENCE_STALE and partitions candidate revocation into protected N, X, or unsettled reconciliation without permitting stale authority or exposure to continue.",
+      "evidence": [
+        "IC30 legally changes candidate `SHADOW_PASSED->FROZEN` on a safety, identity, or telemetry hold, and FROZEN is explicitly nonterminal. The only outgoing FROZEN row is IC31 back to SHADOW_PASSED. Every IC32 revocation-entry row has candidate source SHADOW_PASSED (or REVOKED for continuation); none accepts FROZEN->REVOKED.",
+        "IC24 legally changes `SHADOW_PASSED->EVIDENCE_STALE` on a bound digest change, but it changes no rollout, Effect, rollback, or authority coordinate. Normative \u00a715 reachability says canary states require candidate `SHADOW_PASSED|FROZEN|REVOKED`, so IC24 during CANARY_RUNNING, widening, promotion, or observation produces an impossible tuple and rejects rather than fencing exposure.",
+        "Once EVIDENCE_STALE is reached before rollout, its only refresh rows IC25-IC27 return to proposal/offline/shadow stages; there is no revocation row from EVIDENCE_STALE if a revocation arrives while the stale state is pending.",
+        "The IC32 checker prose claims equality against actual reachable revocation coordinates including candidate source, but the row union cannot contain FROZEN or EVIDENCE_STALE sources. A future generated check does not supply the missing legal edges in this plan-only closed manifest."
+      ],
+      "impact": "A revocation can be unrecordable while a candidate is held or stale, and an active-rollout digest change either rejects or lacks atomic fencing/rollback classification. This contradicts revocation totality and can leave authority or exposure governed by invalid evidence.",
+      "required_correction": "Add exact synchronized FROZEN/EVIDENCE_STALE revocation rows and active-rollout digest-change rows. Partition each reachable rollout/Effect coordinate into protected N, protected X, or unsettled reconciliation; atomically fence grants and sends; reuse an existing saga or create exactly one; and assign later cleanup only to IR13C, IRB08, or IX03. Extend the generated equality and ordering witnesses to IC30-before-revocation, IC24-before-revocation, and digest-change during canary/widening/promotion/observation."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2
+  },
+  "residual_uncertainty": [
+    "Implementation, executable race tests, and exhaustive reachable-product model checking remain future gates and were not treated as findings.",
+    "Fresh immutable evidence retrieval, same-run human semantic review, and deterministic reviewed-edge regeneration remain future gates and were not treated as findings."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,1293 @@
+{
+  "scope": {
+    "question": "Define a portable, versioned factory-as-code language and deterministic runtime that can coordinate bounded probabilistic workers across durable human interaction, parallel work, side effects, and governed evolution.",
+    "in_scope": [
+      "static factory definitions and their lifecycle",
+      "roles/identities/capabilities",
+      "typed phases, task DAGs and transitions",
+      "artifact/evidence/provenance contracts",
+      "durable questions and exact-version decisions",
+      "budgets, leases, checkpoints, retries, escalation and cancellation",
+      "parallel fanout/join and subfactory composition",
+      "gates, compensation, cleanup, reconciliation and audit",
+      "proposal/evaluation/shadow/canary/rollback evolution"
+    ],
+    "boundaries": [
+      "Git is desired configuration and review history, not the authoritative live execution database.",
+      "The runtime owns instance state; an LLM/foreman may propose a route but cannot commit a transition or grant itself authority.",
+      "This is a superset/interchange model, not a claim that one vendor already implements it.",
+      "MCP/A2A/OpenAPI describe tool/peer interfaces, not workflow correctness, durable execution or authorization by themselves [S24][S25].",
+      "No unattended product authority, ambiguity resolution, privilege growth, grader/policy mutation, high-risk promotion, novel incident command, or irreversible operation is included."
+    ],
+    "as_of_note": "Evidence and mutable product behavior assessed to 2026-09-13."
+  },
+  "verified_capabilities": [
+    {
+      "claim": "Warp Factories has an official repository-backed v1alpha1 definition. It covers factory metadata, repository scope, agent roles/prompts, execution defaults, integrations/secrets/MCP servers, runners, event/schedule automations, benchmark tasks, LLM scorers, webhooks and skills. GitHub-backed changes receive an atomic config check/apply, and live work items/runs/metrics remain outside definition files [S01][S02].",
+      "status": "verified from live documentation and the unauthenticated generated JSON Schema endpoint"
+    },
+    {
+      "claim": "Warp is Early Access. Its foreman chooses/skips default triage/planning/build/review stages through instructions; spec approval, questions and merge are human touchpoints by default. Review verdicts are advisory [S03].",
+      "status": "officially documented availability and behavior, not independent production reliability"
+    },
+    {
+      "claim": "Warp Self-improvement samples LLM-scorer failures and can open application or definition PRs after 25 unreviewed failures or seven days (or ad hoc); nothing is adopted without review [S04][S05].",
+      "status": "official capability; no public denominator-based safety/effect estimate"
+    },
+    {
+      "claim": "Durable engines demonstrate event history/replay, signals/updates, declarative retry, task queues and bounded histories; Kubernetes demonstrates desired/actual reconciliation [S08][S09][S10][S11][S19].",
+      "status": "mature generic control-plane mechanisms, not proof of agent correctness"
+    },
+    {
+      "claim": "AWS ASL and Argo show typed states, catch/retry, DAG dependencies, dynamic loops and exit handlers; GitHub Actions shows reusable pinned workflow calls and matrices [S12][S13][S14][S15][S16][S17].",
+      "status": "verified workflow primitives with platform-specific semantics"
+    },
+    {
+      "claim": "LangGraph provides checkpoints/threads and durable interrupts. OpenAI Agents provides handoffs and guardrails. These are useful worker/scaffold features but do not replace an external authorization and lifecycle ledger [S20][S21][S22][S23].",
+      "status": "official framework behavior"
+    },
+    {
+      "claim": "CloudEvents, JSON Schema 2020-12, OpenAPI 3.1.1, W3C Trace Context and SLSA provide useful event, schema/interface, correlation and provenance building blocks [S06][S07][S18][S26][S27].",
+      "status": "open specifications; composition semantics must be added by this DSL"
+    }
+  ],
+  "evidence_and_limits": {
+    "evidence_basis": [
+      "Direct Warp documentation plus its generated v1alpha1 JSON Schemas were inspected, including top-level property sets. The schema exposes no declarative phase graph, transitions, typed artifacts, budgets, joins, gates, retry/compensation/cleanup, or composition [S01][S02].",
+      "Cross-checks use versioned/open workflow specifications and official runtime/framework docs, plus independent agent-system and security research [S06-S30].",
+      "Prior repository-agent-OS validated results and the self-managing-project synthesis were used to preserve fenced leases, outbox/reconciliation, exact-hash approvals, risk tiers and protected improvement controls."
+    ],
+    "limits": [
+      "Warp documentation is an Early Access product contract and can change. There is no public source code for its hosted orchestrator and no independent audit of its lifecycle semantics or Self-improvement outcome rate.",
+      "Temporal, Argo, Step Functions and GitHub Actions prove orchestration primitives, not that one syntax is portable or that LLM work is correct. Runtime semantic differences include replay requirements, retry defaults, history limits, cancellation and exactly-once wording [S08-S17].",
+      "LLM scorers are stochastic and correlated with candidates. A single judge label or aggregate score is not a safety oracle [S05][S28].",
+      "MAST reports 14 failure modes from 1,600+ traces across seven multi-agent frameworks; AgentDojo shows material prompt-injection/utility tradeoffs. More agents and tool access increase failure surface [S29][S30].",
+      "Vendor feature availability is not evidence of productivity or unattended end-to-end safety. No reviewed evidence validates an autonomous plan-to-production-to-self-modification loop."
+    ],
+    "design_consequence": "Compile declarative intent into one deterministic, separately privileged control plane. Treat all agent decisions and external callbacks as untrusted proposals/events. Require local outcome data before expanding authority."
+  },
+  "actors_and_authority": {
+    "principals": [
+      {
+        "actor": "factory owner/policy maintainer",
+        "authority": "approve schema/policy, allowed capabilities, risk taxonomy and factory versions; cannot retroactively alter audit"
+      },
+      {
+        "actor": "requester/product decision owner",
+        "authority": "supply intent and approve exact spec/decision revision; cannot approve security exceptions unless separately qualified"
+      },
+      {
+        "actor": "controller/service identity",
+        "authority": "sole writer of canonical execution state; evaluates deterministic guards, issues leases, records events and invokes adapters; does not author candidate work"
+      },
+      {
+        "actor": "foreman/router agent",
+        "authority": "propose phase/role/decomposition/clarification; no state-write, credential minting, gate approval or budget expansion"
+      },
+      {
+        "actor": "specialist worker",
+        "authority": "act only through a short-lived capability lease scoped to attempt/repo/path/tool/network/budget"
+      },
+      {
+        "actor": "independent verifier",
+        "authority": "produce exact-artifact verification; separate identity/environment/input from author where risk requires"
+      },
+      {
+        "actor": "gate approver/quorum",
+        "authority": "approve exact spec/artifact/policy digests for a named action, scope and expiry; cannot be candidate or author"
+      },
+      {
+        "actor": "credential broker/tool proxy",
+        "authority": "enforce verbs/resources/egress and mint audience-bound credentials outside the model"
+      },
+      {
+        "actor": "scheduler/reconciler/sweeper",
+        "authority": "dispatch eligible work, compare desired/observed state, revoke stale leases and perform allowlisted cleanup; no semantic approval"
+      },
+      {
+        "actor": "evaluator/curator/promotion authority",
+        "authority": "own protected eval inclusion, hidden tests, graders, thresholds and promotion; candidates have read-only or opaque access"
+      },
+      {
+        "actor": "auditor/incident commander",
+        "authority": "read immutable evidence; incident commander may invoke bounded break-glass with independent confirmation and expiry"
+      }
+    ],
+    "invariants": [
+      "Requester, candidate/author, verifier, approver and promotion authority are distinct logical roles; high risk maps them to distinct principals.",
+      "Risk may rise automatically but may not fall because an agent reports confidence.",
+      "Definition inheritance can reduce authority but cannot add authority above tenant/repository policy.",
+      "A role name is not authorization. Every action needs authenticated principal + capability lease + policy decision + idempotency key.",
+      "All untrusted repository/web/issue/tool/MCP content remains data, never authority [S24][S25][S30]."
+    ]
+  },
+  "complete_state_catalog": {
+    "definition_states": {
+      "DRAFT": "editable, never executable",
+      "VALIDATING": "schema/reference/capability/migration checks running",
+      "INVALID": "validation failed; last ACTIVE stays live",
+      "REVIEW_PENDING": "signed plan/diff awaits required owners",
+      "APPROVED": "approval bound to manifest digest but not active",
+      "ACTIVATING": "atomic install/migration in progress",
+      "ACTIVE": "admittable immutable factory version",
+      "DEPRECATED": "existing instances may finish; new admission forbidden",
+      "SUPERSEDED": "replacement active",
+      "ROLLBACK_PENDING": "prior known-good digest selected and approved",
+      "ROLLED_BACK": "prior version restored; failed version retained",
+      "RETIRED": "no execution; retention applies"
+    },
+    "instance_states": {
+      "CREATED": "identity/idempotency established",
+      "ADMISSION_PENDING": "policy, quota and definition lookup",
+      "REJECTED": "invalid/unauthorized/duplicate terminal",
+      "QUEUED": "eligible but not leased",
+      "WAITING_DEPENDENCY": "prerequisite or child not terminal",
+      "WAITING_EVENT": "correlated external event/timer",
+      "WAITING_HUMAN": "durable question/gate open",
+      "WAITING_RESOURCE": "capacity/rate/lock unavailable",
+      "READY": "all guards true",
+      "DISPATCHING": "outbox intent written, worker not confirmed",
+      "RUNNING": "valid fenced lease and active phase",
+      "CHECKPOINTING": "checkpoint commit in progress",
+      "PAUSING": "cooperative pause requested",
+      "PAUSED": "durably resumable; no active write lease",
+      "BLOCKED": "actionable missing input/policy ambiguity",
+      "ESCALATED": "routed to accountable owner/incident process",
+      "CANCELLING": "cancel requested and propagated",
+      "COMPENSATING": "reverse completed side effects where declared",
+      "ROLLING_BACK": "restore prior artifact/config/deployment",
+      "CLEANING": "revoke/delete/retain cleanup graph active",
+      "RECONCILING": "external outcome unknown or drift detected",
+      "FAILED": "unrecoverable instance failure after cleanup",
+      "CANCELLED": "cancelled and cleanup policy satisfied",
+      "SUCCEEDED": "all terminal acceptance/gates/cleanup satisfied",
+      "PARTIAL": "explicitly accepted subset; never silently success",
+      "TIMED_OUT": "deadline terminal after compensation/cleanup",
+      "DEAD_LETTER": "malformed/poison event retained for operator action",
+      "ORPHANED": "definition/resource/parent missing; quarantined",
+      "STALE": "lease/factory/spec/policy version invalid; worker output rejected"
+    },
+    "phase_task_attempt_states": {
+      "phase": [
+        "NOT_STARTED",
+        "ELIGIBLE",
+        "RUNNING",
+        "WAITING_JOIN",
+        "WAITING_GATE",
+        "SUCCEEDED",
+        "FAILED",
+        "SKIPPED",
+        "CANCELLED",
+        "STALE"
+      ],
+      "task": [
+        "PLANNED",
+        "READY",
+        "LEASED",
+        "RUNNING",
+        "CHECKPOINTED",
+        "RETRY_WAIT",
+        "SUCCEEDED",
+        "FAILED",
+        "CANCEL_REQUESTED",
+        "CANCELLED",
+        "COMPENSATING",
+        "COMPENSATED",
+        "UNKNOWN_EFFECT",
+        "STALE"
+      ],
+      "attempt": [
+        "CREATED",
+        "DISPATCHED",
+        "STARTED",
+        "HEARTBEATING",
+        "SUCCEEDED",
+        "FAILED_TRANSIENT",
+        "FAILED_DETERMINISTIC",
+        "FAILED_POLICY",
+        "TIMED_OUT",
+        "LOST",
+        "CANCELLED",
+        "FENCED_OUT"
+      ],
+      "gate": [
+        "CLOSED",
+        "EVALUATING",
+        "WAITING_EVIDENCE",
+        "WAITING_APPROVAL",
+        "PASSED",
+        "FAILED",
+        "EXPIRED",
+        "INVALIDATED",
+        "WAIVED_BY_EXCEPTION"
+      ],
+      "artifact": [
+        "DECLARED",
+        "UPLOADING",
+        "QUARANTINED",
+        "VALIDATING",
+        "VALID",
+        "REJECTED",
+        "SUPERSEDED",
+        "EXPIRED",
+        "DELETED",
+        "LEGAL_HOLD"
+      ],
+      "decision": [
+        "OPEN",
+        "ANSWERED",
+        "ACCEPTED",
+        "REJECTED",
+        "EXPIRED",
+        "SUPERSEDED",
+        "INVALIDATED"
+      ],
+      "cleanup": [
+        "PENDING",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED_RETRYABLE",
+        "FAILED_PERMANENT",
+        "WAIVED_WITH_EXPIRY"
+      ]
+    },
+    "terminal_rule": "Terminal is a composite invariant, not only a label: no live lease/token, all mandatory children terminal, effects reconciled, required artifacts retained, and cleanup either succeeded or has an approved bounded exception. FAILED/CANCELLED/TIMED_OUT do not bypass cleanup.",
+    "source_basis": "The catalog extends durable history/replay, typed error and exit-handler patterns rather than copying a vendor state list [S08][S12][S15]."
+  },
+  "transition_contract": {
+    "event_envelope": {
+      "event_id": "globally unique UUID/ULID",
+      "type": "reverse-DNS/versioned semantic type",
+      "schema_version": "event payload schema",
+      "occurred_at/received_at": "source and controller timestamps",
+      "source/subject": "authenticated emitter and aggregate",
+      "tenant/factory_id/factory_version/instance_id": "scope",
+      "phase_id/task_id/attempt_id": "optional execution scope",
+      "sequence/expected_revision": "optimistic concurrency",
+      "correlation_id/causation_id/traceparent": "lineage [S06][S26]",
+      "actor_principal/capability_lease_id": "authority",
+      "payload_ref/payload_digest": "immutable content address",
+      "idempotency_key": "semantic effect key",
+      "policy_digest": "evaluated policy",
+      "signature": "where trust crossing requires"
+    },
+    "transition_record": [
+      "from_state",
+      "event_type",
+      "guard_version and deterministic guard result",
+      "to_state",
+      "effects[] as outbox intents",
+      "artifacts consumed/produced by digest",
+      "budget delta",
+      "approval/exception refs",
+      "definition/spec/policy version",
+      "controller transaction revision"
+    ],
+    "rules": [
+      "Only the controller commits transitions with compare-and-swap on aggregate revision. Duplicate event_id or idempotency_key returns the prior result.",
+      "A transaction appends event + new state + budget reservation + outbox intents atomically. External effects occur later and record receipts.",
+      "An LLM output must validate against a declared proposal schema; it emits route.proposed/question.proposed/artifact.proposed, never state.changed.",
+      "Before retry of any non-read effect, query/reconcile remote state by receipt/idempotency key. UNKNOWN_EFFECT goes to RECONCILING or human review; never blind replay.",
+      "Lease fence = monotonically increasing epoch. Heartbeat renews expiry only for the current epoch; late/stale outputs are quarantined, not attached.",
+      "Any change to spec, artifact head, factory, policy, required evidence, approver eligibility or risk invalidates dependent approvals/gates and propagates staleness downstream.",
+      "Cancellation is a durable event and scope tree. Stop new dispatch, signal children, wait grace, fence/kill, compensate in reverse dependency order, then clean.",
+      "Timers are durable absolute deadlines. Backoff is capped exponential with jitter and consumes retry/wall/cost budgets.",
+      "Reconciliation periodically derives desired versus observed state, records drift, and uses monotonic corrective actions [S19]."
+    ],
+    "guard_order": [
+      "authenticate/schema/deduplicate",
+      "current revision/fence",
+      "definition ACTIVE and pins resolvable",
+      "risk and capability policy",
+      "preconditions/dependencies/artifacts",
+      "budget reservation",
+      "gate/approval freshness",
+      "effect idempotency",
+      "commit"
+    ],
+    "failure_classes": {
+      "TRANSIENT": "bounded retry",
+      "THROTTLED": "honor retry-after within deadline",
+      "DETERMINISTIC": "no identical retry; replan/fail",
+      "INVALID_INPUT": "reject/clarify",
+      "POLICY_DENIED": "stop/escalate; no fallback escalation",
+      "BUDGET_EXHAUSTED": "pause/escalate/terminate per declaration",
+      "UNKNOWN_EFFECT": "reconcile before action",
+      "SECURITY": "isolate, revoke and alert",
+      "STALE": "reject and rebase/restart",
+      "HUMAN_TIMEOUT": "default declared deny/defer/cancel, never implicit approve"
+    },
+    "compatibility": "Events are immutable. Readers ignore only declared optional fields. Breaking event/state semantic changes require a new major schema/API version plus upcaster or drain-and-migrate plan. Replay must pin workflow implementation or use explicit deterministic version markers [S08]."
+  },
+  "artifact_contracts": {
+    "common_envelope": {
+      "artifact_id": "stable logical ID",
+      "artifact_type": "registered reverse-DNS type",
+      "schema_uri/schema_version": "JSON Schema dialect + domain version [S07]",
+      "media_type": "serialization",
+      "uri/digest/size": "immutable content address",
+      "producer_principal/attempt_id": "identity",
+      "factory/spec/policy/tool/model/image/base revisions": "full lineage",
+      "input_digests": "derivation edges",
+      "created_at/valid_until": "time",
+      "classification/tenant/acl/residency": "data controls",
+      "signature/attestation/sbom": "integrity/provenance [S27]",
+      "retention/legal_hold/deletion_status": "lifecycle",
+      "validation_results": "schema/security/semantic checks",
+      "uncertainty/confidence": "non-authoritative inference metadata"
+    },
+    "required_types": [
+      "FactoryManifest, CompiledGraph, MigrationPlan, PolicyBundle, RoleCapabilityProfile",
+      "WorkRequest, SourceSnapshot, SpecRevision, DecisionRecord, QuestionRecord, PlanDAG",
+      "ContextBundle/Checkpoint, PromptBundle, ToolCatalogLock, CapabilityLease",
+      "TaskInput, AttemptTranscriptRef, ToolCallReceipt, SideEffectRecord, Patch/PR/Commit",
+      "EvidenceManifest, VerificationResult, GateDecision, Approval, Exception",
+      "FanoutManifest, ChildResult, JoinResult, CompositionLock",
+      "BuildArtifact, SBOM, Provenance/Attestation, Deployment/Canary/Rollback record",
+      "CleanupPlan/Receipt, AuditEvent, TraceIndex, CostLedger",
+      "TelemetryCase, Postmortem, EvalCase, DatasetManifest, CandidateChange, PromotionDecision"
+    ],
+    "contracts": [
+      "Every phase declares input/output type+version, cardinality, max size/classification, producer role, validators and whether absence is legal.",
+      "Mutable collaborative objects use immutable revisions plus a stable logical ID. References bind digest/revision, never “latest.”",
+      "Large bodies live in an ACL-controlled object/artifact store. Workflow history stores digest, schema and URI only to remain bounded [S11].",
+      "An artifact becomes gate-eligible only after upload complete, digest verified, malware/secret/data-class checks pass and producer lease is current.",
+      "Derived artifacts retain all input edges. Redaction produces a new artifact with policy and reviewer provenance; it does not overwrite the original.",
+      "SLSA/in-toto-style provenance can establish origin and process, not semantic correctness [S27].",
+      "Retention and deletion are stateful auditable workflows, including tombstones and legal holds."
+    ],
+    "exact_hash_binding": "Approval and verification key = tenant + work item + spec revision digest + candidate artifact/SHA + factory digest + policy digest + gate manifest digest + action scope + expiry."
+  },
+  "conversation_and_handoffs": {
+    "durable_model": {
+      "conversation": "stable thread_id + participants/ACL + purpose + factory/spec version; transcript chunks are artifacts, not state",
+      "turn": "turn_id, actor principal, occurred_at, raw/normalized content digests, attachments/tool evidence, correlation/causation, classification",
+      "question": "question_id, exact question/schema/options, why needed, blocking states, requested decision owner/role, default-on-timeout, deadline, supersedes",
+      "answer": "answer_id, question_id, respondent identity/role, typed value, rationale, evidence refs, timestamp/signature",
+      "decision": "decision_id, subject, selected option, alternatives, rationale, assumptions, scope/non-goals, spec/factory/policy digests, effective/expiry, approvers, supersedes/invalidates",
+      "handoff": "from/to role, objective, authority/capability lease, exact input artifact list/digests, open questions, completed/next actions, budget remaining, acceptance contract",
+      "summary": "generated view with coverage map back to source turn IDs; never authority"
+    },
+    "protocol": [
+      "Persist the user message before any action. Acknowledge with thread/decision IDs.",
+      "Validate answer against the question schema and identity/role. Conflicting answers open a conflict gate; latest prose does not silently win.",
+      "Accept a decision only after showing the normalized consequence when material. Commit it as an immutable revision. Edits/supersession create events and invalidate dependent spec/gates/work.",
+      "On context compaction, create a signed/hashed summary plus unresolved questions, accepted decisions, artifact index and last event cursor. Resume by verifying digests and replaying canonical decisions, not by trusting summary prose.",
+      "Agent handoff is accepted only if the receiver validates schemas, digests, authority and freshness; otherwise HANDOFF_REJECTED returns exact defects.",
+      "Human pause has durable timeout, reminders/escalation and an explicit fail-closed outcome. No response is never approval.",
+      "Concurrent conversation branches create decision candidates. A deterministic merge requires nonoverlapping subjects or a human conflict decision."
+    ],
+    "interaction_boundary": "Back-and-forth can be fully durable and resumable, but it cannot autonomously decide ambiguous product value, consent, legal/privacy interpretation or irreversible tradeoffs. The system may ask, research, offer alternatives and recommend; an accountable authorized person commits those decisions."
+  },
+  "orchestration_and_composition": {
+    "node_model": "Each compiled node declares stable ID, kind={task,subfactory,switch,wait,event,human,gate,fanout,join,compensate,cleanup,end}, typed I/O, guard, dependencies, role, capability profile, queue, lease/heartbeat/timeouts, retry policy, budgets, checkpoint policy and terminal mapping.",
+    "fanout": {
+      "source": "bounded static list, typed artifact collection or approved query snapshot",
+      "child_identity": "hash(parent instance, fanout node, item key, definition digest); item keys unique",
+      "limits": "maxItems, maxParallel, rate/spend/token quotas, per-child and aggregate deadline",
+      "isolation": "separate attempt/lease/workspace/output namespace; shared write targets require serialization or declared merge protocol",
+      "fail_policy": "failFast | continue | cancelSiblingsOnThreshold; always explicit",
+      "dynamic_expansion": "children may propose further items but controller admits them against depth/count/budget caps"
+    },
+    "join": {
+      "policy": "all | allSettled | quorum(k or percentage) | race | reduce",
+      "success/failure_thresholds": "typed, predeclared, risk-aware; quorum cannot waive mandatory child/gate",
+      "ordering": "aggregate by declared stable item key or child ordinal, never completion order",
+      "duplicates/missing": "deduplicate child IDs; missing/timed-out status represented explicitly",
+      "race": "winner selected by first controller-committed qualifying event; other children cancelled/cleaned; late outputs quarantined",
+      "merge": "deterministic reducer version+digest; semantic/code conflict becomes gate, not last writer wins"
+    },
+    "composition": [
+      "Subfactory reference is immutable {registry, name, version/digest, entrypoint}; alias resolves once at parent admission.",
+      "Parent passes a capability subset, budget slice, typed inputs, trace/correlation and cancellation scope. Child cannot escalate permissions.",
+      "Child exposes typed outcomes/events only through its interface; internal roles/state are private. Parent stores child instance and definition digest.",
+      "No recursive cycle unless explicitly tail-recursive with maxDepth and proven decreasing budget. Static compiler rejects graph/subfactory cycles otherwise.",
+      "Composition lock records transitive digests, schemas, tool/plugin versions and compatibility constraints. Maximum nesting is policy bounded; GitHub’s reusable-workflow depth/permission reduction is precedent, not the portable limit [S17].",
+      "Cancellation propagates parent-to-child. Child failure maps through declared outcome mapping. Compensation/cleanup order is reverse topological across effect dependencies."
+    ],
+    "scheduling": [
+      "Ready-set scheduling is deterministic from priority class, age, deadline, dependency and tenant fairness; LLM ranking may be an advisory feature only.",
+      "Use queues and fenced leases. Do not confuse GitHub Actions concurrency groups with an atomic work lease.",
+      "Reserve aggregate budgets before fanout. Release unused reservation only after receipt/reconciliation."
+    ],
+    "sources_note": "Parallel platforms disagree on fail-fast, race and output ordering; the DSL must declare these rather than inherit engine defaults [S12-S17][S31-S35]."
+  },
+  "human_need_policy": {
+    "deterministic_precedence": [
+      "DENY/STOP security or invariant violation",
+      "EMERGENCY_ESCALATE for active harm/rollback failure",
+      "APPROVAL_REQUIRED for consequential exact action",
+      "CLARIFY for missing intent/oracle/conflict",
+      "PAUSE/ESCALATE for budget/uncertainty threshold",
+      "CONTINUE only when all guards prove eligible"
+    ],
+    "continue_only_if": [
+      "request/spec/artifact schemas valid and current",
+      "no unresolved blocking question or contradictory authoritative decision",
+      "risk class and affected scope inside approved autonomy profile",
+      "capability lease is least privilege and current",
+      "required deterministic gates pass on exact hashes",
+      "remaining reserved budget covers work plus cleanup",
+      "action is reversible/idempotent or separately approved",
+      "confidence/novelty policy is satisfied; model confidence is never sole evidence"
+    ],
+    "clarification_triggers": [
+      "two or more materially different interpretations change observable acceptance",
+      "missing product value/priority/scope/non-goal/consent/data owner",
+      "acceptance oracle is absent, circular, authored only by candidate, or conflicts with intent",
+      "source evidence conflicts above a configured materiality threshold",
+      "decision owner or approver cannot be resolved deterministically",
+      "requested action exceeds declared interface or output schema"
+    ],
+    "approval_triggers": [
+      "new/changed product decision or READY spec",
+      "R2+ behavior change/merge/release per repository policy",
+      "new repository/path/egress/tool/MCP peer/secret/cloud/production capability",
+      "auth/crypto/IAM/secrets/privacy/legal/billing/public API/schema/data migration/infrastructure/supply chain",
+      "grader/rubric/eval inclusion/threshold, prompt/model/router/tool/image/policy/memory-schema or factory promotion",
+      "exception, waiver, ambiguity acceptance, irreversible/destructive action, novel incident remediation",
+      "join conflict or partial result that changes committed scope"
+    ],
+    "escalation_triggers": [
+      "security signal, suspected prompt injection/exfiltration or unauthorized effect",
+      "unknown external effect, stale/fenced worker mutation, repeated deterministic failure",
+      "rollback/cleanup/compensation failure",
+      "budget >=80% with no bounded completion plan; hard cap at 100%",
+      "deadline/SLO breach, human timeout, approver conflict/unavailable quorum",
+      "uncertainty score above policy threshold or evidence disagreement unresolved after one bounded research pass"
+    ],
+    "stop_triggers": [
+      "policy deny/no eligible capability",
+      "protected invariant/gate fails",
+      "hard cost/token/time/tool/retry/fanout/depth limit",
+      "kill switch, legal hold or cancellation",
+      "candidate attempts to access/modify hidden evals, policy, permissions, audit or promotion authority",
+      "irreversible effect lacks exact authorized approval and tested recovery"
+    ],
+    "probabilistic_signals": "Novelty, semantic uncertainty, disagreement and anomaly scores may only raise risk/request review. Thresholds are versioned per task class and calibrated on local labeled outcomes with abstention. They cannot grant access, lower risk, waive gates or approve.",
+    "decision_timeout": "Every human request declares deadline, reminders, escalation target and fail-closed result (deny, defer, pause or cancel). Never default-approve.",
+    "automation_classes": {
+      "SAFE_NOW": "read-only normalization/search; bounded planning draft; deterministic validation; isolated candidate artifact; known idempotent runbook; predeclared canary abort/rollback",
+      "CONDITIONAL": "locally proven R0/R1 branch/PR work and sampled low-risk promotion within allowlist",
+      "HUMAN_GATE": "intent/readiness, R2+, privilege, protected controls, production/high-risk actions",
+      "UNSUPPORTED": "autonomous roadmap/value tradeoff, silent ambiguity, self-approval, grader/policy/permission self-edit, novel high-impact remediation, irreversible operations, unattended end-to-end ownership"
+    },
+    "evidence": "MCP only says humans SHOULD be able to deny tools, so the runtime must convert consequential classes to enforced MUST-level policy [S24]. OWASP excessive-agency and prompt-injection guidance plus AgentDojo justify default deny and authority outside the model [S25][S30]."
+  },
+  "factory_as_code_schema": {
+    "design": "YAML is authoring syntax; JSON Schema validates structure; a compiler resolves imports and emits a normalized immutable graph/lock digest. A policy engine evaluates authorization. Runtime state/events use separately versioned schemas. This separation follows JSON Schema dialect practice and OWS separation of DSL versus document version [S07][S31].",
+    "required_top_level": [
+      "apiVersion/kind",
+      "metadata{name,version,compatibility,owners}",
+      "spec{imports,policyRefs,artifactTypes,roles,budgets,retryPolicies,phases,transitions,events,failure,cleanup,observability,evolution,acceptance}"
+    ],
+    "role_contract": [
+      "stable ID/kind/objective",
+      "principal/service account and separation constraints",
+      "pinned harness/model/instruction/tool/plugin/image",
+      "input/output schemas",
+      "capability profile: verbs/resources/paths/egress/secrets",
+      "sandbox and data classification",
+      "budget overrides bounded by parent",
+      "canPropose/canVerify/canApprove/canTransition flags; controller rejects unsafe combinations"
+    ],
+    "task_contract": [
+      "kind and stable scoped ID",
+      "typed inputs/outputs/cardinality",
+      "deterministic use ref or role",
+      "depends/then/onOutcome/onError",
+      "guard and policy refs",
+      "timeouts/lease/heartbeat/checkpoint",
+      "retry/idempotency/side-effect class/compensator",
+      "budget/capability subset",
+      "gate/escalation/cleanup hooks"
+    ],
+    "versioning": [
+      "apiVersion controls language semantics; metadata.version is semantic definition version; digest identifies exact transitive compiled content.",
+      "Patch: corrections with identical semantics; minor: additive optional behavior/migrations; major: incompatible artifacts/states/authority. Runtime compatibility is an explicit constraint, not inferred.",
+      "Aliases/channels are mutable pointers. Resolve once and pin digest on admission. In-flight instances never take “latest.”",
+      "Unknown fields fail closed except namespaced x-* annotations. Unknown required event/artifact versions quarantine.",
+      "Definition activation uses validate -> deterministic plan/diff -> owner approval -> atomic activate; last valid stays active on failure, matching Warp’s safe apply precedent [S01].",
+      "Schema migration cannot mutate history. Use adapters/upcasters for reads or an explicit signed checkpoint migration with rollback; retain old workers/definitions until drain."
+    ],
+    "concrete_example_yaml": "apiVersion: factory.agent-os.dev/v1alpha1\nkind: Factory\nmetadata:\n  name: issue-to-verified-change\n  version: 1.4.0\n  compatibility: {requiresRuntime: \">=0.6 <1.0\"}\nspec:\n  immutableRunSnapshot: true\n  imports:\n    - {name: research, ref: registry.example/research@sha256:abc..., interface: research/v1}\n  policyRefs:\n    - {ref: git+https://example/policy.git//factory.rego?ref=<full-sha>, digest: sha256:def...}\n  artifactTypes:\n    Spec: {schema: schemas/spec-2.1.json, compatibility: backward}\n    Decision: {schema: schemas/decision-1.0.json, retention: project}\n    Patch: {schema: schemas/patch-1.0.json, provenance: required}\n    Evidence: {schema: schemas/evidence-1.2.json, provenance: required}\n  roles:\n    foreman:\n      kind: advisory-router\n      identity: factory-router\n      instructions: {ref: prompts/foreman.md, digest: sha256:...}\n      tools: [repo.read, issue.comment.propose]\n      input: [Spec]\n      output: [RouteProposal, Question]\n      authority: {stateTransitions: false, approve: false, escalateCapability: false}\n    implementer:\n      kind: worker\n      isolation: ephemeral\n      tools: [repo.read, branch.write, test.run]\n      capabilityProfile: low-risk-branch\n      output: [Patch, Evidence]\n    verifier:\n      kind: verifier\n      separation: {differentPrincipal: true, cleanWorkspace: true}\n      tools: [repo.read, test.run]\n      output: [Verification]\n  budgets:\n    default:\n      wall: PT45M\n      tokens: 200000\n      cost: {currency: USD, amount: \"20.00\"}\n      toolCalls: 300\n      attempts: 2\n      fanout: 8\n      depth: 3\n      diffLines: 800\n      reserveForCleanup: {percent: 10}\n      onExhausted: escalate\n  retryPolicies:\n    transient:\n      match: [NetworkTimeout, RateLimited, WorkerLost]\n      exclude: [PolicyDenied, InvalidInput, UnknownSideEffect]\n      maxAttempts: 3\n      backoff: {kind: exponential, initial: PT2S, factor: 2, max: PT1M, jitter: full}\n  phases:\n    plan:\n      entry: validate-spec\n      tasks:\n        validate-spec:\n          kind: deterministic\n          uses: builtin/schema-validate@sha256:...\n          in: {spec: \"$artifacts.spec\"}\n          out: {validated: Spec}\n          then: ready-gate\n        ready-gate:\n          kind: gate\n          checks: [noOpenQuestions, acceptanceOraclePresent]\n          approval: {role: product-owner, quorum: 1, bind: [spec,factory,policy], expires: P7D}\n          then: implement\n    build:\n      entry: implement\n      tasks:\n        implement:\n          kind: agent\n          role: implementer\n          checkpoint: {on: [toolEffect, PT5M], retain: P30D}\n          lease: {ttl: PT5M, heartbeat: PT1M, fencing: required}\n          retry: transient\n          then: verify-fanout\n        verify-fanout:\n          kind: fanout\n          items: [unit, integration, security]\n          maxParallel: 3\n          child: {task: verify-one, key: \"$item\"}\n          join: {policy: allSettled, orderBy: key, success: \"all(required).passed\"}\n          onFailure: human-review\n        verify-one:\n          kind: agent\n          role: verifier\n          out: {result: Verification}\n          then: end\n        human-review:\n          kind: human\n          questionSchema: schemas/review-decision-1.0.json\n          timeout: {after: P3D, then: deferred}\n          bind: [spec,patch,evidence,factory,policy]\n          then: complete\n        complete: {kind: end, outcome: succeeded}\n        deferred: {kind: end, outcome: deferred}\n  transitions:\n    - {from: plan.ready-gate, event: gate.passed, to: build.implement}\n    - {from: build.implement, event: task.succeeded, to: build.verify-fanout}\n  events:\n    ingress: {format: CloudEvents/1.0, dedupeBy: id, schemas: schemas/events/}\n  failure:\n    unknownEffect: reconcile\n    security: {transition: escalated, revokeAllLeases: true}\n  cleanup:\n    always:\n      - {uses: builtin/revoke-leases@sha256:..., idempotent: true}\n      - {uses: builtin/delete-workspace@sha256:..., retry: transient}\n    compensationOrder: reverseTopological\n    failureOutcome: cleanup_failed\n  observability:\n    traceContext: W3C\n    audit: {appendOnly: true, hashChain: true}\n  evolution:\n    aliases: {stable: \"1.4.0\"}\n    inFlight: pin\n    migration: explicit\n  acceptance:\n    success: \"phases.allRequiredSucceeded && gates.allPassed && cleanup.requiredSatisfied\"\n",
+    "warp_delta": "Warp v1alpha1 should be treated as one adapter/import format. Its schema describes configuration, not live orchestration. Compile its agents/automations/runners/scorers into role/trigger/resource/eval records, but require explicit phase/transition/artifact/budget/gate/retry/cleanup/composition extensions before claiming a general factory DSL [S01][S02]."
+  },
+  "end_to_end_workflows": {
+    "factory_definition_release": [
+      "Author branch -> schema/reference/type/cycle/capability/lint validation -> compile transitive lock/digest -> graph/model/security/replay tests -> plan diff including authority increases -> required CODEOWNERS/policy approvals -> sign -> atomic activate alias -> shadow selected triggers -> canary admissions -> promote or alias rollback. Existing runs stay pinned."
+    ],
+    "durable_user_decision": [
+      "Persist request -> normalize candidates without losing raw digest -> resolve decision owner -> research/options if bounded -> open typed Question -> WAITING_HUMAN checkpoint -> authenticate answer -> show material normalized consequence -> commit Decision revision -> invalidate dependent spec/approval/tasks -> recompile affected plan -> resume. Timeout follows declared deny/defer/escalate."
+    ],
+    "parallel_build": [
+      "Admit exact READY spec -> reserve total/cleanup budgets -> issue fenced implementation lease -> checkpoint before/after effects -> publish patch/evidence -> fan out immutable exact-head verification -> allSettled join in stable key order -> deterministic required-check gate -> independent review on exact hashes -> handoff/merge authority -> reconcile receipts -> reverse-topological cleanup."
+    ],
+    "research_subfactory": [
+      "Compile question/items/fields/time range/evidence policy -> bounded fanout per item/source route -> primary-source artifact capture with provenance -> schema validate each result -> join allSettled -> conflict/dedup audit -> durable user decisions for scope/conflicts -> report artifact -> scheduled evidence refresh creates a new evidence/report revision, never overwrites claims."
+    ],
+    "failure_and_resume": [
+      "Worker loss -> expire/fence lease -> inspect last checkpoint/effect receipts -> if effect unknown, RECONCILING -> transient retry with new attempt/epoch if budget -> deterministic failure replan/escalate -> on cancellation stop fanout, compensate declared reversible effects, revoke credentials, clean resources -> terminal only after cleanup invariant."
+    ],
+    "composition": [
+      "Parent pins subfactory interface+digest -> validates typed input/capability/budget subset -> creates child with correlation/cancellation scope -> consumes only declared outcome artifacts -> explicit join/failure mapping -> parent cleanup owns leaked-child sweep."
+    ],
+    "source_basis": "The flow combines Warp’s role/human-handoff model [S03] with durable runtime patterns [S08-S19], rather than leaving routing and gates only in foreman prose."
+  },
+  "self_improvement_boundary": {
+    "maximum_safe_loop": [
+      "Observe correlated outcomes with exact factory/model/tool/policy/artifact versions.",
+      "Triage and deduplicate; redact/privacy review; human-curate material failures and labels.",
+      "Create immutable eval case/dataset revision with provenance, holdout/adversarial slices and protected expected results.",
+      "Candidate agent proposes the smallest prompt/router/tool/workflow/code change as a PR. It has no write or discovery access to hidden cases, graders, thresholds, policy, permissions, audit or promotion credentials.",
+      "Run schema/security/replay/model tests and repeated stochastic offline comparisons against the current version; report per-risk slices, cost/latency, uncertainty and regressions.",
+      "Independent protected evaluator identity runs hidden tests and calibrates model graders against blinded qualified humans. Any protected invariant regression rejects regardless of composite score [S28].",
+      "Shadow on live inputs with zero authority, then canary only inside a preapproved low-risk capability cohort with exposure/error/spend/deadline limits and automatic kill/rollback.",
+      "Independent promotion authority approves the exact candidate/eval/policy digests. Activate atomically, retain prior version and monitor delayed outcomes/drift; rollback automatically on predeclared signals."
+    ],
+    "protected_outside_candidate": [
+      "test/eval inclusion and hidden data",
+      "ground truth/rubrics/graders and their calibration",
+      "security/property/invariant suites and thresholds",
+      "risk/capability/permission/credential policy",
+      "approval quorum and promotion identity",
+      "audit/event history and outcome labels",
+      "canary exposure/stop rules and rollback target",
+      "retention/redaction/legal controls"
+    ],
+    "warp_comparison": "Warp correctly keeps self-improvement at PR proposal and review, but published docs use LLM scorer classifications and do not document candidate isolation from graders/held-out sets or an automated shadow/canary rollback promotion protocol [S04][S05]. Therefore it is evidence for proposal workflow, not for autonomous safe promotion.",
+    "cannot_safely_be_autonomous": [
+      "choosing product goals/roadmap or resolving value conflicts",
+      "consent, privacy/legal interpretation and security exceptions",
+      "authorizing new privileges, production roles or destructive/irreversible effects",
+      "candidate changing its own protected tests, grader, threshold, policy, permissions, audit or promotion authority",
+      "semantic acceptance where no independent oracle exists",
+      "novel high-impact incident command or rollback failure response",
+      "unattended end-to-end plan/build/merge/deploy/repair/learn ownership"
+    ],
+    "reason": "Reward/grader hacking is documented, prompt injection remains unsolved, and multi-agent systems show coordination/verification failures [S28][S29][S30]. “Fully self-improving” is therefore bounded to automatic propose/evaluate/shadow/canary/rollback under externally owned controls."
+  },
+  "validation_strategy": {
+    "static_schema": [
+      "Validate authoring documents against pinned JSON Schema dialect; reject duplicate IDs, unresolved refs, illegal override/unknown required keys, invalid durations/currency and capability broadening.",
+      "Resolve and hash every import/tool/prompt/model/image/policy/schema. Verify signatures/allowlists and generate an SBOM/composition lock.",
+      "Compile graph; prove one entry, explicit terminal paths, reachability, no unintended cycles, valid scoping, compatible artifact edges, finite recursion/fanout, a gate before each sensitive effect, and cleanup from every exit."
+    ],
+    "semantic_and_model_tests": [
+      "Exhaustively enumerate finite state/event pairs; assert invalid transitions fail closed and terminal/approval/lease/budget invariants always hold.",
+      "Property-based generated graphs/events; deterministic replay equality; event upcaster and checkpoint migration compatibility corpus.",
+      "Model-check concurrent claims, lease expiry/reclaim, cancellation races, join quorum/race, approval invalidation, budget reservation and compensation order.",
+      "Golden cross-runtime conformance suite for success/failure/retry/catch/join/cancel/timeout semantics; engines may advertise only passed capabilities."
+    ],
+    "fault_tests": [
+      "Crash before/after event commit, outbox dispatch, external effect and receipt; duplicate/reorder/drop callbacks; clock skew; partition; throttling; poisoned event; worker loss; artifact-store outage; cleanup failure.",
+      "Verify no blind replay, no stale worker attachment, bounded retry, correct UNKNOWN_EFFECT reconciliation and eventual lease/token revocation."
+    ],
+    "security_tests": [
+      "Prompt/tool/indirect injection, malicious repository/dependency/MCP/A2A data, confused deputy, schema smuggling, path/shell injection, secret exfiltration, SSRF, cache/artifact poisoning.",
+      "Prove candidate cannot read/write protected graders/policy/audit/promotion; test tenant/role/path/egress isolation and capability non-escalation.",
+      "Sign/verify artifacts and plans; tamper, replay and downgrade tests; sensitive trace redaction because SDK tracing can retain data [S23]."
+    ],
+    "evaluation": [
+      "Fixed deterministic acceptance + fresh/private temporal holdouts + adversarial/metamorphic cases + repeated stochastic trials.",
+      "Predeclare primary metric, risk slices, equivalence/noninferiority margins, confidence intervals, cost/latency/reviewer effort and stop rules.",
+      "Measure full funnel: admitted -> correct durable outcome -> retained/no incident, not PR count or judge score. Calibrate graders to blinded experts and record disagreements [S28]."
+    ],
+    "acceptance_gates": [
+      "0 unexplained unauthorized effects/stale commits in fault tests",
+      "100% duplicate external mutation tests idempotent/reconciled",
+      "100% protected invariant tests pass",
+      "rollback and credential-revocation drills pass within declared objectives",
+      "no schema activation can partially apply; last known-good remains",
+      "local canary meets predeclared quality/safety/cost criteria; otherwise rollback"
+    ],
+    "validation_limit": "Tests prove encoded properties, not complete intent or future adversarial safety. Human/product and specialist judgments remain where the oracle is incomplete."
+  },
+  "implementation_recommendation": {
+    "core_decision": "Build a small deterministic control plane and compiler around immutable typed artifacts, event-sourced state, transactional outbox, fenced leases and external policy. Treat Warp/agent frameworks as adapters/workers, not the authority.",
+    "stage_0_spec_2_weeks": [
+      "Freeze v1alpha1 authoring/event/artifact schemas and state catalog.",
+      "Create compiler/normalized IR, composition lock and conformance fixtures.",
+      "Define role/capability/risk policy, exact-hash approval and cleanup invariants.",
+      "Import Warp v1alpha1 read-only and report unsupported general-DSL constructs."
+    ],
+    "stage_1_shadow_3_5_weeks": [
+      "PostgreSQL aggregate/event/outbox tables plus object store; schema registry and OPA/Cedar-style policy adapter.",
+      "Read-only triggers, deterministic scheduler, decision/question ledger, checkpoint/replay and desired/observed reconciler.",
+      "No agents receive write tools. Inject crash/duplicate/reorder/lease faults for at least 14 days."
+    ],
+    "stage_2_bounded_execution_4_8_weeks": [
+      "One repository, one low-risk factory, ephemeral worker and short-lived branch-only capability.",
+      "Typed patch/evidence artifacts, exact-head independent verification, human merge, always cleanup.",
+      "Hard wall/token/cost/tool/retry/diff/fanout limits and kill switch."
+    ],
+    "stage_3_parallel_composition": [
+      "Add bounded fanout/allSettled deterministic joins and one pinned research subfactory after single-worker invariants hold.",
+      "Avoid shared concurrent writes; use proposal branches and deterministic/human conflict merge.",
+      "Publish runtime capability/conformance matrix, not a portability claim."
+    ],
+    "stage_4_governed_improvement": [
+      "Protected evaluator service/dataset namespace; candidate PR only.",
+      "Offline -> shadow -> narrow canary -> signed promotion -> automatic rollback; human owns graders, policy, permissions and promotion."
+    ],
+    "technology_profile": [
+      "PostgreSQL transaction/outbox for MVP; object store by digest; JSON Schema 2020-12; CloudEvents envelope; W3C Trace Context; OPA/Cedar-like external policy; Sigstore/in-toto/SLSA provenance.",
+      "Use Temporal only when long waits/history/replay/operational volume justify its code/replay complexity. Use Argo/GitHub Actions for bounded compute/CI adapters, not as the canonical long-lived state store."
+    ],
+    "build_vs_buy": "Warp provides the closest managed UX and useful v1alpha1 resources, but its Early Access schema omits the required general orchestration contract. Adopt it as a front-end/worker integration only if export, identity, policy, audit and deterministic state requirements are verified in a pilot.",
+    "go_no_go": "Do not enable autonomous merge/deploy or candidate promotion until local representative denominators, protected invariant results, review cost, reverts/escapes, fault drills and rollback objectives meet predeclared thresholds."
+  },
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Factory definition syntax",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-as-code/",
+      "supported_claims": [
+        "Warp factory-as-code file layout, v1alpha1 resources, Git source of truth, atomic validation/apply, live work state excluded from files."
+      ],
+      "version": "v1alpha1 only at cutoff",
+      "limitations": "Early Access product documentation; hosted runtime not open source."
+    },
+    {
+      "id": "S02",
+      "title": "Factory definition schemas API — v1alpha1",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official generated JSON Schema endpoint",
+      "url": "https://app.warp.dev/api/v1/factory-files/schemas/v1alpha1",
+      "supported_claims": [
+        "Machine-readable property sets for factory, agent, automation, runner, benchmark, scorer and webhook documents; generated from the validating parser."
+      ],
+      "version": "v1alpha1; JSON Schema Draft 2020-12",
+      "limitations": "Shape validation is not orchestration semantics."
+    },
+    {
+      "id": "S03",
+      "title": "How Warp Factories work",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/how-factories-work/",
+      "supported_claims": [
+        "Early Access; foreman routing; default triage/planning/build/review stages; spec/questions/merge human touchpoints; advisory review; work item identity."
+      ],
+      "limitations": "Workflow policy partly lives in editable agent instructions; no independent efficacy record."
+    },
+    {
+      "id": "S04",
+      "title": "Configuring and reviewing Self-improvement",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/self-improvement/",
+      "supported_claims": [
+        "25-unreviewed-failure or seven-day trigger, ad hoc option, grouped follow-up runs, application/factory PR proposals, nothing adopted without review."
+      ],
+      "limitations": "No protected-grader isolation, canary or outcome-rate evidence documented."
+    },
+    {
+      "id": "S05",
+      "title": "Configuring Scorers",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/scorers/",
+      "supported_claims": [
+        "LLM classification judge, agent scope, labels/scores, threshold and sampling."
+      ],
+      "limitations": "LLM label is not ground truth and rescoring replaces the prior result."
+    },
+    {
+      "id": "S06",
+      "title": "CloudEvents specification",
+      "publisher_or_author": "Cloud Native Computing Foundation",
+      "publication_or_update_date": "v1.0.2 release lineage, 2022-02-05",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open specification",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "supported_claims": [
+        "Portable event identity/source/type/time/subject/data envelope."
+      ],
+      "version": "1.0.2",
+      "limitations": "No workflow durability or deduplication guarantee."
+    },
+    {
+      "id": "S07",
+      "title": "JSON Schema Draft 2020-12",
+      "publisher_or_author": "JSON Schema project",
+      "publication_or_update_date": "2020-12",
+      "access_date": "2026-09-13",
+      "source_type": "open specification",
+      "url": "https://json-schema.org/draft/2020-12",
+      "supported_claims": [
+        "Dialect/meta-schema identification and structural validation base."
+      ],
+      "version": "2020-12",
+      "limitations": "Does not define semantic migration, authorization or state transitions."
+    },
+    {
+      "id": "S08",
+      "title": "Workflows and deterministic replay",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/workflows",
+      "supported_claims": [
+        "Durable event history, commands/events, recovery by replay and deterministic workflow requirement."
+      ],
+      "limitations": "Code-first runtime; SDK/service semantics are not a portable DSL."
+    },
+    {
+      "id": "S09",
+      "title": "Retry policies",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/encyclopedia/retry-policies",
+      "supported_claims": [
+        "Declarative Activity retry behavior; workflow failures differ."
+      ],
+      "limitations": "Defaults must not be generalized to side-effect safety."
+    },
+    {
+      "id": "S10",
+      "title": "Workflow message passing",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/encyclopedia/workflow-message-passing",
+      "supported_claims": [
+        "Queries are reads; Signals are asynchronous writes; Updates are tracked synchronous writes/results."
+      ],
+      "limitations": "Rolling docs and Temporal-specific semantics."
+    },
+    {
+      "id": "S11",
+      "title": "Workflow Execution limits",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/workflow-execution/limits",
+      "supported_claims": [
+        "Workflow history bounded at 51,200 events or 50 MB with earlier warnings."
+      ],
+      "limitations": "Service configuration and releases can change limits."
+    },
+    {
+      "id": "S12",
+      "title": "Amazon States Language specification",
+      "publisher_or_author": "Amazon Web Services",
+      "publication_or_update_date": "spec text copyright 2016–2024",
+      "access_date": "2026-09-13",
+      "source_type": "language specification",
+      "url": "https://states-language.net/spec.html",
+      "supported_claims": [
+        "Named states, transitions, Choice, Task, Parallel, Map, Retry and Catch semantics."
+      ],
+      "version": "1.0",
+      "limitations": "Language semantics do not guarantee external effect exactly-once."
+    },
+    {
+      "id": "S13",
+      "title": "Handling errors in Step Functions workflows",
+      "publisher_or_author": "Amazon Web Services",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+      "supported_claims": [
+        "Ordered typed retry/catch with interval, attempts, backoff, maximum delay and jitter."
+      ],
+      "limitations": "AWS service-specific; Catch is not a universal finally."
+    },
+    {
+      "id": "S14",
+      "title": "DAGs — fail fast",
+      "publisher_or_author": "Argo Project / CNCF",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/#fail-fast",
+      "supported_claims": [
+        "DAG dependencies and explicit failFast behavior."
+      ],
+      "limitations": "Latest docs can move ahead of pinned runtime; Kubernetes-centric."
+    },
+    {
+      "id": "S15",
+      "title": "Exit handlers",
+      "publisher_or_author": "Argo Project / CNCF",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/walk-through/exit-handlers/",
+      "supported_claims": [
+        "onExit runs irrespective of success/failure and supports cleanup/notification."
+      ],
+      "limitations": "Kill/controller/storage failures still require operational reconciliation."
+    },
+    {
+      "id": "S16",
+      "title": "Loops",
+      "publisher_or_author": "Argo Project / CNCF",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/walk-through/loops/",
+      "supported_claims": [
+        "Dynamic item fanout primitives."
+      ],
+      "limitations": "Does not by itself define portable join ordering or authority."
+    },
+    {
+      "id": "S17",
+      "title": "Reuse workflows",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows",
+      "supported_claims": [
+        "Commit SHA is safest reference; bounded nesting/no loops; permissions maintained or reduced; matrix reusable-workflow outputs have completion-sensitive last-success behavior."
+      ],
+      "limitations": "CI scheduler, not a durable interactive orchestrator."
+    },
+    {
+      "id": "S18",
+      "title": "OpenAPI Specification 3.2.1",
+      "publisher_or_author": "OpenAPI Initiative / Linux Foundation",
+      "publication_or_update_date": "2026-09-10",
+      "access_date": "2026-09-13",
+      "source_type": "open specification",
+      "url": "https://spec.openapis.org/oas/v3.2.1.html",
+      "supported_claims": [
+        "Versioning/deprecation model and JSON Schema dialect support."
+      ],
+      "version": "3.2.1",
+      "limitations": "Interface/schema description does not supply workflow migration or authorization."
+    },
+    {
+      "id": "S19",
+      "title": "Controllers",
+      "publisher_or_author": "Kubernetes Authors / CNCF",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "supported_claims": [
+        "Controllers reconcile desired and observed state."
+      ],
+      "limitations": "Pattern does not prove semantic correctness or safe compensation."
+    },
+    {
+      "id": "S20",
+      "title": "Persistence",
+      "publisher_or_author": "LangChain",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "supported_claims": [
+        "Thread checkpoints and stores for graph state."
+      ],
+      "limitations": "Correct persistence/runtime configuration remains operator responsibility."
+    },
+    {
+      "id": "S21",
+      "title": "Interrupts",
+      "publisher_or_author": "LangChain",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "supported_claims": [
+        "Durable interrupts, same-thread resume and idempotency requirement because node code restarts."
+      ],
+      "limitations": "Python/JS framework primitive, not portable authorization/state schema."
+    },
+    {
+      "id": "S22",
+      "title": "Agent orchestration",
+      "publisher_or_author": "OpenAI",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://openai.github.io/openai-agents-python/multi_agent/",
+      "supported_claims": [
+        "Manager/handoff versus code-directed orchestration; code orchestration offers more deterministic predictability and parallel patterns."
+      ],
+      "limitations": "SDK patterns, not a long-lived durable workflow service."
+    },
+    {
+      "id": "S23",
+      "title": "Guardrails",
+      "publisher_or_author": "OpenAI",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://openai.github.io/openai-agents-python/guardrails/",
+      "supported_claims": [
+        "Input/output/tool guardrails and timing distinctions."
+      ],
+      "limitations": "Guardrails are not an authorization boundary; parallel checks may not prevent model work already begun."
+    },
+    {
+      "id": "S24",
+      "title": "Tools — Model Context Protocol",
+      "publisher_or_author": "Model Context Protocol / Linux Foundation",
+      "publication_or_update_date": "2026-07-28",
+      "access_date": "2026-09-13",
+      "source_type": "versioned protocol specification",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "supported_claims": [
+        "Named tools with schemas/capability negotiation; server/client validation, confirmation, timeout and audit guidance; human denial is SHOULD."
+      ],
+      "version": "2026-07-28",
+      "limitations": "Not a workflow or authorization system; human control is not uniformly MUST."
+    },
+    {
+      "id": "S25",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "publication_or_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "source_type": "industry security guidance",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "supported_claims": [
+        "Direct/indirect prompt injection and residual mitigation limits."
+      ],
+      "limitations": "Guidance, not a proof that listed mitigations eliminate attacks."
+    },
+    {
+      "id": "S26",
+      "title": "Trace Context",
+      "publisher_or_author": "W3C",
+      "publication_or_update_date": "2021-11-23",
+      "access_date": "2026-09-13",
+      "source_type": "W3C Recommendation",
+      "url": "https://www.w3.org/TR/trace-context/",
+      "supported_claims": [
+        "Vendor-neutral traceparent/tracestate propagation and privacy/security considerations."
+      ],
+      "version": "Recommendation"
+    },
+    {
+      "id": "S27",
+      "title": "SLSA specification v1.2",
+      "publisher_or_author": "OpenSSF SLSA",
+      "publication_or_update_date": "v1.2",
+      "access_date": "2026-09-13",
+      "source_type": "open supply-chain specification",
+      "url": "https://slsa.dev/spec/v1.2/",
+      "supported_claims": [
+        "Artifact/build provenance and integrity levels."
+      ],
+      "version": "1.2",
+      "limitations": "Provenance does not establish source semantics/correctness."
+    },
+    {
+      "id": "S28",
+      "title": "Evaluation best practices",
+      "publisher_or_author": "OpenAI",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "supported_claims": [
+        "Continuous evals, representative/edge/adversarial cases, expert labels, clear rubrics and human calibration."
+      ],
+      "limitations": "Vendor guidance, not a formal safety guarantee."
+    },
+    {
+      "id": "S29",
+      "title": "Why Do Multi-Agent LLM Systems Fail?",
+      "publisher_or_author": "Mauran et al.",
+      "publication_or_update_date": "2025-03-17 v1; revised 2025-08-21 v2",
+      "access_date": "2026-09-13",
+      "source_type": "independent academic preprint / annotated empirical study",
+      "url": "https://arxiv.org/abs/2503.13657",
+      "supported_claims": [
+        "1,600+ traces across seven frameworks; taxonomy used 150 traces and identified 14 failure modes in system design, inter-agent misalignment and verification."
+      ],
+      "version": "arXiv v2",
+      "limitations": "Benchmark/framework sample; preprint; does not measure this proposed runtime."
+    },
+    {
+      "id": "S30",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher_or_author": "Debenedetti et al.",
+      "publication_or_update_date": "2024-06-19; revised 2024-11-24",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed security research",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "supported_claims": [
+        "97 tasks/629 cases and material tool-data prompt-injection/utility tradeoffs."
+      ],
+      "limitations": "Adversarial benchmark is not a production incident-rate estimate."
+    },
+    {
+      "id": "S31",
+      "title": "Open Workflow Specification DSL reference",
+      "publisher_or_author": "Open Workflow Specification / CNCF ecosystem",
+      "publication_or_update_date": "v1.0.3 released 2026-01-12",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open specification",
+      "url": "https://github.com/open-workflow-specification/specification/blob/v1.0.3/dsl-reference.md",
+      "supported_claims": [
+        "Separate document.dsl and document.version; reusable retries/timeouts/functions; sequential, fork, loop, event, switch, try and wait tasks; scoped flow directives."
+      ],
+      "version": "1.0.3",
+      "limitations": "Portable language surface does not itself supply persistence/idempotency/runtime conformance."
+    },
+    {
+      "id": "S32",
+      "title": "Open Workflow Specification — Fork task",
+      "publisher_or_author": "Open Workflow Specification / CNCF ecosystem",
+      "publication_or_update_date": "v1.0.3 released 2026-01-12",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open specification",
+      "url": "https://github.com/open-workflow-specification/specification/blob/v1.0.3/dsl-reference.md#fork",
+      "supported_claims": [
+        "Join-all declaration-ordered outputs and compete/race semantics."
+      ],
+      "version": "1.0.3",
+      "limitations": "Runtime behavior still depends on a conforming implementation."
+    },
+    {
+      "id": "S33",
+      "title": "Redrive executions",
+      "publisher_or_author": "Amazon Web Services",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/redrive-executions.html",
+      "supported_claims": [
+        "Standard execution redrive preserves prior successful results/history and original definition/version while resuming failed work."
+      ],
+      "limitations": "AWS-specific redrive constraints."
+    },
+    {
+      "id": "S34",
+      "title": "Evaluate expressions — status check functions",
+      "publisher_or_author": "GitHub",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#status-check-functions",
+      "supported_claims": [
+        "Status predicates for cleanup/follow-on jobs; warning that always can hang critical acquisition and !cancelled is often safer."
+      ],
+      "limitations": "Not a first-class compensation protocol."
+    },
+    {
+      "id": "S35",
+      "title": "Retries",
+      "publisher_or_author": "Argo Project / CNCF",
+      "publication_or_update_date": "latest docs assessed against Argo v4.1.3 released 2026-09-11",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://argo-workflows.readthedocs.io/en/latest/retries/",
+      "supported_claims": [
+        "retryStrategy differs from infrastructure restarts; retry policy/expression evaluated after attempts and defaults have version history."
+      ],
+      "version": "4.1.3 cutoff reference",
+      "limitations": "Latest docs may exceed pinned release; external effects require separate idempotency."
+    },
+    {
+      "id": "S36",
+      "title": "A2A Protocol Specification",
+      "publisher_or_author": "A2A Protocol Working Group / Linux Foundation",
+      "publication_or_update_date": "v1.0.0",
+      "access_date": "2026-09-13",
+      "source_type": "versioned protocol specification",
+      "url": "https://a2a-protocol.org/v1.0.0/specification/",
+      "supported_claims": [
+        "Agent Cards, Tasks, status/history/artifacts, input/auth interruptions and terminal states; critical facts should be durable beyond stream messages."
+      ],
+      "version": "1.0.0",
+      "limitations": "Inter-agent wire protocol; no factory budgets, graders or promotion policy."
+    },
+    {
+      "id": "S37",
+      "title": "Factory agents",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-agents/",
+      "supported_claims": [
+        "Foreman, triage, spec, implement, review and verify roles and expected outputs."
+      ],
+      "limitations": "Role prompt is not enforcement; product is Early Access."
+    },
+    {
+      "id": "S38",
+      "title": "Benchmarking factory agent configurations",
+      "publisher_or_author": "Warp",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.warp.dev/factories/benchmarks/",
+      "supported_claims": [
+        "Reusable tasks/configurations/scorers/repetitions/cost comparison before live change."
+      ],
+      "limitations": "Benchmark correctness criteria and scorers can be weak/correlated; cost is estimated."
+    },
+    {
+      "id": "S39",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "publication_or_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "source_type": "industry security guidance",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "supported_claims": [
+        "Minimize functionality, permissions and autonomy; require human approval for high-impact actions."
+      ],
+      "limitations": "Guidance, not a complete policy engine."
+    },
+    {
+      "id": "S40",
+      "title": "Workflow versioning",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/workflow-definition#workflow-versioning",
+      "supported_claims": [
+        "Worker Versioning or patch-compatible paths preserve deterministic replay across workflow code changes."
+      ],
+      "limitations": "SDK/runtime-specific migration model."
+    },
+    {
+      "id": "S41",
+      "title": "Continue-As-New",
+      "publisher_or_author": "Temporal Technologies",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.temporal.io/workflow-execution/continue-as-new",
+      "supported_claims": [
+        "New run with same Workflow ID and fresh history can carry forward explicit state/checkpoint."
+      ],
+      "limitations": "Outstanding-child semantics and SDK APIs require explicit design."
+    },
+    {
+      "id": "S42",
+      "title": "Choosing workflow type in Step Functions",
+      "publisher_or_author": "Amazon Web Services",
+      "publication_or_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html",
+      "supported_claims": [
+        "Standard durable/auditable state execution semantics differ from at-least-once Express semantics."
+      ],
+      "limitations": "AWS state transition wording does not make external effects exactly once."
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict": "Warp calls the factory self-improving, but also says nothing is adopted automatically.",
+      "resolution": "Use “self-improving” only for automated failure aggregation and PR proposal [S04]. The requested maximum adds evaluation/shadow/canary/rollback automation while keeping protected controls and promotion external; it does not claim recursive autonomous authority."
+    },
+    {
+      "conflict": "Warp documentation says definition files are source of truth, while work items/runs/metrics are never written there [S01].",
+      "resolution": "Git is authoritative only for desired immutable factory versions. The transactional runtime/event store is authoritative for executions; integrations are projections."
+    },
+    {
+      "conflict": "Warp’s foreman dynamically skips/routes stages, whereas a safe runtime requires explicit statically checked transitions [S03].",
+      "resolution": "Allow the model to emit a typed RouteProposal among compiler-declared edges. The deterministic controller checks policy/guards and commits."
+    },
+    {
+      "conflict": "Workflow platforms differ on retries, cleanup, branch failure, ordering and delivery: ASL/Argo/GitHub/Temporal defaults are not interchangeable [S09][S12-S17][S35][S42].",
+      "resolution": "Make every semantic dimension explicit in normalized IR and publish a per-runtime conformance matrix. Reject deployment when an adapter cannot implement required semantics."
+    },
+    {
+      "conflict": "ASL Standard uses “exactly-once” state execution language, while queues/callbacks and external systems remain duplicable [S42].",
+      "resolution": "Never claim end-to-end exactly once. Use at-least-once handling, idempotency keys, outbox receipts and reconciliation for effects."
+    },
+    {
+      "conflict": "LLM scorer/evaluator feedback is convenient, but grader hacking and weak-oracle risk undermine self-promotion [S05][S28].",
+      "resolution": "Use LLM graders only as calibrated evidence. Hide/protect evaluator inputs and require deterministic invariants plus independent promotion authority."
+    },
+    {
+      "conflict": "Agent frameworks promote dynamic handoffs, while independent MAST evidence identifies coordination and verification failure modes [S22][S29].",
+      "resolution": "Default to single-worker deterministic pipelines. Add fanout only for independent shards with typed joins/objective verification."
+    },
+    {
+      "conflict": "MCP says a human SHOULD be able to deny tool invocations [S24], but consequential factory controls need fail-closed enforcement.",
+      "resolution": "Host policy upgrades sensitive actions to MUST require exact approval/deny; never rely on protocol UI guidance."
+    }
+  ],
+  "uncertainties": [
+    {
+      "field": "verified_capabilities",
+      "unknown": "Warp’s hosted runtime implementation, isolation, exact work-item state model, retry/dedup/lease/checkpoint/reconciliation semantics and production outcome denominators are not public.",
+      "impact": "Cannot adopt Warp as canonical authority without contractual/pilot verification.",
+      "mitigation": "Request schema/runtime/export/security documentation; instrument a shadow pilot and fault-test callbacks."
+    },
+    {
+      "field": "factory_as_code_schema",
+      "unknown": "No validated universal translation exists across Temporal, Argo, ASL, GitHub Actions and Warp because cancellation, join, retry and history semantics differ.",
+      "impact": "“Write once/run anywhere” is unsupported.",
+      "mitigation": "Target a normative IR and capability profiles; conformance-test each adapter and fail compile on semantic gaps."
+    },
+    {
+      "field": "orchestration_and_composition",
+      "unknown": "Best fanout, nesting and budget limits depend on workload distributions, rate limits and correlated agent errors.",
+      "impact": "Static defaults could waste cost or amplify failures.",
+      "mitigation": "Start single-worker; measure local full-funnel outcomes; bound and tune per task class."
+    },
+    {
+      "field": "human_need_policy",
+      "unknown": "No universal calibrated uncertainty/confidence threshold safely decides when semantic human input is needed.",
+      "impact": "Over-asking creates delay; under-asking creates silent intent errors.",
+      "mitigation": "Deterministic triggers dominate; probabilistic scores only raise risk and are calibrated locally with abstention."
+    },
+    {
+      "field": "self_improvement_boundary",
+      "unknown": "Public evidence does not quantify long-horizon retained benefit or rare-harm rate for automatically canaried factory changes.",
+      "impact": "Promotion thresholds cannot be borrowed from vendors or benchmarks.",
+      "mitigation": "Pre-register local metrics, human-calibrated holdouts, small cohorts, error budgets and automatic rollback."
+    },
+    {
+      "field": "evidence_and_limits",
+      "unknown": "Some official documentation is rolling and may have changed between product releases; future-dated cutoff behavior cannot be independently reproduced here beyond accessible documents and version tags.",
+      "impact": "Mutable limits/defaults may drift.",
+      "mitigation": "Archive/digest sources and schemas at implementation/procurement time; pin runtime versions."
+    }
+  ],
+  "confidence": {
+    "overall": "High (0.89) for the proposed safety/state/artifact architecture and for documented open workflow primitives; medium (0.72) for current Early Access Warp capability boundaries; low (0.35) for claims of portability or unattended end-to-end/self-promoting reliability.",
+    "claim_level": {
+      "Warp v1alpha1 files/schema and human-reviewed self-improvement": "high — direct docs and live generated schema [S01-S05].",
+      "durable history/retry/reconciliation/fanout building blocks": "high — official specifications/runtime docs [S06-S21][S31-S42].",
+      "need for protected authority and conservative multi-agent use": "medium-high — security guidance plus independent benchmark/trace research [S25][S29][S30][S39].",
+      "recommended DSL/runtime correctness": "medium-high as an implementable synthesis; it still requires conformance, fault and local outcome validation.",
+      "general productivity/ROI and fully autonomous operation": "low/unsupported — no denominator-based evidence found."
+    },
+    "method_note": "Claims from vendor docs establish availability/contract, not effectiveness. Independent studies are used to challenge safety and multi-agent assumptions; no numerical estimates were averaged across incompatible tasks."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "verified_capabilities",
+    "evidence_and_limits",
+    "orchestration_and_composition",
+    "human_need_policy",
+    "self_improvement_boundary",
+    "factory_as_code_schema"
+  ]
+}

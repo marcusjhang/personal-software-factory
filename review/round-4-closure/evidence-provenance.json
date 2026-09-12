@@ -1,0 +1,37 @@
+{
+  "reviewer": "round-4 evidence/provenance closure auditor",
+  "scope": "Final plan-only closure audit of the current repository snapshot, specializing in evidence claims and provenance. Reviewed PLAN.md, README.md, docs/state-transition-manifests.md, requirements traceability, round-3 resolution and all four round-3 closure reviews, all round-2 reviews and resolution, the relevant round-1 resolution memos, and the named repository-agent-operating-system evidence artifacts. The explicit user scope that no implementation exists was accepted; future proof gates were checked as contracts, not required to have passed.",
+  "strengths": [
+    "PLAN.md is evidence-honest at the authoritative contract level: it calls the 2026-09-12 cutoff an intended scope boundary, makes no UTC collection-history claim for the legacy corpus, distinguishes structural from semantic/provenance validation, and blocks Increment 1 on a fresh immutable re-fetch plus human review.",
+    "The 37-file inventory is reproducible: filesystem enumeration yields 14 self-managing-software, 10 RAOS base, 8 lifecycle-extension, and 5 domain-extension JSON results; all parse; all 37 current SHA-256 values match research-manifest.json; and synthesis-coverage.md has 37 distinct track entries with the same 14/10/8/5 breakdown.",
+    "The regenerated material claim graph closes ROAD-EVID-R3-002 mechanically. Its PLAN.md and normative-manifest digests match the current bytes; all 20 claim excerpts match their stated current lines; canonical work IDs are unique; all 36 evidence edges use supports, refutes, or context_only; all references resolve; and all 25 SourceObservation IDs, JSON pointers, record hashes, and result-file hashes reproduce exactly. Five explicit refutes edges preserve material conflicts.",
+    "The claim graph clearly marks semantic entailment and legacy provenance as unverified, separates platform/standard/external findings and architecture inferences from local target outcome hypotheses, treats the METR paper/blog as one family, and does not claim local efficacy, safety, recovery, isolation, compliance, productivity, or ROI.",
+    "Evidence-index.md now places a prominent disclaimer over legacy labels such as accessed, observed, and snapshot accessed. Evidence-cutoff.md correctly says the older UTC+08 account is an unverified process narrative rather than retrieval evidence."
+  ],
+  "findings": [
+    {
+      "id": "EVID-PROV-R4-001",
+      "severity": "high",
+      "title": "Two current provenance artifacts still assert the disclaimed UTC+08 timing narrative as fact",
+      "requirement": "The user requires evidence-honest provenance with no semantic/provenance overclaim and reproduction of the round-3 evidence closures. ROAD-EVID-R3-001 required all legacy timing claims to be labeled unverified, and the current authoritative plan says no UTC collection account is asserted.",
+      "evidence": [
+        "research/repository-agent-operating-system/evidence-cutoff.md:5 says the earlier association of the dates with a UTC+08 host is an unverified process narrative and that no actual UTC retrieval time or pre-cutoff compliance is asserted.",
+        "research/repository-agent-operating-system/synthesis-coverage.md:11 nevertheless says records show 2026-09-13 'because that is the UTC+08 host’s local calendar date.' This is a causal collection-history assertion, not an explicitly unverified account.",
+        "research/repository-agent-operating-system/research-manifest.json provenance_disclaimer.access_date_scope says access_date 2026-09-13 'is intended as the UTC+08 host local calendar date' and attributes that statement to evidence-cutoff.md, although the latter now expressly disclaims that association as verified fact.",
+        "The same synthesis-coverage.md sentence says mutable pages require 'implementation-time snapshotting,' while PLAN.md:4,82,480,484 and 559 require the fresh immutable run and human review before implementation/Increment 1."
+      ],
+      "reproduction": "Search the six named current evidence artifacts for 'UTC+08'. Compare synthesis-coverage.md:11 and research-manifest.json provenance_disclaimer.access_date_scope with evidence-cutoff.md:5 and PLAN.md:4. The first two retain affirmative UTC+08 language; the controlling documents say that exact account is unverified and that no UTC collection account is asserted. Then compare synthesis-coverage.md:11's 'implementation-time snapshotting' with PLAN.md's pre-implementation gate.",
+      "impact": "The current evidence package gives incompatible answers about what the 2026-09-13 labels mean and when repair may occur. A reader can still treat the UTC+08 story as established collection history or defer snapshot repair into implementation. This is the material provenance overclaim ROAD-EVID-R3-001 required the combined deliverable to remove, so the claimed round-3 closure is not complete.",
+      "recommendation": "In synthesis-coverage.md and research-manifest.json, replace the affirmative UTC+08 explanation with wording that it is only an unverified legacy process narrative and that the labels establish no host timezone, UTC retrieval time, or cutoff compliance. Change 'implementation-time snapshotting' to the exact pre-implementation fresh immutable re-fetch and human semantic-review gate. Keep quoted historical text clearly marked as superseded where retained.",
+      "verification": "A repository-wide search of the current, non-historical provenance artifacts must find no affirmative UTC+08 causal account. evidence-cutoff.md, research-manifest.json, synthesis-coverage.md, evidence-index.md, evidence-repair.md, material-claims.json, and PLAN.md must consistently state that legacy timing is unverified and that the fresh immutable run blocks Increment 1. Recompute any artifact digest that covers an edited file and rerun the local 37-file and claim-graph checks.",
+      "confidence": "high",
+      "prior": "ROAD-EVID-R3-001; incomplete closure of EVID-R2-001 and R2-RJ-003"
+    }
+  ],
+  "residual_uncertainty": [
+    "No fresh retrieval or human semantic/entailment review was performed, and none should be inferred from this plan-only audit. Those remain correctly specified future blocking gates.",
+    "The claim graph's materiality, source-family grouping, and entailment judgments remain editorial until the named human semantic review. This audit verified local identity, pointers, digests, types, counts, and explicit qualifications only.",
+    "Finding counts: critical 0, high 1, medium 0, low 0."
+  ],
+  "closure_criteria_pass": false
+}

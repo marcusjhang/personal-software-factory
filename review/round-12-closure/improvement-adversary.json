@@ -1,0 +1,135 @@
+{
+  "reviewer": "round-12 independent improvement adversary closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-11 combined correction",
+    "specialty": "Cancellation first across all states; stale/revocation active states; effect and rollback ownership; canary/widening/promotion/degradation races.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-11-resolution.md",
+      "review/round-11-closure/improvement-races.json",
+      "review/round-11-closure/formal-state.json",
+      "review/round-11-closure/cross-consistency.json",
+      "review/round-11-closure/recovery-cleanup.json",
+      "review/round-11-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "full reachable-product/model checking",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "reviewed-edge regeneration",
+      "production validation"
+    ],
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "authority_status_and_schema_3_identity",
+      "result": "pass",
+      "exact_text": [
+        "README.md makes PLAN.md the primary deliverable and docs/state-transition-manifests.md its incorporated normative legal-edge authority.",
+        "Recomputed PLAN.md SHA-256 is 5b320a71b86912845960ad67081137ed270bdf83d4ea019a32923df041d917ab.",
+        "Recomputed docs/state-transition-manifests.md SHA-256 is 8186b5724f24a60342a40e89d6e8ebb1795cdcbac0700a7dbc0723495dfd2f29.",
+        "material-claims.json is schema_version 3.0.0, regeneration_checkpoint round-11, binds those exact digests, reports 28 dynamically reviewed manifest headings, and remains candidate-only."
+      ],
+      "basis": "Direct byte hashing and JSON inspection reproduce the round-11 status without treating candidate evidence as semantic proof."
+    },
+    {
+      "area": "manifest_and_requirements_shape",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest parses to 776 unique table edge IDs.",
+        "review/requirements-traceability.md maps R-01 through R-16 and explicitly defines mapping as a proposed plan contract rather than implementation or empirical closure."
+      ],
+      "basis": "Independent row-ID extraction found no duplicate ID; the 16-row requirement register is present."
+    },
+    {
+      "area": "cancellation_first_and_no_exposure_settlement",
+      "result": "fail_with_high_finding_R12-IA-001",
+      "exact_text": [
+        "IX01 accepts every member of ReachableNonterminalTupleV1 and rejects ordinary rollout progress after cancellation.",
+        "IX06-E2R/E2Q/E3R/E3Q settle INTENT_RECORDED and READY_TO_SEND before send, while IX06-NR/NQ own deterministic all-target NoExposureReceipt creation and IX03 alone schedules cancellation cleanup.",
+        "IX06-XR/XQ omit CANARY_PASSED even though IR08 reaches CANARY_PASSED only after all IR28-IR33 receipts, including IR31's durable bounded ExposureEffect receipt."
+      ],
+      "basis": "The reachable exposed CANARY_PASSED cancellation tuple has neither an X safety row nor an N proof path."
+    },
+    {
+      "area": "revocation_stale_effect_and_cleanup_ownership",
+      "result": "pass",
+      "exact_text": [
+        "IC24-A and IC32-F/E invoke the same X/N/UNSETTLED safety partition; unsettled mutation effects reconcile before rollback dispatch.",
+        "IC32-CA adopts FAILED/RETIRED cleanup without replacing the CleanupManifest, rollback saga, or origin.",
+        "IR13C-X/N, IRB08, and IX03 have branch- and cancellation-specific cleanup ownership."
+      ],
+      "basis": "The corrected rows state generation fencing, no duplicate rollback, reconciliation-first ordering, and mutually exclusive later cleanup owners."
+    },
+    {
+      "area": "control_health_interrupt_totality",
+      "result": "fail_with_high_finding_R12-IA-002",
+      "exact_text": [
+        "Generic IH01 is legal whenever rollout is not CANARY_RUNNING, WIDENING_EFFECT, APPROVED, PROMOTING, PROMOTED, or OBSERVING.",
+        "Reachable CANARY_PASSED, WIDENING_REVIEW, and PROMOTION_PENDING_APPROVAL coordinates can retain protected canary exposure, and exposed CANARY_FAILED exists between IR09-X and IR11-X.",
+        "No IH01-* synchronized interrupt handles those source states, while the invariant says later progress is rejected after stale health and IH05 requires protected no exposure and no active generation."
+      ],
+      "basis": "The asserted sole active-interrupt allowlist is not total over the actual exposure-bearing intervals."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R12-IA-001",
+      "severity": "high",
+      "title": "Cancellation-first has no exposed CANARY_PASSED settlement row",
+      "requirement": "R-08 complete status model and R-12 maximum-safe improvement; the manifest promise that IX01 is eligible at every reachable nonterminal tuple and cancellation can settle safely.",
+      "evidence": [
+        "docs/state-transition-manifests.md:824 IR08 requires all IR28-IR33 receipts before CANARY_RUNNING->CANARY_PASSED.",
+        "docs/state-transition-manifests.md:853 IR31 consumes a durable bounded ExposureEffect receipt.",
+        "docs/state-transition-manifests.md:995 IX01 accepts the reachable nonterminal tuple and closes waits/revokes grants.",
+        "docs/state-transition-manifests.md:1008-1009 IX06-XR/XQ list CANARY_RUNNING, CANARY_PAUSED, CANARY_FAILED, WIDENING_REVIEW, WIDENING_EFFECT, WIDENING_RECONCILING, PROMOTION_PENDING_APPROVAL, APPROVED, PROMOTING, PROMOTION_RECONCILING, PROMOTED, and OBSERVING, but not CANARY_PASSED.",
+        "docs/state-transition-manifests.md:1002-1007 and 1011 restrict IX06-N/E2/E3 to proved no exposure or pre-send settlement, which conflicts with the IR31 exposure receipt."
+      ],
+      "adversarial_trace": [
+        "Reach SHADOW_PASSED/CANARY_RUNNING with a current protected ExposureReceipt.",
+        "Commit IR08 and reach CANARY_PASSED.",
+        "Commit IX01 first, changing cancellation NONE->REQUESTED and blocking ordinary IR14.",
+        "IX06-NR cannot prove no exposure. IX06-XR has no CANARY_PASSED source. IX02 cannot truthfully claim every required rollback intent is scheduled, and IX03 forbids cleanup until exposed application is exactly ROLLED_BACK."
+      ],
+      "impact": "A valid authenticated cancellation can strand an exposed rollout without rollback or cleanup. This contradicts cancellation totality and creates a nonterminal safety sink.",
+      "required_correction": "Add CANARY_PASSED to the exact IX06 protected-X partition with an atomic safe rollout target, stop/fence action, rollback IDLE->REQUESTED, immutable WIDENING_ABORT origin, replay/conflict rules, and corresponding source-set equality/witnesses. Re-run the cancellation-first race for IX01 before and after IR08/IR14."
+    },
+    {
+      "id": "R12-IA-002",
+      "severity": "high",
+      "title": "The sole control-health interrupt set omits reachable exposure-bearing states",
+      "requirement": "R-12 maximum-safe improvement and the stated control-health invariant that every canary/exposure interval has exactly one safe HEALTHY-to-degraded interrupt.",
+      "evidence": [
+        "docs/state-transition-manifests.md:1020 makes generic IH01 legal outside only CANARY_RUNNING, WIDENING_EFFECT, APPROVED, PROMOTING, PROMOTED, and OBSERVING.",
+        "docs/state-transition-manifests.md:824-837 reach exposed CANARY_PASSED and PROMOTION_PENDING_APPROVAL after the canary exposure receipt.",
+        "docs/state-transition-manifests.md:860-865 state that WIDENING_REVIEW retains old bounds/exposure.",
+        "docs/state-transition-manifests.md:825 and 829 leave a reachable exposed CANARY_FAILED interval before IR11-X creates rollback.",
+        "docs/state-transition-manifests.md:1053 claims IH01-C/W/WV/A/P/PV/D/O exhaust every active member/effect interval, rejects subsequent progress after degradation, and limits IH05 to no-exposure/no-active-generation tuples."
+      ],
+      "adversarial_trace": [
+        "Reach an exposed CANARY_PASSED tuple after IR08 (the same defect also appears in WIDENING_REVIEW, PROMOTION_PENDING_APPROVAL, and the IR09-X->IR11-X gap).",
+        "Commit generic IH01, which is legal by its negative rollout guard and changes health to TELEMETRY_DEGRADED without a synchronized rollout/rollback transition.",
+        "IH05 cannot restore because exposure and the active generation exist. No IH06 row accepts CANARY_PASSED. IH04 merely says abort/rollback in an effects cell but is not a rollback-entry owner and supplies no rollout/rollback coordinate edge. The invariant rejects ordinary progress after stale health."
+      ],
+      "impact": "A telemetry failure can leave active exposure stopped incompletely or stranded without the required rollback. It also falsifies the plan's material claim that the named active interrupt set is exhaustive.",
+      "required_correction": "Derive the active/exposure source set from reachable tuples, not the six-state hand list. Add synchronized degraded-state safety rows for CANARY_PASSED, WIDENING_REVIEW, PROMOTION_PENDING_APPROVAL, and the exposed CANARY_FAILED pre-rollback interval (plus any other derived omissions). Each X branch must fence/stop and create or reuse exactly one rollback; N branches need complete protected no-exposure proof. Require exact source-set equality and race degradation before/after each adjacent rollout edge."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2
+  },
+  "residual_uncertainty": [
+    "Implementation, exhaustive reachable-product proof, fresh evidence retrieval, semantic review, reviewed-edge regeneration, and production validation remain future gates and were not scored.",
+    "This audit reproduced declared contracts and concrete adversarial traces; it does not claim full state-space exhaustiveness."
+  ],
+  "closure_criteria_pass": false
+}

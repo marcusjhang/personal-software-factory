@@ -1,0 +1,242 @@
+{
+  "reviewer": "state-security-round-3-closure",
+  "scope": "Final plan-only closure audit of PLAN.md, README.md, requirements traceability, the round-2 resolution register, all six round-2 reviews, all round-1 resolution memos, and the repository-agent-operating-system evidence-repair artifacts. The removed prototype was accepted by design. This review checks whether future contracts and proof gates are defined; it does not require or infer implementation proof. All prior state/security/improvement findings claimed addressed were rechecked.",
+  "strengths": [
+    "The deliverable clearly identifies itself as plan-only and repeatedly states that implementation, semantic evidence validation, production safety, and local outcomes remain unproven.",
+    "The revised plan materially closes prior defects in rollback ordering, reclaim-before-reissue ordering, authenticated authority snapshots, exact-purpose approvals, signed context key lifecycle, sandbox tiering, PostgreSQL-before-write gating, RLS-before-second-repository gating, and independent improvement enablement.",
+    "The roadmap defines future proof gates and keeps external writes, second-repository operation, and improvement canary/promotion disabled until their respective evidence and independence gates pass.",
+    "Cleanup, stale evidence, UNKNOWN effects, cancellation epochs, quiescence, rollback verification, and fail-closed telemetry handling are treated as first-class safety concerns rather than implementation details."
+  ],
+  "findings": [
+    {
+      "id": "R3-STATESEC-001",
+      "severity": "high",
+      "title": "The claimed total factory mapping still has no private legal-edge catalog",
+      "prior_finding_status": "STATE-R2-001 and R2-RJ-001 are only partially closed; the state inventory was added, but the edge half of the required mapping was not.",
+      "requirement": "P-08, SO-RC-1, SO-RC-2, and the round-2 closure criterion require every private legal edge to project to a legal canonical edge, stutter, or fully specified guarded sequence, with wait, stale, cancellation, retry/exhaustion, rollback, cleanup, and terminal behavior machine-readable.",
+      "evidence": [
+        "PLAN.md:154-168",
+        "PLAN.md:192-216",
+        "PLAN.md:352-390",
+        "PLAN.md:483-487",
+        "review/round-2/state-exhaustiveness.json (STATE-R2-001)",
+        "review/round-2/requirements-journey.json (R2-RJ-001)",
+        "review/round-2-resolution.md: finding rows 7 and 11",
+        "review/round-1-resolutions/state-orchestration.md: RC-1 and RC-2",
+        "review/round-1-resolutions/evidence-experience.md: PC-5"
+      ],
+      "details": "Section 14.0 is a state-to-state-name projection only. Sections 14.1-14.5 say the listed rows are the exact states and then describe flows in prose, but they never enumerate the factories' legal private edges. Thus the promised fixture cannot derive which private pairs are legal or verify how NEEDS_INPUT/REFRESH_WAIT/SUPPRESSED answers, expiry, withdrawal, stale invalidation, retries, cancellation from each node, cleanup failure, and terminal disposition project. Section 21.1 promises future generated tests, but a test promise cannot determine an absent source graph.",
+      "impact": "Different implementations can invent different legal transitions, including bypasses of READY, LEASED, verification, observation, rollback verification, or cleanup. This directly leaves the complete-status requirement and safe compiler contract undefined.",
+      "recommendation": "Add a normative edge manifest for every built-in factory. For each edge, specify source, target, guard, atomic canonical event sequence or stutter, wait/resume/expiry behavior, stale and cancellation behavior, effects, cleanup, and exhaustion disposition. Make the Cartesian model tests generated from that manifest, not from prose.",
+      "verification": "The future Increment 1 gate must compile all built-ins from the published manifests, enumerate every legal and illegal private pair, and prove every edge projection and exceptional trace with no inferred or wildcard transition."
+    },
+    {
+      "id": "R3-STATESEC-002",
+      "severity": "high",
+      "title": "Orthogonal improvement machines have conflicting simultaneous canonical projections",
+      "prior_finding_status": "SECIMP-R2-001 and the improvement portion of STATE-R2-001 are incompletely closed. Orthogonal state lists now exist, but their composition into one work lifecycle is undefined.",
+      "requirement": "P-08, P-12, SI-RC-13, and SO-RC-8 require separate candidate, rollout, attempt, and control-health machines whose composition cannot bypass protected improvement and product-lifecycle gates.",
+      "evidence": [
+        "PLAN.md:228-242",
+        "PLAN.md:352-366",
+        "PLAN.md:388-390",
+        "review/round-2/security-improvement.json (SECIMP-R2-001)",
+        "review/round-2-resolution.md: finding row 20",
+        "review/round-1-resolutions/security-improvement.md: corrections 6, 7, 9 and Required data/schema/state contracts"
+      ],
+      "details": "Section 8.4 correctly calls the machines orthogonal, so candidate, rollout, attempt, and control-health states coexist. Section 14.0 then places their state names in one IMPROVEMENT row as if each independently determines the single canonical work state. For example, a valid snapshot can simultaneously be candidate SHADOW_PASSED (mapped READY_REVIEW), rollout DISABLED (mapped BLOCKED), and control HEALTHY (mapped OBSERVING). No product-state reducer, precedence rule, synchronized transition set, invariant, or per-machine projection target resolves that contradiction. The same row also maps terminal candidate dispositions to FAILED while rollout cleanup/rollback may still be active.",
+      "impact": "An implementer cannot determine the authoritative work state or its allowed terminal predicate. A candidate disposition, telemetry transition, or rollout event could incorrectly mask active authority, rollback, or cleanup and permit unsafe admission or promotion.",
+      "recommendation": "Define a product of the orthogonal machines with explicit invariants and synchronized edges. Either project each machine to a separate aggregate or publish a deterministic fail-closed reducer and precedence table. Require terminal work states to consider all machine coordinates, effects, attempts, rollback, and cleanup.",
+      "verification": "Model-check the full reachable product. Every reachable coordinate tuple must have exactly one canonical projection; conflicting simultaneous mappings must be rejected; no promotion, success, failure, cancellation, or cleanup terminal may mask a nonterminal coordinate or live authority."
+    },
+    {
+      "id": "R3-STATESEC-003",
+      "severity": "high",
+      "title": "The lease contract still omits the lease expires_at boundary",
+      "prior_finding_status": "The exact reclaim ordering in STATE-R2-002 is addressed, but round-1 SO-RC-6's required lease timestamp contract remains incomplete.",
+      "requirement": "SO-RC-6 requires every lease to carry issued_at, renew_by, expires_at, and max_expires_at, with database-time renewal and explicit expiry/fencing behavior.",
+      "evidence": [
+        "PLAN.md:22-23",
+        "PLAN.md:302-304",
+        "PLAN.md:310-315",
+        "PLAN.md:489",
+        "review/round-1-resolutions/state-orchestration.md: RC-6",
+        "review/round-2/state-exhaustiveness.json (STATE-R2-002)",
+        "review/round-2-resolution.md: finding row 8"
+      ],
+      "details": "The context binds lease issued, renew-by, and max-expiry, and renewal checks now < renew_by and max_expires_at. The plan refers to lease expiry and says context lifetime is bounded by it, but never defines or binds a lease expires_at value or states whether renew_by is also the authority-expiry instant. Reclaim begins on a missed renewal, leaving the interval and authority rule between renew_by and max_expires_at undefined.",
+      "impact": "Implementations can disagree on when an old worker loses authority and when results become stale. One interpretation can leave authority valid after renewal is missed; another can revoke it immediately. This is unsafe in lease, fence, capability, context, and effect-gateway enforcement.",
+      "recommendation": "Add expires_at to the Lease and signed context contracts. Define the exact relations among renew_by, expires_at, and max_expires_at; the database-time renewal update; the instant gateways reject authority; and the transition that starts reclaim/quiescence.",
+      "verification": "Increment 3 must include deterministic boundary and two-session tests immediately before, at, and after renew_by and expires_at, plus max-expiry, clock-skew, partition, stale-result, and effect-send cases."
+    },
+    {
+      "id": "R3-STATESEC-004",
+      "severity": "high",
+      "title": "The tenant-boundary rule contradicts the neutral typed-scope contract",
+      "prior_finding_status": "CDD-R2-004 is not fully closed because its corrected typed-scope rule conflicts with a later unconditional repository_id mandate.",
+      "requirement": "P-13/P-15 and CDD-R2-004 require immutable tenant plus typed ScopeRef, with repository identity mandatory only for engineering repository records and forbidden as a substitute for other-domain authority.",
+      "evidence": [
+        "PLAN.md:121-136",
+        "PLAN.md:400-403",
+        "PLAN.md:434-440",
+        "review/round-2/cross-domain-dogfood.json (CDD-R2-004)",
+        "review/round-2-resolution.md: finding row 19"
+      ],
+      "details": "Section 5.1 says repository identity is mandatory only for engineering records/effects and that neutral records use typed domain scope. Section 16 instead says every stored, queued, cached, object-stored, and audited record carries repository_id. Those rules cannot both hold for future GTM or another non-repository domain.",
+      "impact": "The canonical schema cannot satisfy both rules. An implementation may fabricate or reuse repository identity as authority for another domain, violating the tenant/scope boundary, or reject valid neutral-domain records.",
+      "recommendation": "Replace the unconditional repository_id rule with immutable tenant_id plus typed ScopeRef and domain-required canonical IDs. Require repository_id only when the scope kind is repository-bearing, with schema constraints rejecting both omission where required and substitution where forbidden.",
+      "verification": "Future schema tests must cover engineering and non-engineering scopes, reject a repository ID used as account/consent/campaign/subject authority, and prove cross-scope export/import authorization."
+    },
+    {
+      "id": "R3-STATESEC-005",
+      "severity": "high",
+      "title": "The sandbox table has no profile for ordinary trusted, secretless R2 execution",
+      "prior_finding_status": "SECIMP-R2-004 is incompletely closed because the profiles and controls were added without a total risk/threat selection function.",
+      "requirement": "P-11 and SECIMP-R2-004 require a closed sandbox profile set and deterministic risk/threat selection whose attested strength matches consequence.",
+      "evidence": [
+        "PLAN.md:178-190",
+        "PLAN.md:400-415",
+        "review/round-2/security-improvement.json (SECIMP-R2-004)",
+        "review/round-2-resolution.md: finding row 23"
+      ],
+      "details": "S1_REPO_LOW is limited to R1. S2_HOSTILE applies to untrusted/prompt-injected or secret-bearing execution. S3_HIGH_CONSEQUENCE lists only R2/R3 infrastructure, sensitive data, policy/workflow, or deployment. A trusted, secretless R2 application/API/user-visible behavior change is allowed by the risk policy but matches no executable profile. Mixed-threat precedence does not resolve a missing base match, and S4 only names R4, missing classification, unavailable attestation, unsupported isolation, or rollback.",
+      "impact": "The compiler must invent a profile, silently downgrade R2 to S1, or unexpectedly forbid an intended R2 class. The downgrade option permits unsafe containment.",
+      "recommendation": "Publish a total selection matrix over every R tier and closed threat category. Define the safe profile or explicit no-execution result for trusted, secretless R2 work and reject every unmatched combination.",
+      "verification": "Exhaustively enumerate the risk-by-threat Cartesian product in compiler fixtures; every combination must resolve to exactly one profile or an explicit fail-closed S4 result, and no weaker profile may satisfy a stronger row."
+    },
+    {
+      "id": "R3-STATESEC-006",
+      "severity": "high",
+      "title": "Cross-repository data dependencies are not bound to the dual-owner transfer boundary",
+      "prior_finding_status": "The CDD-R2-004 typed-scope correction and the tenant-boundary export rule are not carried into dependency admission.",
+      "requirement": "P-13/P-15 require cross-repository and cross-scope evidence transfer to use a separately authorized export/import envelope with source and destination authority.",
+      "evidence": [
+        "PLAN.md:174-176",
+        "PLAN.md:316-320",
+        "PLAN.md:400-404",
+        "PLAN.md:434-440",
+        "review/round-2/cross-domain-dogfood.json (CDD-R2-004)",
+        "review/round-2-resolution.md: finding row 19"
+      ],
+      "details": "DependencyEdge may directly name source and target tenant/repository and includes a data type. Admission quarantines cycles or unclear ownership, but no rule requires the signed dual-owner export/import envelope, allowed artifact ports/data classes, or source/destination consent for a cross-repository data or approval edge. Clear ownership is not transfer authorization.",
+      "impact": "A dependency can become an unauthorized cross-repository read or authority channel despite the stated tenant boundary.",
+      "recommendation": "Require every cross-repository data/evidence/approval dependency to bind a current signed export/import envelope, exact source and destination ScopeRefs, approved artifact ports/data classes, purpose, owners/consent, expiry, and receipt. Ordering-only edges must be proven non-disclosing or use the same authorization.",
+      "verification": "Admission tests must reject cross-tenant/repository dependency substitution, missing/one-sided/stale envelopes, disallowed ports/classes, and attempts to relabel a data edge as ordering."
+    },
+    {
+      "id": "R3-STATESEC-007",
+      "severity": "medium",
+      "title": "Canary admission and post-canary promotion do not have distinct decision contracts",
+      "prior_finding_status": "SECIMP-R2-002 is substantially addressed, but the separate enablement decision does not clearly cover a fresh post-canary promotion decision.",
+      "requirement": "P-12 and SO-RC-8 require promotion from APPROVED only after current immutable canary results and an independent exact-digest purpose-bound approval.",
+      "evidence": [
+        "PLAN.md:232-242",
+        "PLAN.md:258",
+        "PLAN.md:388-390",
+        "review/round-2/security-improvement.json (SECIMP-R2-002)",
+        "review/round-2-resolution.md: finding row 21"
+      ],
+      "details": "ImprovementEnablementDecision is defined as the atomic gate into CANARY_PENDING_APPROVAL, before canary results exist. Section 14.5 then says promotion needs 'the separate enablement decision,' while the rollout machine has PROMOTION_PENDING_APPROVAL -> APPROVED without defining a separate post-canary decision schema/guard bound to final canary receipts and current telemetry. EvidenceBundle also lists shadow and canary evidence without stage-specific completeness rules.",
+      "impact": "Implementers may reuse a pre-canary enablement decision for promotion or invent incompatible promotion gates.",
+      "recommendation": "Define distinct purpose-bound CanaryAdmissionDecision and PromotionDecision contracts, or explicit revisions of one contract. Promotion must bind a newly complete post-canary EvidenceBundle, final canary/abort status, current telemetry, exact rollout/candidate/policy, independent principals, expiry, and no open high/critical finding.",
+      "verification": "Model and schema tests must reject reuse of the pre-canary decision, absent or stale canary receipts, telemetry gaps, changed rollout inputs, wrong-purpose approvals, and principal overlap."
+    },
+    {
+      "id": "R3-STATESEC-008",
+      "severity": "medium",
+      "title": "Canonical-person and controlling-organization independence lacks a durable resolution contract",
+      "prior_finding_status": "SECIMP-R2-006 adds the correct independence rule and solo-owner block, but not the data or algorithm needed to enforce aliases and organizational control.",
+      "requirement": "P-09/P-12 require independence by canonical principal and controlling organization, not role sessions, aliases, bots, or proposer-controlled services.",
+      "evidence": [
+        "PLAN.md:99",
+        "PLAN.md:123-134",
+        "PLAN.md:256-258",
+        "PLAN.md:388-390",
+        "PLAN.md:461-475",
+        "PLAN.md:489-494",
+        "review/round-2/security-improvement.json (SECIMP-R2-006)",
+        "review/round-2-resolution.md: finding row 25"
+      ],
+      "details": "The catalog names Principal, RoleBinding, and AuthoritySnapshot, and Approval stores principals/quorum, but no record binds identity-provider subjects, verified aliases, service controllers, or organizational control relationships. No resolution/freshness/conflict rule says how the gateway determines that two accounts or a proposer-controlled evaluator service are not independent.",
+      "impact": "A superficially conforming gateway can count aliases or a proposer-controlled service as independent and defeat curation, evaluation, approval, or promotion separation.",
+      "recommendation": "Add a protected PrincipalIdentity/ControlRelationship snapshot with issuer, verified identity-provider subjects, aliases, controlling organization/person, provenance, review owner, freshness/expiry, and fail-closed conflict rules. Bind its digest into approvals, evidence review, and promotion decisions.",
+      "verification": "Adversarial fixtures must reject second logins, aliases, bots, and services controlled by the proposer, including stale or conflicting relationship snapshots, while accepting genuinely independent principals."
+    },
+    {
+      "id": "R3-STATESEC-009",
+      "severity": "high",
+      "title": "Runtime attempt and wait state sets still lack transition relations and terminal definitions",
+      "prior_finding_status": "Round-1 SO-RC-2/PC-5 remain incompletely closed despite the new runtime state names and future test list.",
+      "requirement": "P-08 and round-1 state corrections require retry, stale, wait/block, cancellation, cleanup, and terminal semantics to be machine-readable with no nonterminal sinks.",
+      "evidence": [
+        "PLAN.md:210-216",
+        "PLAN.md:310-324",
+        "PLAN.md:483-487",
+        "review/round-1-resolutions/state-orchestration.md: RC-2",
+        "review/round-1-resolutions/evidence-experience.md: PC-5"
+      ],
+      "details": "Factory-instance, node-run, and attempt states are enumerated without initial states, terminal sets, or complete edge relations. Reclaim prose uses HEARTBEAT_LOST -> STOP_REQUESTED, then QUIESCING, then STOPPED, but does not define whether STOPPED is finished for the one-unfinished-attempt invariant. WAITING_INPUT, WAITING_DEPENDENCY, WAITING_HUMAN, RETRY_WAIT, and attempt STALE likewise lack answer, expiry, withdrawal, cancel, and exhaustion target edges. Section 21.1 promises tests for these paths but provides no normative graph from which to derive the oracle.",
+      "impact": "Admission, reclaim, retry, resume, cancellation, and terminal decisions remain implementation-defined. This can create nonterminal sinks or allow a new attempt while the old one is still unfinished.",
+      "recommendation": "Publish separate complete transition manifests for FactoryInstance, NodeRun, Attempt, and Wait, including initial/terminal states, every edge/guard, expiry/withdrawal/cancel targets, stale invalidation, retry budget exhaustion, cleanup, and the exact finished-attempt predicate.",
+      "verification": "Generate reachability, illegal-pair, no-sink, wait-answer/expiry/withdraw/cancel, stale-result, retry-exhaustion, and one-unfinished-attempt tests directly from those manifests."
+    },
+    {
+      "id": "R3-STATESEC-010",
+      "severity": "high",
+      "title": "UNCONFIRMED_QUIESCENCE is an undefined authority-reissue exception",
+      "prior_finding_status": "STATE-R2-002 fixes normal reclaim ordering but leaves its exceptional reissue path outside every declared state/decision contract.",
+      "requirement": "SO-RC-5/SO-RC-6 require explicit cancellation and reclaim states, durable escalation disposition, proven isolation, and no overlapping authority.",
+      "evidence": [
+        "PLAN.md:206-216",
+        "PLAN.md:310-315",
+        "PLAN.md:322-324",
+        "review/round-2/state-exhaustiveness.json (STATE-R2-002)",
+        "review/round-2-resolution.md: finding row 8"
+      ],
+      "details": "UNCONFIRMED_QUIESCENCE is the named exception that can permit disjoint-resource work and can support terminal cancellation, but it is absent from canonical, factory, node-run, and attempt state sets. No typed escalation decision/receipt, authorized actor, bound resources, sandbox attestation fields, expiry/revocation, transitions, or closure predicate is defined.",
+      "impact": "A controller cannot prove when the exception is valid, whether the old attempt counts unfinished, or which resources are truly disjoint. Implementers may issue new authority on an inadequately isolated zombie worker.",
+      "recommendation": "Define UNCONFIRMED_QUIESCENCE as a fail-closed durable saga/disposition with exact actor/approval, old authority snapshot, resource proof, isolation attestation, allowed disjoint keys, expiry, monitoring, revocation, and resolution edges. Keep the old attempt unfinished for shared-resource purposes until a defined closure receipt exists.",
+      "verification": "Fault/model tests must reject reissue without every bound proof, reject shared/ambiguous resources, expire and revoke the exception, fence all old outputs/effects, and keep cancellation visibly nonterminal until the declared disposition predicate is met."
+    },
+    {
+      "id": "R3-STATESEC-011",
+      "severity": "medium",
+      "title": "Human UNKNOWN-effect dispositions still have no unambiguous target states",
+      "prior_finding_status": "STATE-R2-004 is only partially closed: lookup outcomes are defined, but the human disposition exits and their terminal meaning conflict.",
+      "requirement": "P-08/SO-RC-7 require every UNKNOWN reconciliation result and human disposition to have a machine-readable exit, receipt, replay rule, and settled classification.",
+      "evidence": [
+        "PLAN.md:206",
+        "PLAN.md:218-226",
+        "PLAN.md:279",
+        "review/round-2/state-exhaustiveness.json (STATE-R2-004)",
+        "review/round-2-resolution.md: finding row 10"
+      ],
+      "details": "After UNRESOLVED -> QUARANTINED, the plan names ACCEPT_APPLICATION, DECLARE_FAILED, and AUTHORIZE_COMPENSATION but does not give their target states or required receipts. QUARANTINED is called unresolved and prohibited from terminal success, yet the canonical terminal predicate allows effects explicitly quarantined by human disposition and the CLI describes the selected disposition as closed.",
+      "impact": "Implementations can disagree whether ACCEPT_APPLICATION reconstructs a verified receipt, whether quarantine can close DONE, and when compensation authority begins.",
+      "recommendation": "Define a target edge and typed receipt for each disposition. Separate accepted-but-unverified risk acceptance from RECEIPT_VERIFIED, define whether either permits work success, and map AUTHORIZE_COMPENSATION only to COMPENSATION_PENDING under fresh authority.",
+      "verification": "Model fixtures for each disposition must prove a single settled/unresolved classification, exact terminal eligibility, no generic replay, and compensation authority binding."
+    },
+    {
+      "id": "R3-STATESEC-012",
+      "severity": "medium",
+      "title": "Cleanup escalation and terminal cleanup predicates disagree",
+      "prior_finding_status": "Cleanup is materially improved, but the irrecoverable-failure/escalation path is not closed in the state model.",
+      "requirement": "P-08 and SO-RC-5 require explicit cleanup failure, escalation, and terminal predicates for DONE, FAILED, and CANCELLED.",
+      "evidence": [
+        "PLAN.md:200-208",
+        "PLAN.md:392-398",
+        "PLAN.md:483-499",
+        "review/round-1-resolutions/state-orchestration.md: RC-2 and RC-5"
+      ],
+      "details": "Canonical terminal states require cleanup receipts complete. Section 15 instead permits each cleanup item to have an explicit escalated disposition. No CLEANUP_FAILED/escalated state, disposition receipt treated as cleanup-equivalent, authorized actor, retry/exhaustion edge, or exit from CLEANING is defined.",
+      "impact": "An irrecoverable cleanup failure either deadlocks forever or causes an implementer to weaken the terminal predicate silently.",
+      "recommendation": "Define a cleanup submachine with retry budget, CLEANUP_FAILED/escalated disposition, exact authority, retained-risk record, resurface/remediation obligation, and an explicit rule for whether the disposition satisfies each terminal predicate.",
+      "verification": "Tests must cover retry success, exhaustion, legal hold, unavailable external deletion, rejected/expired escalation, and terminal denial unless the exact declared receipt-or-disposition predicate holds."
+    }
+  ],
+  "residual_uncertainty": [
+    "This is a document audit only. No compiler, state model, database, gateway, sandbox, evaluator, or controller was expected or tested.",
+    "Future IR and schema work could resolve these defects, but the current plan does not yet constrain those choices enough for closure.",
+    "Counts: 0 critical, 8 high, 4 medium. Closure criteria do not pass because unresolved high plan-contract defects remain."
+  ]
+}

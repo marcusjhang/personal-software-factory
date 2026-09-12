@@ -1,0 +1,107 @@
+{
+  "reviewer": "round-14 independent formal-model closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-13 combined correction",
+    "specialty": "All 787 normative manifest edge rows, with emphasis on IH already-reconciling degradation, IC24-RWX/RPX rollout and rollback, full adjacency/vocabulary/reachability/terminals, and previously corrected safety paths.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-13-resolution.md",
+      "review/round-13-closure/formal-model.json",
+      "review/round-13-closure/improvement-races.json",
+      "review/round-13-closure/cross-consistency.json",
+      "review/round-13-closure/recovery-remediation.json",
+      "review/round-13-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_inventory_adjacency_vocabulary_reachability_and_terminals",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest parses to 787 unique edge IDs: 96 canonical rows and 691 private/product rows.",
+        "All 787 rows were parsed through the final ICL03 row; no duplicate ID was found, and every row has the width declared for its row family.",
+        "Every adjacent pair named by a literal canonical projection occurs in the 96-row canonical graph; REDUCE-V1 remains constrained to S, one canonical edge, or an exact synchronized sequence.",
+        "The 96-row canonical graph reaches all 27 declared canonical symbols from INBOX and has exactly DONE, FAILED, and CANCELLED as sinks.",
+        "Literal traversal reaches every source/target symbol in IDEATION, BUILD, MAINTENANCE, DEEP-RESEARCH, FactoryInstance, NodeRun, Attempt, Wait, Effect, CleanupItem, RemediationObligation, UnconfirmedQuiescence, candidate, rollout, rollback, release-attempt, cancellation, control-health, and final improvement-cleanup row families. Their literal sinks agree with their declared terminal or disposition vocabularies; rollout has RETIRED as its sole sink."
+      ],
+      "basis": "Independent escaped-pipe row parsing, stable-ID uniqueness, row-family width checks, canonical-pair checks, and directed source/target traversal over all 787 closed rows."
+    },
+    {
+      "area": "already_reconciling_control_degradation",
+      "result": "pass",
+      "exact_text": [
+        "IH01-WR and IH01-PR cover every derived HEALTHY EVIDENCE_STALE or REVOKED tuple already in WIDENING_RECONCILING or PROMOTION_RECONCILING after IC24-A or IC32-UW/UP while the exact original Effect remains UNSETTLED and rollback remains IDLE.",
+        "Each interrupt atomically changes only control health to TELEMETRY_DEGRADED, preserves the byte-identical rollout, Effect identity/state, and reconciliation record, fences every remaining grant, authority, and send, stops or quiesces the child, and creates no rollback or cleanup before protected settlement.",
+        "After IH01-WR/PR, only the matching IH06-WX/WN/PX/PN continuation consumes settlement. X leaves reconciliation and creates exactly one rollback; N proves all-target non-application and creates no rollback, with cleanup owned by the declared sole owner.",
+        "The derived interrupt source equality includes IH01-WR/PR, requires pairwise-disjoint coverage, forbids generic IH01 on active tuples, and witnesses degradation before and after reconciliation initiation and Effect settlement."
+      ],
+      "basis": "Manifest \u00a7\u00a715.6-15.8, PLAN \u00a78.4, and the round-13 correction register agree on identity preservation, authority fencing, X/N ownership, and race selection."
+    },
+    {
+      "area": "ic24_protected_x_rollout_exit_and_rollback_dispatch",
+      "result": "pass",
+      "exact_text": [
+        "IC24-RWX atomically takes rollout WIDENING_RECONCILING->CANARY_ABORTING and rollback IDLE->REQUESTED, preserves the exact original Effect and reconciliation receipt, and binds immutable WIDENING_ABORT origin.",
+        "IC24-RPX atomically takes rollout PROMOTION_RECONCILING->FAILED and rollback IDLE->REQUESTED, preserves the exact original Effect and reconciliation receipt, and binds immutable non-widening CANDIDATE_REVOCATION origin.",
+        "Both rows use the exact legal canonical sequence BLOCKED>ROLLBACK_REQUESTED, require no unrelated revocation, apply absent-or-same replay/conflict rules, and produce a tuple that satisfies IRB01's prohibition on dispatch from reconciliation rollout states.",
+        "IC24-RN remains the disjoint protected-N continuation: it synchronizes rollout to FAILED, proves all-target non-application, creates no rollback, and creates the sole byte-identical CleanupManifest."
+      ],
+      "basis": "Direct closed-row comparison of IC24-A, IC24-RWX, IC24-RPX, IC24-RN, IRB01, canonical adjacency, rollback-origin rules, and exact race witnesses."
+    },
+    {
+      "area": "prior_safety_paths",
+      "result": "pass",
+      "exact_text": [
+        "Improvement rollback-safety blocks remain held through RO09 closure and IRB09 reverification; only IRB07-N/R/Q releases the exact purpose/digest-bound blocks, and cleanup or terminal settlement requires the bound BlockReleaseReceipt.",
+        "Whole-work cancellation rejects ordinary progress while non-NONE, classifies unsettled, protected-N, and protected-X exposure through the closed IX06 allowlist, creates at most one rollback, and leaves IX03 as sole cancellation cleanup owner.",
+        "BUILD and MAINTENANCE first cancellation at ROLLED_BACK remains split into first-arrival, persisted-continuation, and byte-identical replay rows under the same expected-version/disposition boundary as ordinary cleanup.",
+        "Effect identity, one-saga ownership, immutable rollback origin, cleanup ownership, cancellation priority, A11 reclaim ordering, and immutable Work terminals remain consistent across PLAN and the normative manifest."
+      ],
+      "basis": "Rechecked the previously corrected rollback, remediation, cancellation, effect, cleanup, reclaim, and terminal paths against all round-13 reviews and current normative bytes."
+    },
+    {
+      "area": "requirements_evidence_and_status",
+      "result": "pass",
+      "exact_text": [
+        "Requirements traceability remains structurally mapped 16/16, including R-08/P-08 and R-12/P-12 affected by the round-13 correction.",
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-13.",
+        "Its generated PLAN SHA-256 is 012934597727e4946f274a4033fc3f0dc0b2337c224155f4e1535323f8682c1a and manifest SHA-256 is da76752e03a289075e2a02e3614fccd11448899c2dab639621542cf7f7709c05; independent byte hashing matches both.",
+        "The schema-3 graph records 37 corpus files, 25 source observations, 20 claims, and 36 evidence edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports, and zero refutes. It covers all 25 PLAN sections and all 28 dynamically derived normative headings.",
+        "README, PLAN, traceability, the round-13 resolution, and schema-3 evidence consistently leave implementation, full-model execution, fresh retrieval, semantic review, reviewed-edge regeneration, and production validation pending; none materially overclaims closure or empirical proof."
+      ],
+      "basis": "Independent JSON parsing, count and disposition checks, byte hashing, heading derivation, requirement-register comparison, and status-language review."
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0
+  },
+  "residual_uncertainty": [
+    "The accepted future exhaustive reachable-product/full-model execution may reveal guard-product defects; this audit reproduces the complete literal row graph and exact contracts but does not claim that future gate was performed.",
+    "Fresh immutable retrieval, same-run human semantic review, reviewed-edge regeneration, implementation checks, and production validation remain pending and are not treated as present PLAN-only closure failures."
+  ],
+  "closure_criteria_pass": true
+}

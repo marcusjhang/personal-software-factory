@@ -1,0 +1,132 @@
+{
+  "reviewer": "round-9 independent improvement/interleavings closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-8 combined correction",
+    "specialty": "Rollback REMEDIATION_WAIT/cancel, control degradation, direct/UNKNOWN Effect outcomes, rollback saga ownership, release failures, and final cleanup.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-8-resolution.md",
+      "review/round-8-closure/evidence-status.json",
+      "review/round-8-closure/formal-state.json",
+      "review/round-8-closure/improvement-product.json",
+      "review/round-8-closure/cleanup-reclaim.json",
+      "review/round-8-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for unmet requirement, contradiction, unsafe/undefined path, or material evidence overclaim. Implementation, full model, fresh retrieval, and semantic review are accepted as unperformed. closure_criteria_pass iff critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "rollback_remediation_wait_and_cancellation",
+      "result": "pass_with_ownership_contradiction_reported_below",
+      "exact_text": [
+        "\u00a715: `rollback_state={IDLE,REQUESTED,ROLLING_BACK,VERIFYING,VERIFIED,FAILED,REMEDIATION_WAIT,ROLLED_BACK}`.",
+        "\u00a715.1 priorities 2 and 7 map `REQUESTED|ROLLING_BACK|VERIFYING|VERIFIED|FAILED|REMEDIATION_WAIT` positionally to `ROLLBACK_REQUESTED|ROLLING_BACK|ROLLBACK_VERIFYING|ROLLBACK_VERIFIED|ROLLBACK_FAILED|BLOCKED`.",
+        "IRB09 requires RO09 closure, fresh independent rollback-verification authority, and genuine restoration; IRB03 and IRB07-N/R/Q remain required.",
+        "IX03 forbids active, FAILED, and REMEDIATION_WAIT rollback; IX04 alone reaches cancellation terminality."
+      ],
+      "basis": "The vocabulary, reducer mappings, and NONE/REQUESTED/QUIESCING remediation sequence are defined. No waiver makes REMEDIATION_WAIT clean or terminal."
+    },
+    {
+      "area": "control_health_and_current_continuity",
+      "result": "fail",
+      "exact_text": [
+        "\u00a715.6: `CURRENT_CONTINUITY` means no degradation in the current generation, or fresh IH03 newer than the latest degradation and bound to current generation/bounds/telemetry epoch/decisions.",
+        "IH05 requires protected no-exposure and no active generation, rollout exposure, live Effect, promotion authority, or pending receipt; it invalidates old decisions.",
+        "IH01 is excluded from the six active states; IH01-C/W/A/P/D/O are their synchronized degradation family."
+      ],
+      "basis": "Pristine and restored continuity and the source-state partition are explicit, but IH01-W/P omit an exact Effect-coordinate disposition before rollback; see R9-INT-002."
+    },
+    {
+      "area": "direct_unknown_and_terminal_effect_outcomes",
+      "result": "fail",
+      "exact_text": [
+        "Only direct E06 through IR38/IR18 or reconstructed E17 through IR56/IR57 may widen bounds or cross MERGED.",
+        "The declared product set is `{E09,E10,E30,E31,E33,E35}` plus `{E20,E21,E24,E25,E28,E29,E37,E39}` in WIDENING_EFFECT and PROMOTING, with X/N classification.",
+        "E34 has dedicated no-application paths IR43/IR55; invalid reconstruction proceeds through quarantine/disposition rather than success."
+      ],
+      "basis": "UNKNOWN cannot silently succeed, but the unconditional X/N family conflicts with no-send facts of direct exits; see R9-INT-003."
+    },
+    {
+      "area": "release_failure_and_final_cleanup",
+      "result": "pass",
+      "exact_text": [
+        "IA07-OP/OR/OD/SP/SR and IA08-OP/OR/OD/SP/SR atomically fail each reachable offline/shadow candidate phase and enter FAILURE_PENDING_CLEANUP.",
+        "IA16 preserves cleanup; IA17 alone reaches release FAILED.",
+        "ICL01/ICL02 accept final C02 or C12, ICL03 accepts eligible final C09, and IX04 separately owns cancellation; generic rows reject on a synchronized final fold."
+      ],
+      "basis": "The release failure conjunction and success, failure, retained-risk, and cancellation final cleanup owners are separated."
+    },
+    {
+      "area": "schema_3_evidence_status",
+      "result": "pass",
+      "exact_text": [
+        "README.md says round-8 corrections and schema-3 candidate-only regeneration match the current PLAN/manifest digests and all 28 dynamically derived headings.",
+        "material-claims.json declares schema `3.0.0` and unreviewed candidate-only semantics; supports/refutes remain future reviewed observations."
+      ],
+      "basis": "Recomputed SHA-256 is 9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5 for PLAN.md and 8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2 for the manifest, matching material-claims.json. No future evidence gate was inferred complete."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R9-INT-001",
+      "severity": "high",
+      "title": "Priority 7a names IRB08 as the only cleanup successor but widening-abort requires IR13C",
+      "requirement": "Rollback cleanup ownership must be single and deterministic for every origin and cancellation coordinate.",
+      "evidence": [
+        "\u00a715.1 priority 7a says ROLLED_BACK plus NOT_REQUIRED projects to ROLLED_BACK and `only IRB08 may schedule cleanup next`.",
+        "\u00a715.3.1 forbids IRB08 for WIDENING_ABORT under cancellation NONE and names IR13A then IR13C as the sole cleanup path.",
+        "\u00a715.8 repeats that widening-abort uses IR13C under NONE while promotion uses IRB08."
+      ],
+      "impact": "A literal checker cannot satisfy both normative instructions. It either rejects required widening-abort cleanup or admits forbidden IRB08.",
+      "required_correction": "Qualify priority 7a by rollback origin: IRB08 is sole for non-WIDENING_ABORT; WIDENING_ABORT stays ROLLED_BACK through IR12/IR13A and uses IR13C only. Add this partition to checker assertions."
+    },
+    {
+      "id": "R9-INT-002",
+      "severity": "high",
+      "title": "IH01-W/P start rollback without an exact atomic disposition of the live mutation Effect",
+      "requirement": "Degradation must fence sends, expose no hidden live activity, and prevent rollback from racing a still-applying original effect.",
+      "evidence": [
+        "IH01-W changes WIDENING_EFFECT->CANARY_ABORTING and rollback IDLE->REQUESTED, but only says `stop/reconcile effect`; no Effect source, target, or synchronized E-row is named.",
+        "IH01-P likewise changes PROMOTING->FAILED and rollback IDLE->REQUESTED with only `stop/reconcile effect`.",
+        "\u00a715 applies only named coordinate changes, while IRB01 permits rollback dispatch without requiring the original Effect terminal, quarantined, or proved unable to apply."
+      ],
+      "impact": "Rollback can dispatch while the external mutation is SENDING, UNKNOWN, or LIVE; delayed application after restoration can defeat rollback and the no-hidden-activity invariant.",
+      "required_correction": "Partition IH01-W/P by exact reachable Effect state and name a synchronized Effect transition or durable stop/no-send receipt. Gate IRB01 until application is impossible or reconciliation/isolation supplies safe ordering. Generate degradation-versus-send/response races."
+    },
+    {
+      "id": "R9-INT-003",
+      "severity": "high",
+      "title": "Terminal Effect products require impossible exposure variants for conclusive pre-dispatch failures",
+      "requirement": "Reachable edge/product equality and exposure classification must be internally consistent.",
+      "evidence": [
+        "E30 is INTENT_RECORDED->FAILED_FINAL with signed no-send; E31 is READY_TO_SEND->FAILED_FINAL before dispatch; E35 is RETRY_AUTHORIZED->FAILED_FINAL before dispatch after absence proof.",
+        "IWD30X/IPD30X, IWD31X/IPD31X, and IWD35X/IPD35X nevertheless require ExposureReceipt proving application/exposure.",
+        "\u00a715.8 demands the listed direct edges be crossed by X/N classification and reachable-edge/product-row set equality; N variants correctly require no send/application or absence."
+      ],
+      "impact": "The X guards contradict the same effect's no-send/absence facts. The promised reachable product equality is not reproducible, and ExposureReceipt scope is ambiguous.",
+      "required_correction": "Make classification target-effect-specific. Remove unreachable X variants for no-dispatch edges, or define equality over a constrained reachable relation rather than a Cartesian family. Reject an ExposureReceipt conflicting with the edge receipt."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3
+  },
+  "residual_uncertainty": [
+    "Implementation, generated exhaustive model checking, and race execution remain future gates.",
+    "Fresh immutable retrieval, human semantic review, and reviewed-edge regeneration remain future gates."
+  ],
+  "closure_criteria_pass": false
+}

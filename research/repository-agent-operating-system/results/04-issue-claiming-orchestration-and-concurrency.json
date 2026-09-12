@@ -1,0 +1,625 @@
+{
+  "scope": {
+    "in_scope": "The repository-native control plane from a READY issue through deterministic admission, dependency and priority evaluation, exclusive claim, bounded parallel execution, heartbeats, retries, cancellation, stale-worker rejection, completion and GitHub Project synchronization. It defines durable state, event and repository contracts for one repository first, with a path to multi-repository work.",
+    "boundary": "GitHub Issues/Projects/Actions are user-facing intake, evidence and projection surfaces. A transactional database or durable workflow is canonical for active ownership, leases, attempts and side-effect receipts. Agent frameworks are replaceable workers; the LLM does not grant leases, order work, approve policy, or mutate canonical state by prose. Planning/readiness and merge governance are inputs/outputs, not redesigned here.",
+    "non_goals": "No product-list comparison, free-form swarm, autonomous roadmap choice, permission/policy self-approval, or claim that Project status stored in Git is actual GitHub remote state."
+  },
+  "current_capabilities": [
+    {
+      "verified": "GitHub can expose priority/status as Project fields and update one item field by GraphQL/CLI (https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue; https://cli.github.com/manual/gh_project_item-edit). Built-in Project workflows and Actions can automate remote Project state (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations; https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions)."
+    },
+    {
+      "verified": "Issues expose assignee mutation and dependency relationships (https://docs.github.com/en/rest/issues/assignees?apiVersion=2022-11-28; https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-issue-dependencies). These are collaboration primitives, not atomic lease or fencing APIs; the issue update API documents mutation but not compare-and-swap ownership (https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#update-an-issue)."
+    },
+    {
+      "verified": "Actions concurrency allows one running plus one pending run per group, may replace the pending run, is case-insensitive, and gives arbitrary ordering (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency). It is useful to suppress duplicate workflow execution, but cannot implement FIFO priority, dependency admission, renewable leases, or stale-worker fencing."
+    },
+    {
+      "verified": "Durable engines provide queue, retry and replay primitives (https://docs.temporal.io/task-queue; https://docs.temporal.io/encyclopedia/retry-policies; https://docs.temporal.io/workflow-execution/event). PostgreSQL row locking with SKIP LOCKED is explicitly suitable for queue-like consumers, although it returns an inconsistent view (https://www.postgresql.org/docs/current/sql-select.html). Kubernetes Lease/controller patterns demonstrate renewal and reconciliation (https://kubernetes.io/docs/concepts/architecture/leases/; https://kubernetes.io/docs/concepts/architecture/controller/)."
+    },
+    {
+      "limit": "GitHub does not automatically redeliver failed webhooks (https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries). Webhooks and Project mutations therefore cannot be the only durable record. Projects are remote mutable state; repository YAML is only desired configuration until a controller reads, diffs and applies it."
+    }
+  ],
+  "representative_systems": {
+    "recommended_mvp": "GitHub App + webhook receiver + PostgreSQL + queue workers + GitHub Actions for clean verification. PostgreSQL owns admission/leases/events/outbox; GitHub owns issues, PRs, checks and the human-visible Project projection.",
+    "scale_up": "Temporal is the leading fit for days-long waits/replay and worker queues (https://docs.temporal.io/task-queue; https://docs.temporal.io/workflow-execution/event); retain a relational projection/dedupe/effect ledger and external artifact store because histories have limits (https://docs.temporal.io/workflow-execution/limits).",
+    "patterns": "Kubernetes-style controller/Lease semantics for reconcile/renew (https://kubernetes.io/docs/concepts/architecture/leases/; https://kubernetes.io/docs/concepts/architecture/controller/); CloudEvents 1.0.2 envelope for interoperable events (https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md); PostgreSQL SKIP LOCKED for bounded competing consumers (https://www.postgresql.org/docs/current/sql-select.html).",
+    "explicit_rejection": "Do not use issue assignee, label, Project status, an Actions concurrency group, or an agent chat/checkpoint as the exclusive lock/system of record."
+  },
+  "primary_evidence": [
+    "GitHub's own concurrency contract says there is at most one running and one pending member, the old pending member can be canceled by a new one, and ordering is arbitrary (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency). This directly rules out using Actions concurrency as the fair priority queue.",
+    "GitHub documents separate mutation surfaces for issue assignees (https://docs.github.com/en/rest/issues/assignees?apiVersion=2022-11-28), issues (https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#update-an-issue), and Project item field values (https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue). No cited surface supplies a renewable issue-work lease with a monotonically increasing fence; implement it in canonical state.",
+    "GitHub Projects automation lives in Project configuration and GraphQL/API actions (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations; https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions). Thus `.github/project-os/*.yaml` can declare desired names/options/rules, but actual field IDs, item values, workflow settings and manual edits remain remote facts that must be imported/reconciled.",
+    "Webhook event schemas expose Project item changes (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item), but failed deliveries are not automatically retried (https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries). A periodic full/incremental read is required in addition to signed, deduplicated webhooks (https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries).",
+    "Temporal makes retries/replay durable (https://docs.temporal.io/encyclopedia/retry-policies; https://docs.temporal.io/workflow-execution/event) but also documents at-least-once external Activity risk (https://docs.temporal.io/develop/python/best-practices/error-handling). An orchestration engine does not remove the need for idempotency keys, effect receipts and reconciliation."
+  ],
+  "independent_evidence": [
+    {
+      "challenge": "A lease alone does not stop a process paused beyond expiry from writing later. Independent distributed-systems analysis recommends fencing tokens checked by the protected resource (https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html). Therefore every attempt completion/artifact registration uses a monotonically increasing `lease_fence`; stale results can be retained for audit but never promoted."
+    },
+    {
+      "challenge": "Multi-agent coordination adds system-design, misalignment and verification failures. MAST reports 14 modes from 1,600+ traces across seven frameworks and kappa 0.88 for taxonomy validation (https://arxiv.org/abs/2503.13657). It is a preprint and not repository-operating SLO evidence, but supports single-agent-first routing, bounded fan-out and objective joins."
+    },
+    {
+      "challenge": "Issues and repository content are untrusted model input. OWASP identifies prompt injection and excessive agency (https://genai.owasp.org/llmrisk/llm01-prompt-injection/; https://genai.owasp.org/llmrisk/llm062025-excessive-agency/). Deterministic admission and a capability proxy must mediate every tool action; an issue instruction cannot expand scopes or approve an exception."
+    },
+    {
+      "challenge": "Vendor docs establish features, not unattended correctness or economics. No independent, longitudinal 6–12 month dataset was found for accepted changes, duplicate side effects, escaped defects, reviewer time and full cost of repository-wide agent orchestration."
+    }
+  ],
+  "metrics_and_limits": [
+    {
+      "fact": "GitHub Actions concurrency: maximum one running and one pending workflow/job per group; a newer pending member replaces the previous pending member; order is arbitrary (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency). Consequence: it is dedupe/backpressure only, not fair scheduling."
+    },
+    {
+      "fact": "Temporal workflow history hard limits: 51,200 events or 50 MB, warnings at 10,240 events or 10 MB (https://docs.temporal.io/workflow-execution/limits). Consequence: one workflow per work item, external artifacts, archival/Continue-As-New; never one immortal project workflow."
+    },
+    {
+      "fact": "Temporal external Activities are at least once around lost acknowledgment (https://docs.temporal.io/develop/python/best-practices/error-handling). Required target: duplicate irreversible effect rate is exactly zero by receipt/reconciliation, not by assuming exactly-once delivery."
+    },
+    {
+      "operating_metrics": "Measure with denominators and task/risk slices: eligible queue age p50/p95; claim conflicts; lease expiries per 100 attempts; heartbeat lag p95; stale writes rejected; retries by failure class; unknown-effect reconciliations; cancellations reaching quiescence; dependency-blocked age; Project drift count/time-to-repair; concurrency utilization; accepted-change rate; human-rescue rate; tokens/$/wall time per accepted change; reverts and escaped defects."
+    },
+    {
+      "local_thresholds": "Configure repository-specific SLOs in policy; suggested launch alarms, not universal evidence: any accepted stale-fence write or unauthorized side effect pages and freezes admission; webhook reconciliation lag >15 minutes warns; retry budget exhaustion and Project drift >24 hours route to an owner."
+    }
+  ],
+  "recommended_design": {
+    "decision": "Use a deterministic durable controller with a database-backed fenced lease per work item, append-only events plus projections, transactional inbox/outbox/effect ledger, and a GitHub Project reconciler. Use GitHub Actions concurrency as an extra run-level dedupe guard, never the claimant lock.",
+    "admission": "Within one DB transaction: ingest/dedupe; lock eligible rows; validate READY revision/policy/risk/budget; confirm every hard dependency terminal-success; enforce repository/path/resource conflict sets and per-class quotas; score by explicit priority then aging; create attempt; bump `lease_fence`; set expiry; append transition/outbox. `FOR UPDATE SKIP LOCKED` supports competing dispatchers (https://www.postgresql.org/docs/current/sql-select.html).",
+    "priority": "Sort by policy tuple `(expedite_lane with quota, numeric_priority, risk-compatible capacity, aging_bucket, ready_at, work_item_id)`. Aging prevents starvation; weighted quotas prevent security expedite from consuming all capacity. Do not infer priority from comment volume or LLM urgency.",
+    "parallelism": "Start one implementation worker. Parallelize only independent read-only analysis or DAG nodes whose declared write/resource sets do not overlap. Serialize shared schemas/lockfiles/migrations and use deterministic join predicates. Compare every multi-agent path against a single-agent baseline because coordination failure is independently observed (https://arxiv.org/abs/2503.13657).",
+    "status_as_code": "Git stores desired schema/mappings/policy. GitHub Project is remote actual state. Reconciler owns only fields declared `managed`; it discovers IDs, computes desired-vs-actual, applies idempotent mutations (https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue), records receipts, observes webhooks plus scheduled polls, and either reverts drift, imports it through a reviewed config PR, or alerts according to per-field drift mode. Never silently overwrite unmanaged human fields.",
+    "self_improvement_boundary": "Telemetry may open a proposal changing scoring, retries, prompts, models or policies. Promotion requires reviewed versioned config, offline/shadow evaluation, canary, independent approver and rollback. The proposing/running agent cannot approve its own permission, policy, evaluator or promotion."
+  },
+  "state_and_event_contract": {
+    "canonical_states": [
+      "PLANNING",
+      "CLARIFICATION_REQUIRED",
+      "READY",
+      "BLOCKED",
+      "ADMITTED",
+      "RUNNING",
+      "CANCEL_REQUESTED",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "COMPLETED",
+      "FAILED",
+      "DEAD_LETTER",
+      "CANCELLED"
+    ],
+    "important_invariants": [
+      "Only READY at exact `spec_revision` and `policy_version` is eligible.",
+      "Hard dependencies must be COMPLETED with required artifacts; failure/cancel blocks dependent and emits explanation.",
+      "At most one unexpired implementation lease per work item; uniqueness is enforced by DB constraint/transaction, not label.",
+      "Every worker mutation carries `attempt_id` and `lease_fence`; canonical acceptance uses conditional update against current fence.",
+      "Terminal state requires no live capability lease and a reconciled effect ledger.",
+      "GitHub Project fields are projections and cannot authorize state changes."
+    ],
+    "lease_record": {
+      "fields": "lease_id, work_item_id, attempt_id, owner_principal, fence bigint, issued_at, expires_at, last_heartbeat_at, capability_profile, repo/base_sha/spec_revision/policy_version, cancellation_epoch, status",
+      "renew": "Heartbeat is a conditional update where owner, attempt, fence and ACTIVE status match; extend by bounded TTL. Agent prose/comments never renew.",
+      "expiry": "A sweeper marks expired, revokes credentials, reconciles external effects/worktree/branch, increments fence before requeue, and emits `lease.expired`. Grace affects scheduling only; it never makes an old fence valid."
+    },
+    "event_envelope": "CloudEvents-compatible `specversion,id,source,type,subject,time,datacontenttype,data` plus schema_version, correlation_id, causation_id, tenant, repo, work_item_id, attempt_id, fence, producer, payload_hash and traceparent (https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md). Inbox has unique `(source,id)`; append-only event IDs and outbox rows make handlers idempotent.",
+    "events": [
+      "work_item.ready",
+      "admission.denied|deferred|granted",
+      "dependency.blocked|released",
+      "lease.issued|heartbeat|expired|revoked",
+      "attempt.started|checkpointed|failed|completed|stale_result",
+      "cancel.requested|acknowledged|forced|quiesced",
+      "effect.intent|confirmed|unknown|compensated",
+      "artifact.registered",
+      "verification.finished",
+      "project.drift_detected|applied|import_proposed",
+      "work_item.transitioned"
+    ],
+    "idempotency": "Key each transition by `(work_item_id, from_state, to_state, cause_event_id, spec_revision)` and each external intent by stable `effect_key = work_item_id/step_id/logical_operation`. Before retry, query receipt/remote state; never invent a fresh key for the same logical operation.",
+    "reconciliation": "Inbound signed webhooks update observations; scheduled API reads repair missed delivery because GitHub does not auto-redeliver failures (https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries). Desired Project config and work-item projection are separately diffed so configuration drift is not confused with workflow-state drift."
+  },
+  "repository_artifacts": {
+    "files": [
+      "`.github/project-os/project.yaml`: desired Project owner/number lookup, fields/options/views/workflows, `managed` and drift mode (`enforce|propose-import|observe`)—never claims these are remote actual state.",
+      "`.github/project-os/status-map.yaml`: canonical-state to Project Status/labels and reverse mapping; reverse transitions default deny.",
+      "`.github/project-os/admission.yaml`: READY predicates, priority tuple, aging, quotas, global/repo/path concurrency, risk-capability matrix and budget ceilings.",
+      "`.github/project-os/dependencies.schema.json` and `workflow.schema.json`: typed DAG nodes, hard/soft edges, resource/write sets, join, timeout, heartbeat, max attempts, effect class, verifier and gate.",
+      "`.github/project-os/retry-policy.yaml`: stable failure taxonomy, retryable classes, exponential backoff/jitter, maximum attempts/duration and dead-letter owner.",
+      "`.github/project-os/capabilities.yaml`: GitHub App permission profiles, branch/path/tool/egress scopes, TTL and approver roles.",
+      "`.github/project-os/policy.rego` plus `policy-tests/`: allow/deny decisions; no policy change promoted by the agent it governs.",
+      "`.github/workflows/project-reconcile.yml`, `dispatch.yml`, `verify.yml`, `sweep-stale.yml`: thin authenticated entrypoints; controller/database retains durable truth. `verify.yml` adds a normalized issue/run concurrency key as secondary protection (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).",
+      "`db/migrations/`: work_items, dependencies, attempts, leases, events, inbox, outbox, effects, approvals, project_remote_map, project_observations, reconciler_runs and dead_letters; partial unique indexes protect active leases/effect keys.",
+      "`schemas/events/*.json`, `schemas/artifacts/*.json`, `runbooks/{stale-lease,unknown-effect,project-drift,dead-letter,kill-switch}.md`, `evals/orchestration/` and `tests/{contract,integration,chaos,reconciliation}/`."
+    ],
+    "generated_runtime_data": "No tokens, lease timestamps, remote node IDs, Project field values or actual queue state are committed as truth. Store only safe generated snapshots for reviewed drift PRs; secrets and active state stay in DB/secrets manager."
+  },
+  "workflow_steps": [
+    "1. Receive issue/Project/PR webhook. Verify raw-body `X-Hub-Signature-256` with constant-time comparison (https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries), record delivery ID in inbox, normalize to an event, acknowledge quickly; scheduled poll covers missed deliveries.",
+    "2. Materialize issue, exact readiness/spec revision, Project priority observation and GitHub dependency mirror. Reject unknown schema/repo, closed item, changed revision, policy denial or missing mandatory data before model execution.",
+    "3. Dependency evaluator detects cycles and confirms all hard predecessors succeeded. BLOCKED gets a reason/edges; soft dependencies adjust score only. A release event reevaluates descendants.",
+    "4. Dispatcher transaction uses SKIP LOCKED, deterministic priority+aging and quotas, checks declared resource/write conflicts, creates attempt/fenced lease and outbox job (https://www.postgresql.org/docs/current/sql-select.html). Then it mirrors assignee/status to GitHub; mirror failure does not lose the canonical claim.",
+    "5. Worker redeems short-lived capability only for matching attempt/fence, creates disposable worktree at pinned SHA, emits heartbeat separately from LLM output, checkpoints artifacts by digest, and stops on budget, cancellation epoch, lost lease or policy denial.",
+    "6. On timeout/error, classify. Retry only transient provider/network/runner faults under capped backoff+jitter (https://docs.temporal.io/encyclopedia/retry-policies). Deterministic test failure returns to agent/clarification, policy denial is not retried, exhaustion becomes DEAD_LETTER.",
+    "7. Before retrying GitHub mutation, branch push, PR creation or any other effect, consult effect ledger and remote receipt/state because completion may precede lost acknowledgement (https://docs.temporal.io/develop/python/best-practices/error-handling). Resume/reconcile; do not blindly replay.",
+    "8. Parallel branches receive disjoint scopes and individual fences. Join waits for declared required outputs and objective validators; conflict/shared invariant serializes or re-plans. Agent consensus alone cannot pass.",
+    "9. Cancellation persists CANCEL_REQUESTED and increments cancellation epoch, revokes credentials, signals engine/Actions (https://docs.github.com/en/actions/how-tos/manage-workflow-runs/cancel-a-workflow-run), waits bounded grace, force-terminates sandbox, reconciles effects, cleans worktree, then sets CANCELLED. A requested cancel is not proof external effects stopped.",
+    "10. Completion conditionally commits only under current fence and exact revisions, registers immutable artifacts/evidence, revokes lease, queues verification/review and updates Project projection. Late output emits stale_result and is quarantined.",
+    "11. Reconciler compares desired repository config and canonical projection with GitHub actual state using webhooks plus polling. Apply managed drift idempotently; preserve unmanaged fields; propose-import or alert where configured.",
+    "12. Close/archive only after durable terminal event, no live credentials/lease, effects confirmed/compensated, artifact retention recorded and cleanup verified."
+  ],
+  "human_gates": [
+    {
+      "gate": "readiness/priority exception",
+      "binding": "Named principal approves exact `work_item_id + spec_revision + priority/risk + policy_version + expiry`; changed scope/revision invalidates it.",
+      "when": "Ambiguous intent/acceptance, cross-repository or shared-schema coupling, missing dependency owner, exceptional expedite or quota bypass."
+    },
+    {
+      "gate": "capability expansion",
+      "binding": "Independent owner/security approval of exact repo/branch/path/tool/egress/secret scope and TTL.",
+      "when": "New write path, token permission, external service, production resource or sandbox escape. Assignee/agent cannot grant itself permissions; OWASP excessive-agency guidance supports least privilege (https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)."
+    },
+    {
+      "gate": "unknown effect/dead letter",
+      "binding": "Human chooses reconcile, compensate, accept, retry-with-same-key or abandon and records evidence/reason.",
+      "when": "Remote side-effect outcome is unknown, compensation fails, repeated transient failure, stale worker touched remote state or dependency graph conflicts."
+    },
+    {
+      "gate": "merge/release",
+      "binding": "Outside this track but consumed as exact artifact/head SHA, check suite, policy hash, role/quorum and expiry; any new commit invalidates approval."
+    },
+    {
+      "gate": "orchestration improvement",
+      "binding": "Proposal author/running agent excluded from approval. Eval curator and policy owner approve exact config commit after offline/shadow result and bounded canary; rollback pointer required.",
+      "when": "Changing admission, retry, priority, concurrency, model/prompt, capability policy, evaluator or promotion thresholds."
+    }
+  ],
+  "security_and_failure_modes": [
+    {
+      "mode": "Two dispatchers claim one issue; GitHub mirror races.",
+      "control": "DB transaction/unique active lease and fence; idempotent mirror. Assignee or Project status is not the lock (https://docs.github.com/en/rest/issues/assignees?apiVersion=2022-11-28; https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue)."
+    },
+    {
+      "mode": "Stale worker resumes after lease expiry or split brain.",
+      "control": "Monotonic fence on every canonical/result/effect gateway write, short-lived credentials bound to fence, quarantine late artifacts (https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)."
+    },
+    {
+      "mode": "Lost webhook, duplicate/out-of-order delivery, API rate/secondary limit, or partial Project multi-field update.",
+      "control": "Signed inbox dedupe, append/outbox, sequential/backoff API use per GitHub best practices (https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api), per-field receipts, webhook plus periodic full reconciliation because failed webhooks are not auto-redelivered (https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)."
+    },
+    {
+      "mode": "Retry duplicates PR/comment/branch/deploy or acknowledged effect is lost.",
+      "control": "Stable logical effect key, intent-before-call, receipt, remote lookup and compensation; at-least-once engines do not promise exactly-once effects (https://docs.temporal.io/develop/python/best-practices/error-handling)."
+    },
+    {
+      "mode": "Priority starvation, retry storm or runaway fan-out/cost.",
+      "control": "Aging, weighted lane quotas, per-repo/model/provider concurrency, capped retries/backoff/jitter, fan-out/token/time/diff limits, circuit breakers and global kill switch."
+    },
+    {
+      "mode": "Dependency cycle, failed predecessor, stale dependency mirror or concurrent shared-file edits.",
+      "control": "Canonical versioned DAG, cycle detection, hard-edge terminal-success rule, resource/write-set locks, serialize migrations/schema/lockfiles, revalidate at claim and completion."
+    },
+    {
+      "mode": "Prompt injection or issue asks for more rights/policy bypass.",
+      "control": "Treat repository/issue/tool output as data; deterministic policy proxy, least privilege, sandbox/egress controls, protected branch and human gate (https://genai.owasp.org/llmrisk/llm01-prompt-injection/; https://docs.github.com/en/actions/reference/security/secure-use)."
+    },
+    {
+      "mode": "Cancel races with worker/external effect; cleanup deletes human work.",
+      "control": "Persist cancellation epoch, revoke capability, fence, bounded termination, reconcile effects, and delete only resources tagged with exact controller/attempt ownership."
+    },
+    {
+      "mode": "Project status-as-code overwrites human fields or drifts silently.",
+      "control": "Managed-field allowlist, observed remote snapshot, three-way-like desired/last-applied/actual diff, enforce/propose-import/observe mode, audit and stop on ambiguous destructive change."
+    },
+    {
+      "mode": "Agent changes its own priority/policy/evals then self-promotes.",
+      "control": "CODEOWNERS/ruleset and separate credentials prevent governed worker from approving or applying control-policy changes; independent eval/approval/canary/rollback."
+    }
+  ],
+  "validation_and_tests": {
+    "contract": "JSON Schema tests for every event/DAG/artifact; state-machine property tests reject illegal transitions, revision drift and terminal state with a live lease; policy unit tests include deny-by-default and self-approval attempts.",
+    "concurrency": "Run N dispatchers against the same READY rows; assert one active lease/work item, stable quota/priority ordering, no starvation under aging, deadlock-free dependency release and all losing claim attempts recorded. Inject normalization collisions in Actions concurrency keys because group names are case-insensitive (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).",
+    "lease_chaos": "Pause worker beyond TTL, partition heartbeat, skew clocks, duplicate heartbeat/completion, restart dispatcher/DB client and deliver old-fence effects. Assert fence rejection, credential revocation, one accepted terminal artifact and safe requeue.",
+    "delivery_faults": "Duplicate/reorder/drop webhooks; return 429/5xx; crash after effect-before-receipt and after receipt-before-event; poison outbox; replay entire history. Assert inbox dedupe, same effect key, remote reconciliation and bounded retry/dead-letter.",
+    "dependency_parallelism": "Property-test acyclicity and hard/soft rules; generate overlapping write/resource sets; verify conflicting nodes never overlap and deterministic joins fail closed on missing/invalid outputs.",
+    "project_reconciliation": "Golden-test field mapping and fake GitHub GraphQL. Simulate deleted/renamed fields, changed option IDs, manual managed/unmanaged edits, missed Project webhook and partial mutation. Assert enforce/propose-import/observe behavior and no overwrite outside ownership.",
+    "cancellation_cleanup": "Cancel before dispatch, during model call, push and verification; crash controller mid-cancel. Assert eventual quiescence, fence bump, credential revocation, effect reconciliation and ownership-safe cleanup.",
+    "security": "Invalid webhook HMAC, replayed delivery ID, malicious issue/action output, token passthrough, path/egress escape and policy/config self-change must fail closed; GitHub requires raw payload HMAC validation (https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) and warns about untrusted workflow input (https://docs.github.com/en/actions/reference/security/secure-use).",
+    "acceptance": "End-to-end fixture: READY issue with two dependencies -> claim -> worker crash after PR creation -> same-key reconcile -> retry -> stale old-worker result rejected -> cancel another branch -> Project drift repaired -> exact artifacts handed to verification/review. Validate audit replay reproduces all decisions."
+  },
+  "operational_maintenance": {
+    "loops": "Run heartbeat expiry sweeper frequently relative to TTL; outbox/inbox lag monitor; dependency unblock evaluator on terminal events plus periodic scan; Project incremental webhook consumer plus scheduled authoritative poll; orphan worktree/branch/credential cleanup; dead-letter and unknown-effect queue with named on-call.",
+    "dashboards_alerts": "Dashboard admission decisions, queue age, utilization, retry/error classes, heartbeat lag, stale rejects, unknown effects, API/rate-limit responses, Project drift/reconcile age, cancellations-to-quiescence, artifacts/cost and outcome quality. Page on accepted stale write, unauthorized effect, fence regression, audit gap or kill-switch failure; freeze affected repo/provider/class.",
+    "recovery": "Rebuild projections from append-only events and remote observations; restore DB then reconcile GitHub rather than trusting labels/status. Rotate webhook/App keys, revoke all active capabilities, bump cancellation/fence epoch, pause dispatch, inspect effects, then resume lane by lane.",
+    "upgrades": "Version schemas, workflow code, policy, prompt/model/tool/image and repository mapping on each attempt. Use expand/migrate/contract DB changes, replay old histories, dual-read/write where needed and canary controller versions. Temporal histories must be rolled/sharded before documented limits (https://docs.temporal.io/workflow-execution/limits).",
+    "retention_cleanup": "Keep decision/event/effect/approval metadata per audit policy; large logs/patches in immutable artifact storage by digest with redaction/TTL. Never retain secrets/raw unnecessary model context. Cleanup uses attempt tags and two-phase mark/delete so human-owned branches/items are not removed.",
+    "runbooks": "Stale lease: fence/revoke/reconcile/requeue. Unknown effect: block retries, query remote, compensate or human decide. Project drift: snapshot, classify ownership, enforce/import proposal/alert. Retry storm: circuit-break and drain. Cancel failure: fence/revoke/force-stop/reconcile. Dead letter: preserve evidence and assign owner."
+  },
+  "maturity_and_uncertainty": {
+    "production_ready": "Transactional queues/row locks, renewable leases with fencing, inbox/outbox/idempotency, bounded retry, durable workflow history, GitHub Apps/webhooks/APIs, Actions checks and controller reconciliation are mature primitives when engineered and operated as distributed systems (https://www.postgresql.org/docs/current/sql-select.html; https://kubernetes.io/docs/concepts/architecture/leases/; https://docs.temporal.io/workflow-execution/event).",
+    "conditional": "GitHub Projects as a human-visible projection and repository-declared desired config are practical only with explicit field ownership, remote observation and drift reconciliation. Actions concurrency is only secondary dedupe due to arbitrary ordering and one-pending replacement (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).",
+    "experimental": "Dynamic multi-agent DAG planning, learned priority/routing, broad parallel editing and automatic workflow/prompt optimization. MAST's failure taxonomy (https://arxiv.org/abs/2503.13657) and absent longitudinal repository SLOs require selective, evaluated use.",
+    "unsupported": "LLM-owned admission/authorization/canonical state; assignment/status used as lease; blind retries; unfenced stale work; unattended policy/permission/evaluator self-modification; universal issue-to-production autonomy.",
+    "unknowns": "No independent evidence gives optimal lease TTL/heartbeat, priority weights, safe concurrency or multi-agent marginal value across repositories. GitHub's live documentation and schema can change after the as-of date; verify pinned API behavior in conformance tests."
+  },
+  "implementation_recommendation": {
+    "core_decision": "Build the MVP on GitHub App + PostgreSQL fenced-lease/outbox controller + disposable single worker + GitHub Project projection/reconciler. Keep merge human-gated. Do not introduce Temporal or multi-agent parallel writing until crash/retry/wait-volume data warrants it.",
+    "stage_0": "Observe-only: import Project schema/items/dependencies, validate desired manifest, calculate eligibility/priority/drift without claiming. Compare decisions with maintainers.",
+    "stage_1": "Claim-only: transactional admission, one repo, one worker, one active lease, heartbeat/fence, no automatic retry of effects, human review of all outputs. Mirror Project/assignee after commit and poll-reconcile.",
+    "stage_2": "Add typed failure taxonomy, same-key retry/reconciliation, cancellation/cleanup, quotas/aging/dependency DAG, dashboards/kill switch, chaos tests. Keep external consequential effects proposal-only.",
+    "stage_3": "Add disjoint read-only/specialist parallel nodes and deterministic joins only if A/B results improve accepted changes or reviewer time without escapes/cost regression. Shared writes remain serialized.",
+    "stage_4": "Adopt Temporal for long waits/high volume/multi-step recovery if database controller complexity and incident evidence justify it; one workflow per item and external artifact/effect ledger (https://docs.temporal.io/task-queue; https://docs.temporal.io/workflow-execution/limits).",
+    "promotion_rule": "Every broader retry/parallelism/permission class is a reviewed policy change with versioned offline/shadow evaluation, bounded canary, independent approval, automatic rollback and local denominator-based SLOs. Agents may propose but never self-approve."
+  },
+  "sources": [
+    {
+      "id": "G1",
+      "title": "Control the concurrency of workflows and jobs",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "supported_claims": [
+        "A concurrency group permits at most one running and one pending workflow/job; a newer pending run replaces the existing pending run; ordering is arbitrary; cancel-in-progress is optional; names are case-insensitive."
+      ]
+    },
+    {
+      "id": "G2",
+      "title": "REST API endpoints for issue assignees",
+      "publisher_author": "GitHub",
+      "source_type": "official REST API documentation (version 2022-11-28)",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/issues/assignees?apiVersion=2022-11-28",
+      "supported_claims": [
+        "Issue assignees can be added/removed through REST; fine-grained tokens need Issues write permission for mutation."
+      ]
+    },
+    {
+      "id": "G3",
+      "title": "REST API endpoints for issues — Update an issue",
+      "publisher_author": "GitHub",
+      "source_type": "official REST API documentation (version 2022-11-28)",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#update-an-issue",
+      "supported_claims": [
+        "Issue fields, including assignees, labels, milestone and state, are mutable remote state; update is not documented as an atomic lease/CAS primitive."
+      ]
+    },
+    {
+      "id": "G4",
+      "title": "GraphQL reference — updateProjectV2ItemFieldValue",
+      "publisher_author": "GitHub",
+      "source_type": "official GraphQL schema/reference",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue",
+      "supported_claims": [
+        "ProjectV2 item field values can be updated by mutation using project, item and field IDs; the mutation clears or sets one field value."
+      ]
+    },
+    {
+      "id": "G5",
+      "title": "gh project item-edit",
+      "publisher_author": "GitHub CLI",
+      "source_type": "official CLI documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://cli.github.com/manual/gh_project_item-edit",
+      "supported_claims": [
+        "CLI edits require item/project/field identifiers and edit a single field at a time; --clear removes a value."
+      ]
+    },
+    {
+      "id": "G6",
+      "title": "Using the built-in automations",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations",
+      "supported_claims": [
+        "Projects has configured remote workflows for item addition, status changes, auto-archive and code-change-triggered updates; these are actual Project settings/state, not files in the repository."
+      ]
+    },
+    {
+      "id": "G7",
+      "title": "Automating Projects using Actions",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation with workflow examples",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions",
+      "supported_claims": [
+        "Actions plus GraphQL/CLI can add items and mutate Project fields; examples require tokens and Project identifiers."
+      ]
+    },
+    {
+      "id": "G8",
+      "title": "Creating issue dependencies",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-issue-dependencies",
+      "supported_claims": [
+        "Issues can record blocked-by/blocking relationships; dependency data is a useful user-visible mirror but eligibility still needs deterministic validation."
+      ]
+    },
+    {
+      "id": "G9",
+      "title": "Webhook events and payloads — Projects v2 item",
+      "publisher_author": "GitHub",
+      "source_type": "official webhook schema/reference",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item",
+      "supported_claims": [
+        "Projects v2 item activity is exposed as webhook events/payloads for integration and reconciliation."
+      ]
+    },
+    {
+      "id": "G10",
+      "title": "Handling failed webhook deliveries",
+      "publisher_author": "GitHub",
+      "source_type": "official operations documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries",
+      "supported_claims": [
+        "GitHub does not automatically redeliver failed webhook deliveries; consumers should inspect and redeliver/recover, so polling reconciliation is required."
+      ]
+    },
+    {
+      "id": "G11",
+      "title": "Validating webhook deliveries",
+      "publisher_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+      "supported_claims": [
+        "Validate the X-Hub-Signature-256 HMAC against the raw payload and use constant-time comparison."
+      ]
+    },
+    {
+      "id": "G12",
+      "title": "Best practices for using the REST API",
+      "publisher_author": "GitHub",
+      "source_type": "official API operations documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api",
+      "supported_claims": [
+        "Use conditional requests, avoid concurrent requests, handle rate-limit errors, follow redirects and use authenticated requests; API clients need backoff/rate control."
+      ]
+    },
+    {
+      "id": "G13",
+      "title": "Canceling a workflow",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/how-tos/manage-workflow-runs/cancel-a-workflow-run",
+      "supported_claims": [
+        "Cancellation is an explicit control action; a controller must not equate request acceptance with rollback of external effects."
+      ]
+    },
+    {
+      "id": "G14",
+      "title": "Secure use reference",
+      "publisher_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "supported_claims": [
+        "Untrusted input, script injection, compromised actions and credential scope are workflow threats; pin and minimize authority."
+      ]
+    },
+    {
+      "id": "T1",
+      "title": "Task Queues",
+      "publisher_author": "Temporal Technologies",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/task-queue",
+      "supported_claims": [
+        "Workers poll task queues, enabling durable dispatch decoupled from a worker process."
+      ]
+    },
+    {
+      "id": "T2",
+      "title": "What is a Temporal Retry Policy?",
+      "publisher_author": "Temporal Technologies",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/encyclopedia/retry-policies",
+      "supported_claims": [
+        "Activity retries are declarative and automatic by default; maximum attempts, interval/backoff and non-retryable errors are configurable."
+      ]
+    },
+    {
+      "id": "T3",
+      "title": "Events and Event History",
+      "publisher_author": "Temporal Technologies",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/workflow-execution/event",
+      "supported_claims": [
+        "Workflow history is appended and replayed for recovery, providing durable orchestration state."
+      ]
+    },
+    {
+      "id": "T4",
+      "title": "Workflow Execution limits",
+      "publisher_author": "Temporal Technologies",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/workflow-execution/limits",
+      "supported_claims": [
+        "History hard limits are 51,200 events or 50 MB, with warnings at 10,240 events or 10 MB."
+      ]
+    },
+    {
+      "id": "T5",
+      "title": "Error handling — Python SDK",
+      "publisher_author": "Temporal Technologies",
+      "source_type": "official SDK documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/develop/python/best-practices/error-handling",
+      "supported_claims": [
+        "An Activity can complete an effect and fail before acknowledgment, so execution is at least once and side effects need idempotency/reconciliation."
+      ]
+    },
+    {
+      "id": "K1",
+      "title": "Leases",
+      "publisher_author": "Kubernetes Project",
+      "source_type": "official documentation",
+      "publication_update_date": "2025-06-27 shown on page",
+      "access_date": "2026-09-13",
+      "url": "https://kubernetes.io/docs/concepts/architecture/leases/",
+      "supported_claims": [
+        "Lease objects support leader election and node heartbeats through renewals; a lease represents time-bounded coordination rather than permanent ownership."
+      ]
+    },
+    {
+      "id": "K2",
+      "title": "Controllers",
+      "publisher_author": "Kubernetes Project",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation",
+      "access_date": "2026-09-13",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "supported_claims": [
+        "Controllers continuously move actual state toward desired state and must cope with ongoing change."
+      ]
+    },
+    {
+      "id": "P1",
+      "title": "SELECT",
+      "publisher_author": "PostgreSQL Global Development Group",
+      "source_type": "official database reference",
+      "publication_update_date": "PostgreSQL current documentation",
+      "access_date": "2026-09-13",
+      "url": "https://www.postgresql.org/docs/current/sql-select.html",
+      "supported_claims": [
+        "FOR UPDATE locks selected rows; SKIP LOCKED gives an inconsistent view but is appropriate for queue-like tables with multiple consumers."
+      ]
+    },
+    {
+      "id": "C1",
+      "title": "CloudEvents specification v1.0.2",
+      "publisher_author": "Cloud Native Computing Foundation",
+      "source_type": "versioned open standard/repository",
+      "publication_update_date": "2022-02-05 release lineage",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "supported_claims": [
+        "CloudEvents defines interoperable event identity, source, type, time, subject, data and extension attributes; it does not itself supply deduplication or workflow durability."
+      ]
+    },
+    {
+      "id": "O1",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_author": "OWASP GenAI Security Project",
+      "source_type": "independent security guidance",
+      "publication_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "supported_claims": [
+        "External issue/repository/tool text can steer an LLM; least privilege, segregation and human approval reduce impact but do not eliminate injection."
+      ]
+    },
+    {
+      "id": "O2",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_author": "OWASP GenAI Security Project",
+      "source_type": "independent security guidance",
+      "publication_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "supported_claims": [
+        "Excessive functionality, permissions and autonomy expand impact; minimize extensions, permissions and autonomous actions."
+      ]
+    },
+    {
+      "id": "I1",
+      "title": "How to do distributed locking",
+      "publisher_author": "Martin Kleppmann",
+      "source_type": "independent distributed-systems analysis",
+      "publication_update_date": "2016-02-08",
+      "access_date": "2026-09-13",
+      "url": "https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html",
+      "supported_claims": [
+        "A paused client can continue after lease expiry; fencing tokens checked by the resource are needed when stale writers can cause corruption."
+      ]
+    },
+    {
+      "id": "A1",
+      "title": "Why Do Multi-Agent LLM Systems Fail?",
+      "publisher_author": "Cemri et al.",
+      "source_type": "academic preprint with released taxonomy",
+      "publication_update_date": "2025-03-17 initial arXiv submission",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/2503.13657",
+      "supported_claims": [
+        "Study of 1,600+ traces from seven frameworks reports 14 failure modes across system design, inter-agent misalignment and task verification; taxonomy validation reports Cohen's kappa 0.88."
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "claims": "GitHub Actions calls the feature concurrency, but its arbitrary ordering and replacement of the single pending member (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency) conflict with requirements for fair priority scheduling and durable admission.",
+      "resolution": "Use it only as last-mile duplicate suppression. The DB/workflow controller owns priority, quotas and leases."
+    },
+    {
+      "claims": "An issue assignee/Project Status visibly looks like ownership, but GitHub's APIs describe mutable fields (https://docs.github.com/en/rest/issues/assignees?apiVersion=2022-11-28; https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue) rather than renewable/fenced leases.",
+      "resolution": "Canonical claim is a conditional DB record; GitHub is an eventually consistent projection with drift evidence."
+    },
+    {
+      "claims": "Temporal markets durable retries/replay (https://docs.temporal.io/encyclopedia/retry-policies; https://docs.temporal.io/workflow-execution/event), while its SDK documents at-least-once Activity execution (https://docs.temporal.io/develop/python/best-practices/error-handling).",
+      "resolution": "There is no real conflict at the boundary: workflow decision history may be durable while an external effect outcome is duplicated/unknown. Use effect keys, receipts and reconciliation."
+    },
+    {
+      "claims": "Repository 'status as code' suggests Git is truth, while GitHub built-in Project automations and item values are remote mutable state (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations; https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue).",
+      "resolution": "Git is truth for desired managed configuration and policy; API observations are truth for actual remote state. Reconciliation records drift and applies field-specific ownership modes."
+    },
+    {
+      "claims": "Parallel agents may increase search/diversity, while MAST finds recurrent coordination/verification failures (https://arxiv.org/abs/2503.13657).",
+      "resolution": "Single-agent first; parallelize only disjoint or independent-verification nodes with hard budgets, deterministic joins and local A/B evidence."
+    },
+    {
+      "claims": "Lease renewal indicates current ownership (https://kubernetes.io/docs/concepts/architecture/leases/), but a paused holder can resume after expiry (https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html).",
+      "resolution": "Lease plus monotonically increasing fencing token checked at every state/effect gateway; time alone is insufficient."
+    }
+  ],
+  "confidence": {
+    "overall": "High for platform/API semantics and mature distributed-systems controls; medium-high for the proposed MVP composition; medium for Project drift policy details; low for universal tuning and multi-agent productivity gains.",
+    "high": [
+      "GitHub Actions concurrency behavior, issue/Project mutation surfaces, webhook verification/no automatic failed-delivery redelivery, Temporal delivery/history semantics, PostgreSQL queue locking and Kubernetes Lease/controller concepts—direct official sources."
+    ],
+    "medium": [
+      "Database-canonical fenced claim with Project projection/reconciler is a strongly supported engineering synthesis, but no official GitHub reference implementation provides this exact complete operating system."
+    ],
+    "low": [
+      "Suggested operational alarm windows and stage economics are starting hypotheses; calibrate locally. No neutral longitudinal benchmark establishes optimal orchestration topology or safe autonomous concurrency."
+    ],
+    "claim_handling": "Primary capability claims cite direct official pages. Independent security/distributed-systems/paper evidence challenges feature-to-safety inference. Unknowns are preserved rather than replaced with vendor statements."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "metrics_and_limits",
+    "maturity_and_uncertainty",
+    "implementation_recommendation"
+  ]
+}

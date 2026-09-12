@@ -1,0 +1,141 @@
+{
+  "reviewer": "round-13 independent formal-model closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-12 combined correction and schema-3 candidate-only regeneration",
+    "specialty": "All 785 normative manifest edge rows, with emphasis on improvement rollback-safety block release, EVIDENCE_STALE X/N reconciliation, exposed CANARY_PASSED cancellation, the derived control-degradation set, BUILD/MAINTENANCE first cancellation at ROLLED_BACK, and endpoints/reachability/terminals.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-12-resolution.md",
+      "review/round-12-closure/formal-model.json",
+      "review/round-12-closure/cross-consistency.json",
+      "review/round-12-closure/improvement-adversary.json",
+      "review/round-12-closure/recovery-remediation.json",
+      "review/round-12-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "reviewed-edge regeneration",
+      "production validation"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_inventory_and_literal_graph_shape",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest parses to 785 unique edge IDs: 96 canonical rows and 689 private/product rows.",
+        "All 785 rows were parsed through the final ICL03 row; no duplicate ID was found, and data rows match the declared width of their table blocks.",
+        "The 96-row canonical graph reaches every declared canonical symbol from INBOX and has only DONE, FAILED, and CANCELLED as sinks.",
+        "Literal BUILD traversal from CREATED reaches every BUILD source/target symbol and has only SUCCEEDED, FAILED, and CANCELLED as sinks. Literal MAINTENANCE traversal from SIGNAL_RECEIVED has the same completeness and sink result.",
+        "The rollout relation, including synchronized product/control/cancellation targets, retains RETIRED as its sole declared terminal."
+      ],
+      "basis": "Independent Markdown-table parsing, ID uniqueness checks, and source/target traversal reproduced the round-12 inventory and endpoint contracts. Guard-product execution remains an accepted future gate, but the high finding below is visible directly in the closed rows."
+    },
+    {
+      "area": "improvement_rollback_safety_block_release",
+      "result": "pass",
+      "exact_text": [
+        "IRB06 invokes RO00-I and retains the exact rollback-safety exposure/resource blocks through remediation closure and independent reverification.",
+        "RO09 closes the obligation but releases no rollback-safety block; IRB09 returns REMEDIATION_WAIT to VERIFYING only with closure, genuine restoration, and fresh independent authority.",
+        "IRB07-N/R/Q require the current closure/restoration/IRB03 verification receipts and the exact purpose/generation/key-set digest, then atomically remove only the exact blocks and emit the bound BlockReleaseReceipt with ROLLED_BACK.",
+        "IRB08, IR13C-X, IX03, and terminal reducer guards require that release receipt when a rollback-safety obligation exists."
+      ],
+      "basis": "Manifest \u00a7\u00a713.1 and 15.3.1, reducer terminal rules, IX03, IR13C-X, and PLAN \u00a78.4 agree on creation, retention, release ownership, and cleanup/terminal ordering."
+    },
+    {
+      "area": "evidence_stale_reconciliation_partition",
+      "result": "fail",
+      "exact_text": [
+        "IC24-A can leave candidate EVIDENCE_STALE with rollout WIDENING_RECONCILING or PROMOTION_RECONCILING while the exact original Effect is unsettled.",
+        "IC24-RN defines the settled protected-N continuation, moves the synchronized rollout to FAILED, creates the sole CleanupManifest, and creates no rollback.",
+        "IC24-RWX/RPX define settled protected-X rollback creation but do not define any synchronized rollout transition out of WIDENING_RECONCILING or PROMOTION_RECONCILING.",
+        "IRB01 expressly rejects both reconciliation rollout states."
+      ],
+      "basis": "Finding R13-FM-001 below."
+    },
+    {
+      "area": "exposed_canary_passed_cancellation",
+      "result": "pass",
+      "exact_text": [
+        "ExposedCancellationSourcesV1 is required to equal the generated exposed source union and explicitly includes CANARY_PASSED.",
+        "IX06-XR/XQ map exposed CANARY_PASSED to CANARY_ABORTING, stop and fence exposure, take rollback IDLE to REQUESTED, and bind immutable WIDENING_ABORT origin.",
+        "IX01 races before and after IR08 and IR14 are required, with expected-version replay/conflict rejection and IX03 remaining the sole cancellation cleanup owner."
+      ],
+      "basis": "Manifest \u00a7\u00a715.5 and 15.8 close the exposed CANARY_PASSED cancellation gap without admitting ordinary progress during cancellation."
+    },
+    {
+      "area": "derived_control_degradation_interrupt_set",
+      "result": "pass",
+      "exact_text": [
+        "ReachableActiveExposureInterruptCoordinatesV1 is derived from complete reachable tuples rather than a handwritten rollout list.",
+        "The exact union of specialized IH01-C/W/WV/A/P/PV/D/O and residual IH01-RX/RN must equal the derived set, with pairwise-disjoint classification.",
+        "Residual X atomically records degradation, fences/stops exposure, selects SafeDegradationTargetV1, and creates or reuses one rollback; residual N requires a protected all-target no-exposure proof and creates none. Generic IH01 is forbidden for every tuple in the derived set."
+      ],
+      "basis": "Manifest \u00a7\u00a715.6-15.8 state set equality, protected X/N classification, exact safe targets, adjacent-edge races, and rejection of ordinary progress after health/continuity becomes stale."
+    },
+    {
+      "area": "build_maintenance_first_cancel_at_rolled_back",
+      "result": "pass",
+      "exact_text": [
+        "B71 and M59 accept the first authenticated cancellation arriving after B38/M29 when disposition is absent, under one expected-version/absent-disposition CAS.",
+        "B71-P and M59-P separately continue cancellation already persisted during rollback; B71-R and M59-R are exact receipt replay only.",
+        "B39/M30 ordinary cleanup races the first arrival at the same version/disposition boundary, so exactly one owner wins."
+      ],
+      "basis": "BUILD and MAINTENANCE closed rows now distinguish first arrival, persisted continuation, replay, and ordinary-cleanup races at ROLLED_BACK."
+    },
+    {
+      "area": "schema_3_identity_scope_and_status",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-12.",
+        "Its generated PLAN SHA-256 is 19fea5cc0f6df092eec3fa4f0b0488465b4e3460c8c54fe94c85006a795bea1c and manifest SHA-256 is 8fb9782a8e20310ce8975486a8e0742a02e76148fba85624e4197ff1073f0a1d; independent byte hashing matches both.",
+        "The artifact records 37 corpus result files, 25 source observations, 20 claims, 36 edges (23 candidate_support, 5 candidate_refute, 8 context_only), zero supports, zero refutes, 25 PLAN sections, and all 28 dynamically derived normative headings.",
+        "README, traceability, and the round-12 resolution consistently describe round-11 as historical and round-12 regeneration as current, while leaving implementation, full-model execution, fresh retrieval, semantic review, and production validation pending."
+      ],
+      "basis": "Independent JSON parsing, byte hashing, count checks, heading derivation, and status-text comparison reproduced the schema-3 structural/currentness contract without treating candidate associations as semantic evidence."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R13-FM-001",
+      "severity": "high",
+      "title": "EVIDENCE_STALE protected-X reconciliation creates rollback but leaves rollout in a state from which rollback dispatch is forbidden",
+      "requirement": "The round-12 correction requires exact settled X/N continuations after IC24-A, one rollback for X, one cleanup owner for N, preserved Effect identity, and a legal path to rollback/cleanup settlement. Closed-row semantics forbid inventing an omitted synchronized rollout delta.",
+      "evidence": [
+        "IC24-A may preserve candidate EVIDENCE_STALE while moving an unsettled widening or promotion Effect to WIDENING_RECONCILING or PROMOTION_RECONCILING.",
+        "IC24-RWX and IC24-RPX create or reuse rollback IDLE->REQUESTED, but neither row states a synchronized rollout target. By contrast, the analogous IC32-RWX/RPX rows explicitly move WIDENING_RECONCILING->CANARY_ABORTING and PROMOTION_RECONCILING->FAILED.",
+        "Manifest \u00a71 says a closed row does not permit an unlisted delta. The prose following IC24-RWX/RPX says only that the X rows create/reuse rollback; it supplies no rollout transition.",
+        "IRB01 permits REQUESTED->ROLLING_BACK only when rollout is not WIDENING_RECONCILING or PROMOTION_RECONCILING. Thus the rollback created by either IC24 protected-X row cannot dispatch.",
+        "IC32-RWX/RPX cannot repair the path without a later revocation event, and the new IC24 continuation contract explicitly says unrelated revocation is not required."
+      ],
+      "impact": "A reachable digest-change-before-Effect-settlement race can settle as protected exposure, request the required rollback, and then strand both rollout and rollback indefinitely. Cleanup and terminal settlement remain unreachable unless an unrelated event occurs. This is an unsafe and undefined recovery path in the formal plan.",
+      "required_correction": "Make IC24-RWX atomically synchronize WIDENING_RECONCILING->CANARY_ABORTING and bind WIDENING_ABORT origin, and make IC24-RPX atomically synchronize PROMOTION_RECONCILING->FAILED with its non-widening origin, matching the legal dispatch preconditions and the analogous IC32 rows. Update exact tuple/race witnesses and regenerate current schema-3 digests after normative-byte changes."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1
+  },
+  "residual_uncertainty": [
+    "The accepted future exhaustive reachable-product execution may reveal additional guard-level gaps; it was not treated as completed or as a present closure prerequisite.",
+    "Fresh immutable retrieval and same-run human semantic review remain future evidence gates and do not affect this formal-path finding."
+  ],
+  "closure_criteria_pass": false
+}

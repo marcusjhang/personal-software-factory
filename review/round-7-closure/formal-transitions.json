@@ -1,0 +1,180 @@
+{
+  "reviewer": "round-7 independent formal-transitions closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-6 combined repairs",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-6-resolution.md",
+      "review/round-6-closure/adversarial-consistency.json",
+      "review/round-6-closure/architecture-requirements.json",
+      "review/round-6-closure/evidence-semantics.json",
+      "review/round-6-closure/formal-model.json",
+      "review/round-6-closure/improvement-recovery.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "All 626 manifest ID rows and their canonical sequences, with emphasis on reachability, endpoints and guards, cancellation, Effect partitions, cleanup/remediation, Attempt reclaim A11, and DEEP-RESEARCH publication paths.",
+    "severity_rule": "Critical/high only for an unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. Implementation, a full reachable-product model proof, and completion of fresh evidence gates were not required."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_parse_and_canonical_projection",
+      "result": "pass",
+      "basis": "Parsed exactly 626 ID rows: canonical 88; IDEATION 37; BUILD 74; MAINTENANCE 61; DEEP-RESEARCH 71; FactoryInstance 29; NodeRun 32; Attempt 23; Wait 18; Effect 39; CleanupItem 12; UnconfirmedQuiescence 10; candidate 36; rollout 59; rollback-coordinate 10; improvement release-attempt 17; whole-work cancellation 5; control-health 5. Every explicit canonical adjacent pair in all noncanonical ID rows exists among the 88 canonical edges. All explicit private projection endpoints agree with PLAN \u00a714.0, including stutters."
+    },
+    {
+      "area": "built_in_reachability_cancel_and_sinks",
+      "result": "fail",
+      "basis": "From the declared entry states, all PLAN \u00a714.0 private symbols are reachable: IDEATION 16/16, BUILD 31/31, MAINTENANCE 28/28, and DEEP-RESEARCH 28/28. Their only graph sinks are private SUCCEEDED, FAILED, and CANCELLED. Every reachable nonterminal built-in private state has a cancel, cancel-adopt, or safety-defer row. Wait cancellation covers OPEN, ANSWERED, STALE, EXPIRED, WITHDRAWN, and ESCALATED. Runtime tables otherwise expose only declared terminal sinks. However, declared aggregate terminal symbol FAILED is reused as a mutable pre-cleanup state in FactoryInstance, NodeRun, and Attempt; see R7-FT-003."
+    },
+    {
+      "area": "attempt_reclaim_A11",
+      "result": "pass",
+      "basis": "A01 rejects every other unfinished Attempt across fences. A10 requires verified termination and settled bound Effects but remains unfinished at STOPPED. A11 separately requires previously committed cleanup receipts, no live authority/resource ownership, and settled Effects before CANCELLED. The prose requires A10, predecessor cleanup receipts, and A11 to commit before a later A01 transaction can create any successor Attempt/Lease/fence/epoch/context/outbox."
+    },
+    {
+      "area": "effect_partition_cleanup_and_quiescence",
+      "result": "fail",
+      "basis": "All 15 nonterminal Effect states have explicit outcome or bounded failure/disposition exits through E01-E39; UNKNOWN preserves ORIGINAL versus COMPENSATION identity and never blindly retries. CleanupItem entry, retry/escalation, retained-risk disposition, and terminal CLEANED are separate. C11 preserves terminal parent/item history and atomically creates one deterministic obligation/link/MAINTENANCE child, but the new obligation's own lifecycle is not closed; see R7-FT-002. PLAN \u00a715 also directly says retained-risk resurface returns the parent to CLEANING, contrary to C11 and terminal immutability; see R7-FT-005."
+    },
+    {
+      "area": "research_publication_repair",
+      "result": "pass",
+      "basis": "The three exact paths now satisfy the canonical guards. D19P3 and D19P6 bind both a verified publication receipt/remote identity for CW14 and an independent protected purpose-bound NoDeploymentReceipt for CW16. D19P5 uses CW-B44 to BLOCKED and D19P7 later uses CW-X2 to CLEANING, without misusing CW12. D19/D19C1 remains the no-publication path, and cleanup is deferred to a later transaction."
+    },
+    {
+      "area": "improvement_rollback_cancel_and_child_identity",
+      "result": "fail",
+      "basis": "IRB07-N/R/Q now agree with reducer projections, IRB08 is limited to cancellation NONE, IX03 owns cancellation cleanup after IDLE or ROLLED_BACK, and IR04/IR27-IR35 bind the deterministic absent-or-same child/link pair. However, an exhausted or forbidden rollback at rollback_state=FAILED cannot reach IX03 or CANCELLED; see R7-FT-001. Final cleanup also changes the reducer projection without a synchronized product row; see R7-FT-004."
+    },
+    {
+      "area": "evidence_boundary",
+      "result": "pass",
+      "basis": "Schema-3 candidate graph digests reproduce exactly for current PLAN (e0a3194743e4434fa7f40212ef81c29985b8f63db7e9b24ae62b199c0ed4ed70) and manifest (9c54a76d8090485d1a3e84283b4fbf9bda5cf481f4ee887a5ca7d2b46090476a). It declares 27/27 current numbered manifest headings, 37 corpus files, 25 source observations, 20 claims, and 36 candidate/context edges, with 0 supports and 0 refutes. The plan and evidence package continue to require fresh immutable retrieval and human semantic review; no material evidence completion was assumed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R7-FT-001",
+      "severity": "high",
+      "title": "An exhausted rollback failure strands whole-work cancellation despite the total cancellation contract",
+      "requirement": "PLAN \u00a78.4 says whole-work cancellation is accepted from every reachable nonterminal improvement tuple and, after safety rollback/effect settlement and cleanup, reaches CANCELLED. PLAN \u00a721 requires IX01/IX02 at every active rollback state through settled rollback, IX03 cleanup, and CANCELLED. Manifest \u00a715.8 repeats that exact witness obligation.",
+      "evidence": [
+        "docs/state-transition-manifests.md IRB04 reaches rollback_state=FAILED on failed, unknown, or timed-out verification.",
+        "IRB06 is the applicable row when retry is forbidden, stale, or exhausted, and only stutters FAILED. Its prose says human safety escalation remains visible and cannot claim ROLLED_BACK.",
+        "IX01 and IX02 can make work_cancel_state REQUESTED then QUIESCING while reducer priority 2 preserves canonical ROLLBACK_FAILED.",
+        "IX03 expressly forbids rollback_state=FAILED and permits cleanup only at IDLE or ROLLED_BACK. IRB05 is unavailable in the IRB06 partition, and no other row disposes, repairs, or settles FAILED. Therefore this reachable cancelled tuple has only the IRB06 stutter and cannot reach cleanup or CANCELLED.",
+        "The \u00a715.8 witness claims IX01/IX02 at FAILED proceeds via IRB05 'as appropriate', but IRB05 requires approved retry, fresh authority, and budget and does not cover the stated forbidden/stale/exhausted branch."
+      ],
+      "reproduction": [
+        "Reach VERIFYING, apply IRB04 to obtain rollback_state=FAILED, then make retry forbidden or exhaust its budget so IRB06 is selected.",
+        "Apply IX01 and IX02. The tuple remains canonically ROLLBACK_FAILED under reducer priority 2 while cancellation is QUIESCING.",
+        "IRB05 is guard-false, IRB06 only stutters, and IX03 is guard-false because rollback_state=FAILED. No sequence reaches ROLLED_BACK, CLEANING, or CANCELLED."
+      ],
+      "impact": "The normative model contradicts its every-tuple cancellation and validation contracts and leaves an operationally important rollback-failure recovery path undefined. An implementation must remain stuck forever or invent an unlisted protected disposition/transition.",
+      "recommendation": "Add an exact human-owned terminal rollback-failure disposition with authority, retained-exposure/resource rules, and a canonical path that makes cancellation cleanup legal, or narrow the total cancellation promise and define the durable blocked terminal-equivalent behavior. Partition FAILED by retryable versus final and add exact witnesses for both branches through their permitted end states.",
+      "verification": "Enumerate rollback FAILED with retry approved, denied, stale, and exhausted; interleave IX01/IX02; require exactly one enabled owner, reducer equality, legal adjacency, and either a defined protected fail-closed end state or later IX03, cleanup receipts, and CANCELLED.",
+      "confidence": "high"
+    },
+    {
+      "id": "R7-FT-002",
+      "severity": "high",
+      "title": "RemediationObligation controls resource reuse but has no closed transition contract",
+      "requirement": "The manifest's universal closed-edge rule and PLAN's retained-risk resurface requirement need a deterministic, independently visible remediation path whose status, revocation, authorization, closure, and resource-unblocking behavior can be implemented without inferred transitions.",
+      "evidence": [
+        "C11 defines only a CleanupItem ESCALATED_DISPOSITION self-edge. It atomically creates or confirms a RemediationObligation, link, and MAINTENANCE child, while deliberately leaving the parent Work and CleanupItem terminal.",
+        "The prose declares RemediationObligation statuses OPEN, IN_PROGRESS, VERIFYING, CLOSED, and REVOKED, and makes CLOSED the admission-unblock condition, but no one of the 626 ID rows has RemediationObligation as source/target.",
+        "Neither C11 nor the prose states the obligation's exact initial status or exhaustive legal transitions/events. In particular, REVOKED is said to remain blocking until newly authorized remediation reaches CLOSED, but no REVOKED recovery edge, guards, or atomic coupling to child/receipt events is defined.",
+        "Section 17's generated proof starts from declared initials and closed rows. It therefore cannot check reachability, sinks, cancellation/revocation, or illegal pairs for this admission-controlling aggregate."
+      ],
+      "reproduction": [
+        "Take C09, then C11 on a resurface/revocation/review trigger. The child is exactly at INBOX, but the obligation initial state is not an exact row result.",
+        "Assume the obligation becomes REVOKED before remediation completes. Resource reuse must remain blocked, but no closed row says who can move REVOKED, to which state, or on what receipt; alternatively allowing arbitrary prose-inferred movement violates the closed-edge rule."
+      ],
+      "impact": "Different implementations can invent incompatible or unsafe state changes for the record that gates reuse of retained resources. They can either unblock without a uniquely legal closure path or leave resources permanently blocked. This is a material undefined implementation path, not a request for implementation proof.",
+      "recommendation": "Add a normative RemediationObligation table with an exact initial state and exhaustive owner-authorized OPEN/IN_PROGRESS/VERIFYING/REVOKED/CLOSED transitions, stale/deny/expiry/revocation/retry rules, child and closure-receipt bindings, terminal rules, and resource-unblock semantics. Include it in row-count, reachability, no-sink, illegal-edge, and replay tests.",
+      "verification": "Parse the new rows from a declared initial state; prove every nonterminal has bounded disposition/recovery, REVOKED cannot unblock, CLOSED requires the named child/effect/resource/closure receipts, exact replay is idempotent, and only CLOSED removes every bound resource-key block.",
+      "confidence": "high"
+    },
+    {
+      "id": "R7-FT-003",
+      "severity": "high",
+      "title": "FAILED is declared terminal but reused as a mutable pre-cleanup state in three runtime aggregates",
+      "requirement": "Closed aggregate vocabularies need unambiguous terminal identity and terminal immutability. A state declared terminal cannot also require later ordinary transitions before the same symbol becomes terminal.",
+      "evidence": [
+        "Manifest \u00a78 declares FactoryInstance terminals SUCCEEDED, FAILED, CANCELLED. F06 and F15 enter FAILED with terminal column 'not yet'; F17 exits FAILED to CLEANING; F19 later re-enters the identical FAILED symbol with terminal column 'failed'.",
+        "Manifest \u00a79 declares NodeRun FAILED terminal. N11 enters FAILED with 'not yet', N32 exits it to CLEANUP_PENDING, and N15 later re-enters identical FAILED as terminal.",
+        "Manifest \u00a710 declares Attempt FAILED terminal. A04 and A06 enter FAILED and mark it 'failed', yet A16 legally exits FAILED to EXHAUSTED and A17 exits it to CANCELLED.",
+        "The state value alone therefore cannot determine terminal immutability, admission/retry eligibility, or whether cancel/cleanup transitions are legal."
+      ],
+      "reproduction": [
+        "Apply F06. The aggregate value is a declared terminal FAILED, but its row says 'not yet' and F17 must mutate it. The same bytes/state symbol after F19 are supposedly terminal.",
+        "Apply A04 or A06. The row calls FAILED terminal, then apply A16 or A17, which mutates that declared terminal state."
+      ],
+      "impact": "A compiler, persistence constraint, or concurrent controller cannot enforce terminal immutability from the normative state. Cleanup, retry, cancellation, and duplicate-event races can disagree on whether mutation is forbidden.",
+      "recommendation": "Introduce distinct nonterminal failure states such as FAILURE_PENDING_CLEANUP/RETRY_DISPOSITION, and reserve FAILED for the final immutable state, or remove FAILED from each terminal set until a distinct final predicate/state is encoded. Update projections and reachability tests accordingly.",
+      "verification": "For every aggregate symbol declared terminal, assert zero outgoing rows and immutable duplicate-event behavior. For every pre-cleanup failure, assert a distinct reachable nonterminal symbol with exactly defined cleanup/retry/cancel exits.",
+      "confidence": "high"
+    },
+    {
+      "id": "R7-FT-004",
+      "severity": "high",
+      "title": "The final improvement cleanup receipt has no legal synchronized row for CLEANING to DONE or FAILED",
+      "requirement": "Manifest \u00a7\u00a715.1 and 15.7 require every improvement component event to apply through a listed coordinate row whose declared projection equals the reducer result.",
+      "evidence": [
+        "CleanupItem C02 is declared canonical S. When it cleans the last required item, the improvement cleanup_set_state changes to CLEANED in the same tuple transaction.",
+        "Reducer priority 9 or 10 then changes the parent canonical result from CLEANING to DONE or FAILED when the remaining terminal conjunction holds.",
+        "No improvement synchronized cleanup-completion row declares CLEANING>DONE or CLEANING>FAILED. The prose says a later cleanup receipt 'permits' the terminal priority, but universal rule \u00a71 forbids prose or an inferred pair from adding an edge.",
+        "IX04 covers cancellation only and cannot own ordinary improvement success/failure cleanup."
+      ],
+      "reproduction": [
+        "Reach an otherwise-successful improvement tuple with canonical CLEANING and exactly one CleanupItem RUNNING. Apply C02 to make the final item CLEANED.",
+        "C02 declares S, but the reducer now returns DONE. Row/projection equality rejects the transaction. The analogous failed candidate/rollout tuple returns FAILED and rejects for the same reason."
+      ],
+      "impact": "Ordinary improvement success and failure cannot legally terminalize after their last cleanup receipt. Implementations must violate C02, skip tuple reduction, or invent an unlisted synchronized edge.",
+      "recommendation": "Add explicit synchronized improvement cleanup-set rows for final success and final failure (and eligible escalated failure if applicable), each consuming previously committed item receipts and declaring the exact CLEANING>DONE or CLEANING>FAILED projection. Keep cleanup entry and terminalization separate.",
+      "verification": "Replay final C02/C12 and eligible-disposition folds for successful and failed improvement tuples; require one row owner, exact reducer equality, listed canonical adjacency, and immutable terminal output.",
+      "confidence": "high"
+    },
+    {
+      "id": "R7-FT-005",
+      "severity": "high",
+      "title": "PLAN still says retained-risk resurface reopens the parent, contradicting C11 and round-6 terminal immutability",
+      "requirement": "Round-6 repair R6-AC-002 and the normative manifest require terminal Work and terminal CleanupItems to remain immutable; later review, revocation, or resurface must create/track an independent RemediationObligation and MAINTENANCE child without reopening the parent.",
+      "evidence": [
+        "PLAN \u00a715 says an eligible escalated disposition 'resurfaces the parent to CLEANING'.",
+        "PLAN \u00a713 says terminal Work remains historical and C11 creates/confirms an independent obligation and child without returning parent state to CLEANING.",
+        "Manifest \u00a71 says terminal Work and terminal cleanup are immutable. C11 is an ESCALATED_DISPOSITION self-edge and explicitly says the historical item remains terminal and no parent/item retry occurs.",
+        "review/round-6-resolution.md claims 'No parent reopens.'"
+      ],
+      "reproduction": [
+        "Finish a parent as FAILED or CANCELLED using an eligible ESCALATED_DISPOSITION, then fire a review-due/revocation/resurface trigger.",
+        "Following PLAN \u00a715 mutates the parent to CLEANING. Following C11 stutters the terminal item, leaves the parent terminal, and creates the obligation/child. Both contracts cannot be implemented."
+      ],
+      "impact": "The current plan gives opposite lifecycle and audit-history instructions on the retained-risk recovery path. Reopening can invalidate terminal immutability, while not reopening contradicts the reader-facing implementation contract.",
+      "recommendation": "Replace PLAN \u00a715's 'resurfaces the parent to CLEANING' with the exact C11 behavior: surface and track the independent obligation/child, leave parent Work and CleanupItem terminal, and block bound resource reuse until verified obligation closure.",
+      "verification": "A cross-document assertion must find no parent-reopen wording; replay C11 and prove unchanged parent/item state plus deterministic obligation/link/child creation and resource blocking.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 5,
+    "total": 5
+  },
+  "residual_uncertainty": [
+    "This was a plan-only static audit. It does not claim implementation, full product-state model checking, operational safety, fresh external retrieval, or human semantic evidence validation.",
+    "The 626-row parse proves structural adjacency/endpoints and graph reachability where declared; it does not enumerate the full Cartesian improvement tuple space."
+  ],
+  "closure_criteria_pass": false
+}

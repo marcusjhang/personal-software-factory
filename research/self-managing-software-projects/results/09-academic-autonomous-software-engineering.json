@@ -1,0 +1,785 @@
+{
+  "scope": {
+    "definition": "Academic evidence on autonomous software engineering: systems that receive a bug report, issue, or repository task; inspect and edit a repository; execute tools/tests; and emit a patch. Also covers automated program repair foundations, repository-level benchmarks, agent-computer interfaces, test generation, and evidence about validity and failure. It does not treat code completion alone as autonomous engineering.",
+    "systems_and_stages": [
+      "Issue-to-patch repository agents (SWE-agent, OpenHands, AutoCodeRover, RepairAgent)",
+      "Structured non-agent baselines (Agentless)",
+      "Evaluation and data infrastructure (SWE-bench family, SWE-Lancer, SWE-rebench, SWE-bench-Live, SWT-Bench, Defects4J)",
+      "Stages: intake, reproduction, localization, patching, validation, review; deployment and product discovery remain outside most academic benchmarks."
+    ],
+    "time_range": "Emphasis 2019-2026; Defects4J is included as a pre-2019 foundation for reproducible real-bug evaluation."
+  },
+  "current_state": [
+    {
+      "status": "verified",
+      "claim": "Repository agents can autonomously navigate, edit, and test nontrivial repositories in controlled Docker-like environments. SWE-agent showed that an agent-computer interface materially changes outcomes; its 2024 paper reported 12.5% pass@1 on original SWE-bench and 87.7% on HumanEvalFix."
+    },
+    {
+      "status": "verified",
+      "claim": "Structured workflows can rival or beat elaborate interactive agents. Agentless reported 32.0% (96/300) on SWE-bench Lite at $0.70 per issue using localization, repair, and validation; AutoCodeRover reported 19% at $0.43 average using AST search and optional spectrum-based localization."
+    },
+    {
+      "status": "verified",
+      "claim": "The benchmark frontier broadened from 2,294 Python issues in 12 repositories (SWE-bench) to economic tasks (SWE-Lancer), fresh/live tasks (SWE-rebench and SWE-bench-Live), testing (SWT-Bench), and visual/multilingual variants. These are stronger evidence of task competence, not evidence of safe unattended product ownership."
+    },
+    {
+      "status": "independent/critical",
+      "claim": "Fresh and audited evaluations show large validity hazards. SWE-rebench reports that some SWE-bench Verified performance may be inflated by contamination. SWE-bench-Live reports a substantial gap versus static SWE-bench. September 2026 studies report leaderboard differences can be statistically unresolved and agents can exploit git/upstream/memorized solutions."
+    },
+    {
+      "status": "inference",
+      "claim": "As of the research date, narrow issue-to-candidate-patch automation is conditionally useful. End-to-end autonomous roadmap selection, requirements negotiation, secure merge, deployment, and long-term maintenance are not demonstrated by these benchmarks."
+    }
+  ],
+  "representative_systems": [
+    {
+      "name": "SWE-agent",
+      "status": "NeurIPS-era research system; open source",
+      "mechanism": "LM loop over a purpose-built shell/editor ACI; repository navigation, edits, test execution.",
+      "evidence": "12.5% SWE-bench pass@1 in the 2024 paper."
+    },
+    {
+      "name": "OpenHands (formerly OpenDevin)",
+      "status": "Open MIT platform spanning academia and industry; paper updated 2025",
+      "mechanism": "Code, terminal, web, sandbox, multi-agent coordination, and benchmark adapters; useful as experimental substrate, not a proof of autonomy."
+    },
+    {
+      "name": "Agentless",
+      "status": "Open research baseline",
+      "mechanism": "Fixed three-phase localization → repair → patch validation; limits free-form tool choice.",
+      "evidence": "32.0% SWE-bench Lite; $0.70 average reported by authors."
+    },
+    {
+      "name": "AutoCodeRover",
+      "status": "ISSTA-era research prototype/open repository",
+      "mechanism": "AST-aware iterative search, classes/methods, optional spectrum-based fault localization, patch generation.",
+      "evidence": "19% SWE-bench Lite; $0.43 average reported by authors."
+    },
+    {
+      "name": "RepairAgent",
+      "status": "Research prototype for Java APR",
+      "mechanism": "Finite-state-machine-guided tool calls that interleave bug information, repair ingredients, and validation.",
+      "evidence": "164 Defects4J bugs repaired, including 39 not fixed by prior techniques; 270k tokens and $0.14 average per bug under then-current GPT-3.5 pricing, per authors."
+    },
+    {
+      "name": "Benchmarks/data",
+      "status": "Active research infrastructure",
+      "mechanism": "SWE-bench/Verified/Lite/Multilingual/Multimodal; SWE-Lancer; SWT-Bench; SWE-rebench; SWE-bench-Live; SWE-smith; Defects4J."
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "SWE-bench formalized issue-to-patch evaluation with 2,294 issues from 12 Python repositories; original best model Claude 2 solved 1.96%.",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "evidence_class": "paper, benchmark authors"
+    },
+    {
+      "claim": "The official benchmark site describes Full (2,294), Lite (300), Verified (500 human-filtered), Multilingual (300 across 42 repositories and 9 languages), and Multimodal views; it also exposes resolved/cost/step analyses.",
+      "url": "https://www.swebench.com/",
+      "evidence_class": "official benchmark documentation"
+    },
+    {
+      "claim": "SWE-agent reports 12.5% pass@1 on SWE-bench and attributes gains to a purpose-built ACI.",
+      "url": "https://arxiv.org/abs/2405.15793",
+      "evidence_class": "paper, system authors"
+    },
+    {
+      "claim": "Agentless reports 32.0% on SWE-bench Lite at $0.70 and identifies exact-patch and insufficient/misleading-description defects in Lite.",
+      "url": "https://arxiv.org/abs/2407.01489",
+      "evidence_class": "paper, system authors"
+    },
+    {
+      "claim": "SWT-Bench evaluates test generation and reports that generated tests doubled SWE-agent patch precision.",
+      "url": "https://arxiv.org/abs/2406.12952",
+      "evidence_class": "paper, benchmark authors"
+    },
+    {
+      "claim": "SWE-bench-Live starts with 1,319 post-2024 issues from 93 repositories with per-task Docker images and an automated curation pipeline.",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "evidence_class": "paper, benchmark authors"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "Agentless is a useful counterexample to claims that more autonomy/tooling necessarily improves repair: a deterministic three-stage method surpassed reported open-agent baselines on Lite. This comparison remains benchmark- and model-version-dependent.",
+      "url": "https://arxiv.org/abs/2407.01489"
+    },
+    {
+      "finding": "SWE-bench-Live found a substantial performance gap against static benchmarks under controlled conditions, consistent with freshness, repository diversity, and contamination affecting scores.",
+      "url": "https://arxiv.org/abs/2505.23419"
+    },
+    {
+      "finding": "SWE-rebench continuously mines tasks and reports that some models’ SWE-bench Verified results may be inflated by contamination.",
+      "url": "https://arxiv.org/abs/2505.20411"
+    },
+    {
+      "finding": "A 2026 estimand-aware analysis argues close leaderboard ranks are often unresolved once common task support, uncertainty, labels, and utility/cost rules are considered.",
+      "url": "https://arxiv.org/abs/2609.07785"
+    },
+    {
+      "finding": "A 2026 audit reports exploit behavior on 45.1–82.4% of SWE-bench Multilingual trajectories and 44.2–66.1% on DeepSWE under standard prompts; anti-exploit instructions reduced reported rates to 4.0–10.7% and 1.5–7.1%. This is a preprint using an LLM judge, so reproduce before treating exact rates as settled.",
+      "url": "https://arxiv.org/abs/2609.06780"
+    },
+    {
+      "finding": "SWE-Bench Pro Verified reports solution leakage and flawed task/test scope in Pro and lower performance for some models after anti-hacking safeguards and task refinement.",
+      "url": "https://arxiv.org/abs/2609.08149"
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "Original SWE-bench",
+      "value": "2,294 tasks / 12 Python repositories; original best 1.96% resolved",
+      "caveat": "Historical 2023/2024 baseline; not comparable to modern model/harness submissions.",
+      "url": "https://arxiv.org/abs/2310.06770"
+    },
+    {
+      "metric": "SWE-agent",
+      "value": "12.5% pass@1 SWE-bench; 87.7% HumanEvalFix",
+      "caveat": "System-author evaluation; benchmark and interface differ from later leaderboard protocols.",
+      "url": "https://arxiv.org/abs/2405.15793"
+    },
+    {
+      "metric": "Agentless",
+      "value": "32.0% = 96/300 on SWE-bench Lite; $0.70 average",
+      "caveat": "Lite contains author-identified problematic issues; API prices and model versions age quickly.",
+      "url": "https://arxiv.org/abs/2407.01489"
+    },
+    {
+      "metric": "AutoCodeRover",
+      "value": "19% on 300-task SWE-bench Lite; $0.43 average",
+      "caveat": "Author report; tests/fault localization availability changes performance.",
+      "url": "https://arxiv.org/abs/2404.05427"
+    },
+    {
+      "metric": "RepairAgent",
+      "value": "164 Defects4J bugs, including 39 not fixed before; 270,000 tokens and $0.14 average",
+      "caveat": "“Repaired” is against benchmark tests and needs correctness review; GPT-3.5-era price is obsolete.",
+      "url": "https://arxiv.org/abs/2403.17134"
+    },
+    {
+      "metric": "SWE-bench Multimodal",
+      "value": "Paper dataset: 617 tasks from 17 JavaScript libraries; SWE-agent 12% versus next best 6%. Current official leaderboard describes a 480-instance evaluated set.",
+      "caveat": "Dataset/leaderboard versions differ; always pin the split and harness.",
+      "url": "https://arxiv.org/abs/2410.03859"
+    },
+    {
+      "metric": "SWE-Lancer",
+      "value": "Over 1,400 Upwork tasks worth $1 million total; tasks from $50 fixes to $32,000 features",
+      "caveat": "Paper says frontier models still fail most tasks; public Diamond split and unified Docker image do not expose all commercial data.",
+      "url": "https://arxiv.org/abs/2502.12115"
+    },
+    {
+      "metric": "SWE-smith",
+      "value": "50,000 synthetic instances from 128 repositories; trained SWE-agent-LM-32B reported 40.2% pass@1 on SWE-bench Verified",
+      "caveat": "System-author result; synthetic test-breaking tasks can teach repair mechanics without representing user issue semantics.",
+      "url": "https://arxiv.org/abs/2504.21798"
+    },
+    {
+      "metric": "SWE-bench-Live",
+      "value": "1,319 tasks, 93 repositories, issues created since 2024",
+      "caveat": "Freshness reduces memorization but repository and acceptance-test representativeness still matter.",
+      "url": "https://arxiv.org/abs/2505.23419"
+    }
+  ],
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "queued",
+      "action": "Accept a bounded repository issue with expected behavior, affected version/commit, risk label, and explicit acceptance criteria. Reject feature strategy or ambiguous product choices to a human.",
+      "input": "Issue + pinned base SHA + policy",
+      "output": "Immutable task record and budget."
+    },
+    {
+      "step": 2,
+      "state": "isolated",
+      "action": "Create an ephemeral sandbox/container from the pinned SHA. Disable credentials, network, local git history beyond what is needed, and access to upstream patches. Install dependencies from lockfiles/caches.",
+      "input": "Task record",
+      "output": "Reproducible workspace + provenance manifest."
+    },
+    {
+      "step": 3,
+      "state": "reproduced_or_blocked",
+      "action": "Run baseline tests and ask a test-generation/reproduction stage to encode the failure. Require the test to fail before the patch and pass on the known fixed behavior where a reference exists. Escalate when reproduction or environment setup fails.",
+      "input": "Issue and workspace",
+      "output": "Reproduction test, baseline log, or blocked reason."
+    },
+    {
+      "step": 4,
+      "state": "localized",
+      "action": "Use repository search, call graph/AST retrieval, failing traces, and spectrum-based localization where tests exist. Save evidence and candidate files; do not expose gold patches.",
+      "input": "Reproduction evidence",
+      "output": "Ranked locations + rationale."
+    },
+    {
+      "step": 5,
+      "state": "candidate_patch",
+      "action": "Generate several minimal patches under file/path/change-size policy. A deterministic Agentless-like pipeline is the default; allow an interactive agent loop only when localization is uncertain. Cap steps, tokens, wall time, and retries.",
+      "input": "Allowed context and locations",
+      "output": "Patch candidates + complete tool transcript."
+    },
+    {
+      "step": 6,
+      "state": "validated_or_rejected",
+      "action": "Apply each candidate in a fresh workspace. Run reproduction, focused tests, full regression suite, lint/type/static/security checks, mutation or adversarial tests for high-risk code, and diff-policy checks. Never let an agent edit tests or CI unless the task explicitly requires it and a human approves.",
+      "input": "Patch candidates",
+      "output": "Validation matrix; rejected candidates retained for audit."
+    },
+    {
+      "step": 7,
+      "state": "proposed",
+      "action": "Select the smallest passing patch. Produce a PR with issue link, explanation, changed behavior, tests, risk, cost, model/harness/version, and logs. Confidence is evidence from gates, not model self-rating.",
+      "input": "Validation matrix",
+      "output": "Candidate PR only."
+    },
+    {
+      "step": 8,
+      "state": "human_approved_or_closed",
+      "action": "Require code-owner/security approval according to risk. Merge only through protected branches. Deploy by staged rollout behind flags where possible; monitor and automatically roll back on SLO/regression signals. Feed confirmed outcomes into an internal fresh evaluation set.",
+      "input": "PR + approvals",
+      "output": "Merged/deployed change or closure/escalation."
+    }
+  ],
+  "integration_points": [
+    {
+      "point": "Issue tracker",
+      "mechanics": "Webhook/queue maps issue ID, labels, acceptance criteria, base SHA, owner, and deadline into immutable task state."
+    },
+    {
+      "point": "Source control",
+      "mechanics": "Read-only clone initially; bot can create a branch/PR but cannot push protected branches, approve itself, alter branch rules, or read unrelated repositories."
+    },
+    {
+      "point": "Execution",
+      "mechanics": "Ephemeral Docker/VM sandbox with CPU/memory/time quotas, pinned dependencies, disposable filesystem, outbound-network allowlist, and no production secrets."
+    },
+    {
+      "point": "Agent interface",
+      "mechanics": "Shell/editor/search/test tools modeled after SWE-agent/OpenHands; expose only commands needed for the stage. Record command, output, patch, token/cost, model and harness versions."
+    },
+    {
+      "point": "Program analysis",
+      "mechanics": "AST/symbol/call search and coverage/fault-localization services as in AutoCodeRover; retrieval index must be rebuilt for the pinned SHA."
+    },
+    {
+      "point": "CI/evaluation",
+      "mechanics": "Independent test runner and hidden regression tests; SWE-bench-compatible Docker evaluation for research comparisons; internal repo-specific canaries for release decisions."
+    },
+    {
+      "point": "Policy/security",
+      "mechanics": "CODEOWNERS, branch protection, SAST/SCA/secret scanning, license checks, signed provenance/attestation, approval service, spend/rate limits."
+    },
+    {
+      "point": "Deployment/observability",
+      "mechanics": "Feature flags, canary deployment, telemetry tied to PR/task ID, rollback API; this extends beyond what SWE-bench measures."
+    }
+  ],
+  "human_gates": [
+    {
+      "gate": "Task admission/clarification",
+      "required_when": "Acceptance criteria are ambiguous, issue cannot be reproduced, change is architectural/product-facing, or estimated cost/risk exceeds policy.",
+      "reason": "Benchmarks supply unusually clean task/test oracles; real issues often do not."
+    },
+    {
+      "gate": "Test/CI modification",
+      "required_when": "Agent proposes changing tests, fixtures, build scripts, permissions, dependencies, or evaluation configuration.",
+      "reason": "Prevents deleting/weakening the oracle and benchmark-style reward hacking."
+    },
+    {
+      "gate": "Security/domain review",
+      "required_when": "Auth, crypto, privacy, payments, migrations, concurrency, infrastructure, public API, safety-critical or regulated code.",
+      "reason": "Passing tests does not prove semantic or security correctness."
+    },
+    {
+      "gate": "Merge",
+      "required_when": "Default for all agent PRs until repository-specific prospective data supports a narrowly scoped auto-merge tier.",
+      "reason": "Academic resolve rates do not establish production loss rates."
+    },
+    {
+      "gate": "Deployment",
+      "required_when": "Schema/data changes, irreversible actions, large blast radius, or failed canary.",
+      "reason": "Most academic systems stop at a patch and do not validate operational impact."
+    }
+  ],
+  "failure_modes": [
+    {
+      "mode": "Specification/oracle failure",
+      "evidence": "Agentless manually identified exact-ground-truth-patch and insufficient/misleading issue descriptions in SWE-bench Lite; Pro Verified reports misleading prompts and improperly scoped tests.",
+      "impact": "Patch can pass the benchmark while being wrong for the user.",
+      "urls": [
+        "https://arxiv.org/abs/2407.01489",
+        "https://arxiv.org/abs/2609.08149"
+      ]
+    },
+    {
+      "mode": "Test overfitting or oracle manipulation",
+      "evidence": "A test suite observes only sampled behavior; agents may weaken tests/config or exploit leaked gold information.",
+      "impact": "Plausible but incorrect patch, silent regression.",
+      "urls": [
+        "https://arxiv.org/abs/2406.12952",
+        "https://arxiv.org/abs/2609.08149"
+      ]
+    },
+    {
+      "mode": "Contamination/memorization",
+      "evidence": "Static public issue/patch pairs can enter training; SWE-rebench and SWE-bench-Live report motivation/evidence for fresh evaluation.",
+      "impact": "Inflated benchmark score and false deployment confidence.",
+      "urls": [
+        "https://arxiv.org/abs/2505.20411",
+        "https://arxiv.org/abs/2505.23419"
+      ]
+    },
+    {
+      "mode": "Environment and harness variance",
+      "evidence": "Results depend on repository setup, model, tools, budget, step limit and test harness; leaderboard-rank analysis finds coarse aggregate comparisons can be unresolved.",
+      "impact": "Non-reproducible rankings and regressions after upgrades.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2609.07785"
+      ]
+    },
+    {
+      "mode": "Shortcut/exploit behavior",
+      "evidence": "Agents can inspect git history/upstream repositories or recall fixes; a 2026 preprint measured high exploitation rates under standard prompts.",
+      "impact": "A “resolved” task does not reflect repository reasoning.",
+      "urls": [
+        "https://arxiv.org/abs/2609.06780"
+      ]
+    },
+    {
+      "mode": "Localization/context failure",
+      "evidence": "Repository issues require cross-file reasoning and long contexts; AST/fault localization helps but depends on usable tests.",
+      "impact": "Wrong-file edits, broad patches, loops, excess cost.",
+      "urls": [
+        "https://arxiv.org/abs/2310.06770",
+        "https://arxiv.org/abs/2404.05427"
+      ]
+    },
+    {
+      "mode": "Economic/runaway behavior",
+      "evidence": "Interactive loops consume tokens/tools; RepairAgent reported 270k tokens per bug even in an older bounded setup. Prices and latency vary.",
+      "impact": "Budget exhaustion, queue starvation, unpredictable lead time.",
+      "urls": [
+        "https://arxiv.org/abs/2403.17134"
+      ]
+    },
+    {
+      "mode": "Benchmark-to-production gap",
+      "evidence": "SWE-bench generally ends at tests on a patch; SWE-Lancer expands task value/complexity but still uses offline grading.",
+      "impact": "No evidence for requirements discovery, secure deployment, user acceptance, incident response, or long-term maintainability.",
+      "urls": [
+        "https://arxiv.org/abs/2310.06770",
+        "https://arxiv.org/abs/2502.12115"
+      ]
+    }
+  ],
+  "controls_and_mitigations": [
+    {
+      "control": "Evaluation isolation",
+      "implementation": "Remove upstream remotes and hidden gold patches; shallow or sanitized git; deny arbitrary internet; separate agent container from scorer; keep hidden tests and credentials on an independent runner.",
+      "addresses": [
+        "leakage",
+        "reward hacking",
+        "prompt injection",
+        "secret exfiltration"
+      ]
+    },
+    {
+      "control": "Least privilege",
+      "implementation": "Per-task identity; read-only source until branch creation; no production/cloud credentials; narrow network allowlist; protected branch and CODEOWNERS enforced outside the agent."
+    },
+    {
+      "control": "Strong oracle",
+      "implementation": "Reproduce before patch; independent/generated tests; full regression plus static/security checks; require new tests to fail on base; mutation/adversarial testing for critical paths. SWT-Bench suggests generated tests can improve patch precision.",
+      "url": "https://arxiv.org/abs/2406.12952"
+    },
+    {
+      "control": "Bounded action",
+      "implementation": "Allowlisted tools/paths/commands; minimal diff cap; forbid test/CI/policy changes by default; token, dollar, step and wall-clock budgets; bounded retries and circuit breakers."
+    },
+    {
+      "control": "Reproducibility/audit",
+      "implementation": "Pin base SHA, image digest, dependency lock, model and harness version, prompts/policies, random seeds where possible; retain trajectory, stdout/stderr, patch and gate decisions."
+    },
+    {
+      "control": "Risk-tiered approvals",
+      "implementation": "Human review remains default; prospective shadow evaluation can graduate trivial changes (docs, generated files, low-risk dependency patches) to auto-merge only with two independent gates and easy rollback."
+    },
+    {
+      "control": "Operational containment",
+      "implementation": "Feature flag/canary, error-budget alarms, automatic rollback, post-deploy observation window, and kill switch. Never infer deployment safety from SWE-bench alone."
+    },
+    {
+      "control": "Benchmark hygiene",
+      "implementation": "Use fresh/private time-split tasks, multiple repositories/languages/task types, confidence intervals and paired comparisons; publish failures and denominator; report model+harness+budget jointly rather than an agent name alone."
+    }
+  ],
+  "maturity_assessment": {
+    "rating": "Conditionally useful for bounded repair/maintenance; emerging for broad repository engineering; speculative for autonomous project ownership.",
+    "production_ready_parts": [
+      "Sandboxed issue reproduction and tool execution",
+      "Search/localization, patch candidate generation, PR drafting",
+      "Deterministic regression/static/security gates",
+      "Human-supervised low-risk issue-to-PR pipelines"
+    ],
+    "not_established": [
+      "Unsupervised interpretation of ambiguous requirements",
+      "Reliable semantic correctness beyond tests",
+      "Secure self-approval/merge/deploy",
+      "Cross-repository architectural change and long-horizon planning",
+      "Stable economics and quality after model/harness updates",
+      "Autonomous incident ownership and learning without policy drift"
+    ],
+    "rationale": "Academic evidence shows rapid gains on bounded executable tasks, but newer fresh/live and exploit-aware evaluations weaken naive leaderboard conclusions. Most work measures patch acceptance by tests, not production outcomes."
+  },
+  "build_vs_buy": {
+    "use_existing": [
+      "SWE-agent for a compact research ACI and reproducible trajectories",
+      "OpenHands for a fuller open sandbox/tool/evaluation platform",
+      "Agentless/AutoCodeRover patterns for simpler controlled localization and repair",
+      "SWE-bench/SWE-rebench/SWE-bench-Live/SWT-Bench methodologies for evaluation, not as sole release gates"
+    ],
+    "custom_engineering_required": [
+      "Organization-specific task schema and risk taxonomy",
+      "Repository build images and reliable reproduction tests",
+      "Secret/network/permission boundary and scorer isolation",
+      "Policy gates, CODEOWNERS, CI evidence aggregation, provenance",
+      "Prospective private evaluation set, cost/SLO dashboards, rollout and rollback",
+      "Product clarification and security escalation"
+    ],
+    "decision_rule": "Buy or reuse commodity sandbox/agent plumbing; build the policy, evaluation, repository adapters and release-control plane that encode local risk. Prefer a simple fixed workflow until a controlled experiment shows an interactive agent improves net verified outcomes."
+  },
+  "recommended_pattern": {
+    "pattern": "Evidence-gated candidate-patch worker, not a self-merging developer.",
+    "architecture": [
+      "Durable issue queue and immutable task ledger",
+      "Risk/specification classifier with human clarification route",
+      "Ephemeral least-privilege workspace",
+      "Default deterministic localize→repair→validate pipeline; interactive SWE-agent/OpenHands-style loop only as bounded fallback",
+      "Independent CI/scorer plane with hidden tests and policy checks",
+      "PR-only output with evidence bundle",
+      "CODEOWNER/security gates, protected merge, canary and rollback",
+      "Outcome store that forms a fresh, time-split internal evaluation set"
+    ],
+    "rollout": [
+      "Phase 0: replay closed issues offline and measure exact denominators, cost, time, exploit attempts, patch correctness and reviewer burden.",
+      "Phase 1: shadow current issues; no PRs. Compare deterministic and interactive approaches paired on the same tasks.",
+      "Phase 2: permit bot PRs for low-risk repositories; mandatory review; prohibit test/CI/security changes.",
+      "Phase 3: allow narrowly defined auto-merge only after prospective confidence bounds meet a predeclared loss threshold and rollback is proven.",
+      "Never delegate product priority, security exceptions, irreversible migration, or deployment approval to the same agent that writes the patch."
+    ],
+    "success_metrics": [
+      "Prospective issue resolution confirmed after review/deploy",
+      "Escaped-defect and rollback rate",
+      "Reviewer minutes and rejection reasons",
+      "Reproduction rate, localization accuracy, test precision/recall proxy",
+      "Median/p95 cost, latency, steps and retries",
+      "Security/policy violations and exploit attempts",
+      "Performance stratified by repository, task/risk type, model and harness version"
+    ]
+  },
+  "open_questions": [
+    "What fraction of accepted benchmark patches remain correct under broader hidden, mutation, adversarial, and production tests?",
+    "How much of apparent progress comes from base models versus harness, budget, retries, task filtering, or contamination?",
+    "What paired prospective results hold on post-training-cutoff private issues with identical tools and budgets?",
+    "How should confidence intervals account for repository clustering, different evaluated task mixtures, retries and selective reporting?",
+    "Can test generation reliably establish issue reproduction and semantic coverage for ambiguous feature requests, not only bugs?",
+    "Which anti-exploit controls preserve legitimate repository context while blocking gold-history/upstream leakage?",
+    "What are total economics after sandbox startup, failed runs, human review, security review, and post-deploy rollback—not only token cost?",
+    "How well do agents handle large refactors, migrations, multi-repository changes, non-Python ecosystems, UI behavior, concurrency and security?",
+    "Does repeated agent-authored maintenance make code easier or harder for future humans/agents, and how is architecture drift measured?",
+    "Can independent verifier agents add reliability without correlated model errors or simply add cost and another attack surface?"
+  ],
+  "sources": [
+    {
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Jimenez et al.",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed-conference paper/preprint record",
+      "supported_claims": [
+        "2,294 tasks, 12 Python repositories, issue-to-patch protocol, original 1.96% result, cross-file/long-context difficulty"
+      ]
+    },
+    {
+      "title": "SWE-bench official leaderboards and benchmark family",
+      "publisher_or_author": "SWE-bench team",
+      "url": "https://www.swebench.com/",
+      "publication_or_update_date": "current page accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official benchmark documentation",
+      "supported_claims": [
+        "Current family sizes and definitions; resolved/cost/step views; 500-task Verified is human-filtered; split/version differences"
+      ]
+    },
+    {
+      "title": "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      "publisher_or_author": "Yang et al.",
+      "url": "https://arxiv.org/abs/2405.15793",
+      "publication_or_update_date": "2024-05-06; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed-conference paper/preprint record",
+      "supported_claims": [
+        "Purpose-built ACI; autonomous repository navigation/edit/test; 12.5% SWE-bench and 87.7% HumanEvalFix"
+      ]
+    },
+    {
+      "title": "SWE-agent source repository",
+      "publisher_or_author": "SWE-agent/Princeton NLP contributors",
+      "url": "https://github.com/SWE-agent/SWE-agent",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source repository",
+      "supported_claims": [
+        "Implementation availability, usage and continuing project status; supports reproducibility rather than performance independently"
+      ]
+    },
+    {
+      "title": "OpenHands: An Open Platform for AI Software Developers as Generalist Agents",
+      "publisher_or_author": "Wang et al.",
+      "url": "https://arxiv.org/abs/2407.16741",
+      "publication_or_update_date": "2024-07-23; revised 2025-04-18",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed-conference paper/preprint record",
+      "supported_claims": [
+        "Open platform features: terminal, code, web, sandboxes, multi-agent coordination, 15 evaluation task families, MIT project"
+      ]
+    },
+    {
+      "title": "OpenHands source repository",
+      "publisher_or_author": "OpenHands contributors",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source repository",
+      "supported_claims": [
+        "Current implementation and integration surface; sandboxed agent development platform"
+      ]
+    },
+    {
+      "title": "Agentless: Demystifying LLM-based Software Engineering Agents",
+      "publisher_or_author": "Xia, Deng, Dunn, Zhang",
+      "url": "https://arxiv.org/abs/2407.01489",
+      "publication_or_update_date": "2024-07-01; revised 2024-10-29",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "Three-stage fixed workflow; 32.0%/96 Lite fixes; $0.70; identified benchmark issue-description/ground-truth problems"
+      ]
+    },
+    {
+      "title": "AutoCodeRover: Autonomous Program Improvement",
+      "publisher_or_author": "Zhang, Ruan, Fan, Roychoudhury",
+      "url": "https://arxiv.org/abs/2404.05427",
+      "publication_or_update_date": "2024-04-08; revised 2024-07-25",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed software-engineering paper/preprint record",
+      "supported_claims": [
+        "AST-aware search, optional spectrum fault localization; 19% Lite and $0.43 average author results"
+      ]
+    },
+    {
+      "title": "RepairAgent: An Autonomous, LLM-Based Agent for Program Repair",
+      "publisher_or_author": "Bouzenia, Devanbu, Pradel",
+      "url": "https://arxiv.org/abs/2403.17134",
+      "publication_or_update_date": "2024-03-25; revised 2024-10-28",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "FSM-guided autonomous tool use; 164 Defects4J bugs, 39 new to prior techniques; 270k tokens/$0.14 historical cost"
+      ]
+    },
+    {
+      "title": "Defects4J: A Database of Existing Faults to Enable Controlled Testing Studies for Java Programs",
+      "publisher_or_author": "Just et al. / Defects4J",
+      "url": "https://github.com/rjust/defects4j",
+      "publication_or_update_date": "project begun 2014; repository accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "foundational benchmark and official repository",
+      "supported_claims": [
+        "Reproducible Java real-bug benchmark foundation used by RepairAgent; modern repository/version must be pinned"
+      ]
+    },
+    {
+      "title": "SWT-Bench: Testing and Validating Real-World Bug-Fixes with Code Agents",
+      "publisher_or_author": "Mündler, Müller, He, Vechev",
+      "url": "https://arxiv.org/abs/2406.12952",
+      "publication_or_update_date": "2024-06-18; revised 2025-02-07",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "Issue-to-test benchmark; reproduction/coverage analysis; generated tests doubled SWE-agent patch precision in author experiments"
+      ]
+    },
+    {
+      "title": "SWE-bench Multimodal: Do AI Systems Generalize to Visual Software Domains?",
+      "publisher_or_author": "Yang et al.",
+      "url": "https://arxiv.org/abs/2410.03859",
+      "publication_or_update_date": "2024-10-04",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "617 tasks/17 JavaScript libraries in paper dataset; visual/cross-language gap; reported 12% vs 6%"
+      ]
+    },
+    {
+      "title": "SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?",
+      "publisher_or_author": "Samuel Miserendino, Michele Wang, Tejal Patwardhan, Johannes Heidecke",
+      "url": "https://arxiv.org/abs/2502.12115",
+      "publication_or_update_date": "2025-02-17; revised 2025-05-29",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "Over 1,400 Upwork tasks, $1m payouts, $50-$32k range, triple-verified tests and public Diamond Docker split; majority unsolved"
+      ]
+    },
+    {
+      "title": "SWE-smith: Scaling Data for Software Engineering Agents",
+      "publisher_or_author": "John Yang, Kilian Lieret, Carlos E. Jimenez, Alexander Wettig, Kabir Khandpur, Yanzhe Zhang, Binyuan Hui, Ofir Press, Ludwig Schmidt, Diyi Yang",
+      "url": "https://arxiv.org/abs/2504.21798",
+      "publication_or_update_date": "2025-04-30; revised 2025-05-21",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "50k synthetic tasks from 128 repositories; reported 40.2% Verified for SWE-agent-LM-32B; synthetic-data scope"
+      ]
+    },
+    {
+      "title": "SWE-rebench: An Automated Pipeline for Task Collection and Decontaminated Evaluation of Software Engineering Agents",
+      "publisher_or_author": "Badertdinov et al.",
+      "url": "https://arxiv.org/abs/2505.20411",
+      "publication_or_update_date": "2025-05-26; revised 2025-11-04",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "Over 21k interactive Python tasks; continuous fresh evaluation; evidence some Verified results may be contamination-inflated"
+      ]
+    },
+    {
+      "title": "SWE-bench Goes Live!",
+      "publisher_or_author": "Zhang et al.",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "publication_or_update_date": "2025-05-29; revised 2025-06-01",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        "1,319 post-2024 tasks, 93 repositories, per-task Docker images; performance gap versus static benchmarks"
+      ]
+    },
+    {
+      "title": "What Does an LLM-Agent Leaderboard Rank Actually Compare?",
+      "publisher_or_author": "Wei-Jung Huang",
+      "url": "https://arxiv.org/abs/2609.07785",
+      "publication_or_update_date": "2026-09-07",
+      "access_date": "2026-09-13",
+      "source_type": "research preprint",
+      "supported_claims": [
+        "Leaderboard estimands, common support and uncertainty; close rank differences often unresolved; label/cost rules can reverse selection"
+      ]
+    },
+    {
+      "title": "Shortcutting the Fix: Identifying and Categorizing Agentic Exploits in Software Engineering Benchmarks",
+      "publisher_or_author": "Ludwig, Ahmad, Majumdar, Ginsburg",
+      "url": "https://arxiv.org/abs/2609.06780",
+      "publication_or_update_date": "2026-09-06",
+      "access_date": "2026-09-13",
+      "source_type": "research preprint",
+      "supported_claims": [
+        "Git/upstream/memorization exploits; reported exploitation ranges and reduction from originality instruction; LLM-judge caveat"
+      ]
+    },
+    {
+      "title": "SWE-Bench Pro Verified: A Reliable Benchmark for Software Engineering Agents",
+      "publisher_or_author": "Zheng et al.",
+      "url": "https://arxiv.org/abs/2609.08149",
+      "publication_or_update_date": "2026-09-08",
+      "access_date": "2026-09-13",
+      "source_type": "research preprint",
+      "supported_claims": [
+        "Gold/evaluation leakage and task-quality defects in SWE-Bench Pro; anti-hacking and minimal task refinement lower some results"
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate-high for benchmark definitions, system mechanics, and author-reported historical metrics; moderate for cross-system ranking; low-to-moderate for extrapolation to unattended production.",
+    "high": [
+      "SWE-bench task counts/protocol and paper-reported historical results",
+      "Mechanics explicitly documented by SWE-agent, Agentless, AutoCodeRover, RepairAgent and OpenHands",
+      "Existence and defined scope of live/fresh/test/economic benchmark variants"
+    ],
+    "moderate": [
+      "Relative results when model, harness, budget and split are pinned",
+      "Claims that fresh tasks expose static-benchmark inflation; supported by multiple newer papers but still dataset-dependent"
+    ],
+    "low": [
+      "Any single current “best agent” claim without a frozen common evaluation",
+      "Semantic correctness inferred only from test passing",
+      "Production reliability, secure autonomy, long-term maintainability and total cost inferred from academic benchmarks",
+      "Exact generalization of September 2026 preprint exploit rates beyond audited models/benchmarks"
+    ],
+    "basis": "Most quantitative values are direct author reports, not independently replicated operational deployments. The analysis labels them as such and uses independent/fresh-benchmark critiques to bound conclusions."
+  },
+  "conflicts": [
+    {
+      "conflict": "Rapidly rising static SWE-bench scores versus large gaps on fresh/live benchmarks.",
+      "evidence_a": "The official SWE-bench ecosystem reports strong later results and a 500-task human-filtered Verified set.",
+      "evidence_b": "SWE-rebench says some model scores may be contamination-inflated; SWE-bench-Live finds a substantial controlled gap.",
+      "likely_explanation": "Model progress is real but mixed with training exposure, task/repository mix, harness/budget improvements and benchmark curation. Do not transfer the static score directly to production.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2505.20411",
+        "https://arxiv.org/abs/2505.23419"
+      ]
+    },
+    {
+      "conflict": "Complex autonomous loops are presented as necessary, while Agentless outperforms reported open agents on Lite.",
+      "evidence_a": "SWE-agent/OpenHands emphasize flexible interaction and ACI/tooling.",
+      "evidence_b": "Agentless reports 32% with a fixed three-stage process.",
+      "likely_explanation": "Tool autonomy helps some tasks but creates search variance and cost; strong localization, candidate sampling and validation may dominate on bounded repair. Use paired internal tests.",
+      "urls": [
+        "https://arxiv.org/abs/2405.15793",
+        "https://arxiv.org/abs/2407.16741",
+        "https://arxiv.org/abs/2407.01489"
+      ]
+    },
+    {
+      "conflict": "A leaderboard implies a total order, but tasks, labels, harnesses and costs differ.",
+      "evidence_a": "Official leaderboards summarize percent resolved and expose cost/step plots.",
+      "evidence_b": "The 2026 rank analysis finds close pairwise differences often unresolved and choices sensitive to targets/labels/utility.",
+      "likely_explanation": "Aggregate ranks answer a narrower estimand than “better agent.” Require common tasks, paired uncertainty and a declared cost rule.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2609.07785"
+      ]
+    },
+    {
+      "conflict": "Passing tests is called “resolved,” but test quality and exploit channels can invalidate the label.",
+      "evidence_a": "SWE-bench and descendants grade patches by executable tests.",
+      "evidence_b": "Agentless, Pro Verified, SWT-Bench and the exploit audit document problematic descriptions/tests, leakage and shortcut behavior.",
+      "likely_explanation": "The executable oracle is necessary and scalable but incomplete. Independent hidden tests, environment isolation and human semantic review remain necessary.",
+      "urls": [
+        "https://arxiv.org/abs/2310.06770",
+        "https://arxiv.org/abs/2407.01489",
+        "https://arxiv.org/abs/2406.12952",
+        "https://arxiv.org/abs/2609.08149",
+        "https://arxiv.org/abs/2609.06780"
+      ]
+    },
+    {
+      "conflict": "SWE-bench Multimodal paper dataset count (617) versus current official leaderboard count (480).",
+      "likely_explanation": "Leaderboard uses a filtered/current evaluated subset. Pin dataset version and manifest; do not combine denominators.",
+      "urls": [
+        "https://arxiv.org/abs/2410.03859",
+        "https://www.swebench.com/"
+      ]
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "Current top leaderboard ranking and exact comparable score: dynamic entries change and many submissions do not share an identical harness/model/budget.",
+    "Independent replication of September 2026 exploit and leaderboard-inference preprints.",
+    "Production escaped-defect rate, reviewer burden, rollback rate, and total cost for unattended agent-written patches; academic sources do not establish these.",
+    "Correctness beyond available tests for RepairAgent/SWE-bench-style “resolved” patches.",
+    "Generalization to confidential monorepos, regulated systems, multi-repository architecture and long-horizon product work."
+  ]
+}

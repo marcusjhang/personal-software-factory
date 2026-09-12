@@ -1,0 +1,61 @@
+topic: Repository-native agent project-management operating system
+objective: Design an implementable, deeply evidenced system where issues, project
+  fields/statuses, workflow policy and agent instructions are declared as code; a
+  fresh agent can safely claim and progress ready work; planning, implementation,
+  verification, review, cleanup, merge and all status transitions are tracked; humans
+  intervene by explicit risk/exception policy; and improvements are governed by versioned
+  evaluations rather than self-approval.
+as_of: '2026-09-13'
+time_range: 2023-present, plus foundational workflow/durability/security standards
+items:
+- name: GitHub Issues and Projects as code
+  category: github-control-plane
+  description: Issue forms, labels, Project v2 fields/statuses, APIs, declarative
+    reconciliation, limitations, permissions, and drift.
+- name: Ticket planning and readiness gates
+  category: planning
+  description: State machine, Definition of Ready, revision-bound approval, clarification,
+    decomposition, specs, PStack and comparable patterns.
+- name: Agent bootstrap and instant context
+  category: agent-runtime
+  description: How a newly started agent discovers objectives, current state, project
+    rules, architecture, commands, memory, leases, and next eligible work without
+    chat history.
+- name: Issue claiming, orchestration, and concurrency
+  category: orchestration
+  description: Admission, priority, dependencies, leases, heartbeats, idempotency,
+    retries, parallelism, cancellation, stale work, and durable state.
+- name: Implementation, verification, review, and cleanup
+  category: delivery
+  description: Branch/worktree lifecycle, evidence bundles, clean-room CI, AI/human
+    review, merge queues, cleanup of branches/workspaces/comments/artifacts.
+- name: Risk-tiered human gates and merge policy
+  category: governance
+  description: Human intervention rules, CODEOWNERS, rulesets, auto-merge predicates,
+    exceptions, production approval, permissions, security and audit.
+- name: Observability-driven issue creation and maintenance
+  category: operations
+  description: Logs/errors/traces/dependency/security/CI events to deduplicated planned
+    issues; known runbooks, escalation, rollback, and noise controls.
+- name: Governed self-improvement
+  category: improvement
+  description: Feedback and telemetry to postmortems, eval cases, workflow/prompt/tool
+    proposals, offline/shadow/canary tests, promotion, rollback, and anti-self-governance
+    boundaries.
+- name: Repository-native configuration and reusable distribution
+  category: configuration
+  description: Exact schemas, directory layout, reusable workflows/actions, versioning,
+    bootstrapping multiple repositories, portability and upgrades.
+- name: End-to-end reference implementation and rollout
+  category: synthesis
+  description: Minimum viable stack, event/state contracts, GitHub integration, end-to-end
+    scenarios, tests, operational runbooks, staged adoption and success criteria.
+execution:
+  batch_size: 10
+  items_per_agent: 1
+  output_dir: ./results
+  approval_between_batches: false
+source_policy:
+  prefer_primary: true
+  require_urls: true
+  record_access_date: true

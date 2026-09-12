@@ -1,0 +1,72 @@
+topic: Agent-managed self-building and self-maintaining software projects
+objective: Determine what has been solved, what remains experimental, and define reusable
+  production workflows and a reference architecture that minimize human involvement
+  without sacrificing safety or quality.
+as_of: '2026-09-13'
+time_range: 2019-present, with older foundational work where necessary
+items:
+- name: Autonomous coding agent platforms
+  category: platforms
+  description: Devin, OpenAI Codex cloud, GitHub Copilot coding agent, Claude Code
+    and comparable hosted/local agents.
+- name: Open-source agent frameworks
+  category: platforms
+  description: OpenHands, SWE-agent, Aider and extensible orchestration frameworks
+    suitable for issue-to-PR automation.
+- name: Issue and specification driven development
+  category: workflow
+  description: Spec-driven planning, backlog intake, issue decomposition, acceptance
+    criteria, and issue-to-PR loops.
+- name: CI/CD and agent execution integration
+  category: workflow
+  description: How agents run in GitHub Actions, GitLab, sandboxes, ephemeral workspaces,
+    and deployment pipelines.
+- name: Dependency and security maintenance
+  category: maintenance
+  description: Dependabot, Renovate, security scanners, autofix tools, patch validation,
+    and safe auto-merge.
+- name: Observability to autonomous remediation
+  category: maintenance
+  description: Logs, errors, traces, incidents, Sentry and AIOps-style diagnosis-to-fix
+    workflows.
+- name: Automated testing, review, and quality gates
+  category: assurance
+  description: Test generation, static analysis, AI review, confidence scoring, evals,
+    and merge gates.
+- name: Human oversight, governance, and security
+  category: assurance
+  description: Approval boundaries, permissions, sandboxing, prompt injection, supply-chain
+    threats, audit and rollback.
+- name: Academic autonomous software engineering
+  category: evidence
+  description: Research systems, benchmarks, repair agents, repository-level agents,
+    and measured limitations.
+- name: Production case studies and operational evidence
+  category: evidence
+  description: Documented real-world deployments, success rates, failure modes, costs,
+    and maintenance burden.
+- name: Multi-agent orchestration and control planes
+  category: architecture
+  description: Task routing, durable queues, state, retries, memory, event-driven
+    agents, and supervisor patterns.
+- name: Self-improvement and feedback loops
+  category: architecture
+  description: Telemetry, user feedback, postmortems, eval datasets, policy updates,
+    and safe workflow evolution.
+- name: End-to-end reference architectures
+  category: architecture
+  description: Existing blueprints that connect planning, building, review, deploy,
+    observe, repair, and learn.
+- name: Adoption maturity and build-vs-buy landscape
+  category: decision
+  description: What is solved now, what remains experimental, tool selection, incremental
+    rollout, and economics.
+execution:
+  batch_size: 14
+  items_per_agent: 1
+  output_dir: ./results
+  approval_between_batches: false
+source_policy:
+  prefer_primary: true
+  require_urls: true
+  record_access_date: true

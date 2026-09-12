@@ -1,0 +1,222 @@
+{
+  "reviewer": "round-10 formal-model closure audit",
+  "scope": {
+    "mode": "independent final plan-only closure audit after round-9 corrections and schema-3 regeneration",
+    "specialty": "All normative rows/tables/vocabularies; cleanup origin; effect-first control degradation; reachable Effect classification relation; IC32 revocation; canary-abort X/N settlement; reducer, canonical adjacency, terminals, reachability, trace status, and schema-3 evidence identity.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-9-resolution.md",
+      "review/round-9-closure/evidence-traceability.json",
+      "review/round-9-closure/remediation-cleanup.json",
+      "review/round-9-closure/formal-state.json",
+      "review/round-9-closure/improvement-interleavings.json",
+      "review/round-9-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, direct contradiction, unsafe or undefined path, or material overclaim. Future implementation, exhaustive full reachable-product/model proof, fresh immutable retrieval, same-run human semantic review, production validation, and reviewed-edge regeneration were accepted as unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_parse_vocabulary_adjacency_and_status",
+      "result": "fail",
+      "exact_text": [
+        "docs/state-transition-manifests.md §1: ‘A projection is invalid unless every adjacent pair appears in §2.’",
+        "PLAN.md §14.0 declares the IMPROVEMENT rollout coordinate as a versioned exact set.",
+        "docs/state-transition-manifests.md §15 uses WIDENING_RECONCILING and PROMOTION_RECONCILING as real rollout symbols."
+      ],
+      "basis": "All 735 unique edge rows and all Markdown tables parsed with uniform widths; §2 contains 93 canonical rows and every explicit A>B>C projection uses listed adjacency. The new reconciliation symbols are absent from PLAN’s closed rollout set, and four post-reconciliation rollback rows plus two cleanup rows do not name legal canonical adjacency. Findings R10-FM-001 and R10-FM-002."
+    },
+    {
+      "area": "cleanup_origin_and_cancellation_partition",
+      "result": "fail",
+      "exact_text": [
+        "Priority 7a assigns WIDENING_ABORT plus cancellation NONE to IR13C and non-WIDENING_ABORT plus NONE to IRB08.",
+        "IRB07-R/Q plus IX03 assign cancellation REQUESTED|QUIESCING cleanup to IX03.",
+        "§15.8 requires the complete disjoint {WIDENING_ABORT,non-WIDENING_ABORT} × {NONE,REQUESTED,QUIESCING} ownership product."
+      ],
+      "basis": "The priority row, IRB08 guard, IR13C guard, IX03 guard, and tuple witness agree on the intended six-cell partition. However §15.1’s normative terminal-resolution paragraph still says ROLLED_BACK is preserved only until IRB08 schedules cleanup, which is false for WIDENING_ABORT; and IR13A/IR13C can run while rollback remains VERIFIED. Findings R10-FM-006 and R10-FM-007."
+    },
+    {
+      "area": "effect_first_control_degradation",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md §8.4: degradation in WIDENING_EFFECT or PROMOTING first enters safe reconciliation and cannot start rollback until the original Effect is settled/classified.",
+        "IH01-W/P require the original Effect to be unsettled or its classification not protected.",
+        "IR38/IR18 consume an already-durable direct E06 receipt."
+      ],
+      "basis": "The unsettled path is effect-first and IRB01 fences original mutation races. A reachable settled-and-protected interval remains after durable E06 and before IR38/IR18; no IH01 row accepts degradation there. Finding R10-FM-003."
+    },
+    {
+      "area": "reachable_terminal_effect_classification_relation",
+      "result": "pass",
+      "exact_text": [
+        "Direct terminal edges {E09,E10,E30,E31,E33,E35} require target-effect no-application/no-send proof and have N rows only.",
+        "Disposition edges {E20,E21,E24,E25,E28,E29,E37,E39} have X and N rows in WIDENING_EFFECT and PROMOTING.",
+        "Missing/conflicting/stale classification remains UNRESOLVED/QUARANTINED; same-target ExposureReceipt conflicts with direct-edge NoApplicationReceipt and rejects."
+      ],
+      "basis": "The declared reachable relation has exact size 44: 8×2×2 disposition products plus 6×2 direct N products. The 44 IWD/IPD/IW/IP rows match it exactly; impossible direct X rows are absent."
+    },
+    {
+      "area": "candidate_revocation_exact_coordinates",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md §8.4: ‘Candidate revocation is partitioned by the exact rollout and target Effect.’",
+        "Manifest §15.8: ‘Enumerate every reachable rollout coordinate against protected X/N/unsettled Effect classes.’",
+        "IC32-N/CX/PX/WX/WN/MX/MN/UW/UP/RWX/RPX/RN are the declared revocation family."
+      ],
+      "basis": "The new family correctly separates pre-exposure, exposed, and unsettled mutation examples, and each named exposed row creates exactly one saga. It does not cover every reachable SHADOW_PASSED rollout coordinate, including abort-settlement states and exposure-bearing review/approval states. Finding R10-FM-004."
+    },
+    {
+      "area": "canary_abort_exposure_settlement",
+      "result": "fail",
+      "exact_text": [
+        "IR07, IR09→IR11, IR10, and IR53 have mutually exclusive X/N rows.",
+        "IR13A is rollback-required; IR13B requires protected no exposure and all bound effects settled with proved non-application; IR13C/IX03 partition cleanup by cancellation.",
+        "§15.8 claims each reachable abort source has exactly one protected exposed/no-exposure row."
+      ],
+      "basis": "The corrected named X/N families and E34 acceptance are coherent. IR34/IR35 remain unclassified abort-entry rows, and IR13A/IR13C permit cleanup ordering before rollback reaches ROLLED_BACK. Findings R10-FM-005 and R10-FM-007."
+    },
+    {
+      "area": "reducer_terminals_and_reachability",
+      "result": "partial",
+      "exact_text": [
+        "The reducer enumerates every symbol of effect-set, cleanup-set, rollback, cancellation, release, control, rollout, and candidate coordinates.",
+        "Canonical terminals are DONE, FAILED, and CANCELLED only under clean; private aggregate terminals are explicitly listed and immutable.",
+        "Future exhaustive reachable-product/full-model proof is not claimed."
+      ],
+      "basis": "Declared initials, outgoing rows, sinks/terminals, explicit canonical sequences, positional priority-2/7 rollback mappings, release failure, final cleanup, and Effect relation were checked at plan/table level. No new implementation/full-model result was required. The closed-vocabulary, adjacency, degradation, revocation, abort, and cleanup contradictions prevent formal closure."
+    },
+    {
+      "area": "traceability_and_schema_3_evidence_status",
+      "result": "pass",
+      "exact_text": [
+        "README.md and traceability §12 say round-9 correction and current-digest candidate-only regeneration are complete without claiming closure.",
+        "material-claims.json schema_version is 3.0.0 and regeneration_checkpoint is round-9.",
+        "Candidate edges remain unreviewed_candidate; supports/refutes remain future reviewed semantics."
+      ],
+      "basis": "Recomputed SHA-256 is 38c42d41bf38edff16c6777c0e93b0c0ee3e4a4c489645a7ae3c81db21116bb8 for PLAN.md and e61bdd51f16d8e9a49d3b1b6bb7fe060cd84fbd51f477e344cce782de729ee8d for the normative manifest, matching generated_against. All 28 dynamically derived numbered headings equal the recorded set. All 37 inventory JSON files parse and match recorded hashes. The graph has 20 claims, 25 observations, and 36 candidate-only edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports/refutes. No evidence/status overclaim was found."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R10-FM-001",
+      "severity": "high",
+      "title": "PLAN closed rollout vocabulary omits the new reconciliation states",
+      "requirement": "Every versioned tuple coordinate must have one closed vocabulary shared by PLAN and the normative manifest.",
+      "evidence": [
+        "PLAN.md:379 enumerates the rollout coordinate but omits WIDENING_RECONCILING and PROMOTION_RECONCILING.",
+        "docs/state-transition-manifests.md:675 and :705 use both values in reachability and reducer rules.",
+        "IC32-UW/UP/RWX/RPX/RN and IH01-W/P plus IH06-WX/WN/PX/PN use them as reachable rollout sources or targets."
+      ],
+      "impact": "A compiler using PLAN’s declared versioned coordinate rejects the round-9 effect-first states as unknown, while a compiler accepting the manifest has a different schema. The effect-first correction is therefore not reproducible from one exact contract.",
+      "required_correction": "Add both reconciliation values to PLAN §14.0’s closed rollout coordinate and any generated schema/vocabulary equality checks; require exact equality with the manifest vocabulary."
+    },
+    {
+      "id": "R10-FM-002",
+      "severity": "high",
+      "title": "Post-reconciliation rollback and cleanup rows omit required canonical adjacency",
+      "requirement": "Every synchronized tuple row must stutter or traverse only explicit §2 canonical adjacency, with the exact sequence stated.",
+      "evidence": [
+        "Reconciliation rollout states project canonical BLOCKED under manifest :705.",
+        "IC32-RWX/RPX (:763-764) and IH06-WX/PX (:977,:979) change that tuple to rollback REQUESTED but state only ROLLBACK_REQUESTED; §2 has no BLOCKED->ROLLBACK_REQUESTED edge.",
+        "IC32-RN (:765) and IH06-PN (:980) state only CLEANING rather than the available explicit BLOCKED>CLEANING edge."
+      ],
+      "impact": "The manifest’s universal adjacency rule makes these round-9 continuation rows invalid or leaves their canonical transaction sequence undefined. Settled exposure/no-exposure after safe reconciliation can strand.",
+      "required_correction": "Give every row an exact legal §2 sequence. Add a justified canonical edge only if necessary; otherwise use the existing BLOCKED>CLEANING path and an explicit legal BLOCKED-to-rollback sequence, then cover each in tuple witnesses."
+    },
+    {
+      "id": "R10-FM-003",
+      "severity": "high",
+      "title": "Effect-first degradation has no row after a durable verified Effect but before rollout consumption",
+      "requirement": "Every active rollout degradation must atomically record degradation, fence progress, and choose one safe path without losing a reachable interleaving.",
+      "evidence": [
+        "IR38 and IR18 require an already-durable direct E06 receipt, so E06 may settle the Effect while rollout remains WIDENING_EFFECT or PROMOTING.",
+        "IH01-W/P (:968,:970) match only when the original Effect is unsettled or exposure classification is not protected.",
+        "Generic IH01 excludes WIDENING_EFFECT and PROMOTING, and no other IH01 row handles the settled, protected-exposure interval."
+      ],
+      "impact": "Telemetry degradation in a reachable post-E06/pre-IR38-or-IR18 window has no legal control-health transition. Safety handling can block or race the success projection despite the claimed exhaustive degradation partition.",
+      "required_correction": "Either consume E06 and change rollout atomically, or add exact synchronized degradation rows for settled/protected X and N cases with one rollback or cleanup owner and legal canonical projections. Extend the exhaustive IH witness set."
+    },
+    {
+      "id": "R10-FM-004",
+      "severity": "high",
+      "title": "IC32 revocation is not total over every reachable rollout coordinate",
+      "requirement": "Candidate revocation must be partitioned by every reachable rollout coordinate and protected X/N/unsettled classification, without inferred deltas or duplicate rollback.",
+      "evidence": [
+        "Manifest :1010 explicitly requires enumeration of every reachable rollout coordinate.",
+        "IC32 rows :754-765 omit reachable SHADOW_PASSED coordinates including CANARY_ABORTING, CANARY_ABORTED, and CANARY_ABORT_SETTLED with rollback active or settled.",
+        "They also omit exposure-bearing PROMOTION_PENDING_APPROVAL, APPROVED, and WIDENING_REVIEW coordinates; IC32-N cannot apply where a current ExposureReceipt exists."
+      ],
+      "impact": "A revocation arriving in these nonterminal coordinates cannot atomically revoke/fence through IC32, or would need a false no-exposure fact or duplicate rollback. This contradicts PLAN §8.4’s exact partition and leaves unsafe authority/cleanup behavior undefined.",
+      "required_correction": "Enumerate the omitted reachable coordinates with exact existing-rollback/no-new-rollback, protected exposure/no-exposure, stop/quiescence, rollout, cleanup-owner, and replay behavior. Make checker equality use the actual generated reachable coordinate set."
+    },
+    {
+      "id": "R10-FM-005",
+      "severity": "high",
+      "title": "IR34 and IR35 enter canary abort without an exact protected X/N classifier",
+      "requirement": "Every reachable canary abort entry must select and persist exactly one protected exposure or no-exposure classification that can satisfy IR13A or IR13B.",
+      "evidence": [
+        "IR34 and IR35 (:816-817) move CANARY_READY to CANARY_ABORTING after the admitted child fails or cancels but do not persist an X or N branch classifier.",
+        "IR12 can then reach CANARY_ABORTED, where only IR13A or IR13B may settle.",
+        "The claimed exhaustive abort witness list at :1007 enumerates IR07/09/10/53 and IH01-C continuation but omits IR34/IR35."
+      ],
+      "impact": "These abort paths rely on an unstated later proof-producing transition and can strand at CANARY_ABORTED under the closed rows. The claim that every abort source has exactly one X/N row is false.",
+      "required_correction": "Split IR34 and IR35 into explicit reachable X/N rows or prove and record a protected no-exposure classifier atomically in each row. Add both paths to exact abort classification and IR13B witnesses."
+    },
+    {
+      "id": "R10-FM-006",
+      "severity": "high",
+      "title": "Reducer prose assigns all ROLLED_BACK cleanup to IRB08 despite the widening-abort exception",
+      "requirement": "The normative reducer must state one consistent, complete cleanup owner for each rollback_origin and cancellation coordinate.",
+      "evidence": [
+        "Priority 7a (:691), IRB08 (:907), and :910 correctly forbid IRB08 for rollback_origin=WIDENING_ABORT and assign IR13C under cancellation NONE.",
+        "The terminal-resolution paragraph at :714 instead says a settled ROLLED_BACK ‘does not permanently mask cleanup’ because priority 7a preserves it ‘only until IRB08 changes cleanup NOT_REQUIRED->PENDING’.",
+        "That universal explanation has no widening-abort qualification."
+      ],
+      "impact": "Two normative reducer descriptions disagree about the sole transition out of ROLLED_BACK. A literal implementation either rejects widening-abort cleanup or illegally lets IRB08 bypass the origin partition.",
+      "required_correction": "Rewrite :714 to reproduce the exact origin/cancellation partition: IR13C for WIDENING_ABORT/NONE, IRB08 for non-WIDENING_ABORT/NONE, and IX03 for pending cancellation."
+    },
+    {
+      "id": "R10-FM-007",
+      "severity": "high",
+      "title": "IR13A and IR13C permit parent cleanup before rollback reaches ROLLED_BACK",
+      "requirement": "Exposed canary abort cleanup must start only after real rollback is fully settled at ROLLED_BACK, with IR13C as the later sole owner under cancellation NONE.",
+      "evidence": [
+        "IR13A (:793) accepts rollback ‘verified/rolled-back’, which includes the declared rollback state VERIFIED.",
+        "IR13C (:795) requires the IR13A branch receipt and cancellation NONE but has no rollback_state=ROLLED_BACK guard.",
+        "Priority 7 (:690) still forces canonical ROLLBACK_VERIFIED at VERIFIED, so IR13C’s REVIEW>CLEANING projection cannot apply; :691, :910, and :1004 all state that the widening-abort tuple is ROLLED_BACK through IR13A before IR13C."
+      ],
+      "impact": "The rows either allow cleanup scheduling before IRB07 records the rollback outcome or make IR13C reject under the reducer. This breaks the exact exposed-abort settlement path and contradicts the round-9 cleanup-owner contract.",
+      "required_correction": "Require rollback_state=ROLLED_BACK in IR13A’s exposed branch and recheck it in IR13C. Keep IRB07 before IR13A, then prove the ROLLED_BACK-through-IR13A-to-IR13C sequence for NONE and the IX03 sequence for REQUESTED/QUIESCING."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 7,
+    "medium": 0,
+    "low": 0,
+    "total": 7,
+    "manifest_rows_parsed": 735,
+    "canonical_rows": 93,
+    "private_and_product_rows": 642,
+    "current_normative_headings": 28,
+    "reachable_effect_product_rows": 44
+  },
+  "residual_uncertainty": [
+    "This was a plan-only static/table audit, not an implementation test, exhaustive generated reachable-product proof, or production-safety validation.",
+    "Legacy source content and semantic entailment were not revalidated; the package correctly leaves immutable retrieval and same-run human edge review as future gates."
+  ],
+  "closure_criteria_pass": false
+}

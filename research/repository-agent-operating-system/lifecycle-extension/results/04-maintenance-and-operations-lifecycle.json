@@ -1,0 +1,1478 @@
+{
+  "scope": {
+    "question": "Define a repository-native, durable maintenance and operations factory from intake through recurrence prevention, including user reports, telemetry/logs, CI, security alerts, dependency updates, incidents, bounded remediation, rollout/rollback, postmortems and governed improvement.",
+    "boundaries": [
+      "The controller coordinates maintenance work; existing observability, paging, scanners, GitHub, CI/CD and workflow engines remain systems of record for their own facts.",
+      "Incident mitigation and planned defect repair share evidence but have different clocks and authority. Paging restores service; backlog work produces reviewed code.",
+      "The model does not make raw logs/issues authoritative, does not diagnose by confidence alone, and does not claim safe general autonomous operations.",
+      "The target maximum for fully self-improving is automatic proposal, offline evaluation, non-operative shadow, bounded canary, and automatic rollback for proven reversible classes. Protected tests, hidden holdouts, graders, permissions, policy, risk floors and promotion authority remain outside the candidate."
+    ],
+    "as_of": "2026-09-13; foundational incident/workflow evidence before 2023 is included where still normative."
+  },
+  "verified_capabilities": [
+    "GitHub webhooks expose typed issue, CI/check, code-security and deployment events. Official guidance requires HMAC validation, quick acknowledgement, asynchronous queues and use of delivery identifiers; failed deliveries are not automatically redelivered, so durable intake plus inventory reconciliation is necessary [S49-S52].",
+    "Dependabot supports scheduled/grouped/cooldown-limited version-update PRs, vulnerability alerts and minimum-secure-version security PRs; dependency review can gate newly introduced dependencies [S01-S04]. Renovate supports grouping, stability delay and conditional automerge, subject to platform checks and permissions [S08-S10].",
+    "CodeQL Autofix and Sentry Seer can propose fixes/PRs and correlate telemetry, but their own documentation says generated fixes can be incomplete, insecure, syntactically wrong or behavior-changing. This supports diagnosis/proposal, not autonomous acceptance [S06-S07,S24-S25].",
+    "OpenTelemetry provides correlated traces, metrics and logs; W3C Trace Context provides propagation. Prometheus/Alertmanager supports persistence, firing/resolved status, grouping and webhooks. None proves root cause or safe action [S26-S28,S57].",
+    "Argo Rollouts and Kubernetes provide deterministic progressive analysis, abort/pause and rollback primitives. GitHub environments add protected deployment jobs and scoped secrets. These are credible actuation substrates only when metrics, artifact identity and protection configuration are correct [S29,S38,S40,S53-S54].",
+    "NIST incident guidance and Google SRE practice support explicit incident roles, communication, evidence, recovery and lessons learned. PagerDuty exposes logged human-triggered automation actions for known runbooks [S31,S37,S58-S59].",
+    "SLSA provenance, artifact signature verification, GitHub rulesets and Actions hardening can bind a release to reviewed build inputs and separate trusted workflows. Provenance authenticates origin; it does not establish semantic safety [S05,S12,S19,S56].",
+    "GitHub deployment records/statuses are requests and externally reported observations, not a general production rollback mechanism; GitHub Revert creates a new source PR and may conflict [S65-S68]. Runtime rollback must live in the deployer and restore an immutable known-good artifact.",
+    "GitHub required checks can mask a skipped Actions job as success. Merge queues require CI to handle merge_group. Verify expected App/check identity, exact SHA and actual evidence rather than check name/conclusion alone [S64,S67].",
+    "RFC 9116 standardizes discoverable vulnerability-report contact metadata, while NIST SP 800-216 supplies a receive→scope→triage→coordinate→verify/remediate→communicate process; neither makes security intake autonomous [S72-S73]. CVSS v4 separates intrinsic severity from time/local context and must not be used as the sole priority [S74]."
+  ],
+  "evidence_and_limits": {
+    "supported_conclusion": "Compose deterministic intake/reconciliation, independent protected verification, existing incident command, and narrowly scoped runbooks. Let models summarize, search, cluster candidates, draft hypotheses/plans/patches and propose improvements. Never let model prose itself grant authority.",
+    "independent_challenges": [
+      "Empirical Dependabot studies report real adoption and repair activity but also non-merge, compatibility and workflow friction; alert/PR creation is not equivalent to retained remediation [S16-S17,S20-S21].",
+      "GitHub dependency graphs can be incomplete/inaccurate for studied ecosystems; scanner absence is not proof of no vulnerability [S22].",
+      "Knight Capital, Cloudflare and Meta outage records show automation/configuration defects can produce extreme blast radius and that rollback paths may themselves fail [S34-S36].",
+      "Patch-generation research distinguishes plausible/test-passing patches from correct patches. AI incident benchmarks measure bounded task performance, not production authorization or long-horizon safety [S45-S48].",
+      "The event-stream supply-chain incident shows a seemingly ordinary dependency update can transfer attacker code; trust, provenance and maintainer history matter beyond semver/test green [S18]."
+    ],
+    "missing_denominators": [
+      "No normalized public dataset reports total signals, dedupe errors, true/false issue creation, diagnosis correctness, operator effort, safe remediation, rollback success and recurrence across the same production population.",
+      "Vendor case studies generally omit selection, failed attempts, review labor, false RCA, post-deployment defects and cost. Sentry self-use is a useful case report, not independent causal validation [S39].",
+      "Living GitHub/product documentation and plan-specific behavior must be snapshotted and contract-tested on the target tenant."
+    ],
+    "safe_inference": "Automatic rollback may be safer than novel repair only for a pretested compatible artifact and reversible side effects. Missing/conflicting telemetry, data migrations, credential compromise or rollback failure require incident command."
+  },
+  "actors_and_authority": {
+    "external_reporter": "May submit symptoms and answer questions; owns no state transitions. Identity, consent and visibility are recorded.",
+    "intake_adapter": "Authenticates source, redacts, normalizes and stores envelopes; no issue/deploy rights.",
+    "controller": "Only component allowed to append lifecycle transitions. Enforces schema, CAS/fencing, risk, budgets, approval invalidation and outbox. It is deterministic and cannot change its own policy.",
+    "triage_agent": "Reads sanitized evidence; proposes cluster links, severity, hypotheses and questions. Cannot page, publish, dismiss, prioritize, close or execute.",
+    "on_call_and_incident_roles": "Human incident commander owns incident declaration, severity, objectives and break-glass; operations lead executes/coordinates; communications lead handles stakeholder messages; planning lead tracks work [S58].",
+    "planner_implementer": "Creates a versioned remediation proposal and task-branch patch with short-lived, path/verb/budget-scoped credentials. Cannot approve, merge, deploy, access production secrets or modify protected controls.",
+    "verifier": "Independent identity executes protected tests/security/policy and signs evidence for exact SHA/artifact. Cannot edit candidate or approve release.",
+    "publisher_reconciler": "Narrow identity creates/updates issues and managed Project fields idempotently; imports or flags human-owned drift; no code/deploy permission.",
+    "merge_deploy_rollback": "Separate controllers accept only signed policy decisions. Deploy identity receives environment/OIDC authority after required gate. Rollback controller can restore only allowlisted, drilled last-known-good versions.",
+    "security_privacy_owner": "Owns embargo/private routing, disclosure, alert dismissal, risk acceptance and evidence retention/deletion.",
+    "policy_eval_owners": "Humans/independent services own hidden tests, graders, thresholds, permissions, rulesets, promotion and exception approval. Candidate cannot read/write protected answer keys or approve itself.",
+    "separation_invariant": "No principal may propose and satisfy its own independent gate, expand its permissions, alter evidence, or weaken the policy that judges its action."
+  },
+  "complete_state_catalog": {
+    "signal_envelope": [
+      "RECEIVED",
+      "AUTH_FAILED",
+      "QUARANTINED",
+      "NORMALIZED",
+      "DEDUPLICATE",
+      "DEAD_LETTER",
+      "REPLAY_PENDING",
+      "CONSUMED"
+    ],
+    "problem_cluster": [
+      "OBSERVED",
+      "QUALIFYING",
+      "SUPPRESSED_WITH_EXPIRY",
+      "TRIAGE_PENDING",
+      "TRIAGING",
+      "NEEDS_INFORMATION",
+      "DUPLICATE_LINKED",
+      "SECURITY_PRIVATE",
+      "PLANNED_WORK_PROPOSED",
+      "INCIDENT_CANDIDATE",
+      "MITIGATED",
+      "RESOLVED_PENDING_COOLDOWN",
+      "RECURRENT",
+      "CLOSED",
+      "FALSE_POSITIVE",
+      "STALE",
+      "CANCELLED"
+    ],
+    "planned_work": [
+      "INBOX",
+      "TRIAGED",
+      "PLANNING",
+      "CLARIFICATION_REQUIRED",
+      "DEFERRED",
+      "REJECTED",
+      "READY_REVIEW",
+      "READY",
+      "LEASED",
+      "DIAGNOSING",
+      "REPRODUCED",
+      "HYPOTHESIS_PENDING",
+      "REMEDIATION_PLANNED",
+      "IMPLEMENTING",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "MERGE_READY",
+      "MERGE_QUEUED",
+      "MERGED",
+      "RELEASE_READY",
+      "DEPLOYING",
+      "OBSERVING",
+      "VERIFIED",
+      "BLOCKED",
+      "FAILED_BUDGET",
+      "STALE_APPROVAL",
+      "SYNC_ERROR",
+      "CANCELLED",
+      "CLOSED"
+    ],
+    "incident": [
+      "DETECTED",
+      "DECLARED",
+      "ASSESSING",
+      "MOBILIZING",
+      "MITIGATING",
+      "MONITORING",
+      "RECOVERED",
+      "POSTMORTEM_REQUIRED",
+      "POSTMORTEM_REVIEW",
+      "ACTIONS_OPEN",
+      "CLOSED",
+      "HANDOFF_PENDING",
+      "ESCALATED",
+      "ROLLBACK_FAILED"
+    ],
+    "runbook_execution": [
+      "REQUESTED",
+      "PRECHECK",
+      "APPROVAL_REQUIRED",
+      "LOCKED",
+      "EXECUTING",
+      "POSTCHECK",
+      "SUCCEEDED",
+      "FAILED",
+      "COMPENSATING",
+      "ROLLED_BACK",
+      "AMBIGUOUS",
+      "TIMED_OUT",
+      "CANCELLED",
+      "HUMAN_INCIDENT"
+    ],
+    "release": [
+      "CANDIDATE",
+      "APPROVAL_REQUIRED",
+      "CANARY",
+      "PAUSED",
+      "PROMOTING",
+      "PROMOTED",
+      "ABORTING",
+      "ROLLED_BACK",
+      "ROLLBACK_FAILED",
+      "OBSERVATION_INCONCLUSIVE",
+      "SUPERSEDED"
+    ],
+    "postmortem_improvement": [
+      "DRAFT",
+      "FACT_REVIEW",
+      "APPROVED",
+      "ACTION_TRACKING",
+      "EVAL_CURATION",
+      "PROPOSAL",
+      "OFFLINE_EVAL",
+      "SHADOW",
+      "CANARY_PENDING_APPROVAL",
+      "CANARY",
+      "PROMOTED",
+      "REJECTED",
+      "ROLLED_BACK",
+      "ARCHIVED"
+    ],
+    "orthogonal_flags": [
+      "privacy_class",
+      "risk_tier",
+      "severity",
+      "customer_impact",
+      "suppression_expiry",
+      "lease_expiry",
+      "approval_expiry",
+      "evidence_freshness",
+      "source_health",
+      "policy_drift",
+      "legal_hold"
+    ],
+    "terminal_rule": "Terminal is aggregate-specific. CLOSED never erases history; recurrence appends a new revision and either reopens by declared same-problem policy or creates a linked successor. CANCELLED records actor, reason and cleanup result."
+  },
+  "transition_contract": {
+    "event_envelope": {
+      "schema_version": "semver",
+      "event_id": "UUID/ULID",
+      "event_type": "namespace.action.vN",
+      "source": "URI-like producer identity",
+      "subject": "aggregate id",
+      "occurred_at": "producer UTC",
+      "received_at": "controller UTC",
+      "actor_principal": "stable human/workload identity plus role",
+      "correlation_id": "cluster/incident/change/trace",
+      "causation_id": "prior event",
+      "delivery_id": "source delivery identifier",
+      "aggregate_version": "monotonic expected version",
+      "payload_digest": "SHA-256 canonical payload",
+      "versions": "adapter, fingerprint, policy, model/prompt/tool, repository SHA, runbook, evaluator",
+      "evidence_refs": "content-addressed redacted objects",
+      "privacy_risk": "classification and risk floor"
+    },
+    "command": "{command_id, requested_transition, subject, expected_version, idempotency_key, actor, capability, deadline, budget, bound_approval?, reason, payload_digest}. Controller validates and records accepted/rejected result.",
+    "guards": [
+      "authenticated and schema-supported source; privacy route permits processing",
+      "current state/version and valid fencing token match",
+      "risk is max(declared, deterministic source/path/capability/runtime floor); agents cannot lower it",
+      "all required evidence is fresh and bound to exact spec/SHA/artifact/policy/runbook",
+      "approval actor is independent, authorized, unexpired and bound to immutable proposal hash",
+      "budget, error budget, maintenance window, concurrency key and rollback prerequisites allow action",
+      "Security priority combines CVSS vector, current threat/exploitation, local environment/asset criticality, reachability, business impact and disclosure duty; base score alone cannot authorize dismissal or execution [S74]."
+    ],
+    "effects": "Within one DB transaction append event, change aggregate version, create evidence/audit references and insert outbox command. External writes occur later, carry deterministic marker, then are read back before success transition.",
+    "idempotency_ordering": "Unique(source,delivery_id) and unique(subject,transition,candidate_digest,policy_version). Duplicate commands return prior outcome. Store out-of-order evidence but never regress state. Use per-aggregate CAS/lease and fencing; late worker output cannot publish.",
+    "invalidation": [
+      "New material user decision => new decision/spec revision; invalidate READY and downstream approval.",
+      "New commit/base, artifact, policy, evaluator, runbook parameters, evidence revision, scope/permission or expired time => invalidate bound approval and verification.",
+      "Source resolves then re-fires inside cooldown => cancel closure; materially different ownership/cause => linked successor."
+    ],
+    "reconciliation": "Webhooks wake work but are not completeness proof. Periodically inventory sources, alerts, workflow runs, issues/PRs/deployments and managed Project/ruleset/environment configuration. Classify drift as safe-managed, human-owned, destructive, unknown or missing. Repair only preapproved idempotent managed drift; import allowed human decisions; otherwise SYNC_ERROR and stop.",
+    "invalid_transition": "Persist rejection with policy rule/evidence and alert if safety relevant. Never infer success from timeout, missing webhook, green summary, silence, or HTTP 2xx."
+  },
+  "artifact_contracts": {
+    "immutable_evidence": [
+      "raw-event-ref.json: encrypted object URI, ciphertext/hash, source revision, authenticity, DLP result, retention/legal-hold; raw secrets/PII/embargoed findings never enter normal GitHub issues.",
+      "normalized-signal.v1.json: signal kind, detector/rule/version, repo/service/component/environment, severity/status, signature, first/last seen/count and evidence refs.",
+      "cluster.vN.json: fingerprint algorithm/version, exact fields, aliases/merge-split lineage, owners, source membership, decisions and confidence labels fact|inference|unknown.",
+      "incident.v1.json: severity, commander/roles, objectives, timeline, affected services/users, communications, mitigations, state and evidence.",
+      "diagnosis.v1.json: reproduction environment/commit, observations, ranked hypotheses, supporting/refuting evidence, experiments, counterfactuals, uncertainty and stop criteria.",
+      "remediation-plan.v1.json: immutable decision/spec revision, scope/non-goals, risk, steps, tests, rollout, rollback/compensation, owners, budgets and approvals.",
+      "runbook.v1.yaml: signed ID/version/digest, eligible fingerprint/risk, typed parameters and bounds, preconditions, resource/concurrency lock, exact operations, credential profile, timeout, independent postconditions, compensator, last drill, expiry and human-only predicates.",
+      "evidence-bundle.v1.json: base/head, build image, test/evaluator manifests, raw result digests, provenance, policy result and verifier identity.",
+      "release-manifest.v1.json: source/artifact/SBOM/provenance/signature, config/schema compatibility, cohort/budgets, observation queries, abort thresholds and last-known-good.",
+      "postmortem.v1.md+json: impact, detection, timeline, contributing conditions/failed defenses, trigger, mitigation/recovery, evidence, what went well/poorly, owned/dated actions and recurrence/eval candidates; avoid monocausal or model-invented RCA.",
+      "decision.v1.json: question, options/tradeoffs, recommendation, exact human response, actor/time, affected artifact hashes, resulting revision, expiry/supersession and rationale.",
+      "effect-receipt.v1.json: requested operation and idempotency key, target/resource pre-state, provider operation ID, HTTP/result, observed post-state, ambiguity classification and compensating action; deployment status is observation rather than proof of runtime change [S65-S66]."
+    ],
+    "provenance": "Every derived artifact lists input content hashes, producing code/model/prompt/tool versions, actor, timestamp, redaction/transformation and output digest. Mutable URLs are evidence references, not identities.",
+    "storage": "Git stores reviewed schemas/policy/runbook definitions and opaque evidence hashes. Restricted immutable/object storage holds telemetry, security cases, hidden evals and audit. Controller DB is operational truth. GitHub issue/Project fields are projections.",
+    "compatibility": "Schemas use additive-first semver; consumers reject unknown unsafe major versions. Migrations shadow/replay fixtures, retain lineage/aliases and support rollback or dual read.",
+    "retention": "Per privacy/legal/service policy with lineage-aware deletion and a non-sensitive audit tombstone. Failed, cancelled and rolled-back outcomes remain auditable."
+  },
+  "conversation_and_handoffs": {
+    "durable_dialogue": "Every question and answer becomes a versioned Decision artifact, not only a comment. The controller posts a human-readable rendering plus stable decision ID; it ingests the authenticated answer, quotes it exactly, records actor/source/time, creates a new spec/plan revision and computes which approvals/evidence became stale.",
+    "ask_policy": [
+      "Ask one grouped, bounded set of questions when missing facts can change user-visible behavior, security/privacy/legal duties, severity/priority, data loss, compatibility, public communication, ownership, acceptance oracle, blast radius or rollback.",
+      "Provide options, evidence/tradeoffs and a recommended default only when reversible and permitted. Never silently choose consequential product intent.",
+      "After configured attempts/TTL, move to BLOCKED/DEFERRED and notify owner; do not fabricate intent or burn implementation budget."
+    ],
+    "incident_handoff": "Record outgoing/incoming commander, current objectives/state, executed commands, open hypotheses, next checks, timers, permissions and exact acknowledgement. Until accepted, HANDOFF_PENDING retains old accountable commander.",
+    "agent_handoff": "Structured context manifest contains work/spec revision, repository/base SHA, cluster/incident timeline, evidence digests, decisions, attempted experiments, remaining budget, lease/fence and explicit next action. Receiver verifies digests and acknowledges; free-form summary is non-authoritative.",
+    "compaction_resume": "Compact by artifact references and signed checkpoint, never by deleting decisions. Resume requires re-read of current aggregate, remote reconciliation, lease/approval/evidence freshness check and mismatch report before action.",
+    "closure": "Reporter/user confirmation is sought for user-visible bugs when feasible. Lack of response can close after declared policy/cooldown only with verified telemetry/tests, never by assuming satisfaction."
+  },
+  "orchestration_and_composition": {
+    "topology": "MaintenanceFactory composes Intake, Cluster/Triage, Incident, Diagnosis, PlannedChange, Release/Rollback and Postmortem/Improvement subfactories. A parent owns correlation and join policy; each child has separate state, lease, budget and authority.",
+    "fanout": [
+      "Parallel evidence collectors may query logs/traces/deploys/CI/security/dependency/repository history read-only.",
+      "Hypothesis agents may independently analyze sanitized snapshots. Their outputs join as claims with cited evidence; disagreement triggers experiment/human review, never majority truth.",
+      "Security-private work and public backlog never share raw artifacts or credentials. Incident mitigation continues even if Project/issue projection fails."
+    ],
+    "joins": "Join declares required, optional and veto outputs. Timeout yields INCONCLUSIVE with missing branches. A critical security/privacy/policy veto blocks regardless of other success. Late child results append evidence but cannot mutate a completed revision.",
+    "dependencies": "DAG edges name artifact contract, exact producer revision, start condition, cancellation propagation and compensation. Cycles are prohibited except explicit bounded clarification/retry loops.",
+    "budgets": "Per case and child: wall time, attempts, tokens, cost, tool calls, log bytes, evidence age, concurrency and production blast radius. Reserve budget for cleanup/rollback. Exceed => cancel children, revoke lease/token, preserve evidence and escalate.",
+    "cleanup": "Finally paths revoke tokens, release locks, stop sandboxes, remove ephemeral resources, reconcile partial writes, archive evidence and expose cleanup_failed. Cleanup failure is never hidden by task success.",
+    "workflow_engine": "PostgreSQL inbox/outbox/CAS is enough initially. A durable workflow engine may replace scheduling at measured scale, but policy/authority/artifact contracts stay external to LLM agents."
+  },
+  "human_need_policy": {
+    "deterministic_always_human": [
+      "ambiguous or contested user intent/priority; new public behavior/API; legal/privacy/customer communication",
+      "Sev-1/2 declaration/closure, novel production action, destructive/irreversible/data/schema/IAM/auth/crypto operation, cross-region/global action",
+      "security alert dismissal/risk acceptance/public disclosure; dependency supplier trust exception; secret/PII handling",
+      "new or materially changed runbook, fingerprint/noise/routing policy, detector, evaluator/grader/hidden test, permission, workflow trust, ruleset/environment/CODEOWNERS",
+      "failed/incompatible rollback, missing/conflicting telemetry, unknown provenance, expired evidence/approval, break-glass/exception",
+      "promotion of any agent/model/prompt/tool/policy/workflow improvement; proposer cannot count as approver",
+      "vulnerability report scope dispute, safe-harbor/legal issue, coordinated disclosure timing, or reporter communication with material commitment [S72-S73]"
+    ],
+    "may_automate_only_if_all": [
+      "allowlisted low-risk class and exact versioned runbook or patch-dependency profile",
+      "deterministic preconditions and independent postconditions; small bounded blast radius; reversible/drilled rollback",
+      "current signed evidence/provenance and no policy/config/source-health drift",
+      "local pilot meets predefined per-class precision, miss, escape, rollback and operator-load thresholds with enough denominators",
+      "automatic circuit breaker, manual kill switch, scoped identity, idempotency and audited sampled review"
+    ],
+    "probabilistic_use": "Model confidence may rank triage/hypotheses or select questions, but cannot override a deterministic gate. If calibrated uncertainty exceeds class threshold or independent agents/graders disagree beyond threshold, request evidence/human review; an uncalibrated score is treated as unknown.",
+    "approval_binding": "Bind work/incident ID, decision/spec revision, evidence digest, exact SHA/artifact, runbook+parameters, policy/evaluator versions, resource scope, approver stable identity/role, reason and expiry. Any bound change invalidates.",
+    "stop": "On unauthorized tool attempt, secret detection, scope/permission expansion, stale fence, impossible transition, repeated same failure, budget breach, policy drift, inconclusive health, rollback failure or kill signal: stop writes, revoke credentials, preserve evidence and page accountable owner.",
+    "cannot_safely_be_autonomous": [
+      "choosing product priorities or interpreting unresolved human values",
+      "declaring a novel root cause as fact or accepting a model-authored test as sole oracle",
+      "granting its own permissions, weakening gates, modifying protected tests/graders/holdouts or approving/prompting its own promotion",
+      "novel high-blast-radius remediation, destructive migration, security disclosure/risk acceptance, legal/customer commitments, or recovery when rollback is unproven",
+      "general unattended issue→production→self-modification. No reviewed evidence establishes safe broad autonomy."
+    ]
+  },
+  "factory_as_code_schema": {
+    "apiVersion": "agent-os/v1alpha1",
+    "kind": "MaintenanceFactory",
+    "metadata": {
+      "name": "repository-maintenance",
+      "version": "1.0.0",
+      "owners": [
+        "team-id"
+      ],
+      "sourceDigest": "sha256:..."
+    },
+    "spec": {
+      "inputs": {
+        "eventSchemas": [
+          "github.webhook.v1",
+          "otel.signal.v1",
+          "user.report.v1"
+        ],
+        "privacyRoutes": {
+          "security": "private-case"
+        }
+      },
+      "aggregates": [
+        "SignalEnvelope",
+        "ProblemCluster",
+        "WorkItem",
+        "Incident",
+        "RunbookExecution",
+        "Release",
+        "PostmortemImprovement"
+      ],
+      "statesRef": "agent-os/maintenance/states.v1.yaml",
+      "transitionsRef": "agent-os/maintenance/transitions.v1.yaml",
+      "policyRef": "agent-os/policy/maintenance.v1.rego",
+      "riskRef": "agent-os/risk.v1.yaml",
+      "roles": {
+        "triage": "read-sanitized",
+        "publisher": "issues-project-write",
+        "implementer": "task-branch-write",
+        "verifier": "checks-write",
+        "deployer": "environment-oidc",
+        "rollback": "allowlisted-release-write"
+      },
+      "fingerprints": {
+        "version": "3",
+        "rulesRef": "agent-os/maintenance/fingerprints.v3.yaml",
+        "migration": "shadow-and-alias"
+      },
+      "subfactories": {
+        "incident": "factory://incident@1",
+        "plannedChange": "factory://build@1",
+        "improvement": "factory://governed-improvement@1"
+      },
+      "budgets": {
+        "attempts": 2,
+        "wallClock": "PT2H",
+        "cost": "repo-specific",
+        "reserveForRollback": true
+      },
+      "gates": [
+        "privacy",
+        "risk",
+        "ready",
+        "independent-verification",
+        "release",
+        "postcondition"
+      ],
+      "timeouts": {
+        "clarification": "P7D",
+        "lease": "PT15M",
+        "observation": "source-specific"
+      },
+      "retry": {
+        "only": "idempotent/transient",
+        "max": 3,
+        "backoff": "exponential-jitter"
+      },
+      "reconcile": {
+        "webhookWake": true,
+        "fullScan": "daily",
+        "managedFields": [
+          "derived_status"
+        ],
+        "humanFields": [
+          "priority",
+          "intent"
+        ]
+      },
+      "cleanup": {
+        "always": [
+          "revoke-token",
+          "release-lock",
+          "stop-sandbox",
+          "record-evidence"
+        ]
+      },
+      "automationCeiling": "proposal-eval-shadow-canary-rollback; protected promotion remains external"
+    },
+    "required_repository_files": [
+      "agent-os/maintenance/{states,transitions,fingerprints,routing,noise-policy,runbooks}.yaml",
+      "agent-os/schemas/{event,signal,cluster,incident,decision,diagnosis,plan,evidence,release,postmortem}.json",
+      "agent-os/policy/maintenance.rego",
+      "agent-os/evals/maintenance/{fixtures,holdout-manifest}.yaml",
+      ".github/workflows/{intake,verify,reconcile,deploy,rollback}.yml",
+      ".github/dependabot.yml",
+      "CODEOWNERS",
+      "docs/runbooks/*.md"
+    ],
+    "schema_rules": [
+      "Unknown fields rejected in authority-bearing objects; symbolic external IDs resolved into non-authoritative observed lock state.",
+      "All refs and executable artifacts pin version+digest. Secrets, raw telemetry and mutable observed state are excluded from Git.",
+      "Schema CI tests reachability, terminal states, guards, authority separation, retry/cleanup paths and backward compatibility."
+    ]
+  },
+  "end_to_end_workflows": [
+    {
+      "name": "user report to retained fix",
+      "steps": [
+        "Authenticate reporter/source; create redacted envelope; search stable markers/fingerprints and semantic candidates.",
+        "Ask reproducibility/expected-behavior questions; store answers as Decision revisions. Human priority/intent yields READY.",
+        "Reproduce at exact base, record diagnosis/hypotheses, approve remediation plan, patch task branch.",
+        "Independent verifier proves baseline failure/candidate pass plus protected suites; review/merge exact SHA.",
+        "Deploy signed artifact by risk policy; canary on SLO/user evidence; rollback on declared threshold.",
+        "After cooldown and reporter confirmation when feasible, close cluster/work; recurrence links to postmortem/eval."
+      ]
+    },
+    {
+      "name": "CI failure",
+      "steps": [
+        "Key exact occurrence by repository/workflow/job/head/attempt plus normalized error signature; distinguish same-commit rerun from recurrence.",
+        "One allowlisted transient rerun is permitted; repeated/unknown/security failures block. Correlate last pass, dependency/action/runtime changes.",
+        "Agent may draft diagnosis/patch within two attempts; clean trusted CI on exact head decides. Never let privileged workflow execute attacker-controlled artifact."
+      ]
+    },
+    {
+      "name": "security or dependency maintenance",
+      "steps": [
+        "Route secret/embargoed finding privately; preserve advisory/rule/package/ecosystem/manifest and affected-range identity.",
+        "Prioritize deterministic severity/exposure plus CISA KEV/EPSS as signals, not sole decisions [S14-S15]. Verify dependency graph/SBOM and exploitability; scanner absence is inconclusive [S22].",
+        "Bot proposes minimum secure/grouped update; verify supplier/provenance, lockfile delta, dependency review, tests and compatibility. CodeQL autofix remains a suggestion [S01-S07].",
+        "Only allowlisted patch updates with mature local evidence may auto-merge/canary; majors, new suppliers, scripts, auth/crypto or failed tests require review. Humans own dismiss/risk accept/disclose."
+      ]
+    },
+    {
+      "name": "active incident and rollback",
+      "steps": [
+        "Actionable symptom/SLO/security signal creates incident candidate; human/on-call declares severity and incident roles. Preserve timeline and separate mitigation from RCA.",
+        "Prefer stop-the-bleeding: abort rollout, disable preapproved flag, shed bounded load, or restore drilled last-known-good using signed runbook. Lock resource and verify preconditions.",
+        "Execute with short-lived operation identity; observe independent user/SLO postconditions. Ambiguous telemetry, side-effect mismatch or rollback failure => HUMAN_INCIDENT.",
+        "After recovery/cooldown, preserve evidence and hand planned code changes into normal READY/verification/release gates; incident urgency does not permanently bypass them."
+      ]
+    },
+    {
+      "name": "postmortem and recurrence prevention",
+      "steps": [
+        "Open POSTMORTEM_REQUIRED for severe, repeated, rollback, control or near-miss criteria. Agent drafts factual timeline from immutable events; humans review impact/contributors.",
+        "Create owned dated actions across detection, prevention, containment, rollback, runbook, tests and policy. Each action is a work item, not a checkbox in prose.",
+        "Curator converts verified failure to minimized eval fixture with provenance/privacy and protected oracle. Candidate improvement runs offline, shadow and canary. Independent owner promotes; adverse late result rolls back and reopens learning."
+      ]
+    },
+    {
+      "name": "controller/source outage",
+      "steps": [
+        "Freeze publishers/executors if auth/policy/evidence integrity is unavailable; keep known-good production and paging independent.",
+        "Restore DB/object/audit from tested backup, replay durable inbox with idempotency, inventory upstream/GitHub remote actual state, surface gaps/conflicts.",
+        "Canary one source and reconcile before general enablement; create incident/postmortem for loss or unauthorized mutation."
+      ]
+    }
+  ],
+  "self_improvement_boundary": {
+    "automated_loop": [
+      "Observe retained outcome, false merge/split, incident, rollback, operator correction and sampled success.",
+      "Draft sanitized postmortem action/eval candidate. Independent curator validates oracle, provenance, privacy and time-split holdout.",
+      "Agent proposes one minimal change to prompt/model/router/tool/fingerprint/workflow/runbook with hypothesis, cost and rollback digest.",
+      "Run deterministic tests, repeated stochastic trials, adversarial/metamorphic cases and protected holdout with independent evaluator.",
+      "Shadow production inputs with all side effects forced to sinks. Compare against current control by slice.",
+      "After external promotion approval, canary signed digest with fixed cohort/time/action/spend/error budgets and auto-abort.",
+      "Promote only through independent authority. Monitor delayed effects; automatically restore compatible known-good on declared reversible threshold; open new case."
+    ],
+    "protected_invariants": [
+      "candidate cannot see/write hidden expected results, evaluator/grader config, acceptance thresholds or audit",
+      "candidate cannot change permissions, identities, policy, risk floors, gates, CODEOWNERS/rulesets/environments or promotion decision",
+      "candidate cannot select only favorable evidence, rewrite failed runs or delete incident/rollback history",
+      "authorization safety is a hard veto; aggregate score cannot trade it for productivity",
+      "production artifact equals evaluated digest and rollback target is pretested/compatible"
+    ],
+    "maximum_safe_claim": "Proposal/evaluation/shadow/canary/rollback can be automatic for a narrow proven reversible class. Promotion authority and any change to the control plane stay independent and human-accountable. Auto-promotion is not recommended without external preauthorization of an immutable policy and ample local evidence; control-plane changes are never auto-promoted.",
+    "recurrence_metric": "Measure retained resolution after 7/30/90-day class-specific windows, reopened clusters, same-cause incidents, action completion/effect, false dedupe split/merge, escape severity, rollback success, human corrections, review/on-call cost and user/SLO outcome—not tickets closed."
+  },
+  "validation_strategy": {
+    "schema_contract": [
+      "Validate every YAML/JSON artifact against pinned schema; golden canonicalization/digest; reject unknown authority fields; compatibility/expand-migrate-contract tests.",
+      "Consumer-driven contracts for GitHub webhook/API, OTel/Alertmanager, scanners, CI, deployment and Project schemas on target tenant/version."
+    ],
+    "state_model": [
+      "Enumerate every state/event/role/risk combination; prove no unreachable states, unauthorized path to READY/MERGED/PROMOTED/CLOSED, terminal mutation, missing cleanup or unbounded loop.",
+      "Property-based/random command sequences: monotonic aggregate versions; at-most-once logical effect; duplicate/reordered events converge; stale fence/approval never publishes; closure requires evidence/cooldown; cancel always cleans.",
+      "Model check joins, timeouts, handoffs, recurrence, incident-to-planned-work linkage and compensation."
+    ],
+    "fingerprint_reconciliation": [
+      "Golden fixtures for volatile-token normalization, collision/split/adversarial input, alias migrations and privacy. Shadow new fingerprint and produce merge/split impact before approval.",
+      "Replay duplicate/out-of-order/redelivery and partial API timeouts; compare scheduled inventory; verify read-after-write, human-owned drift preservation and visible SYNC_ERROR.",
+      "Retain canonical normalized key material and detect collisions; an upstream 64-bit fingerprint is grouping evidence, not a collision-free cluster or idempotency identity [S77]."
+    ],
+    "diagnosis_quality": [
+      "Historical time-split incidents with verified causes plus counterexamples; score evidence citation, calibrated hypothesis ranking, experiment usefulness and unsafe certainty separately. Never train/test on post-resolution clues that would not have existed at decision time."
+    ],
+    "security": [
+      "Forged HMAC, replay, parser bomb, SSRF, malicious Markdown/log prompt injection, secret/PII, poisoned SARIF/artifact/cache, compromised action, dependency confusion, token exfiltration, self-approval, check spoof, audit deletion and policy drift tests.",
+      "Permission matrix tests assert denied verbs/paths/network for each identity. Execute untrusted PR code only in nonprivileged clean sandbox."
+    ],
+    "fault_chaos": [
+      "Kill worker/controller at every side effect; network partition, rate limit, queue poison, DB failover, telemetry loss, stale clock, lock expiry, source resolves/reopens, Project field deletion, deploy partial success and rollback failure. Restore/replay and token-revoke drills."
+    ],
+    "release_acceptance": [
+      "Exact SHA/artifact/provenance/signature binding, canary control, predeclared SLO/error budget, minimum observation and statistical/power plan. Inconclusive pauses; no missing-data-as-pass.",
+      "Game days verify abort/rollback, communications/handoff and incident evidence. Data migrations require forward/backward compatibility and compensation, not binary rollback claims."
+    ],
+    "pilot_metrics": "Report denominators by source/risk/class: true/false issue publication, misses, fingerprint collisions/splits, time to detect/triage/mitigate/repair, accepted/retained fixes, escaped defects, auto-action success, rollback and rollback failure, recurrence, reviewer/on-call minutes, cost and security/privacy violations.",
+    "promotion_freeze": "Any critical unauthorized action, evidence tampering, false safety approval, severe escape, rollback failure, policy drift or underpowered/conflicting result freezes autonomy expansion and requires review."
+  },
+  "implementation_recommendation": {
+    "core": "Build a thin durable reconciliation controller around GitHub and existing observability/incident/deployment tools. Do not build a single write-capable autonomous maintenance agent.",
+    "phase_0_0_4_weeks": [
+      "Commit schemas/states/policy/fingerprint fixtures/runbooks/CODEOWNERS. Create separate GitHub App identities with minimum permissions.",
+      "Ingest one user form, GitHub Actions failures and one SLO source into Postgres inbox/outbox/cluster ledger. HMAC, DLP, security-private queue and audit are mandatory.",
+      "Run read-only/shadow triage and daily source↔cluster↔issue/Project inventory. Test replay, restore, stale fencing and kill switch."
+    ],
+    "phase_1_assisted": [
+      "Humans approve all publication, priority, incident action, closure and remediation. Agent summarizes evidence, asks durable questions, drafts diagnosis/plan/PR.",
+      "Add Dependabot/code scanning/security adapters and exact fingerprints. Independent clean verifier and protected merge/release remain mandatory.",
+      "Select two signed human-triggered runbooks; drill rollback and postconditions. No automatic production action."
+    ],
+    "phase_2_bounded_automation": [
+      "After measured local precision, auto-create/reopen planned issues for allowlisted signals with quotas/circuit breaker; never auto-READY.",
+      "Permit deterministic abort or restore-known-good and one low-risk reversible runbook only. Sample human audits and automatically suspend on error/incident/drift budgets.",
+      "Pilot allowlisted patch dependency auto-merge only with stable supplier, no scripts/protected paths, exact-head checks, provenance, canary and easy rollback."
+    ],
+    "phase_3_governed_learning": [
+      "Curate postmortem regressions under independent ownership. Automate offline/shadow and evidence production.",
+      "Human governance approves exact canary/promotion. Expand one source/action/repository/risk class at a time; retain last-known-good and kill switch."
+    ],
+    "do_not_automate": [
+      "product priority/ambiguous behavior",
+      "Sev-1/2 or novel destructive operations",
+      "security dismissal/disclosure/risk acceptance",
+      "permission/policy/evaluator/hidden-test/promotion control",
+      "unproven rollback or general unattended self-governance"
+    ],
+    "exit_criteria": "Predeclare per-class thresholds and denominators. Require zero privilege escapes/tampering, reconciled delivery completeness, acceptable false publication/dedupe and retained-fix rates, all rollback drills passing, no worse severe-escape/SLO outcome than baseline, and measured operator load benefit. Volume alone never graduates authority."
+  },
+  "sources": [
+    {
+      "title": "Configuration options for the dependabot.yml file",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependabot supports schedules, groups, cooldown, open-PR limits, target branches, registries, labels, reviewers and ignore/allow rules."
+      ],
+      "id": "S01"
+    },
+    {
+      "title": "About Dependabot security updates",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependabot can raise a PR that upgrades a vulnerable dependency to the minimum secure version when a supported manifest/lockfile is present; coverage and compatibility constraints apply."
+      ],
+      "id": "S02"
+    },
+    {
+      "title": "About Dependabot alerts",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Alerts derive from dependency-graph matches to GitHub Advisory Database entries; dismissals have reasons and can be governed."
+      ],
+      "id": "S03"
+    },
+    {
+      "title": "About dependency review",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Dependency review exposes dependency changes in PRs and can fail checks for vulnerable or disallowed dependencies."
+      ],
+      "id": "S04"
+    },
+    {
+      "title": "About rulesets",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Repository rulesets can require reviews, status checks, signed commits, merge queue and restrict bypass."
+      ],
+      "id": "S05"
+    },
+    {
+      "title": "About autofix for CodeQL code scanning",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-autofix-for-codeql-code-scanning",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "GitHub can generate suggested fixes for supported CodeQL alerts; suggestions must be evaluated and committed or opened as PRs."
+      ],
+      "id": "S06"
+    },
+    {
+      "title": "Responsible use of Copilot Autofix for code scanning",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor limitations",
+      "supported_claims": [
+        "Autofix may be syntactically incorrect, insecure, incomplete, behavior-changing, or fail to address the alert; users must review and test."
+      ],
+      "id": "S07"
+    },
+    {
+      "title": "Automerge",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/key-concepts/automerge/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Renovate can automerge branches or PRs after its conditions pass; platform automerge, schedules, required tests and branch protection affect behavior."
+      ],
+      "id": "S08"
+    },
+    {
+      "title": "Noise Reduction",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/noise-reduction/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Grouping, schedules, dependency dashboard, stability days/minimumReleaseAge and PR limits reduce update noise."
+      ],
+      "id": "S09"
+    },
+    {
+      "title": "Security and Permissions",
+      "publisher_or_author": "Renovate Docs",
+      "url": "https://docs.renovatebot.com/security-and-permissions/",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Self-hosted Renovate needs careful token permissions and treats repository configuration as untrusted; host rules and secret exposure require controls."
+      ],
+      "id": "S10"
+    },
+    {
+      "title": "OSV-Scanner repository and documentation",
+      "publisher_or_author": "Google / OpenSSF",
+      "url": "https://github.com/google/osv-scanner",
+      "publication_or_update_date": "2022-present; release dates in repository",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source repository",
+      "supported_claims": [
+        "OSV-Scanner scans lockfiles, SBOMs and source for vulnerabilities from OSV and provides remediation-oriented features; behavior is inspectable and self-hostable."
+      ],
+      "id": "S11"
+    },
+    {
+      "title": "Verifying artifacts",
+      "publisher_or_author": "SLSA",
+      "url": "https://slsa.dev/spec/v1.2/verifying-artifacts",
+      "publication_or_update_date": "2025 (SLSA v1.2)",
+      "access_date": "2026-09-13",
+      "source_type": "industry specification",
+      "supported_claims": [
+        "Consumers should verify provenance authenticity and that artifact identity/builder/source expectations match policy; provenance is a control against substitution, not vulnerability absence."
+      ],
+      "id": "S12"
+    },
+    {
+      "title": "Secure Software Development Framework (SSDF) Version 1.1, SP 800-218",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "government standard",
+      "supported_claims": [
+        "SSDF calls for protecting software, producing well-secured releases, responding to vulnerabilities and retaining provenance/evidence; automation belongs inside governed practices."
+      ],
+      "id": "S13"
+    },
+    {
+      "title": "Known Exploited Vulnerabilities Catalog",
+      "publisher_or_author": "CISA",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "publication_or_update_date": "continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "government operational catalog",
+      "supported_claims": [
+        "KEV records vulnerabilities known to be exploited and provides a high-value prioritization signal, but only for listed CVEs."
+      ],
+      "id": "S14"
+    },
+    {
+      "title": "Exploit Prediction Scoring System (EPSS)",
+      "publisher_or_author": "FIRST",
+      "url": "https://www.first.org/epss/model",
+      "publication_or_update_date": "model updated over time",
+      "access_date": "2026-09-13",
+      "source_type": "industry risk model documentation",
+      "supported_claims": [
+        "EPSS estimates probability of exploitation in the next 30 days; it is a prioritization input, not impact or reachability."
+      ],
+      "id": "S15"
+    },
+    {
+      "title": "On the Use of Dependabot Security Pull Requests",
+      "publisher_or_author": "Alfadel, Costa, Shihab, Mkhallalati; IEEE MSR",
+      "url": "https://doi.org/10.1109/MSR52588.2021.00037",
+      "publication_or_update_date": "2021-05",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Among 2,904 JavaScript GitHub projects, 65.42% of security PRs were accepted, often within one day; only 3.2% of manually examined PRs had build breakage; severity and breaking-change risk were not strongly associated with merge time."
+      ],
+      "id": "S16"
+    },
+    {
+      "title": "Dependabot and security pull requests: large empirical study",
+      "publisher_or_author": "Rebatchi, Bissyandé, Moha; Empirical Software Engineering",
+      "url": "https://doi.org/10.1007/s10664-024-10523-y",
+      "publication_or_update_date": "2024-07-30",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Dataset: 9,916,318 PR-related issues in 1,743,035 projects; Dependabot represented over 65% of dependency-management activity; fixes after PR creation often took under one day, while vulnerabilities remained hidden 512 days on average and patches were disclosed after 362 days on average."
+      ],
+      "id": "S17"
+    },
+    {
+      "title": "Details about the event-stream incident",
+      "publisher_or_author": "npm",
+      "url": "https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident",
+      "publication_or_update_date": "2018-11-26",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident report",
+      "supported_claims": [
+        "A malicious dependency version entered a legitimate dependency chain, illustrating that newest/allowed versions and passing vulnerability-database checks are not equivalent to trustworthy code."
+      ],
+      "id": "S18"
+    },
+    {
+      "title": "Secure use reference for GitHub Actions",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "publication_or_update_date": "continuously updated; exact page date not shown",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Pinning third-party actions to full commit SHAs is the only immutable release form; CODEOWNERS and least-privilege token controls reduce workflow supply-chain risk."
+      ],
+      "id": "S19"
+    },
+    {
+      "title": "Automating Dependency Updates in Practice: An Exploratory Study on GitHub Dependabot",
+      "publisher_or_author": "He et al.; IEEE Transactions on Software Engineering",
+      "url": "https://doi.org/10.1109/TSE.2023.3278129",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "1,823 projects and 540,665 PRs; technical lag dropped after adoption; >70% PRs merged; compatibility-score availability was only 3.4%; noise and switching were observed."
+      ],
+      "id": "S20"
+    },
+    {
+      "title": "Investigating the Resolution of Vulnerable Dependencies with Dependabot Security Updates",
+      "publisher_or_author": "Mohayeji et al.; IEEE MSR",
+      "url": "https://doi.org/10.1109/MSR59073.2023.00042",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "4,195 closed security updates in 978 JavaScript projects; 57% PR merge; 53.48% bot fixes, 30.27% manual, 16.25% unresolved; rejection reasons and one-year persistence quantified."
+      ],
+      "id": "S21"
+    },
+    {
+      "title": "On the Accuracy of GitHub's Dependency Graph",
+      "publisher_or_author": "Bifolco et al.; ACM EASE",
+      "url": "https://doi.org/10.1145/3661167.3661175",
+      "publication_or_update_date": "2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": [
+        "Random sample of 297 Java and 338 Python projects found dependency-graph inaccuracies that can propagate to Dependabot and GitHub SBOMs."
+      ],
+      "id": "S22"
+    },
+    {
+      "title": "Resolve code scanning alerts",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Copilot can open draft fix PRs; cloud-agent validation is best-effort; PR code scanning tests proposed fixes."
+      ],
+      "id": "S23"
+    },
+    {
+      "title": "Seer",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Seer combines issues, traces, logs and profiles; supports Autofix, PR creation and code review; commercial add-on.",
+      "id": "S24"
+    },
+    {
+      "title": "Autofix",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/autofix/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Collaborative RCA-to-plan-to-code/PR flow; GitHub.com/GitLab.com repository links; automatic stopping points governed by fixability confidence and configured cap; agent handoffs.",
+      "id": "S25"
+    },
+    {
+      "title": "Signals",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/concepts/signals/",
+      "publication_or_update_date": "2026-03-10",
+      "access_date": "2026-09-13",
+      "source_type": "standard/project documentation",
+      "supported_claims": "Defines traces, metrics, logs and baggage as distinct signals; common context is needed for correlation.",
+      "id": "S26"
+    },
+    {
+      "title": "Trace Context, W3C Recommendation",
+      "publisher_or_author": "W3C",
+      "url": "https://www.w3.org/TR/trace-context/",
+      "publication_or_update_date": "2021-11-23",
+      "access_date": "2026-09-13",
+      "source_type": "web standard",
+      "supported_claims": "Standard traceparent/tracestate propagation enables cross-service causal correlation; propagation also creates trust/privacy boundaries.",
+      "id": "S27"
+    },
+    {
+      "title": "Alertmanager configuration: webhook_config",
+      "publisher_or_author": "Prometheus Authors/CNCF",
+      "url": "https://prometheus.io/docs/alerting/latest/configuration/#webhook_config",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Alertmanager can emit structured webhook batches with resolved status; receiver is only a trigger, not diagnosis or safety control.",
+      "id": "S28"
+    },
+    {
+      "title": "Analysis and Progressive Delivery",
+      "publisher_or_author": "Argo Rollouts Authors/CNCF",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Metric analysis can continue, pause, abort or mark rollout inconclusive; supports dry run, thresholds and multiple providers.",
+      "id": "S29"
+    },
+    {
+      "title": "Configure Liveness, Readiness and Startup Probes",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Kubelet restarts failed liveness containers; readiness removes endpoints; bad probes can cause cascading restarts/outage.",
+      "id": "S30"
+    },
+    {
+      "title": "PagerDuty Automation Actions",
+      "publisher_or_author": "PagerDuty",
+      "url": "https://support.pagerduty.com/main/docs/automation-actions",
+      "publication_or_update_date": "2026-06-08",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Responders can run scripts or Process/Runbook Automation jobs in incident context and inspect an action log; supports controlled human-triggered remediation.",
+      "id": "S31"
+    },
+    {
+      "title": "The Evolution of Automation at Google",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/sre-book/automation-at-google/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Known, well-scoped procedures benefit from consistent automation, but thoughtless automation can create as many problems as it solves; autonomous system design is preferable to endless scripts.",
+      "id": "S32"
+    },
+    {
+      "title": "Monitoring Distributed Systems",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/sre-book/monitoring-distributed-systems/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Alerts should be actionable and symptom/SLO oriented; noisy monitoring consumes operator capacity and undermines response.",
+      "id": "S33"
+    },
+    {
+      "title": "Knight Capital Americas LLC to Pay $12 Million to Settle Charges",
+      "publisher_or_author": "U.S. SEC",
+      "url": "https://www.sec.gov/newsroom/press-releases/2013-222",
+      "publication_or_update_date": "2013-10-16",
+      "access_date": "2026-09-13",
+      "source_type": "regulator enforcement release / independent evidence",
+      "supported_claims": "Defective deployment and inadequate controls caused more than four million erroneous orders in 45 minutes and over $460 million loss; direct evidence that fast automated actuation magnifies errors.",
+      "id": "S34"
+    },
+    {
+      "title": "Cloudflare outage on July 2, 2019",
+      "publisher_or_author": "Cloudflare",
+      "url": "https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/",
+      "publication_or_update_date": "2019-07-12",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "A globally deployed WAF regex exhausted CPUs; software rollback existed but global blast radius and deployment path caused a 27-minute outage; supports staged rollout and circuit breakers.",
+      "id": "S35"
+    },
+    {
+      "title": "October 4, 2021 outage",
+      "publisher_or_author": "Meta Engineering",
+      "url": "https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/",
+      "publication_or_update_date": "2021-10-05",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "A command unintentionally disconnected backbone capacity and impaired recovery tooling; supports out-of-band control plane, bounded scope and tested break-glass access.",
+      "id": "S36"
+    },
+    {
+      "title": "Incident Response",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+      "publication_or_update_date": "2025-04",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/guidance",
+      "supported_claims": "Incident response integrates preparation, detection, response and recovery into cybersecurity risk management; governance and recovery remain required around automation.",
+      "id": "S37"
+    },
+    {
+      "title": "Rollback a deployment",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Deployment revision history supports rollback, but rollback success depends on compatibility of data/schema/external effects.",
+      "id": "S38"
+    },
+    {
+      "title": "Seer Fixes Seer: How Sentry’s Debugging Agent Helped Resolve Its Own Outage",
+      "publisher_or_author": "Sentry",
+      "url": "https://blog.sentry.io/seer-fixes-seer-debugging-agent/",
+      "publication_or_update_date": "2026-03-20",
+      "access_date": "2026-09-13",
+      "source_type": "vendor incident case study",
+      "supported_claims": "Feb. 21, 2026 EU incident: automatic blocklist used six raw failures, banned a mostly successful provisioned region and cascaded across fallback regions; 80–90% API failures and ~40,000 events. Seer localized mechanism, engineers supplied architectural invariant.",
+      "id": "S39"
+    },
+    {
+      "title": "Canarying Releases",
+      "publisher_or_author": "Google SRE Workbook authors",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Expose a small population, compare canary/control with objective metrics and roll back; applies to remediation changes.",
+      "id": "S40"
+    },
+    {
+      "title": "DORA metrics: Four Keys",
+      "publisher_or_author": "DORA/Google Cloud",
+      "url": "https://dora.dev/guides/dora-metrics-four-keys/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "research-backed practitioner guidance",
+      "supported_claims": "Delivery speed must be balanced with change instability and recovery; auto-remediation needs both speed and harm metrics.",
+      "id": "S41"
+    },
+    {
+      "title": "OpenTelemetry specification status",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/specs/status/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official project status",
+      "supported_claims": "Tracing and logs bridge API/SDK/protocol stable; metrics mixed at SDK level; profiles protocol development. Signal maturity differs.",
+      "id": "S42"
+    },
+    {
+      "title": "Collector resiliency and data loss",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/collector/resiliency/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Queues, retry/backoff, default eventual drop and file-storage WAL tradeoffs; observability evidence itself can be missing.",
+      "id": "S43"
+    },
+    {
+      "title": "Controllers",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Non-terminating reconciliation loops drive current toward desired state; basis for convergent and idempotent low-level remediation.",
+      "id": "S44"
+    },
+    {
+      "title": "ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks",
+      "publisher_or_author": "Jha et al.",
+      "url": "https://arxiv.org/abs/2502.05352",
+      "publication_or_update_date": "2025-02-08",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint / independent benchmark",
+      "supported_claims": "94 reproducible Kubernetes scenarios; on 42 SRE scenarios best tested GPT-4o had 13.81% diagnosis and 11.43% mitigation pass@1; removing traces reduced mitigation to 2.86%; all models 0% hard repairs.",
+      "id": "S45"
+    },
+    {
+      "title": "AIOpsLab: A Holistic Framework to Evaluate AI Agents for Enabling Autonomous Clouds",
+      "publisher_or_author": "Shetty et al.",
+      "url": "https://arxiv.org/abs/2407.12165",
+      "publication_or_update_date": "2024-07-16; SoCC 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper",
+      "supported_claims": "Defines detection-to-mitigation live evaluation; only preliminary single GPT-4/ReAct case: 14s detect, 36s mitigate, 10–12 interactions, ~$0.25, not a general rate.",
+      "id": "S46"
+    },
+    {
+      "title": "Recommending Root-Cause and Mitigation Steps for Cloud Incidents using Large Language Models",
+      "publisher_or_author": "Ahmed et al./Microsoft Research",
+      "url": "https://doi.org/10.1109/ICSE48619.2023.00149",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper",
+      "supported_claims": "Retrieves/generates RCA and mitigation from historical incidents; offline human-assessed recommendation, not autonomous execution.",
+      "id": "S47"
+    },
+    {
+      "title": "An Analysis of Patch Plausibility and Correctness for Generate-and-Validate Patch Generation Systems",
+      "publisher_or_author": "Qi et al.",
+      "url": "https://doi.org/10.1145/2786805.2786825",
+      "publication_or_update_date": "2015",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": "GenProg reassessment found only 2 of 105 plausible patches correct, illustrating test-overfitting risk. (Title metadata should be verified; DOI governs citation.)",
+      "id": "S48"
+    },
+    {
+      "title": "Best practices for using webhooks",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "subscribe narrowly; validate payloads; acknowledge within 10 seconds; queue asynchronously; use delivery IDs and redelivery/reconciliation."
+      ],
+      "id": "S49"
+    },
+    {
+      "title": "Validating webhook deliveries",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "validate X-Hub-Signature-256 HMAC over the exact raw body with a secret and constant-time comparison."
+      ],
+      "id": "S50"
+    },
+    {
+      "title": "Redelivering webhooks",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/testing-and-troubleshooting-webhooks/redelivering-webhooks",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "failed deliveries are not automatically redelivered; GitHub supports manual/API redelivery only within documented retention, so durable intake and inventory scans remain necessary."
+      ],
+      "id": "S51"
+    },
+    {
+      "title": "Webhook events and payloads",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads",
+      "publication_or_update_date": "living API reference; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official API documentation",
+      "supported_claims": [
+        "issue, workflow_run, check, code scanning, Dependabot, deployment and repository events expose typed actions; payload/action coverage differs by event."
+      ],
+      "id": "S52"
+    },
+    {
+      "title": "Managing environments for deployment",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "environments support protection rules, reviewers, wait timers, branch/tag restrictions and scoped secrets; availability varies by plan/visibility."
+      ],
+      "id": "S53"
+    },
+    {
+      "title": "Reviewing deployments",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "reviewers can approve/reject protected jobs and administrators may bypass where configured; native approval semantics and bypass require policy review."
+      ],
+      "id": "S54"
+    },
+    {
+      "title": "CloudEvents specification v1.0.2",
+      "publisher_or_author": "Cloud Native Computing Foundation / CloudEvents",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "publication_or_update_date": "2022-02-05 release tag",
+      "access_date": "2026-09-13",
+      "source_type": "versioned open standard repository",
+      "supported_claims": [
+        "standard event context attributes such as id, source, specversion, type, subject and time; proposed internal envelope can borrow these without claiming conformance."
+      ],
+      "id": "S55"
+    },
+    {
+      "title": "SLSA Requirements v1.2",
+      "publisher_or_author": "OpenSSF / SLSA",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "publication_or_update_date": "v1.2",
+      "access_date": "2026-09-13",
+      "source_type": "versioned supply-chain standard",
+      "supported_claims": [
+        "build provenance and verification requirements bind artifacts to build process; provenance does not prove behavioral correctness."
+      ],
+      "id": "S56"
+    },
+    {
+      "title": "Rules for alerting",
+      "publisher_or_author": "Prometheus Authors / CNCF",
+      "url": "https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "pending/firing states and for/keep_firing_for durations support persistence and hysteresis but not business-impact diagnosis."
+      ],
+      "id": "S57"
+    },
+    {
+      "title": "Incident Management Guide",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/workbook/incident-response/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": [
+        "incident command separates coordination, operations, communication and planning; declared handoffs and records reduce confusion."
+      ],
+      "id": "S58"
+    },
+    {
+      "title": "Postmortem Culture: Learning from Failure",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/sre-book/postmortem-culture/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": [
+        "blameless postmortems document impact, timeline, root causes, triggers, resolution and owned actions; review and action tracking matter."
+      ],
+      "id": "S59"
+    },
+    {
+      "id": "S60",
+      "title": "Syntax for GitHub’s form schema",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Issue-form YAML supports structured fields/validation but is intake substrate, not a workflow engine."
+      ]
+    },
+    {
+      "id": "S61",
+      "title": "Using the built-in automations",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Projects can update status/add/archive by selected events; controller remains needed for richer durable lifecycle."
+      ]
+    },
+    {
+      "id": "S62",
+      "title": "Code scanning",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Code scanning supports CodeQL/third-party analysis, scheduled/event runs, alerts, APIs/webhooks, subject to licensing/coverage."
+      ]
+    },
+    {
+      "id": "S63",
+      "title": "Repository security advisories",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/code-security/concepts/vulnerability-reporting-and-management/repository-security-advisories",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Private coordination, temporary fork, publication and CVE flow for public repositories on GitHub.com; not production incident response."
+      ]
+    },
+    {
+      "id": "S64",
+      "title": "Status checks",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/pull-requests/reference/status-checks",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Checks and commit statuses gate merges; skipped Actions jobs report success, so trusted check provenance and execution evidence matter."
+      ]
+    },
+    {
+      "id": "S65",
+      "title": "REST API endpoints for deployments",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/rest/deployments/deployments",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "A deployment object requests deployment of a ref; external systems perform runtime change."
+      ]
+    },
+    {
+      "id": "S66",
+      "title": "REST API endpoints for deployment statuses",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/rest/deployments/statuses",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Statuses report queued/pending/in-progress/success/failure/error/inactive; inactive does not itself roll back production."
+      ]
+    },
+    {
+      "id": "S67",
+      "title": "Managing a merge queue",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Queue tests combined target/queued changes; Actions must trigger on merge_group for required checks."
+      ]
+    },
+    {
+      "id": "S68",
+      "title": "Reverting a pull request",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/reverting-a-pull-request",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Revert creates a new PR reversing a merge commit and can conflict; it is source reversal, not runtime rollback."
+      ]
+    },
+    {
+      "id": "S69",
+      "title": "Reviewing the audit log for your organization",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Organization audit log access/retention is bounded; external durable evidence may be required."
+      ]
+    },
+    {
+      "id": "S70",
+      "title": "Configuring the retention period for GitHub Actions artifacts and logs",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "Actions artifacts/logs have configurable bounded retention; changes apply to new artifacts and caps vary by repository visibility/organization policy."
+      ]
+    },
+    {
+      "id": "S71",
+      "title": "Events that trigger workflows: workflow_run",
+      "publisher_or_author": "GitHub, Inc.",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run",
+      "publication_or_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/API reference",
+      "supported_claims": [
+        "workflow_run can access secrets/write tokens after an unprivileged workflow; running untrusted code/artifacts in it creates privilege risk."
+      ]
+    },
+    {
+      "title": "A File Format to Aid in Security Vulnerability Disclosure (RFC 9116)",
+      "publisher_or_author": "E. Foudil and Y. Shafranovich; IETF/RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc9116.html",
+      "publication_or_update_date": "April 2022; RFC 9116; Category: Informational",
+      "source_type": "informational RFC with BCP 14 field requirements; not an Internet Standard",
+      "supported_claims": [
+        "security.txt at /.well-known/security.txt requires Contact and Expires; can link encryption/policy/canonical metadata; complements rather than replaces a vulnerability disclosure program."
+      ],
+      "id": "S72",
+      "access_date": "2026-09-13"
+    },
+    {
+      "title": "Recommendations for Federal Vulnerability Disclosure Guidelines (NIST SP 800-216)",
+      "publisher_or_author": "Adam Quinn, Karen Scarfone, Murugiah Souppaya, Kevin Smith, Greg Witte; NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/216/final",
+      "publication_or_update_date": "May 2023; DOI 10.6028/NIST.SP.800-216",
+      "source_type": "government guideline",
+      "supported_claims": [
+        "VDP lifecycle: secure receipt, scope/contact determination, triage/prioritize, coordination, verification/remediation, reporter communication and possible advisory; maintain tracking and published policy."
+      ],
+      "id": "S73",
+      "access_date": "2026-09-13"
+    },
+    {
+      "title": "Common Vulnerability Scoring System v4.0 Specification Document v1.2",
+      "publisher_or_author": "FIRST CVSS Special Interest Group",
+      "url": "https://www.first.org/cvss/v4-0/specification-document",
+      "publication_or_update_date": "CVSS v4.0 document version 1.2",
+      "source_type": "industry standard specification",
+      "supported_claims": [
+        "retain vector and distinguish Base, Threat, Environmental and Supplemental metrics; CVSS severity feeds a broader risk process and is not priority by itself."
+      ],
+      "id": "S74",
+      "access_date": "2026-09-13"
+    },
+    {
+      "title": "Service Level Objectives",
+      "publisher_or_author": "Google SRE authors; Google/O’Reilly",
+      "url": "https://sre.google/sre-book/service-level-objectives/",
+      "publication_or_update_date": "2016 book; web copyright 2017",
+      "source_type": "first-party production-practice book",
+      "supported_claims": [
+        "define user-relevant SLIs/SLOs with measurement and validity conditions; compare measurements to objectives and act."
+      ],
+      "id": "S75",
+      "access_date": "2026-09-13"
+    },
+    {
+      "title": "Alerting on SLOs",
+      "publisher_or_author": "Google SRE Workbook authors; Google/O’Reilly",
+      "url": "https://sre.google/workbook/alerting-on-slos/",
+      "publication_or_update_date": "2018",
+      "source_type": "first-party production-practice book",
+      "supported_claims": [
+        "multiwindow multiburn alerts balance precision, recall, detection and reset; published thresholds are starting points dependent on traffic and page budget."
+      ],
+      "id": "S76",
+      "access_date": "2026-09-13"
+    },
+    {
+      "title": "Prometheus canonical label-set fingerprint implementation",
+      "publisher_or_author": "Prometheus Authors / CNCF",
+      "url": "https://github.com/prometheus/common/blob/66dd0558da55b1d753fd69d779b95ac4af5bd2ea/model/signature.go",
+      "publication_or_update_date": "source commit 66dd0558da55b1d753fd69d779b95ac4af5bd2ea observed 2026-09-13",
+      "source_type": "versioned official source code",
+      "supported_claims": [
+        "canonical fingerprint sorts labels then applies a 64-bit hash; fingerprints are not collision-free durable identities."
+      ],
+      "id": "S77",
+      "access_date": "2026-09-13"
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict": "Vendors describe AI root-cause/fix/remediation capabilities [S06,S24-S25,S39], while official responsible-use text and repair research show outputs can be insecure/incomplete and test-passing patches can be wrong [S07,S48].",
+      "resolution": "Treat AI output as cited hypothesis/proposal. Independent reproduction, protected tests, review and canary establish actionability; confidence never grants authority."
+    },
+    {
+      "conflict": "Dependency bots offer automerge and fast security PRs [S01-S04,S08], while empirical studies show friction/non-merge and dependency metadata can be incomplete [S16-S17,S20-S22].",
+      "resolution": "Use bot PRs as intake. Restrict automation by package/risk/supplier/change type and exact-head evidence; keep risk acceptance and ambiguous updates human-owned."
+    },
+    {
+      "conflict": "Kubernetes/progressive delivery offers rollback/abort [S29,S38,S40], but major outages show control changes and recovery mechanisms can amplify impact [S34-S36].",
+      "resolution": "Call rollback automatic only for drilled compatible releases and reversible effects. Configuration/data/control-plane changes require stronger gates and compensation; rollback failure escalates."
+    },
+    {
+      "conflict": "Automation reduces toil for known procedures [S31-S32], but the same Google source warns thoughtless automation creates new problems [S32].",
+      "resolution": "Encode signed, bounded, expiring runbooks with independent postconditions; prohibit novel model-selected production commands."
+    },
+    {
+      "conflict": "Resolved alert, green CI, closed issue and successful deployment are different success signals.",
+      "resolution": "Model separate aggregates and require retained user/SLO/security outcomes after cooldown. Never collapse denominators into tickets closed."
+    }
+  ],
+  "uncertainties": [
+    "The requested as-of date is 2026-09-13. Many vendor/GitHub pages are living and undated; plan, API, schema and tenant behavior can change. Snapshot content/API versions and contract-test the target tenant before rollout.",
+    "No source proves broad autonomous observability-to-repair-to-self-improvement operation safe across repositories. Absence claims are limited because products and private deployments evolve.",
+    "Repository-specific thresholds for signal persistence, fingerprint fields, severity, cooldown, retry, evidence freshness, canary size/window, error budget and promotion sample size need local baseline/power analysis. Proposed phases are architecture, not universal constants.",
+    "False-negative intake is hard to measure because sources, dependency graphs, scanners and telemetry are incomplete. Reconciliation detects some gaps but cannot prove total coverage.",
+    "Automated rollback safety depends on real application/data/config compatibility and independently available telemetry. No generic rollback predicate exists.",
+    "Human review and incident-response capacity, privacy retention and legal/disclosure rules vary by organization and jurisdiction.",
+    "Model confidence is not necessarily calibrated for local incidents; probabilistic thresholds require calibration and drift monitoring.",
+    "The exact effect of agent assistance on retained fixes, recurrence and on-call load is unknown until a matched local shadow/pilot reports full denominators."
+  ],
+  "confidence": {
+    "overall": "High for architecture, state/authority separation and limits; medium for tool-specific composition; low for universal thresholds or broad autonomous safety.",
+    "claim_level": {
+      "GitHub/Dependabot/OTel/Argo/Kubernetes documented primitives": "high, subject to version/plan contract tests",
+      "need for durable idempotent reconciliation and independent protected gates": "high, supported by primary docs, standards and incident evidence",
+      "AI diagnosis/fix usefulness on selected cases": "medium; product support and studies exist but selection and correctness vary",
+      "automatic known-good rollback for declared reversible classes": "medium-high when locally drilled; low otherwise",
+      "fully autonomous general maintenance and self-governance": "unsupported; confidence high that current public evidence does not justify it",
+      "proposed schemas/states/default phases": "medium design synthesis; validate locally"
+    },
+    "source_quality": "77 direct sources: official docs/standards/repositories/practice guides plus empirical papers, regulator evidence and first-party postmortems. Vendor claims are explicitly bounded."
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "uncertainties"
+  ]
+}

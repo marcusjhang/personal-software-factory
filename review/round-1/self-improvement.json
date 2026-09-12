@@ -1,0 +1,239 @@
+{
+  "reviewer": "round-1-self-improvement-adversarial",
+  "scope": {
+    "specialty": "Goodhart resistance, evaluation leakage and grader capture, separation of duties, canary safety, delayed harm, tenant isolation, rollback, privacy, and evidence sufficiency",
+    "reviewed": [
+      "research/repository-agent-operating-system/review-protocol.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/results/08-governed-self-improvement.json",
+      "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json",
+      "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json",
+      "docs/**",
+      ".agent-os/**",
+      "src/**",
+      "migrations/**",
+      "tests/**",
+      "tests-sql/**"
+    ],
+    "validation": [
+      ".venv/bin/pytest -q: 22 passed",
+      "direct Python reproduction against installed editable package showed an invented evidence bundle and near-identical self identity are accepted",
+      "source/SQL inspection; SQL exploit is supplied for execution against a migrated PostgreSQL instance"
+    ],
+    "boundary": "The primary object of review is the planned maximum-safe self-improvement loop and its acceptance evidence. Source, schema, configuration, and tests were used to determine whether the plan's gates are concrete, fail-closed, and verifiable. The current bundle remains plan-only and must not enable promotion."
+  },
+  "strengths": [
+    "The design explicitly recognizes Goodharting, leakage, delayed harm, and the need for independent curation, evaluation, promotion, and rollback.",
+    "Promotion hashes candidate, config, protected-eval identity/digest, and result digests, and rejects an exact proposer/approver string match.",
+    "The public eval manifest declares separation rules and keeps private holdout contents out of Git.",
+    "Documentation clearly says the repository is not a controller and does not claim production capability."
+  ],
+  "findings": [
+    {
+      "id": "SI-001",
+      "severity": "high",
+      "title": "Authoritative SQL accepts a direct, cross-work-item promotion with an unrelated approval",
+      "requirement": "Invalid transitions and stale or unrelated approvals must fail closed; promotion must be exact-digest bound and stage history must be durable.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql:56-67",
+          "migrations/0002_schema.sql:189-198",
+          "migrations/0003_security.sql:8-10",
+          "tests-sql/001_integrity.sql:5-24"
+        ],
+        "urls": []
+      },
+      "reproduction": "On a migrated test database as polar_runtime, insert work item A and any APPROVED approval row for A; insert eval_candidates row E at PROPOSED (source_outcome_id may be NULL); then UPDATE E SET stage='PROMOTED', curated_eval_sha256=repeat('a',64), model_or_policy_sha256=repeat('b',64), promotion_approval_id=<approval A>. PostgreSQL accepts it because the FK is only approvals(id), there is no candidate/work-item/subject digest relation, and no transition-history trigger. The SQL tests exercise readiness binding but never this path.",
+      "impact": "A controller defect or compromised runtime credential can skip curation, offline, shadow, and canary stages and reuse an unrelated approval. The canonical database then records a false promotion.",
+      "recommendation": "Give every candidate a tenant/work-item subject and immutable proposal/promotion digest. Reference approvals with a composite FK over work_item/tenant and subject digest. Record stages as append-only events and expose a guarded transactional transition function; revoke direct table UPDATE from the runtime role.",
+      "verification": "Add a SQL test that the direct update and unrelated/cross-work-item approval both fail, while the guarded sequential path with a current PROMOTION approval succeeds once and records an event.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-002",
+      "severity": "critical",
+      "title": "Promotion treats proposer assertions and arbitrary hashes as evidence",
+      "requirement": "Promotion must verify fresh, attested, complete evidence with predeclared denominators, slices, trials, thresholds, environment/evaluator identities, and hard safety gates; unknown or inconclusive evidence must not pass.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:185-196",
+          "src/agent_os/improvement.py:27-59",
+          "tests/test_improvement.py:10-32",
+          ".agent-os/evals/manifest.yaml:1-15",
+          "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json"
+        ],
+        "urls": [
+          "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+          "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+        ]
+      },
+      "reproduction": "Construct ImprovementProposal(state='CANARY_REVIEW') with protected_eval_identity='invented', SHA-256 hashes of the strings 'invented eval', 'invented baseline', and 'invented result', and both booleans false. Create an exact-digest human ApprovalEnvelope and pass the proposal's own candidate/config digests as current values. validate_improvement_promotion returns valid=True. No evidence artifact is loaded or authenticated and no metric is compared.",
+      "impact": "A candidate can Goodhart the only gate, claim that it did not alter criteria, substitute a grader/dataset/result, omit adverse slices, or promote an underpowered/inconclusive run.",
+      "recommendation": "Replace result-digest-only input with an independently signed EvidenceBundle. Resolve the protected suite/evaluator/policy from trusted current state. Check signer, freshness, expected shard set, trial and slice denominators, predeclared thresholds, hard invariant outcomes, and explicit inconclusive status. Do not accept a proposer-supplied protected_criteria_modified flag as proof.",
+      "verification": "Add negative tests for invented suite identity, wrong signer, missing shard/denominator, changed evaluator/environment, zero trials, inconclusive result, selected-away failure, and forged safety_regression=false.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-003",
+      "severity": "high",
+      "title": "Separation of duties is bypassable with self-asserted identity and no role or quorum check",
+      "requirement": "The proposer, curator, evaluator, and promoter must be independently authenticated; required roles and quorum must be checked against current authority, not names supplied in a file.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:111-126",
+          "src/agent_os/approval.py:6-25",
+          "src/agent_os/improvement.py:55-58",
+          ".agent-os/risk-policy.yaml:18-36",
+          "docs/security.md:31-62"
+        ],
+        "urls": []
+      },
+      "reproduction": "Set proposed_by='agent' and approved_by='agent ' (or any alias), approver_kind='human', and an exact digest. validate_improvement_promotion returns valid=True. ApprovalEnvelope contains no issuer, verified subject, role snapshot, review ID, signature, quorum, or revocation field; approver_kind is caller-controlled.",
+      "impact": "Self-approval, grader capture, or a one-person approval can be presented as independent human authorization, including for protected R3 policy/eval changes that the risk policy says require two roles.",
+      "recommendation": "Accept only approval records resolved from the authority store. Bind immutable principal ID, issuer, authenticated source review, role snapshot, quorum set, scope, revocation, and proposal/eval/rollout digest. Compare canonical principal IDs across proposer, curator, evaluator, and promoter roles.",
+      "verification": "Tests must reject aliases of the same principal, a caller-declared human kind, missing/removed roles, insufficient quorum, reused reviews, and curator/promoter conflicts; accept only independently authenticated principals with the configured role set.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-004",
+      "severity": "high",
+      "title": "The state model can enter canary without human admission or a bounded safety envelope",
+      "requirement": "Moving from shadow to canary or widening a canary requires human approval of exact candidate and rollout digests, with preapproved cohort, exposure, budget, effects, stop rules, and automatic abort.",
+      "evidence": {
+        "files": [
+          "src/agent_os/improvement.py:8-24",
+          "src/agent_os/models.py:173-196",
+          ".agent-os/evals/README.md:3-13",
+          "docs/security.md:216-237",
+          "tests/test_improvement.py:59-66"
+        ],
+        "urls": [
+          "https://sre.google/workbook/canarying-releases/"
+        ]
+      },
+      "reproduction": "Call validate_improvement_transition successively for PROPOSED->CURATED->OFFLINE_EVALUATED->SHADOWED->CANARY_REVIEW. Every call returns valid=True without an approval or evidence argument. The model has no pending/running/passed/failed/inconclusive canary states and no rollout/cohort/exposure/budget/guardrail fields.",
+      "impact": "An integrating controller can treat this validator as its gate and expose a candidate to real effects with no admitted blast radius or abort predicate. Canary widening and inconclusive results are not representable.",
+      "recommendation": "Add CANARY_PENDING_APPROVAL, CANARY_RUNNING, CANARY_PAUSED, CANARY_FAILED, CANARY_PASSED, and abort states. Require a signed rollout manifest and canary-admission approval at the transition boundary, and enforce immutable maximum scope and monotonic non-widening without new approval.",
+      "verification": "Property/state tests must reject shadow-to-canary without approval, reject cohort/budget widening, pause on missing metrics, abort on each guardrail, and prove no canary effect after cancellation or expiry.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-005",
+      "severity": "high",
+      "title": "Promotion has no compatible rollback target and rollback is an unverified terminal label",
+      "requirement": "Every promotion must bind a tested compatible last-known-good rollback target; rollback must track pending/running/failed/verified states and cannot complete before observed-state and health verification.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:173-196",
+          "src/agent_os/improvement.py:8-16",
+          "src/agent_os/improvement.py:27-59",
+          "tests/test_improvement.py:59-66",
+          "docs/operations.md:168-177"
+        ],
+        "urls": []
+      },
+      "reproduction": "Promote using a valid proposal/approval; the proposal and promotion digest contain no previous-good digest, compatibility envelope, rollback plan/drill, or side-effect reversibility. Then validate PROMOTED->ROLLED_BACK, which returns valid=True, and observe ROLLED_BACK has no exits or verification predicate.",
+      "impact": "A non-reversible or incompatible candidate can be promoted, and a failed rollback can be mislabeled complete. Operators cannot distinguish rollback requested, executing, failed, or health-verified.",
+      "recommendation": "Bind rollback artifact/config digests, compatibility and migration/compensation evidence, drill freshness, owner, and maximum recovery time into promotion. Model ABORTING, ROLLBACK_PENDING, ROLLING_BACK, ROLLBACK_FAILED, and ROLLED_BACK_VERIFIED, with receipts and observation gates.",
+      "verification": "Reject promotion without a current compatible rollback manifest; inject rollback failure and stale receipts; permit terminal rollback only after exact deployed digest and health-window verification.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-006",
+      "severity": "medium",
+      "title": "Delayed harm, review expiry, and post-promotion regression are not represented",
+      "requirement": "Promotion must include a declared observation window and review/expiry date; rare or delayed harm must be able to freeze or roll back a live release while preserving denominators and cohort attribution.",
+      "evidence": {
+        "files": [
+          "src/agent_os/models.py:173-196",
+          "src/agent_os/improvement.py:8-16",
+          "migrations/0002_schema.sql:181-198",
+          "docs/operations.md:286-301"
+        ],
+        "urls": [
+          "https://sre.google/workbook/canarying-releases/"
+        ]
+      },
+      "reproduction": "ImprovementProposal has no observation start/end, minimum sample, cohort, review date, release expiry, or ongoing metric reference. The only post-promotion edge is PROMOTED->ROLLED_BACK; eval_candidates has no observation/freeze/expired/retired states. A valid approval can therefore support immediate promotion regardless of delayed-outcome maturity.",
+      "impact": "Short-window improvements can pass while shifting defects, reviewer load, privacy harm, or incidents into later periods or other cohorts. There is no deterministic freeze on unavailable late metrics or mandatory reevaluation.",
+      "recommendation": "Persist release/cohort exposure and denominator-based observation records. Bind minimum windows/sample sizes and review expiry into policy. Add evidence-stale, metrics-unavailable, promotion-frozen, expired, revoked, and retired behavior, with safe defaults of pause/rollback rather than pass.",
+      "verification": "Use a fake clock and delayed outcomes to show promotion remains pending before the window/sample threshold, missing metrics freeze rollout, and a late breach triggers rollback/revocation and a new curated case.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-007",
+      "severity": "high",
+      "title": "Self-improvement records and database roles are not tenant-isolated",
+      "requirement": "Every row, queue, idempotency namespace, artifact, token, trace, evaluation, and approval must carry an enforced repository tenant key; cross-repository access is denied unless separately reviewed and approved.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql:27-43",
+          "migrations/0002_schema.sql:56-67",
+          "migrations/0002_schema.sql:124-150",
+          "migrations/0002_schema.sql:181-198",
+          "migrations/0003_security.sql:8-18",
+          "docs/architecture.md:260-280",
+          "docs/operations.md:324-343"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect the schema: eval_candidates has no repository/tenant column; approvals inherit only a work_item relation; outbox/effects may have NULL work_item_id; idempotency keys have a free-text scope; and one polar_runtime role receives SELECT/INSERT/UPDATE/DELETE on all tenant tables. No RLS policies or per-tenant connection authorization exist. With polar_runtime, SELECT all eval_candidates or attach one repository's approval to another candidate as in SI-001.",
+      "impact": "A query bug or compromised shared runtime can expose proprietary evaluation/outcome metadata, contaminate one repository's learning with another's evidence, or authorize/publish a candidate across repository boundaries.",
+      "recommendation": "Introduce immutable tenant/repository IDs on all records, including global-looking improvement/effect/audit records. Use composite tenant foreign keys, tenant-prefixed uniqueness, RLS or equivalent per-tenant connection enforcement, repository-scoped object storage/encryption, and an explicit dual-owner cross-repo export workflow.",
+      "verification": "Create two tenants and test every runtime/reconciler operation under each identity. Cross-tenant SELECT, FK attachment, idempotency collision, evidence URI access, and outcome/eval contribution must fail unless a separately approved export/import envelope exists.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-008",
+      "severity": "medium",
+      "title": "Privacy review and retention are prose-only for feedback and evaluation evidence",
+      "requirement": "Raw source, prompts, issue bodies, secrets, customer data, and proprietary patches stay local by default; eval contributions require provenance, consent/license, privacy review, expiry, redaction, and auditable retention/deletion.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql:11-24",
+          "migrations/0002_schema.sql:117-123",
+          "migrations/0002_schema.sql:181-198",
+          ".agent-os/evals/README.md:9-15",
+          "docs/architecture.md:275-280",
+          "docs/operations.md:55-72"
+        ],
+        "urls": []
+      },
+      "reproduction": "Insert raw issue/customer text into webhook_inbox.payload, evidence_bundles.manifest, outcomes.metrics, or eval_candidates.proposal. The schema accepts arbitrary JSON and has no data class, tenant on several records, consent/license, export approval, retention deadline, legal-hold status, or redaction receipt. No code in src implements a local privacy filter or deletion/expiry job.",
+      "impact": "Sensitive feedback can persist indefinitely, be used as evaluation data without consent or provenance, and become available to shared runtime/auditor identities. A digest does not prove redaction or lawful use.",
+      "recommendation": "Define typed privacy-filtered OutcomeEnvelope and EvalCase records with data class, provenance, consent/license, owner, purpose, retention/expiry, residency, redaction version/receipt, and export approval. Minimize raw webhook storage, encrypt restricted content, and implement tested deletion/legal-hold workflows that preserve only safe audit metadata.",
+      "verification": "Schema tests reject unclassified/unlicensed eval contributions and free text in export envelopes; integration tests seed PII/secrets and prove filtering, tenant access denial, TTL deletion, legal-hold override, and non-recoverability from ordinary logs/artifacts.",
+      "confidence": "high"
+    },
+    {
+      "id": "SI-009",
+      "severity": "high",
+      "title": "The plan has no executable closure gate for the advertised self-improvement safety matrix",
+      "requirement": "Before the plan can claim convergence, every declared self-improvement state and transition must have legal entry, exit, cancellation, stale/retry, cleanup, terminal, authority, digest, evidence, budget, rollback, and adversarial behavior tested; critical/high findings must be independently closed.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/review-protocol.md:39-62",
+          "research/repository-agent-operating-system/report.md:157-167",
+          "research/repository-agent-operating-system/report.md:241-283",
+          "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json",
+          "tests/test_improvement.py:1-66",
+          "tests-sql/001_integrity.sql:1-25",
+          "tests-sql/003_effects_and_roles.sql:1-22"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run .venv/bin/pytest -q: all 22 tests pass. Inspect tests/test_improvement.py: it covers one happy promotion, exact-string self-approval, candidate digest change, two caller booleans, and four graph edges. There are no executable cases for evidence attestation, stage receipts, thresholds/denominators, holdout leakage/query auditing, curator/evaluator/promoter identity separation, canary admission/abort/widening, delayed harm, rollback compatibility/failure, tenant replay, privacy deletion, concurrent transition CAS, or property-generated action sequences. The report's rollout stages specify delivery thresholds but no separate self-improvement enablement stage requiring this matrix.",
+      "impact": "A green suite can be mistaken for evidence that the maximum-safe loop is ready even though each bypass in SI-001 through SI-008 remains untested. The plan lacks an objective point at which self-improvement changes from prohibited to pilot-eligible.",
+      "recommendation": "Add a distinct, default-disabled self-improvement rollout stage. Make the lifecycle research test matrix a versioned executable acceptance manifest mapped one-to-one to tests. Require stateful/property tests, adversarial identity and Goodhart cases, private-holdout access audits, fault injection, rollback drills, privacy/tenant isolation tests, and an independent reviewer sign-off before canary admission.",
+      "verification": "A generated coverage report must show every state/edge/invariant/actor/evidence/fault cell mapped to a passing test; mutation tests that remove a guard must fail; a fresh independent reviewer must reproduce closure and find zero critical/high issues before the feature flag can leave disabled state.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No external controller, GitHub ruleset, protected evaluator service, object store, identity provider, or canary platform is present, so their out-of-repository controls could not be tested.",
+    "The SQL direct-promotion reproduction was derived from constraints and grants; PostgreSQL was not available in this review turn to execute it. The relevant absence of composite FK/transition trigger is explicit in the migration.",
+    "The Python suite passes, but it mainly proves happy-path hash checks and graph adjacency; it does not exercise hostile identities, evidence authenticity, canary effects, delayed outcomes, privacy, or tenant boundaries.",
+    "Several research files repeat the same primary sources; repeated citations were not treated as independent corroboration.",
+    "Because the repository labels itself plan-only/proposed, deployment risk depends on whether downstream users correctly refuse to treat these validators and migrations as a production controller."
+  ]
+}

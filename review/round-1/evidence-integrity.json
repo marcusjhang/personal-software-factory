@@ -1,0 +1,165 @@
+{
+  "reviewer": "round-1-evidence-integrity",
+  "scope": "Adversarial source/claim-integrity review of the decision-grade repository-agent factory plan, including the base, lifecycle-extension, and domain-extension research; final report and evidence matrix; architecture/operations/security/ADR documents; declared factory contracts and validators; and relevant source/tests/migrations only where they affect plan claims. Repeated citations were treated as one evidence family unless independent provenance was shown.",
+  "strengths": [
+    "The report and primary architecture documents clearly label the system as a proposed design rather than a deployed production capability.",
+    "The research frequently distinguishes official capability documentation from measured outcomes and preserves important unknowns, including lack of proof for unattended production use, productivity benefit, GTM ROI, and safe universal thresholds.",
+    "The plan uses counterevidence from empirical studies, incidents, standards, and security research instead of relying only on product marketing.",
+    "Vendor-heavy GTM research explicitly warns that product pages establish workflow surfaces, not accuracy, legality, causal lift, or safe autonomy.",
+    "The review protocol requires independent reproduction, retained disagreement, focused research for evidence gaps, and zero open critical/high findings before exit."
+  ],
+  "findings": [
+    {
+      "id": "EVID-001",
+      "severity": "high",
+      "title": "Research provenance is future-dated relative to the review clock",
+      "requirement": "Evidence metadata must be truthful, auditable, and fresh as of the actual research/review date.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/outline.yaml",
+          "research/repository-agent-operating-system/lifecycle-extension/outline.yaml",
+          "research/repository-agent-operating-system/domain-extension/outline.yaml",
+          "research/repository-agent-operating-system/report.md",
+          "research/repository-agent-operating-system/results/07-observability-driven-issue-creation-and-maintenance.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+          "research/repository-agent-operating-system/domain-extension/results/02-gtm-factory-workflows-and-current-systems.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `date -u +%F` in the repository (review observed 2026-09-12), then inspect every result `as_of` and source `access_date`. All 23 result files declare `as_of: 2026-09-13`; at least 798 source entries across 18 files explicitly say they were accessed on 2026-09-13. The report also calls 2026-09-13 the research cutoff.",
+      "impact": "A reader cannot distinguish evidence actually retrieved by the review date from planned or inferred future retrieval. This breaks provenance and makes freshness claims non-auditable, especially for living vendor documentation.",
+      "recommendation": "Replace future dates with actual UTC retrieval timestamps. Re-fetch every material source, record the observed timestamp plus a content digest or archived snapshot for living pages, and regenerate the report only after validation rejects access/as-of dates later than the run clock.",
+      "verification": "A deterministic audit parses all result `as_of` and source access dates, rejects dates after the audit clock, and verifies a stored snapshot/digest for every material living source. Re-run it from a clean checkout and publish its result.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-002",
+      "severity": "high",
+      "title": "The decision report and evidence matrix omit the lifecycle and domain-extension research used by the plan",
+      "requirement": "The final decision-grade plan must synthesize all scoped lifecycle-extension and domain-extension research, preserve conflicts/uncertainty, and trace architecture decisions to evidence.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md",
+          "research/repository-agent-operating-system/evidence-matrix.md",
+          "research/repository-agent-operating-system/lifecycle-extension/outline.yaml",
+          "research/repository-agent-operating-system/domain-extension/outline.yaml",
+          "research/repository-agent-operating-system/lifecycle-extension/results/06-general-factory-dsl-and-orchestrator-runtime.json",
+          "research/repository-agent-operating-system/domain-extension/results/01-cross-domain-artifact-factory-abstraction.json",
+          "docs/architecture.md",
+          "docs/adr/0001-repository-agent-os.md",
+          ".agent-os/factories/README.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Search `report.md` for `factory DSL`, `deep research`, `GTM`, or `Warp`; none occurs. The report explicitly says its evidence set is \u201call 10 JSON results,\u201d and `evidence-matrix.md` has only the original 10 rows. Compare that with 8 lifecycle-extension and 5 domain-extension result files and with the plan/docs that adopt durable sub-lifecycles, factory composition, and cross-domain extension decisions.",
+      "impact": "Thirteen scoped research results are not represented in the final synthesis or matrix. Reviewers cannot see which extension evidence supports the factory/cross-domain conclusions, which conflicts remain, or whether repeated sources were deduplicated. The plan is therefore not decision-grade for the expanded scope.",
+      "recommendation": "Regenerate the final report and evidence matrix over all 23 research items. Add claim-level rows for lifecycle, factory DSL, deep-research composition, multi-repository isolation, engineering-first extraction, and GTM gates. Include source lineage, duplicate-source groups, vendor/independent classification, conflicts, confidence, and explicit unknowns.",
+      "verification": "A coverage check maps every outline item and every normative ADR/design decision to at least one matrix claim and cited result, while preserving unsupported/contested claims as uncertainty. The final report states the complete item count and includes all 13 extension items.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-003",
+      "severity": "medium",
+      "title": "The plan repeats a stale, overbroad GitHub Actions concurrency limitation despite newer scoped evidence",
+      "requirement": "Current platform claims must match the cited source version, and known conflicts must be resolved by feature mode/version rather than silently choosing one statement.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md",
+          "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+          "docs/security.md",
+          "docs/adr/0001-repository-agent-os.md"
+        ],
+        "urls": [
+          "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+        ]
+      },
+      "reproduction": "Compare report line 45 and ADR sections \u201cContext\u201d/\u201cRejected alternatives,\u201d which state Actions concurrency has arbitrary ordering and only one pending run, with lifecycle-extension result 03 source G1, which records a newer `queue: max` mode with up to 100 pending and FIFO by when a run starts waiting while retaining `queue: single` behavior. The final plan never scopes its claim to `queue: single` or records the conflict.",
+      "impact": "The main architectural conclusion that Actions concurrency is not a fenced transactional lease remains plausible, but its cited capability/limit claim is inaccurate for all modes. That weakens freshness and can lead to needless custom queueing or incorrect capacity assumptions.",
+      "recommendation": "Re-fetch the official page, name each queue mode and its precise guarantees/limits, and rewrite the report/ADR claim to distinguish queue/backpressure utility from lease, fencing, dependency, and transactional admission requirements. Record the resolved version conflict.",
+      "verification": "A reviewer can follow the cited current documentation and match every stated limit to a named mode; no document makes the unconditional one-running/one-pending/arbitrary-order claim.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-004",
+      "severity": "high",
+      "title": "Presence-only, heterogeneous research records cannot substantiate the report\u2019s validation claim or factory evidence gates",
+      "requirement": "The reusable deep-research factory must preserve claim-level citations, source independence/vendor status, conflicts, freshness, and retrievability rather than rely on prose gates.",
+      "evidence": {
+        "files": [
+          ".agent-os/factories/deep-research.yaml",
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/bin/validate.py",
+          "research/repository-agent-operating-system/lifecycle-extension/fields.yaml",
+          "research/repository-agent-operating-system/lifecycle-extension/results/05-deep-research-factory-as-a-reusable-workflow.json",
+          "research/repository-agent-operating-system/report.md",
+          "research/repository-agent-operating-system/results/02-ticket-planning-and-readiness-gates.json",
+          "research/repository-agent-operating-system/results/05-implementation-verification-review-and-cleanup.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json"
+        ],
+        "urls": []
+      },
+      "reproduction": "Load every `research/repository-agent-operating-system/**/results/*.json` and print the runtime types of `primary_evidence`, `independent_evidence`, and `sources`. Results variously store giant strings, lists of bibliography strings, and source objects; lifecycle result 03 has 87 source strings while neighboring files use objects. The report nevertheless says all 10 base JSONs \u201cpassed the bundled validator with 20/20 required fields.\u201d Then inspect `deep-research.yaml`, `factory.schema.json`, and `.agent-os/bin/validate.py`: no typed claim/source graph or semantic evidence checks exist.",
+      "impact": "Key presence can pass while URLs, dates, claim links, source lineage, and independence are unvalidated. A factory can meet repository validation with uncited claims, three copies of one source, vendor-only support labeled independent, stale links, or unresolved conflicts. This is a blocker to calling the expanded plan deeply researched or its evidence factory reusable.",
+      "recommendation": "Add versioned claim and source schemas with stable IDs, publisher/ownership and duplicate-lineage keys, source type, retrieval timestamp, immutable snapshot/digest, supports/refutes scope, and uncertainty. Replace prose gates with named predicates and define their inputs, failure states, and audit output. Validate referential integrity and independence counts.",
+      "verification": "Negative fixtures for an uncited claim, duplicate URL/publisher lineage, vendor-only \u201cindependent\u201d evidence, a future access date, a missing snapshot, and an unresolved contradiction all fail validation; a complete claim-source graph passes.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-005",
+      "severity": "medium",
+      "title": "Repeated publications are not grouped into evidence families before assessing corroboration",
+      "requirement": "Repeated sources, alternate URLs, and reuse across research items must not be treated as independent support.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/evidence-matrix.md",
+          "research/repository-agent-operating-system/results/08-governed-self-improvement.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/02-conversational-ideation-and-discovery-lifecycle.json",
+          "research/repository-agent-operating-system/lifecycle-extension/results/07-human-need-decision-engine-and-interaction-contract.json",
+          "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json",
+          "research/repository-agent-operating-system/domain-extension/results/04-engineering-first-extension-and-extraction-gates.json",
+          "research/repository-agent-operating-system/domain-extension/results/01-cross-domain-artifact-factory-abstraction.json",
+          "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json"
+        ],
+        "urls": [
+          "https://arxiv.org/abs/2507.09089",
+          "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+        ]
+      },
+      "reproduction": "In `evidence-matrix.md`, item 2 cites METR via arXiv 2507.09089 and item 8 cites the METR blog URL for the same experienced-developer randomized study. Search the two URLs/title/authors across results: the same work recurs in at least eight base/lifecycle/domain result files under different local IDs. No DOI/arXiv/work-level identity or evidence-family field marks the reuse.",
+      "impact": "Cross-item recurrence can look like broader corroboration even though it is one experiment. This is especially material when the study is used to constrain productivity claims across planning, self-improvement, organization, isolation, and extension decisions.",
+      "recommendation": "Canonicalize sources by DOI/arXiv ID plus title/authors, assign an `evidence_family_id`, retain per-claim reuse, and count one work once when reporting independent corroboration. Report domain/task transfer as an inference rather than new evidence.",
+      "verification": "A generated source-lineage report collapses both METR URLs and every reused local source ID to one evidence family and reports unique studies separately from citation occurrences.",
+      "confidence": "high"
+    },
+    {
+      "id": "EVID-006",
+      "severity": "medium",
+      "title": "Confidence ratings conflate documented primitives with an untested composed architecture",
+      "requirement": "Confidence must distinguish direct platform facts, architectural inference, and observed end-to-end outcomes.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md",
+          "research/repository-agent-operating-system/evidence-matrix.md",
+          "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+          "docs/architecture.md"
+        ],
+        "urls": [
+          "https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html",
+          "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+        ]
+      },
+      "reproduction": "Compare report scope/method text, which says no controller was deployed and no target-repository benchmark was run, with matrix ratings such as \u201cHigh\u201d for the proposed control-plane split and \u201cHigh\u201d for durable fenced leases. The cited GitHub/PostgreSQL/Temporal/Kleppmann material establishes individual mechanics and patterns, not the reliability or safety of this exact GitHub + PostgreSQL + signed-context + capability-broker composition.",
+      "impact": "Decision makers can read \u201cHigh\u201d as evidence that the integrated safety boundary works, even though composition failures, operational coupling, and tenant behavior remain untested. This overstates feasibility confidence beyond what the sources establish.",
+      "recommendation": "For every major decision, publish separate ratings for `primitive_fact`, `architectural_inference`, and `local_outcome`, with the last marked unvalidated until fault, security, tenant-contract, and recovery pilots run. Tie promotion gates to evidence that raises the local-outcome rating.",
+      "verification": "The revised matrix never assigns an integration/outcome confidence from component documentation alone and shows explicit evidence required to move each unvalidated architecture claim upward.",
+      "confidence": "medium-high"
+    }
+  ],
+  "residual_uncertainty": [
+    "No complete network re-fetch of all cited URLs was performed in this review, so link availability and exact current page contents remain uncertain beyond the internal conflicts reproduced above.",
+    "Some access/publication dates may reflect a requested future cutoff or an environment-clock mismatch, but they are still invalid as observed provenance until actual retrieval occurs.",
+    "The repository does not contain the claimed bundled research validator, so its exact external behavior could not be audited; the stored output shapes and local validator are sufficient to reproduce the schema/traceability gap.",
+    "The composed architecture may be sound, but available evidence cannot establish its local reliability, security, cost, or multi-tenant behavior without the proposed pilots and fault/adversarial tests."
+  ]
+}

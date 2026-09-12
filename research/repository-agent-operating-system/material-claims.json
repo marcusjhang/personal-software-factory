@@ -1,0 +1,2405 @@
+{
+  "schema_version": "3.0.0",
+  "artifact_type": "material_claim_evidence_graph",
+  "generated_at_utc": "2026-09-12T23:27:20.888996Z",
+  "generated_against": {
+    "plan_path": "PLAN.md",
+    "plan_sha256": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+    "normative_manifest_path": "docs/state-transition-manifests.md",
+    "normative_manifest_sha256": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+    "roadmap_finding": "review/round-3-closure/roadmap-evidence.json#ROAD-EVID-R3-002",
+    "research_manifest_path": "research/repository-agent-operating-system/research-manifest.json",
+    "synthesis_coverage_path": "research/repository-agent-operating-system/synthesis-coverage.md",
+    "evidence_repair_path": "research/repository-agent-operating-system/evidence-repair.md",
+    "plan_link_check_path": "review/plan-link-check.json",
+    "regeneration_checkpoint": "round-16"
+  },
+  "scope_and_method": {
+    "purpose": "Editorial candidate-association graph regenerated against the exact current PLAN.md and normative state-transition manifest.",
+    "corpus_selection": [
+      "research/self-managing-software-projects/results/*.json",
+      "research/repository-agent-operating-system/**/results/*.json"
+    ],
+    "result_file_count": 37,
+    "claim_inclusion": "Material candidate external, platform, standard, empirical, evidence-scope, and architecture-inference propositions in the final plan. Pure prescriptions and proposed contract mechanics are not presented as observed facts.",
+    "bibliography_rule": "A URL listed only in §25 does not create a material claim. It may support a claim made in the plan body.",
+    "semantic_status": "editorial_candidate_associations_only",
+    "provenance_status": "legacy_unverified",
+    "repair_boundary": "This regeneration is an editorial candidate association graph only. It is not the planned immutable re-fetch, does not create a ResearchRun or actual UTC SourceObservation, and is not human semantic/entailment review. Fresh immutable retrieval and human edge-level semantic review are required before any candidate edge may be promoted to supports or refutes."
+  },
+  "identity_rules": {
+    "claim_id": "Stable editorial identifier retained where the same material proposition survives; claim_version increments when stale wording or type is replaced.",
+    "canonical_work_id": "A distinct stable plan-work identity for each current claim. No two current claims share one.",
+    "source_observation_id": "SO- plus uppercase first 16 hexadecimal characters of SHA-256 over UTF-8(result_path + \"#\" + json_pointer + \"|\" + url). The JSON pointer identifies the exact source-list record index.",
+    "evidence_family_id": "Editorial canonical source/work family identity. Repeated records and URLs in the same family are not independent corroboration.",
+    "edge_relation": [
+      "candidate_support",
+      "candidate_refute",
+      "context_only"
+    ],
+    "reserved_future_edge_relations": [
+      "supports",
+      "refutes"
+    ],
+    "relation_promotion_rule": "Reserved values supports and refutes may be used only for a future immutable SourceObservation from the same fresh ResearchRun after a recorded human semantic decision accepts edge-level entailment. They are not used by this legacy graph."
+  },
+  "provenance_policy": {
+    "legacy_retrieval": "All source observations are projections of checked-in legacy records. Their access_date/accessed fields are local-calendar labels, not verified retrieved_at UTC values. No run ID, response/content digest, immutable snapshot, redirect/status receipt, or signed source receipt establishes source bytes or retrieval time.",
+    "plan_link_check": "review/plan-link-check.json reports HTTP 200 reachability for 24 PLAN URLs at its checked_at_utc. Reachability is not source-content, historical-state, or entailment validation.",
+    "semantic_entailment": "Unreviewed candidate associations only. Structural parsing and pointer equality do not establish truth, entailment, independence, conflict closure, transfer, efficacy, safety, compliance, or local outcomes. Fresh immutable retrieval in one ResearchRun plus a recorded human semantic decision for each edge are required before promotion to supports or refutes.",
+    "editorial_graph_status": "Every edge in this artifact points to the checked-in legacy corpus and has semantic_disposition=unreviewed_candidate. candidate_support and candidate_refute express editorial nomination or conflict preservation, not entailment."
+  },
+  "superseded_content": [
+    {
+      "prior_claim_id": "MC-001",
+      "disposition": "removed_and_replaced_by_MC-021",
+      "reason": "The stale claim treated display stamps and the 37-result inventory too broadly. MC-021 limits verification to deterministic local structural scope; legacy timestamps, external content, and semantic entailment remain unverified."
+    },
+    {
+      "prior_claim_id": "MC-002",
+      "disposition": "version_2_superseded_by_current_version_3",
+      "reason": "Retained the stable proposition identity but replaced the current platform-fact wording with an unreviewed mutable-documentation candidate and preserved the older-semantics candidate conflict."
+    },
+    {
+      "prior_claim_id": "MC-012",
+      "disposition": "version_2_superseded_by_current_version_3",
+      "reason": "Retained the stable scoped METR proposition identity while changing external findings to legacy-record candidate associations with an unresolved counter-directional candidate."
+    },
+    {
+      "prior_claim_id": "MC-013",
+      "disposition": "version_2_superseded_by_current_version_3",
+      "reason": "Retained the stable evidence-scope proposition identity while removing semantic-support wording and limiting the locally verified component to graph inspection."
+    },
+    {
+      "prior_claim_ids": [
+        "MC-015",
+        "MC-016",
+        "MC-017"
+      ],
+      "disposition": "removed_as_bibliography_only_overstatement",
+      "reason": "CloudEvents, NIST SSDF, and Google canarying appear only as §25 bibliography entries in the final plan; URL presence alone is not a material body claim."
+    },
+    {
+      "prior_claim_id": "MC-020",
+      "disposition": "version_2_superseded_by_current_version_3",
+      "reason": "Retained the stable artifact-attestation proposition identity while converting platform-fact wording and its conflict to unreviewed candidate associations."
+    },
+    {
+      "prior_claim_id": "MC-023",
+      "disposition": "version_3_superseded_by_current_version_4",
+      "reason": "Retained the stable architecture-inference identity while removing causal dependence on the unreviewed GitHub environment-reviewer candidate. The external signed R3 quorum is now explicitly an independent conservative local requirement."
+    },
+    {
+      "prior_schema_version": "2.0.0",
+      "disposition": "superseded_by_candidate_semantics_in_3.0.0",
+      "affected_surviving_claim_ids": [
+        "MC-002",
+        "MC-003",
+        "MC-004",
+        "MC-005",
+        "MC-006",
+        "MC-007",
+        "MC-008",
+        "MC-009",
+        "MC-010",
+        "MC-011",
+        "MC-012",
+        "MC-013",
+        "MC-014",
+        "MC-018",
+        "MC-019",
+        "MC-020",
+        "MC-021",
+        "MC-022",
+        "MC-023",
+        "MC-024"
+      ],
+      "reason": "All surviving claim wording, types or statuses and all legacy edge relations were regenerated under the round-5 candidate-only semantic model. Stable claim IDs remain because the underlying editorial proposition identities survive."
+    }
+  ],
+  "source_observations": [
+    {
+      "source_observation_id": "SO-8F690DCE5355E4F7",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json#/sources/0|https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+      },
+      "result_path": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+      "json_pointer": "/sources/0",
+      "source_record_index": 0,
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "title": "Control the concurrency of workflows and jobs",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-actions-concurrency-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Living vendor documentation; the legacy record captures older one-running/one-pending semantics and does not verify the current queue-mode wording.",
+      "verbatim_source_record": {
+        "id": "G1",
+        "title": "Control the concurrency of workflows and jobs",
+        "publisher_author": "GitHub",
+        "source_type": "official documentation",
+        "publication_update_date": "living documentation; date not stated",
+        "access_date": "2026-09-13",
+        "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+        "supported_claims": [
+          "A concurrency group permits at most one running and one pending workflow/job; a newer pending run replaces the existing pending run; ordering is arbitrary; cancel-in-progress is optional; names are case-insensitive."
+        ]
+      },
+      "source_record_value_sha256": "8f2fad98f4d2f4aeceef265c4f63b98844ffd6b4935a1ca1b13ef2c6866edd3e",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "1738c321f0091995425d3373caad7cabfe712db19d62568e351d0e7c343c762e",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-CD115DA1EBAA4D2F",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json#/sources/21|https://www.postgresql.org/docs/current/sql-select.html"
+      },
+      "result_path": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+      "json_pointer": "/sources/21",
+      "source_record_index": 21,
+      "url": "https://www.postgresql.org/docs/current/sql-select.html",
+      "title": "SELECT",
+      "publisher_or_author": "PostgreSQL Global Development Group",
+      "evidence_family_id": "postgresql-select-locking-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Database locking primitives do not prove the full proposed lease, fence, recovery, RLS, or controller design.",
+      "verbatim_source_record": {
+        "id": "P1",
+        "title": "SELECT",
+        "publisher_author": "PostgreSQL Global Development Group",
+        "source_type": "official database reference",
+        "publication_update_date": "PostgreSQL current documentation",
+        "access_date": "2026-09-13",
+        "url": "https://www.postgresql.org/docs/current/sql-select.html",
+        "supported_claims": [
+          "FOR UPDATE locks selected rows; SKIP LOCKED gives an inconsistent view but is appropriate for queue-like tables with multiple consumers."
+        ]
+      },
+      "source_record_value_sha256": "dd8e99897501174083f35ee77d07eb1a3abce76c4375371573a8d9c1b22e47d4",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "1738c321f0091995425d3373caad7cabfe712db19d62568e351d0e7c343c762e",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-4725A97E98D29D88",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json#/sources/3|https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects"
+      },
+      "result_path": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json",
+      "json_pointer": "/sources/3",
+      "source_record_index": 3,
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+      "title": "Using the API to manage Projects",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-projects-api-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "API mutation capability does not prove reliable reconciliation or make Projects a transaction log.",
+      "verbatim_source_record": {
+        "title": "Using the API to manage Projects",
+        "publisher_or_author": "GitHub",
+        "source_type": "official API guide",
+        "publication_or_update_date": "living; accessed 2026-09-13",
+        "access_date": "2026-09-13",
+        "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+        "supported_claims": "GraphQL discovery/mutations, node IDs, add idempotency, field constraints, scopes, webhooks"
+      },
+      "source_record_value_sha256": "0cec9c3ae2a0557282a3abcf9d81e5f43ea3054efdd2ac4065482c0205ccef6b",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "ff5473f2eaae5f6fa09ad143680ca9da8e13867f22dd121aa3f30fde93b1369c",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-4DFAC11A5DA0E130",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json#/sources/19|https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md"
+      },
+      "result_path": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json",
+      "json_pointer": "/sources/19",
+      "source_record_index": 19,
+      "url": "https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md",
+      "title": "OpenGitOps Principles v1.0",
+      "publisher_or_author": "OpenGitOps / CNCF GitOps Working Group",
+      "evidence_family_id": "open-gitops-principles-v1",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "General reconciliation principles are architecture context, not empirical evidence for GitHub Projects.",
+      "verbatim_source_record": {
+        "title": "OpenGitOps Principles v1.0",
+        "publisher_or_author": "OpenGitOps / CNCF GitOps Working Group",
+        "source_type": "open standard",
+        "publication_or_update_date": "v1.0.0, 2021-11-10",
+        "access_date": "2026-09-13",
+        "url": "https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md",
+        "supported_claims": "declarative, versioned/immutable, pulled automatically, continuously reconciled desired state"
+      },
+      "source_record_value_sha256": "f7f88bab922042ff7926805706483d9a1286d9a306e7db4ec74b42e2de202402",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "ff5473f2eaae5f6fa09ad143680ca9da8e13867f22dd121aa3f30fde93b1369c",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-801B50038125770F",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json#/sources/10|https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries"
+      },
+      "result_path": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+      "json_pointer": "/sources/10",
+      "source_record_index": 10,
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+      "title": "Validating webhook deliveries",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-webhook-validation-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Supports HMAC validation only; it does not prove delivery completeness or exactly-once processing.",
+      "verbatim_source_record": {
+        "id": "G11",
+        "title": "Validating webhook deliveries",
+        "publisher_author": "GitHub",
+        "source_type": "official security documentation",
+        "publication_update_date": "living documentation",
+        "access_date": "2026-09-13",
+        "url": "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+        "supported_claims": [
+          "Validate the X-Hub-Signature-256 HMAC against the raw payload and use constant-time comparison."
+        ]
+      },
+      "source_record_value_sha256": "072e09abc82a30f843ca3c98e884cdde4dcfd6cd32699a6d4279cbef388c3f62",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "1738c321f0091995425d3373caad7cabfe712db19d62568e351d0e7c343c762e",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-D10743F2B666CE0D",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json#/sources/9|https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks"
+      },
+      "result_path": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json",
+      "json_pointer": "/sources/9",
+      "source_record_index": 9,
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "title": "Best practices for using webhooks",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-webhook-best-practices-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Operational guidance does not make webhook arrival authoritative or exactly once.",
+      "verbatim_source_record": {
+        "title": "Best practices for using webhooks",
+        "publisher_or_author": "GitHub",
+        "source_type": "official operational documentation",
+        "publication_or_update_date": "living; accessed 2026-09-13",
+        "access_date": "2026-09-13",
+        "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+        "supported_claims": "delivery handling, replay/idempotency and asynchronous processing guidance"
+      },
+      "source_record_value_sha256": "640510655ef6628914d20d4258eb6d70c34d91e5a723c5d02b2b554828a00be8",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "ff5473f2eaae5f6fa09ad143680ca9da8e13867f22dd121aa3f30fde93b1369c",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-F625414FA4207E8B",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json#/sources/11|https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app"
+      },
+      "result_path": "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json",
+      "json_pointer": "/sources/11",
+      "source_record_index": 11,
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app",
+      "title": "About permissions for GitHub Apps",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-app-permissions-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Exact permissions and availability depend on installation, endpoint, tenant, and configuration.",
+      "verbatim_source_record": {
+        "id": "S12",
+        "title": "About permissions for GitHub Apps",
+        "publisher": "GitHub",
+        "authors": "GitHub Docs",
+        "publication_or_update_date": "continuously updated",
+        "access_date": "2026-09-13",
+        "source_type": "official product documentation",
+        "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app",
+        "supported_claims": [
+          "repository and organization permission selection",
+          "installation-scoped access"
+        ]
+      },
+      "source_record_value_sha256": "de919b1c82dc2433232ddeea32091da0c2d6336defc335ae33f02a8d185ada45",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "baf0686ee02baa880c0e30621ff7f9bce30cdc75a32266dfcec33785943f8df5",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-8CD88CB43C82E024",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/results/03-agent-bootstrap-and-instant-context.json#/sources/12|https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app"
+      },
+      "result_path": "research/repository-agent-operating-system/results/03-agent-bootstrap-and-instant-context.json",
+      "json_pointer": "/sources/12",
+      "source_record_index": 12,
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "title": "Generating an installation access token for a GitHub App",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-app-installation-token-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Token controls do not prove plan-wide least privilege, revocation, or isolation.",
+      "verbatim_source_record": {
+        "title": "Generating an installation access token for a GitHub App",
+        "publisher": "GitHub",
+        "type": "official authentication documentation",
+        "publication_or_version_date": "live; undated",
+        "access_date": "2026-09-13",
+        "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+        "supports": "one-hour expiry and repository/permission narrowing"
+      },
+      "source_record_value_sha256": "20b45774e4d72ae5fe818bc7e15886d2dc3177e2e6d3c41be31c9238160d0288",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "6b7137286cc9f4f5689e30e338b384acac6db4e7c936c90d075f0946be7cfecf",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-082F22B967A960A8",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/14-adoption-maturity-and-build-vs-buy-landscape.json#/sources/22|https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+      },
+      "result_path": "research/self-managing-software-projects/results/14-adoption-maturity-and-build-vs-buy-landscape.json",
+      "json_pointer": "/sources/22",
+      "source_record_index": 22,
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "title": "About rulesets",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-rulesets-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Capability and availability depend on repository, plan, tenant, and configuration.",
+      "verbatim_source_record": {
+        "title": "About rulesets",
+        "publisher_or_author": "GitHub",
+        "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+        "publication_or_update_date": "continuously updated / accessed snapshot",
+        "access_date": "2026-09-13",
+        "source_type": "official documentation",
+        "supported_claims": [
+          "Protected-branch/ruleset enforcement and required checks/approvals."
+        ]
+      },
+      "source_record_value_sha256": "51e6584a1940c36df8b798c339073edb1ac464a990b5611a17de1a920c93e62d",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "889096aebe7d25f185da6c10a952efcee20407af1f3edb9913d33b8be0dc235a",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-2FD4370016DB2C4D",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json#/sources/1|https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue"
+      },
+      "result_path": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json",
+      "json_pointer": "/sources/1",
+      "source_record_index": 1,
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+      "title": "Managing a merge queue",
+      "publisher_or_author": "GitHub Docs",
+      "evidence_family_id": "github-merge-queue-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Documents the merge-queue primitive, not correct workflow setup or sufficient review.",
+      "verbatim_source_record": {
+        "id": "S2",
+        "title": "Managing a merge queue",
+        "publisher_author": "GitHub Docs",
+        "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+        "publication_update_date": "continuously updated; exact page date not stated",
+        "access_date": "2026-09-13",
+        "source_type": "official documentation",
+        "supported_claims": [
+          "A merge queue validates required checks against the latest target branch and queued PRs and can use GitHub Actions or external CI."
+        ]
+      },
+      "source_record_value_sha256": "1371533430bc7469f34e6a76f64bbd2fc83be2005422b3a80ed12b043defc187",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "600027b9e80bdc6524b317574049f622aa719fa84630fc9c80f555efd2b47644",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-D6EDE5281090C063",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json#/sources/22|https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners"
+      },
+      "result_path": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json",
+      "json_pointer": "/sources/22",
+      "source_record_index": 22,
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "title": "About code owners",
+      "publisher_or_author": "GitHub Docs",
+      "evidence_family_id": "github-codeowners-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Review routing and protection mechanics do not guarantee independent or sufficient review.",
+      "verbatim_source_record": {
+        "id": "S23",
+        "title": "About code owners",
+        "publisher_author": "GitHub Docs",
+        "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+        "publication_update_date": "continuously updated; exact page date not stated",
+        "access_date": "2026-09-13",
+        "source_type": "official documentation",
+        "supported_claims": [
+          "CODEOWNERS can request domain owners automatically and branch rules can require Code Owner approval; ownership files themselves require protection from unauthorized changes."
+        ]
+      },
+      "source_record_value_sha256": "4bd992cb10cc99b77f4b27895b43957ddd7cc14ff148e8c826243acc4fdcd245",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "600027b9e80bdc6524b317574049f622aa719fa84630fc9c80f555efd2b47644",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-4E860FF67BE653EE",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json#/sources/10|https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments"
+      },
+      "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json",
+      "json_pointer": "/sources/10",
+      "source_record_index": 10,
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "title": "Deployments and environments",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-actions-environments-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Plan and repository restrictions apply; one listed reviewer may suffice, so the primitive does not supply an R3 two-person quorum.",
+      "verbatim_source_record": {
+        "id": "S11",
+        "title": "Deployments and environments",
+        "publisher_or_author": "GitHub",
+        "publication_or_update_date": "continuously updated; page date not stated",
+        "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+        "source_type": "official documentation",
+        "access_date": "2026-09-13",
+        "supported_claims": [
+          "required reviewers, prevent self-review, gated environment secrets"
+        ],
+        "limits": "Plan/repository restrictions apply; one listed reviewer may suffice."
+      },
+      "source_record_value_sha256": "12edc44b820bcd43c44d13073d9182563f57e3b49651d9740d623808c4ec78e5",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "6e7eb1b7d83bfaaeef383cb079926bc5c722f23b7121a7d43af39920abc76bcf",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-D0733FED71F2CBE3",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/11-multi-agent-orchestration-and-control-planes.json#/sources/24|https://docs.github.com/en/actions/reference/security/secure-use"
+      },
+      "result_path": "research/self-managing-software-projects/results/11-multi-agent-orchestration-and-control-planes.json",
+      "json_pointer": "/sources/24",
+      "source_record_index": 24,
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "title": "Secure use reference",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-actions-secure-use-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Security guidance identifies controls and threats; it does not prove implementation compliance or prevention.",
+      "verbatim_source_record": {
+        "id": "S25",
+        "title": "Secure use reference",
+        "publisher_author": "GitHub",
+        "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+        "publication_update_date": "unknown; living documentation",
+        "access_date": "2026-09-13",
+        "source_type": "official security documentation",
+        "supported_claims": [
+          "GitHub warns that untrusted workflow input and compromised actions can expose secrets and recommends least privilege, pinning actions, and review controls."
+        ]
+      },
+      "source_record_value_sha256": "dbd9c4b82c127568b633b59476c8e33624c3b143f2ce8ad0e1fbcf70e89b137f",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "eabc8fab7e4adf8de5e2b571d03a43f3f1a639bea66c8909db8d1cefddd1c399",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-BD8E0D01C7590214",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json#/sources/42|https://slsa.dev/spec/v1.2/provenance"
+      },
+      "result_path": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json",
+      "json_pointer": "/sources/42",
+      "source_record_index": 42,
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "title": "SLSA v1.2 Provenance",
+      "publisher_or_author": "OpenSSF SLSA",
+      "evidence_family_id": "slsa-v1.2-provenance",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "The standard defines provenance semantics; it does not show this design conforms or improves outcomes.",
+      "verbatim_source_record": {
+        "id": "S43",
+        "title": "SLSA v1.2 Provenance",
+        "publisher_or_authors": "OpenSSF SLSA",
+        "source_type": "supply-chain standard",
+        "publication_or_version_date": "v1.2",
+        "accessed": "2026-09-13",
+        "url": "https://slsa.dev/spec/v1.2/provenance",
+        "claim_supported": "Artifact provenance model with subject digests and builder identity, transferable to factory outputs/handoffs.",
+        "limitations": "Designed for software supply chain; applying it to GTM/research artifacts is an adaptation."
+      },
+      "source_record_value_sha256": "620a622cb87cfb685270c29363b5b6820cac951434b19d0e3577ff2290ed67d8",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "472e7186c10b768948d8fc12ab583dbf813a84611dfd44267fbd4c23ac78b51a",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-D6896BACDD847875",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json#/sources/8|https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+      },
+      "result_path": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json",
+      "json_pointer": "/sources/8",
+      "source_record_index": 8,
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "evidence_family_id": "owasp-genai-prompt-injection",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Practitioner risk guidance, not prevalence measurement; it explicitly does not promise fool-proof prevention.",
+      "verbatim_source_record": {
+        "id": "S9",
+        "title": "LLM01:2025 Prompt Injection",
+        "publisher_author": "OWASP GenAI Security Project",
+        "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "publication_update_date": "2025 edition; page date not stated",
+        "access_date": "2026-09-13",
+        "source_type": "Practitioner consensus guidance",
+        "supported_claims": "no fool-proof prevention; least privilege, validation, content separation, approvals, red testing"
+      },
+      "source_record_value_sha256": "e2052d51d77726bc84034637a82ea1f0eb11da682462b887e227251da60b8369",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "3799a8aea1dbc3462b5a44a88bfb2f051c7bad175e765781482653dd8a14a4d0",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-AA683D07062B86D6",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json#/sources/9|https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      },
+      "result_path": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json",
+      "json_pointer": "/sources/9",
+      "source_record_index": 9,
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_or_author": "OWASP GenAI Security Project",
+      "evidence_family_id": "owasp-genai-excessive-agency",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Risk guidance does not prove the plan’s authority controls are complete or effective.",
+      "verbatim_source_record": {
+        "id": "S10",
+        "title": "LLM06:2025 Excessive Agency",
+        "publisher_author": "OWASP GenAI Security Project",
+        "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+        "publication_update_date": "2025 edition; page date not stated",
+        "access_date": "2026-09-13",
+        "source_type": "Practitioner consensus guidance",
+        "supported_claims": "minimum tools/permissions/autonomy, complete mediation, human approval"
+      },
+      "source_record_value_sha256": "6311af0320130994249fac984972da7359a985b36a70c5818bb14f00d44af91d",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "3799a8aea1dbc3462b5a44a88bfb2f051c7bad175e765781482653dd8a14a4d0",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-F32C5490D8BC3520",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/06-observability-to-autonomous-remediation.json#/sources/3|https://opentelemetry.io/docs/concepts/signals/"
+      },
+      "result_path": "research/self-managing-software-projects/results/06-observability-to-autonomous-remediation.json",
+      "json_pointer": "/sources/3",
+      "source_record_index": 3,
+      "url": "https://opentelemetry.io/docs/concepts/signals/",
+      "title": "Signals",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "evidence_family_id": "opentelemetry-signals-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Defines telemetry signals and correlation context; telemetry is not authorization, ground truth, or causal outcome proof.",
+      "verbatim_source_record": {
+        "id": "S04",
+        "title": "Signals",
+        "publisher_or_author": "OpenTelemetry Authors/CNCF",
+        "url": "https://opentelemetry.io/docs/concepts/signals/",
+        "publication_or_update_date": "2026-03-10",
+        "access_date": "2026-09-13",
+        "source_type": "standard/project documentation",
+        "supported_claims": "Defines traces, metrics, logs and baggage as distinct signals; common context is needed for correlation."
+      },
+      "source_record_value_sha256": "6a047c2f95c184173fe81bd1c55ba8cd74ae25a54bd56fbecdd58168ca3411e1",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "2de1d778a27bc1cebc557c16ae6c6cfb7ba5d061047421014422b1ff6f68a2d6",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-C8BBC15FB0875929",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/01-autonomous-coding-agent-platforms.json#/sources/28|https://arxiv.org/abs/2507.09089"
+      },
+      "result_path": "research/self-managing-software-projects/results/01-autonomous-coding-agent-platforms.json",
+      "json_pointer": "/sources/28",
+      "source_record_index": 28,
+      "url": "https://arxiv.org/abs/2507.09089",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Joel Becker, Nate Rush, Elizabeth Barnes, David Rein; METR",
+      "evidence_family_id": "metr-early-2025-experienced-os-dev-rct",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Narrow population, early-2025 tools, selected tasks, and synchronous work; not a universal or local-system estimate.",
+      "verbatim_source_record": {
+        "id": "S29",
+        "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+        "publisher_or_author": "Joel Becker, Nate Rush, Elizabeth Barnes, David Rein; METR",
+        "url": "https://arxiv.org/abs/2507.09089",
+        "publication_or_update_date": "2025-07-25 v2",
+        "access_date": "2026-09-13",
+        "source_type": "independent randomized controlled study/preprint",
+        "supported_claims": [
+          "16 developers, 246 tasks, early-2025 tools caused 19% longer completion while developers believed 20% faster; scope limits"
+        ]
+      },
+      "source_record_value_sha256": "c8a1556813d46b1908f7ba605062f9782965cedda7438c8773cb54daaf7b1119",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "e7491eb054bc1d7ced7188ca3de40bd1f6d658fdd3c95293b4cc017146409b40",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-3A084C6D3DB32083",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json#/sources/17|https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+      },
+      "result_path": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json",
+      "json_pointer": "/sources/17",
+      "source_record_index": 17,
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Joel Becker, Nate Rush, Beth Barnes, David Rein; METR",
+      "evidence_family_id": "metr-early-2025-experienced-os-dev-rct",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Same canonical study family as the arXiv paper; not independent corroboration; page later marked the snapshot out of date.",
+      "verbatim_source_record": {
+        "id": "S18",
+        "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+        "publisher_author": "Joel Becker, Nate Rush, Beth Barnes, David Rein; METR",
+        "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+        "publication_update_date": "2025-07-10; page later marked results out of date",
+        "access_date": "2026-09-13",
+        "source_type": "independent randomized controlled trial",
+        "supported_claims": [
+          "Sixteen experienced open-source developers were 19% slower with early-2025 AI tools in the studied setting",
+          "Authors warn benchmarks trade realism for scale and can over- or underestimate impact",
+          "Authors now explicitly call this snapshot out of date"
+        ]
+      },
+      "source_record_value_sha256": "803f18734449d596af56ddbddc052a52e6865904063b4970da8ad80c313108ff",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "3a391fba5aac17edf35b668697e43ea1f215d141b0bf2e92978ddd54f9f621e5",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-F9995A51C54E6AD8",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json#/sources/18|https://metr.org/blog/2026-02-24-uplift-update/"
+      },
+      "result_path": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json",
+      "json_pointer": "/sources/18",
+      "source_record_index": 18,
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_or_author": "Joel Becker et al.; METR",
+      "evidence_family_id": "metr-late-2025-uplift-update",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Raw later point estimates are selection- and measurement-biased with intervals crossing zero; they do not establish a speedup.",
+      "verbatim_source_record": {
+        "id": "S19",
+        "title": "We are Changing our Developer Productivity Experiment Design",
+        "publisher_author": "Joel Becker et al.; METR",
+        "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+        "publication_update_date": "2026-02-24",
+        "access_date": "2026-09-13",
+        "source_type": "independent follow-up study / methodological critique",
+        "supported_claims": [
+          "Late-2025 raw estimates ranged from 18% speedup for returning developers to 4% for new recruits, with confidence intervals crossing zero",
+          "Selection, lower pay and concurrent-agent time accounting make the signal unreliable",
+          "Operational productivity evidence remains conflicting and task-selection dependent"
+        ]
+      },
+      "source_record_value_sha256": "ece2bae3aa71992c28866f0e924720a973152cba57540a821cd430ce9d2c740d",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "3a391fba5aac17edf35b668697e43ea1f215d141b0bf2e92978ddd54f9f621e5",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-2F1F4CF3F484F443",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json#/sources/41|https://json-schema.org/draft/2020-12/json-schema-core"
+      },
+      "result_path": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json",
+      "json_pointer": "/sources/41",
+      "source_record_index": 41,
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "title": "JSON Schema Core Draft 2020-12",
+      "publisher_or_author": "JSON Schema project",
+      "evidence_family_id": "json-schema-draft-2020-12",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Schema validation establishes structure/vocabulary, not business semantics, authorization, truth, or fitness.",
+      "verbatim_source_record": {
+        "id": "S42",
+        "title": "JSON Schema Core Draft 2020-12",
+        "publisher_or_authors": "JSON Schema project",
+        "source_type": "open standard",
+        "publication_or_version_date": "2022-06-10",
+        "accessed": "2026-09-13",
+        "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+        "claim_supported": "Versioned validation vocabulary for factory and artifact contracts.",
+        "limitations": "Schema validation cannot prove semantic correctness or policy compliance."
+      },
+      "source_record_value_sha256": "d50c28aee3f98d334e1c48eca87138c196e908ccb8dff7899efa02c7cfa8db27",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "472e7186c10b768948d8fc12ab583dbf813a84611dfd44267fbd4c23ac78b51a",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-AF4054506E00C4D6",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/lifecycle-extension/results/02-conversational-ideation-and-discovery-lifecycle.json#/sources/20|https://www.rfc-editor.org/rfc/rfc8785"
+      },
+      "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/02-conversational-ideation-and-discovery-lifecycle.json",
+      "json_pointer": "/sources/20",
+      "source_record_index": 20,
+      "url": "https://www.rfc-editor.org/rfc/rfc8785",
+      "title": "RFC 8785: JSON Canonicalization Scheme",
+      "publisher_or_author": "A. Rundgren et al. / IETF",
+      "evidence_family_id": "rfc-8785-json-canonicalization",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Defines canonicalization only; signing, key protection, and cross-runtime correctness require implementation tests.",
+      "verbatim_source_record": {
+        "id": "S21",
+        "title": "RFC 8785: JSON Canonicalization Scheme",
+        "publisher_or_author": "A. Rundgren et al. / IETF",
+        "url": "https://www.rfc-editor.org/rfc/rfc8785",
+        "publication_or_update_date": "2020-06",
+        "access_date": "2026-09-13",
+        "source_type": "Internet standard-track RFC",
+        "supported_claims": [
+          "C20: canonical JSON supports stable hashing/signing of exact decision artifacts."
+        ]
+      },
+      "source_record_value_sha256": "8b6ff7bd22066821082699d52426b55c49518058624d8bae67b83ac062ffa7a2",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "271b6dc74a4c90658995c4df81a2235768f19603affcea55804bf57909151d6e",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-3371796C806DC413",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/self-managing-software-projects/results/04-ci-cd-and-agent-execution-integration.json#/sources/29|https://docs.github.com/en/actions/concepts/security/artifact-attestations"
+      },
+      "result_path": "research/self-managing-software-projects/results/04-ci-cd-and-agent-execution-integration.json",
+      "json_pointer": "/sources/29",
+      "source_record_index": 29,
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "title": "Artifact attestations",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-artifact-attestations-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Attestation supports provenance, not artifact safety; availability and policy/configuration remain tenant-specific.",
+      "verbatim_source_record": {
+        "id": "S30",
+        "title": "Artifact attestations",
+        "publisher_or_author": "GitHub",
+        "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+        "publication_or_update_date": "continuously updated; exact page date not stated",
+        "access_date": "2026-09-13",
+        "source_type": "official documentation",
+        "supported_claims": "Signed build provenance and verification."
+      },
+      "source_record_value_sha256": "622889d4a9cc7e7e39a625081793ae67e1b2b7e0df78015d5b521a22ac4fe117",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "1fa59fd2e0daed00221e885483530d5bce5361988615c6b47e69879c0ddfb702",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-815F1D4806180E58",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json#/sources/0|https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+      },
+      "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+      "json_pointer": "/sources/0",
+      "source_record_index": 0,
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "title": "Control the concurrency of workflows and jobs",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-actions-concurrency-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13 (embedded in legacy bibliography string)",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Living current-page record; queue details can drift. It does not provide a renewable fenced lease or transactional work-state admission.",
+      "verbatim_source_record": "G1 | GitHub, 'Control the concurrency of workflows and jobs' | official documentation, living; current page observed for 2026 target | accessed 2026-09-13 research cutoff | https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency | Supports: default `queue: single` retains replacement/cancellation behavior; current docs also describe `queue: max` with up to 100 pending and FIFO by when a run starts waiting, but actual start timing is variable; groups are case-insensitive and cancel-in-progress constraints apply. Neither mode is a renewable fenced lease or transaction with work-item state.",
+      "source_record_value_sha256": "ddbb215cab549868f6973c34e58e9bc3e62580d3d3ee9cba918fbe68644e1027",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "84177d66f4153c72b4a88ab9963ed5d07c644dcb8ef1b31c8fcfb67580826950",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    },
+    {
+      "source_observation_id": "SO-E086ED42272D2C36",
+      "identity_derivation": {
+        "algorithm": "SO- + uppercase first 16 hex characters of sha256(UTF-8(result_path + \"#\" + json_pointer + \"|\" + url))",
+        "identity_input": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json#/sources/10|https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations"
+      },
+      "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+      "json_pointer": "/sources/10",
+      "source_record_index": 10,
+      "url": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations",
+      "title": "Use artifact attestations",
+      "publisher_or_author": "GitHub",
+      "evidence_family_id": "github-artifact-attestations-doc",
+      "legacy_provenance_limitations": {
+        "access_date_as_recorded": "2026-09-13 (embedded in legacy bibliography string)",
+        "retrieved_at_utc": "unavailable",
+        "research_run_id": "unavailable",
+        "response_or_content_digest": "unavailable",
+        "immutable_snapshot": "unavailable",
+        "status": "Legacy record only. Its local-calendar access date and checked-in bytes do not attest source retrieval time, source bytes, or source authenticity."
+      },
+      "transfer_limits": "Vendor capability and availability must be checked in the target deployment; attestation is provenance, not semantic correctness or safety.",
+      "verbatim_source_record": "G11 | GitHub, 'Use artifact attestations' | official security documentation, living/undated | accessed 2026-09-13 | https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations | Supports: build provenance attestations and verification for artifacts/container images; availability and trust policy must be checked for the deployment.",
+      "source_record_value_sha256": "fdc6aeb7cbf33232ffe16f8244648707484292a8bf0787bba86ca90f55c0d62e",
+      "source_record_value_sha256_encoding": "UTF-8 raw string for string records; UTF-8 JSON with ensure_ascii=false, sorted keys, and compact separators for object records",
+      "result_file_sha256": "84177d66f4153c72b4a88ab9963ed5d07c644dcb8ef1b31c8fcfb67580826950",
+      "observation_kind": "legacy_corpus_projection",
+      "semantic_disposition": "unreviewed_candidate"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "MC-002",
+      "canonical_work_id": "CW-PLAN-002",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_platform_proposition",
+      "claim_text": "The legacy mutable GitHub documentation records nominate a candidate proposition that queue modes are distinguished, while preserving an older-semantics conflict. Current GitHub Actions concurrency behavior remains unconfirmed until the §4 same-run retrieval and human review.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 84,
+          "end_line": 84,
+          "exact_excerpt": "Legacy platform records are candidate associations for primitives, not proof of this composition’s effectiveness. Legacy GitHub records contain candidate vendor-capability propositions. The fenced controller is an architecture inference. Productivity, recovery, security, isolation, and ROI remain unvalidated local outcomes. Repeated URLs or records in one evidence family are not independent corroboration; the METR paper/blog are one family. A legacy mutable GitHub documentation record is candidate context for queue-mode distinctions; current platform behavior is unconfirmed until the §4 same-run review, and no legacy record defines this plan’s renewable fenced lease or transactional admission ([GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-002-01",
+          "source_observation_id": "SO-815F1D4806180E58",
+          "relation": "candidate_support",
+          "edge_scope": "current queue-mode documentation assertion",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “current queue-mode documentation assertion”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-002-02",
+          "source_observation_id": "SO-8F690DCE5355E4F7",
+          "relation": "candidate_refute",
+          "edge_scope": "current queue-mode documentation assertion",
+          "rationale": "The legacy record associates its exact pointer value with a conflicting or counter candidate scoped as “current queue-mode documentation assertion”. This preserves the candidate conflict without an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "The current page returned HTTP 200 in plan-link-check, but no fresh response bytes or snapshot are in the corpus. Current queue-mode semantics require immutable re-fetch and human semantic review.",
+      "claim_version": 3,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-003",
+      "canonical_work_id": "CW-PLAN-003",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "Legacy records associate GitHub Actions concurrency and PostgreSQL locking with candidate primitives, not proof of the renewable fenced lease, transactional admission, durable dependency orchestration, or recovery semantics proposed by the controller.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 84,
+          "end_line": 84,
+          "exact_excerpt": "Legacy platform records are candidate associations for primitives, not proof of this composition’s effectiveness. Legacy GitHub records contain candidate vendor-capability propositions. The fenced controller is an architecture inference. Productivity, recovery, security, isolation, and ROI remain unvalidated local outcomes. Repeated URLs or records in one evidence family are not independent corroboration; the METR paper/blog are one family. A legacy mutable GitHub documentation record is candidate context for queue-mode distinctions; current platform behavior is unconfirmed until the §4 same-run review, and no legacy record defines this plan’s renewable fenced lease or transactional admission ([GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency))."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 323,
+          "end_line": 329,
+          "exact_excerpt": "## 13. Orchestration, dependencies, retries, cancellation, and effects\n\n### Admission and leases\n\nAdmission transaction validates aggregate version, lifecycle version, a current per-item human `Approval` or eligible `PolicyAdmissionReceipt`, pinned factory, dependency snapshot, base, policy, budget/quota, worker compatibility, and resource conflicts; then creates attempt, lease, fence, epoch, and outbox atomically. Queue order is a total tuple such as `(eligible_at, priority_with_bounded_aging, created_at, stable_item_id)`. Per-tenant/repository quotas prevent starvation. Resource keys normalize repository/path/environment; ambiguous overlaps serialize. Acquire locks in one global order.\n\nEvery Lease and signed context binds `issued_at`, `renew_by`, `expires_at`, and `max_expires_at` with exact database-time inequalities `issued_at < renew_by < expires_at <= max_expires_at`. Authority is valid only while `db_now < expires_at`; every gateway rejects it at `db_now >= expires_at`. Renewal CAS checks lease/work/holder/attempt/fence/epoch/unreleased and `db_now < renew_by`, then atomically sets `renew_by'` and `expires_at'` such that `db_now < renew_by' < expires_at' <= max_expires_at`; it never moves `issued_at` or `max_expires_at`. Missing renewal starts reclaim at `db_now >= renew_by`; this grace interval does not create new authority, and the old authority is rejected no later than `expires_at`. Exact ordinary reclaim is: (1) detect missed renewal; (2) transactionally mark old attempt `HEARTBEAT_LOST -> STOP_REQUESTED`, advance fence/cancellation epoch, revoke grants and reject all old-fence effect gates; (3) enter `QUIESCING`, request stop, classify in-flight effects and resource ownership; (4) commit A10 only after the termination receipt and all effect dispositions are settled, leaving the predecessor `STOPPED` and explicitly unfinished; (5) finish every required predecessor CleanupItem from previously committed receipts and then commit A11 `STOPPED -> CANCELLED`; (6) only in a later admission transaction create the successor attempt/lease/fence/epoch/outbox. Admission rejects unless no predecessor exists or the unique predecessor is finished; for ordinary reclaim, only committed A11 `CANCELLED` satisfies that predecessor guard. No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits. Old compute may physically run only in a proven isolated workspace with no reusable credential and every controller/actuator/output gate rejecting its old fence. Shared branch, database, deployment environment, cache, workspace, device or mutable external resource waits for proven quiescence. The new attempt gets a fresh workspace/credentials; immutable content-addressed inputs may be shared. If termination cannot be proved, the normative `UnconfirmedQuiescence` saga remains blocked. A human exact-digest `UnconfirmedQuiescenceDisposition` may authorize only monitoring, isolation, kill attempts, effect reconciliation, and closure work for the old Attempt. It grants no successor Attempt, Lease, fence, execution context, output authority, new business command, or new effect authority, whether resources appear disjoint or not. The old Attempt stays unfinished and the node admits no successor work until exact termination is recorded, the saga closes through U09, and A18 completes. There is no alternate authority carrier, no overlapping authority, and at most one unfinished Attempt per node across all fences. This at-most-one-unfinished invariant is unconditional; retained cleanup or an isolated old process creates no exception."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-003-01",
+          "source_observation_id": "SO-8F690DCE5355E4F7",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-003-02",
+          "source_observation_id": "SO-CD115DA1EBAA4D2F",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "No source tests the complete proposed controller. Correctness remains a local implementation and race-testing question.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-004",
+      "canonical_work_id": "CW-PLAN-004",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "A legacy GitHub record associates Projects with candidate API-driven observation and mutation capabilities. Treating Projects as a reconciled projection rather than the authoritative transaction log is a local architecture inference.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 309,
+          "end_line": 313,
+          "exact_excerpt": "Protected Git declares desired issue forms, labels, Project fields/options/views/workflows, status mapping, and installation scope. The controller observes remote node IDs, field types, option IDs, versions/fingerprints, and permissions. Planning produces a signed `ReconciliationPlan` bound to tenant/repository/project, desired Git commit/digest, observation IDs/fingerprints, ordered operations, risk, approval, creation/expiry, and plan digest.\n\nApply uses optimistic concurrency. Re-read before each operation; stale observations invalidate/replan. Classify differences as create, safe update, rename/migrate, destructive/recreate, ambiguous, or unmanaged. Same-name/type-changing fields are not automatic updates. Preserve unmanaged objects by default. Destructive/ambiguous operations need explicit approval and migration/rollback. Read after write and record remote IDs/receipts.\n\nEach GitHub effect catalog entry names endpoint/API version, logical identity, embedded marker or natural key, expected-before fingerprint, paginated lookup, request digest, receipt match, ambiguity rule, safe retry, compensation limits, and read-after-write. Do not claim GitHub universally deduplicates caller idempotency keys. Legacy GitHub records nominate signature validation and delivery-handling as unreviewed candidate webhook capabilities. Independently, this plan requires authenticated, delivery-deduplicated signals and scheduled full reconciliation as conservative local controls; the target probe and §4 review fail closed before use ([webhook validation](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries), [webhook best practices](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks), [Projects API](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-004-01",
+          "source_observation_id": "SO-4725A97E98D29D88",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-004-02",
+          "source_observation_id": "SO-4DFAC11A5DA0E130",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "The sources do not establish reliable end-to-end reconciliation, idempotency, or the proposed custody model.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-005",
+      "canonical_work_id": "CW-PLAN-005",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "Legacy GitHub records associate webhooks with candidate signature-validation and delivery-handling capabilities. The plan’s authenticated, delivery-deduplicated signals and scheduled full reconciliation are a local architecture inference.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 313,
+          "end_line": 313,
+          "exact_excerpt": "Each GitHub effect catalog entry names endpoint/API version, logical identity, embedded marker or natural key, expected-before fingerprint, paginated lookup, request digest, receipt match, ambiguity rule, safe retry, compensation limits, and read-after-write. Do not claim GitHub universally deduplicates caller idempotency keys. Legacy GitHub records nominate signature validation and delivery-handling as unreviewed candidate webhook capabilities. Independently, this plan requires authenticated, delivery-deduplicated signals and scheduled full reconciliation as conservative local controls; the target probe and §4 review fail closed before use ([webhook validation](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries), [webhook best practices](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks), [Projects API](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-005-01",
+          "source_observation_id": "SO-801B50038125770F",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-005-02",
+          "source_observation_id": "SO-D10743F2B666CE0D",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Lost, duplicate, delayed, or out-of-order deliveries remain possible; exactly-once behavior is not established.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-006",
+      "canonical_work_id": "CW-PLAN-006",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_platform_proposition",
+      "claim_text": "Legacy GitHub records associate App installation credentials with candidate repository/permission narrowing and short-lived installation tokens; the plan proposes using them as bounded credential primitives.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 321,
+          "end_line": 321,
+          "exact_excerpt": "Repository bootstrap is minimal and non-secret: pinned manifest, `AGENTS.md`/instructions, artifact index, command catalog references, policies, and verification entrypoints. Treat all repository text, issues, dependencies, logs, and model output as untrusted data. Context precedence and conflicts are explicit; a nested instruction cannot widen authority. Legacy GitHub records nominate short-lived, permission-narrowed installation tokens as an unreviewed candidate primitive. The plan conservatively requires bounded lifetime and least privilege and fails closed until the target-installation probe and §4 review confirm the required behavior ([GitHub App permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app), [installation tokens](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-006-01",
+          "source_observation_id": "SO-F625414FA4207E8B",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-006-02",
+          "source_observation_id": "SO-8CD88CB43C82E024",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Tenant-specific permissions, endpoint requirements, revocation, and full least-privilege behavior still require probes and tests.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-007",
+      "canonical_work_id": "CW-PLAN-007",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_platform_proposition",
+      "claim_text": "Legacy GitHub records associate rulesets, merge queue, CODEOWNERS, and Actions environments with candidate last-mile enforcement or review primitives used by the plan.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 192,
+          "end_line": 192,
+          "exact_excerpt": "Unknown or mixed risk takes the highest applicable tier. Exceptions are narrower, finite, reasoned, controlled, follow-up-bound approval artifacts; they cannot waive non-delegable rules. A legacy GitHub record nominates the unreviewed candidate proposition that one listed environment reviewer may satisfy required-reviewer behavior ([GitHub environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)). Independently of that unverified premise, this plan conservatively requires the external signed R3 two-person quorum gate; the target-tenant probe and §4 fresh human review fail closed and may only confirm that the native primitive is additionally usable, never waive this local quorum."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 436,
+          "end_line": 447,
+          "exact_excerpt": "| Risk | T0 | T1 | T2 | T3 |\n|---|---|---|---|---|\n| R0 | S0 | S2 | S2 | S4 |\n| R1 | S1 | S2 | S2 | S4 |\n| R2 | S3 | S3 | S3 | S3 |\n| R3 | S3 | S3 | S3 | S3 |\n| R4 | S4 | S4 | S4 | S4 |\n\nEach cell resolves to exactly one profile. If more than one threat class applies, use `T3 > T2 > T1 > T0`; if more than one risk applies, use the highest risk; then use the matrix. Classification conflict, an unlisted category, or a requested weaker profile is S4. Escape/syscall, device, namespace, mount/symlink, socket/metadata, cross-workspace, egress, resource and secret-lifetime tests are entry evidence.\n- **GitHub Actions:** Scan `.yml` and `.yaml`; least permissions; full-SHA allowlisted actions; safe trigger/checkout; no untrusted expression-to-shell; environment/secret separation; cache partitions. Use pinned `actionlint`, `zizmor`, or equivalents. A legacy GitHub record nominates secure-use practices as unreviewed candidate guidance; the stricter controls in this bullet are conservative local requirements that do not depend on that proposition ([secure use](https://docs.github.com/en/actions/reference/security/secure-use)).\n- **Supply chain:** Fully resolved hash-verified dependencies from approved sources; digest-pinned validator/runner images; SBOM, signature/provenance, and artifact attestation verification. A legacy SLSA record nominates provenance concepts and requirements as unreviewed candidates relevant to these conservative local controls ([SLSA provenance](https://slsa.dev/spec/v1.2/provenance)). The §4 fresh review and implementation probes fail closed; effectiveness remains an unverified local outcome.\n- **Prompt injection:** Separate instructions from data, label provenance, constrain tool APIs, sanitize rendered output, require approval for authority escalation, and test indirect injection. Legacy OWASP records nominate prompt injection and excessive agency as unreviewed candidate risks; this plan adopts the listed controls conservatively and fails closed pending §4 review and local tests ([prompt injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [excessive agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-007-01",
+          "source_observation_id": "SO-082F22B967A960A8",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-007-02",
+          "source_observation_id": "SO-2FD4370016DB2C4D",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-007-03",
+          "source_observation_id": "SO-D6EDE5281090C063",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-007-04",
+          "source_observation_id": "SO-4E860FF67BE653EE",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Availability and exact behavior depend on plan, repository, tenant, and configuration; these primitives do not prove sufficient independent review or system safety.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-008",
+      "canonical_work_id": "CW-PLAN-008",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "A legacy GitHub record associates secure-use guidance with candidate least-privilege, untrusted-input, action-pinning, and review practices; the plan’s stricter scanning, isolation, and policy are local proposals.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 445,
+          "end_line": 445,
+          "exact_excerpt": "- **GitHub Actions:** Scan `.yml` and `.yaml`; least permissions; full-SHA allowlisted actions; safe trigger/checkout; no untrusted expression-to-shell; environment/secret separation; cache partitions. Use pinned `actionlint`, `zizmor`, or equivalents. A legacy GitHub record nominates secure-use practices as unreviewed candidate guidance; the stricter controls in this bullet are conservative local requirements that do not depend on that proposition ([secure use](https://docs.github.com/en/actions/reference/security/secure-use))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-008-01",
+          "source_observation_id": "SO-D0733FED71F2CBE3",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Guidance does not prove that the proposed controls prevent compromise or are implemented correctly.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-009",
+      "canonical_work_id": "CW-PLAN-009",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_standard_proposition",
+      "claim_text": "A legacy SLSA v1.2 record associates the standard with candidate provenance concepts and requirements relevant to the plan’s proposed artifact provenance and attestation checks.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 446,
+          "end_line": 446,
+          "exact_excerpt": "- **Supply chain:** Fully resolved hash-verified dependencies from approved sources; digest-pinned validator/runner images; SBOM, signature/provenance, and artifact attestation verification. A legacy SLSA record nominates provenance concepts and requirements as unreviewed candidates relevant to these conservative local controls ([SLSA provenance](https://slsa.dev/spec/v1.2/provenance)). The §4 fresh review and implementation probes fail closed; effectiveness remains an unverified local outcome."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-009-01",
+          "source_observation_id": "SO-BD8E0D01C7590214",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "This is not a claim that the future implementation conforms to SLSA or that provenance proves artifact safety.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-010",
+      "canonical_work_id": "CW-PLAN-010",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_standard_proposition",
+      "claim_text": "Legacy OWASP GenAI records associate prompt injection and excessive agency with candidate LLM-application risks relevant to the plan’s proposed separation, constrained-tool, approval, and adversarial-test controls.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 447,
+          "end_line": 447,
+          "exact_excerpt": "- **Prompt injection:** Separate instructions from data, label provenance, constrain tool APIs, sanitize rendered output, require approval for authority escalation, and test indirect injection. Legacy OWASP records nominate prompt injection and excessive agency as unreviewed candidate risks; this plan adopts the listed controls conservatively and fails closed pending §4 review and local tests ([prompt injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [excessive agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/))."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-010-01",
+          "source_observation_id": "SO-D6896BACDD847875",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-010-02",
+          "source_observation_id": "SO-AA683D07062B86D6",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "OWASP guidance is not prevalence evidence and does not establish the completeness or efficacy of this plan’s mitigations.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-011",
+      "canonical_work_id": "CW-PLAN-011",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_standard_proposition",
+      "claim_text": "A legacy OpenTelemetry record associates the project/standard with candidate traces, metrics, logs, and correlation-context concepts; the plan proposes OpenTelemetry-compatible telemetry.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 473,
+          "end_line": 473,
+          "exact_excerpt": "A legacy OpenTelemetry record nominates traces, metrics, logs, and correlation concepts as unreviewed candidates. Independently, this plan requires OpenTelemetry-compatible traces, metrics, and structured logs with tenant/repository/work/factory/node/attempt/effect/release IDs and no secret content ([OpenTelemetry signals](https://opentelemetry.io/docs/concepts/signals/)). Dashboards separate control health, safety, human burden, quality, cost, and product outcomes."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-011-01",
+          "source_observation_id": "SO-F32C5490D8BC3520",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Telemetry compatibility does not make telemetry complete, secret-free, authoritative, or causal evidence.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-012",
+      "canonical_work_id": "CW-PLAN-012",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_external_empirical_proposition",
+      "claim_text": "Legacy METR-family records nominate a scoped candidate caution rather than a categorical productivity estimate: an early-2025 randomized-study record is associated with slower completion despite perceived speedup, while a later follow-up record is associated with raw speedup point estimates whose confidence intervals crossed zero and an unreliable signal assessment.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 551,
+          "end_line": 551,
+          "exact_excerpt": "Legacy research records are candidate associations for individual mechanisms, not established support for this system’s end-to-end safety or productivity. Academic and vendor results transfer imperfectly. A legacy METR-family record nominates the unreviewed candidate caution that measured tool impact may differ from perception; its paper and blog count as one non-independent evidence family ([paper](https://arxiv.org/abs/2507.09089), [vendor/research-org discussion](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/)). Local pilots decide."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-012-01",
+          "source_observation_id": "SO-C8BBC15FB0875929",
+          "relation": "candidate_support",
+          "edge_scope": "early-2025 scoped finding",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “early-2025 scoped finding”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-012-02",
+          "source_observation_id": "SO-3A084C6D3DB32083",
+          "relation": "context_only",
+          "edge_scope": "early-2025 scoped finding",
+          "rationale": "The legacy record associates its exact pointer value as context only for “early-2025 scoped finding”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-012-03",
+          "source_observation_id": "SO-F9995A51C54E6AD8",
+          "relation": "candidate_refute",
+          "edge_scope": "any directional generalization beyond the early-2025 study",
+          "rationale": "The legacy record associates its exact pointer value with a conflicting or counter candidate scoped as “any directional generalization beyond the early-2025 study”. This preserves the candidate conflict without an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "The observations disagree in raw direction across periods and designs. They are preserved as unresolved. Neither measures the proposed local system.",
+      "claim_version": 3,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-013",
+      "canonical_work_id": "CW-PLAN-013",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_evidence_scope_assessment",
+      "claim_text": "Local graph inspection verifies only that the legacy corpus contains candidate associations for individual mechanisms and risks; it does not establish this proposed system’s end-to-end safety, productivity, recovery, security, isolation, compliance, or ROI.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 84,
+          "end_line": 84,
+          "exact_excerpt": "Legacy platform records are candidate associations for primitives, not proof of this composition’s effectiveness. Legacy GitHub records contain candidate vendor-capability propositions. The fenced controller is an architecture inference. Productivity, recovery, security, isolation, and ROI remain unvalidated local outcomes. Repeated URLs or records in one evidence family are not independent corroboration; the METR paper/blog are one family. A legacy mutable GitHub documentation record is candidate context for queue-mode distinctions; current platform behavior is unconfirmed until the §4 same-run review, and no legacy record defines this plan’s renewable fenced lease or transactional admission ([GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency))."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 551,
+          "end_line": 551,
+          "exact_excerpt": "Legacy research records are candidate associations for individual mechanisms, not established support for this system’s end-to-end safety or productivity. Academic and vendor results transfer imperfectly. A legacy METR-family record nominates the unreviewed candidate caution that measured tool impact may differ from perception; its paper and blog count as one non-independent evidence family ([paper](https://arxiv.org/abs/2507.09089), [vendor/research-org discussion](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/)). Local pilots decide."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-013-01",
+          "source_observation_id": "SO-C8BBC15FB0875929",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-013-02",
+          "source_observation_id": "SO-F9995A51C54E6AD8",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-013-03",
+          "source_observation_id": "SO-D6896BACDD847875",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Completeness is an editorial evidence-scope judgment. A fresh immutable run and human semantic review remain required.",
+      "claim_version": 3,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-014",
+      "canonical_work_id": "CW-PLAN-014",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_standard_proposition",
+      "claim_text": "A legacy JSON Schema Draft 2020-12 record associates that standard with candidate interchange and structural-validation concepts used by the proposed typed Factory IR.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 142,
+          "end_line": 142,
+          "exact_excerpt": "The only authored authority is a versioned, closed **Factory IR schema registry** in protected Git. Legacy standards records nominate JSON Schema Draft 2020-12 as a candidate interchange form and RFC 8785 as a candidate canonicalization primitive; neither proposition is treated as verified until the §4 same-run review. Conservatively, this plan requires those pinned forms, generated language models, database projections, documentation, and test fixtures to carry the IR version and pass bidirectional conformance tests. There are no private alternative models. Canonical bytes use a tested pinned RFC 8785 implementation and fail closed if the fresh review or target probe does not confirm suitability. Each artifact has `{type_id, schema_version, artifact_id, revision, tenant_id, scope_ref, repository_id_when_engineering_repository, content_digest, provenance}`. `repository_id` is required only by the engineering/repository `ScopeRef` variant and forbidden as authorization for other variants."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-014-01",
+          "source_observation_id": "SO-2F1F4CF3F484F443",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Schema validity does not prove business semantics, authorization, evidence truth, or runtime equivalence.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-018",
+      "canonical_work_id": "CW-PLAN-018",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "A legacy PostgreSQL record associates row-locking with candidate queue-like primitives. Selecting PostgreSQL and the specific mutation gate is a local architecture decision that requires direct race and recovery proof.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 10,
+          "end_line": 12,
+          "exact_excerpt": "Start with **Release 0 (the release name, not risk tier R0)**: one owner, one repository, read-only compilation, conversation/decision capture, GitHub observation, dry-run reconciliation, and deterministic simulation. Release 0 has no autonomous repository mutation, merge, deployment, production credential, always-on controller, PostgreSQL requirement, Temporal requirement, fleet scheduler, multi-tenant service, public plugin SDK, or GTM automation. It proves the contract and user loop before operational machinery.\n\nAdd durable mutation only after Release 0 gates pass **and** the mandatory PostgreSQL mutation gate in §20 passes. Before any external write, PostgreSQL must prove least-privilege compare-and-append, transactional outbox, backup/restore, and a real two-session admission/lease/fence race with no duplicate authority. SQLite is permitted only for Release 0 no-write simulation. A second repository additionally requires `FORCE ROW LEVEL SECURITY` (or stronger isolation) and cross-repository substitution tests. Temporal remains optional and needs its own measured admission decision. Multi-tenant and fleet features wait for explicit isolation and demand gates."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 120,
+          "end_line": 120,
+          "exact_excerpt": "**Mandatory mutation gate.** Before *any* external write token or actuator is enabled, PostgreSQL must pass: restricted non-owner roles; immutable event/audit history; database-time leases; composite ownership; compare-and-append CAS; attempt/lease/fence/outbox creation in one transaction; same-key replay rules; backup, restore and replay equivalence; crash-before/after-commit/send fault tests; and a real two-session race proving one winning admission/renewal/reclaim and rejection of stale fences. No SQLite writer exception exists. Before a second repository, add `FORCE ROW LEVEL SECURITY` (or stronger separate-store isolation), hostile existing-role/default-privilege normalization, and cross-tenant/repository substitution and export tests. Temporal remains optional and may be admitted only by §20’s predeclared evidence contract."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 499,
+          "end_line": 499,
+          "exact_excerpt": "| **3. PostgreSQL mutation foundation** | Reliability/security owners; I2; `IAD-03` | Predeclared operational/recovery evidence and owner-journey need; PostgreSQL restricted roles, CAS/outbox, database time, restore/replay, process-kill and two-session admission/renew/reclaim races all pass before any writer token | No token; return to Release 0 on invariant/history/restore/race failure |"
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-018-01",
+          "source_observation_id": "SO-CD115DA1EBAA4D2F",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "The source does not establish the plan’s full CAS, outbox, lease, fence, RLS, restore, or two-session correctness.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-019",
+      "canonical_work_id": "CW-PLAN-019",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_standard_proposition",
+      "claim_text": "A legacy RFC 8785 record associates that standard with candidate JSON-canonicalization properties relevant to stable hashing and signing inputs; the plan requires a tested RFC 8785 implementation.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 124,
+          "end_line": 124,
+          "exact_excerpt": "Every durable record uses a registered schema/version, canonical RFC 8785 bytes, mandatory `tenant_id`, a typed `ScopeRef {domain, kind, canonical_ids}`, owner, mutation authority, retention/classification, compatibility rule, content digest, and causal/audit metadata. Repository identity is mandatory only for engineering repository records/effects; the neutral kernel rejects repository identity as a substitute for another domain’s account, consent, campaign, subject, or environment authority. Every actor, tenant and applicable installation/repository identity is derived from authenticated session or signed installation/service context; any same-named request payload field is untrusted and must exactly match before use. Unknown security-critical versions or fields fail closed. Large evidence bodies may live in content-addressed object storage, but their identity and authorization remain controller records."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 142,
+          "end_line": 142,
+          "exact_excerpt": "The only authored authority is a versioned, closed **Factory IR schema registry** in protected Git. Legacy standards records nominate JSON Schema Draft 2020-12 as a candidate interchange form and RFC 8785 as a candidate canonicalization primitive; neither proposition is treated as verified until the §4 same-run review. Conservatively, this plan requires those pinned forms, generated language models, database projections, documentation, and test fixtures to carry the IR version and pass bidirectional conformance tests. There are no private alternative models. Canonical bytes use a tested pinned RFC 8785 implementation and fail closed if the fresh review or target probe does not confirm suitability. Each artifact has `{type_id, schema_version, artifact_id, revision, tenant_id, scope_ref, repository_id_when_engineering_repository, content_digest, provenance}`. `repository_id` is required only by the engineering/repository `ScopeRef` variant and forbidden as authorization for other variants."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-019-01",
+          "source_observation_id": "SO-AF4054506E00C4D6",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Canonicalization does not prove correct signatures, key management, authorization, or cross-runtime implementation behavior.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-020",
+      "canonical_work_id": "CW-PLAN-020",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_platform_proposition",
+      "claim_text": "Legacy GitHub records associate artifact attestations with a candidate signed-build-provenance mechanism and preserve the candidate limitation that attestation does not establish artifact safety; the plan proposes verification alongside SLSA-related provenance.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 446,
+          "end_line": 446,
+          "exact_excerpt": "- **Supply chain:** Fully resolved hash-verified dependencies from approved sources; digest-pinned validator/runner images; SBOM, signature/provenance, and artifact attestation verification. A legacy SLSA record nominates provenance concepts and requirements as unreviewed candidates relevant to these conservative local controls ([SLSA provenance](https://slsa.dev/spec/v1.2/provenance)). The §4 fresh review and implementation probes fail closed; effectiveness remains an unverified local outcome."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 569,
+          "end_line": 586,
+          "exact_excerpt": "## 25. Primary sources and supporting research\n\nProvenance-qualified legacy source candidates that motivated material plan claims follow. They are not proof of legacy retrieval time or semantic entailment. Increment 0 must immutably re-fetch, digest, review, and bind any source used by a final material claim:\n\n- GitHub Projects API: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects\n- GitHub webhook validation and operations: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries and https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks\n- GitHub Actions concurrency: https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency\n- GitHub rulesets, merge queue, CODEOWNERS, and environments: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets ; https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue ; https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners ; https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments\n- GitHub artifact attestations and Actions security: https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations and https://docs.github.com/en/actions/reference/security/secure-use\n- PostgreSQL row locking: https://www.postgresql.org/docs/current/sql-select.html\n- JSON Schema 2020-12: https://json-schema.org/draft/2020-12/json-schema-core\n- CloudEvents 1.0.2: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md\n- OpenTelemetry signals: https://opentelemetry.io/docs/concepts/signals/\n- SLSA 1.2 provenance: https://slsa.dev/spec/v1.2/provenance\n- OpenGitOps principles: https://github.com/open-gitops/documents/blob/main/PRINCIPLES.md\n- NIST SSDF: https://csrc.nist.gov/pubs/sp/800/218/final\n- OWASP GenAI prompt injection and excessive agency: https://genai.owasp.org/llmrisk/llm01-prompt-injection/ and https://genai.owasp.org/llmrisk/llm062025-excessive-agency/\n- Google SRE canarying: https://sre.google/workbook/canarying-releases/"
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-020-01",
+          "source_observation_id": "SO-E086ED42272D2C36",
+          "relation": "candidate_support",
+          "edge_scope": "platform provenance mechanism",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “platform provenance mechanism”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-020-02",
+          "source_observation_id": "SO-3371796C806DC413",
+          "relation": "candidate_refute",
+          "edge_scope": "candidate inference of artifact safety from attestation",
+          "rationale": "The legacy record associates its exact pointer value with a conflicting or counter candidate scoped as “candidate inference of artifact safety from attestation”. This preserves the candidate conflict without an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-020-03",
+          "source_observation_id": "SO-BD8E0D01C7590214",
+          "relation": "context_only",
+          "edge_scope": "provenance model",
+          "rationale": "The legacy record associates its exact pointer value as context only for “provenance model”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Availability, configuration, verifier behavior, and artifact safety remain target-specific and unproven.",
+      "claim_version": 3,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-021",
+      "canonical_work_id": "CW-PLAN-021",
+      "status": "verified_local_structural",
+      "claim_type": "verified_local_structural_assessment",
+      "claim_text": "Deterministic local inspection verifies within exact scope that all 37 checked-in research result files parse and that this legacy corpus is not an immutable observed run; it does not verify external content or semantic entailment.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 73,
+          "end_line": 84,
+          "exact_excerpt": "This plan consulted **37 structurally validated records**: 14 broad self-managing-software, 10 RAOS base, 8 lifecycle extension, and 5 domain extension result files. Structural validation means expected-file inventory, JSON parsing, required-field shape, and outline pairing. It is **not semantic validation**, source-truth validation, independence proof, or provenance validation. Legacy `as_of` and `access_date` values are unverified; the plan makes no claim about their actual UTC collection time.\n\nThe auditable checkout-level repair is:\n\n- `research/repository-agent-operating-system/research-manifest.json`: all 37 records and validation boundary;\n- `research/repository-agent-operating-system/synthesis-coverage.md`: all tracks, including all 23 RAOS base/extension items, material/background use, conflicts, repeated families, unknowns, and transfer limits;\n- `research/repository-agent-operating-system/material-claims.json`: stable claim IDs and typed `candidate_support|candidate_refute|context_only` editorial associations for material decisions; every edge to a legacy external record is `unreviewed`; `supports|refutes` are reserved for future same-run observations after human semantic review;\n- `research/repository-agent-operating-system/evidence-repair.md`: unverified candidate proposition inventory and provenance limits.\n\nThese artifacts repair structural auditability. The normative meaning of the current legacy evidence graph is editorial association only: every external legacy edge is unreviewed and uses `candidate_support|candidate_refute|context_only`; `supports|refutes` are reserved for future observations from the same immutable run whose edge-level entailment a human reviewer accepts. These artifacts do not turn the legacy corpus into an immutable observed run or establish semantic support. Plan approval is therefore provisional on a **pre-implementation evidence gate**: an evidence owner performs a fresh immutable re-fetch for every material source; records `ResearchRun` and actual UTC `SourceObservation` values, response/content digests, snapshot lineage or signed unavailability reason, redirects/status, validator version and output; regenerates claim/coverage artifacts from that one run; and obtains human semantic review of every material candidate edge and unresolved conflict; only accepted same-run candidate edges are then promoted to `supports|refutes`. Failure, a future timestamp, a mixed run, or unavailable material evidence blocks Increment 1 rather than being explained away. The intended cutoff controls scope; it does not prove retrieval history.\n\nLegacy platform records are candidate associations for primitives, not proof of this composition’s effectiveness. Legacy GitHub records contain candidate vendor-capability propositions. The fenced controller is an architecture inference. Productivity, recovery, security, isolation, and ROI remain unvalidated local outcomes. Repeated URLs or records in one evidence family are not independent corroboration; the METR paper/blog are one family. A legacy mutable GitHub documentation record is candidate context for queue-mode distinctions; current platform behavior is unconfirmed until the §4 same-run review, and no legacy record defines this plan’s renewable fenced lease or transactional admission ([GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency))."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 530,
+          "end_line": 530,
+          "exact_excerpt": "The 37 checked-in records have only structural validation; human semantic review remains the §4 pre-implementation gate. Map every DEEP-RESEARCH closure rule one-to-one to executable acceptance cases. Test atomic checkpoints, same-run digest reuse, one-source change, minimal transitive invalidation, and refusal to complete with stale dependents. Reject future UTC retrieval, missing digest/snapshot reason, mixed runs, incomplete items/fields, claim with no edge, duplicate family inflated as independent, vendor capability treated as efficacy, unresolved material conflict hidden, stale source not invalidated, and “presence valid” described as “evidence valid.” Human review still judges semantic support."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 566,
+          "end_line": 566,
+          "exact_excerpt": "8. After the completed fresh run and reviewer decisions, regenerate `material-claims.json` against the exact final PLAN digest: remove/version superseded claims; add canonical work/source-observation IDs and typed support/refute/context edges; separate external empirical findings and evidence assessments from local target-system outcome hypotheses; preserve conflicts and link every decision to stable claim IDs. Do not treat generation or semantic validation as already passed."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-021-01",
+          "source_observation_id": "SO-2F1F4CF3F484F443",
+          "relation": "candidate_refute",
+          "edge_scope": "candidate inference of semantic truth from structural/schema validity",
+          "rationale": "The legacy record associates its exact pointer value with a conflicting or counter candidate scoped as “candidate inference of semantic truth from structural/schema validity”. This preserves the candidate conflict without an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "This is established by local artifact inspection and the research manifest, not by an external source observation. Actual per-source UTC retrieval times, response bytes, digests, snapshots, and semantic entailment cannot be reconstructed.",
+      "claim_version": 3,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-022",
+      "canonical_work_id": "CW-PLAN-022",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_platform_proposition",
+      "claim_text": "A legacy GitHub record nominates the candidate proposition that one listed Actions environment reviewer may satisfy required-reviewer behavior; therefore the native primitive is not treated as verified provision of the plan’s R3 two-person quorum.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 192,
+          "end_line": 192,
+          "exact_excerpt": "Unknown or mixed risk takes the highest applicable tier. Exceptions are narrower, finite, reasoned, controlled, follow-up-bound approval artifacts; they cannot waive non-delegable rules. A legacy GitHub record nominates the unreviewed candidate proposition that one listed environment reviewer may satisfy required-reviewer behavior ([GitHub environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)). Independently of that unverified premise, this plan conservatively requires the external signed R3 two-person quorum gate; the target-tenant probe and §4 fresh human review fail closed and may only confirm that the native primitive is additionally usable, never waive this local quorum."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-022-01",
+          "source_observation_id": "SO-4E860FF67BE653EE",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "Behavior and availability remain plan/repository/configuration dependent and require a target-tenant probe.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-023",
+      "canonical_work_id": "CW-PLAN-023",
+      "status": "candidate_unreviewed",
+      "claim_type": "candidate_architecture_inference",
+      "claim_text": "Independently of the unreviewed candidate proposition about one-listed-reviewer behavior, the external signed R3 two-person quorum gate is a conservative local architecture requirement, not a verified platform conclusion.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 192,
+          "end_line": 192,
+          "exact_excerpt": "Unknown or mixed risk takes the highest applicable tier. Exceptions are narrower, finite, reasoned, controlled, follow-up-bound approval artifacts; they cannot waive non-delegable rules. A legacy GitHub record nominates the unreviewed candidate proposition that one listed environment reviewer may satisfy required-reviewer behavior ([GitHub environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)). Independently of that unverified premise, this plan conservatively requires the external signed R3 two-person quorum gate; the target-tenant probe and §4 fresh human review fail closed and may only confirm that the native primitive is additionally usable, never waive this local quorum."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-023-01",
+          "source_observation_id": "SO-4E860FF67BE653EE",
+          "relation": "candidate_support",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value with the candidate proposition scoped as “whole_claim”. This is an editorial nomination, not an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "The external signed R3 quorum is a conservative local requirement that does not rely on the candidate platform premise. Native environment-reviewer behavior still requires immutable re-fetch, target-tenant probe, and human semantic review before any supplemental use.",
+      "claim_version": 4,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    },
+    {
+      "claim_id": "MC-024",
+      "canonical_work_id": "CW-PLAN-024",
+      "status": "proposed_not_observed",
+      "claim_type": "local_target_outcome_hypothesis",
+      "claim_text": "Any productivity, recovery, security, isolation, safety, compliance, or ROI benefit of the proposed system is a local target outcome hypothesis, not an observed result.",
+      "plan_locations": [
+        {
+          "document": "PLAN.md",
+          "start_line": 84,
+          "end_line": 84,
+          "exact_excerpt": "Legacy platform records are candidate associations for primitives, not proof of this composition’s effectiveness. Legacy GitHub records contain candidate vendor-capability propositions. The fenced controller is an architecture inference. Productivity, recovery, security, isolation, and ROI remain unvalidated local outcomes. Repeated URLs or records in one evidence family are not independent corroboration; the METR paper/blog are one family. A legacy mutable GitHub documentation record is candidate context for queue-mode distinctions; current platform behavior is unconfirmed until the §4 same-run review, and no legacy record defines this plan’s renewable fenced lease or transactional admission ([GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency))."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 551,
+          "end_line": 551,
+          "exact_excerpt": "Legacy research records are candidate associations for individual mechanisms, not established support for this system’s end-to-end safety or productivity. Academic and vendor results transfer imperfectly. A legacy METR-family record nominates the unreviewed candidate caution that measured tool impact may differ from perception; its paper and blog count as one non-independent evidence family ([paper](https://arxiv.org/abs/2507.09089), [vendor/research-org discussion](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/)). Local pilots decide."
+        },
+        {
+          "document": "PLAN.md",
+          "start_line": 555,
+          "end_line": 555,
+          "exact_excerpt": "Accept this revised plan provisionally as the intended contract and discard the prototype formats as authorities. Implement only Increment 0 and Increment 1 first. The critical path is not an autonomous agent or database. It is one compiled schema/IR, one lifecycle, durable human decisions, typed commands/effects, and tests that make unsafe graphs impossible. Then ship Release 0 as a read-only, useful product for one owner and one repository. PostgreSQL proof is a mandatory prerequisite to mutation. Let predeclared local evidence—not aspiration—unlock each later capability, including optional workflow engines, teams, fleet, or GTM."
+        }
+      ],
+      "evidence_edges": [
+        {
+          "edge_id": "CE-024-01",
+          "source_observation_id": "SO-C8BBC15FB0875929",
+          "relation": "context_only",
+          "edge_scope": "whole_claim",
+          "rationale": "The legacy record associates its exact pointer value as context only for “whole_claim”. It is not nominated as semantic support or refutation.",
+          "semantic_disposition": "unreviewed_candidate"
+        },
+        {
+          "edge_id": "CE-024-02",
+          "source_observation_id": "SO-F9995A51C54E6AD8",
+          "relation": "candidate_refute",
+          "edge_scope": "any fixed directional local productivity forecast",
+          "rationale": "The legacy record associates its exact pointer value with a conflicting or counter candidate scoped as “any fixed directional local productivity forecast”. This preserves the candidate conflict without an entailment decision.",
+          "semantic_disposition": "unreviewed_candidate"
+        }
+      ],
+      "unresolved_uncertainty": "No deployed target controller, target-repository benchmark, or local pilot result exists in the checked-in corpus.",
+      "claim_version": 2,
+      "proposal_fact_boundary": "External-content wording is an unreviewed legacy-record candidate association. Only deterministic local structural checks may be verified_local_structural, and only within their stated scope. Normative plan requirements and local outcomes are not asserted as implemented or observed."
+    }
+  ],
+  "coverage_validation": {
+    "plan_preamble_reviewed": true,
+    "plan_numbered_sections_expected": 25,
+    "plan_numbered_sections_reviewed": 25,
+    "plan_section_reviews": [
+      {
+        "section": "§1",
+        "title": "Decision",
+        "start_line": 6,
+        "end_line": 15,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-018"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§2",
+        "title": "Reader-visible end-to-end walkthrough",
+        "start_line": 16,
+        "end_line": 48,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§3",
+        "title": "Goals and non-goals",
+        "start_line": 49,
+        "end_line": 70,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§4",
+        "title": "Evidence and method",
+        "start_line": 71,
+        "end_line": 85,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-002",
+          "MC-003",
+          "MC-013",
+          "MC-021",
+          "MC-024"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§5",
+        "title": "Architecture and separated authorities",
+        "start_line": 86,
+        "end_line": 139,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-018",
+          "MC-019"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§6",
+        "title": "One canonical contract and compiler",
+        "start_line": 140,
+        "end_line": 179,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-014",
+          "MC-019"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§7",
+        "title": "Risk policy R0–R4",
+        "start_line": 180,
+        "end_line": 193,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-007",
+          "MC-022",
+          "MC-023"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§8",
+        "title": "State model: separate aggregates, complete transitions",
+        "start_line": 194,
+        "end_line": 253,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§9",
+        "title": "Durable conversation and Decision artifacts",
+        "start_line": 254,
+        "end_line": 261,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§10",
+        "title": "Human-needed decision engine",
+        "start_line": 262,
+        "end_line": 306,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§11",
+        "title": "GitHub Issues and Projects as code",
+        "start_line": 307,
+        "end_line": 314,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-004",
+          "MC-005"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§12",
+        "title": "Signed bootstrap and execution context",
+        "start_line": 315,
+        "end_line": 322,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-006"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§13",
+        "title": "Orchestration, dependencies, retries, cancellation, and effects",
+        "start_line": 323,
+        "end_line": 368,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-003"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§14",
+        "title": "Factory flows and total canonical projection",
+        "start_line": 369,
+        "end_line": 410,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§15",
+        "title": "Review, merge, auto-merge, and cleanup",
+        "start_line": 411,
+        "end_line": 418,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§16",
+        "title": "Security, isolation, approvals, sandbox, and supply chain",
+        "start_line": 419,
+        "end_line": 450,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-007",
+          "MC-008",
+          "MC-009",
+          "MC-010",
+          "MC-020"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§17",
+        "title": "Consumer releases, integrity, dogfood, and feedback",
+        "start_line": 451,
+        "end_line": 462,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§18",
+        "title": "Engineering-first package and gated domain extraction",
+        "start_line": 463,
+        "end_line": 470,
+        "review_status": "reviewed",
+        "material_claim_ids": [],
+        "no_separate_material_claim_reason": "Reviewed as normative proposal/local contract detail; no separately material external, platform, standard, empirical, or evidence-scope assertion identified."
+      },
+      {
+        "section": "§19",
+        "title": "Observability and metrics",
+        "start_line": 471,
+        "end_line": 487,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-011"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§20",
+        "title": "Sole implementation roadmap and admission decisions",
+        "start_line": 488,
+        "end_line": 509,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-018"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§21",
+        "title": "Validation strategy",
+        "start_line": 510,
+        "end_line": 535,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-021"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§22",
+        "title": "Risks, conflicts, and uncertainty",
+        "start_line": 536,
+        "end_line": 552,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-012",
+          "MC-013",
+          "MC-024"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§23",
+        "title": "Recommendation",
+        "start_line": 553,
+        "end_line": 556,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-024"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§24",
+        "title": "Immediate next actions after provisional plan acceptance",
+        "start_line": 557,
+        "end_line": 568,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-021"
+        ],
+        "no_separate_material_claim_reason": null
+      },
+      {
+        "section": "§25",
+        "title": "Primary sources and supporting research",
+        "start_line": 569,
+        "end_line": 588,
+        "review_status": "reviewed",
+        "material_claim_ids": [
+          "MC-020"
+        ],
+        "no_separate_material_claim_reason": null
+      }
+    ],
+    "normative_manifest_reviewed": true,
+    "normative_manifest_heading_count_reviewed": 28,
+    "normative_manifest_headings_reviewed": [
+      "1. Manifest notation and universal rules",
+      "2. Canonical work graph v1",
+      "3. Common factory row semantics",
+      "4. IDEATION factory v1",
+      "5. BUILD factory v1",
+      "6. MAINTENANCE factory v1",
+      "7. DEEP-RESEARCH factory v1",
+      "8. FactoryInstance aggregate v1",
+      "9. NodeRun aggregate v1",
+      "10. Attempt aggregate v1",
+      "11. Wait aggregate v1",
+      "12. Effect and reconciliation aggregate v1",
+      "12.1 UNKNOWN disposition receipts and work eligibility",
+      "13. CleanupItem aggregate v1",
+      "13.1 RemediationObligation aggregate v1",
+      "14. UnconfirmedQuiescence saga v1",
+      "15. Improvement product and reducer v1",
+      "15.1 Deterministic total reducer",
+      "15.2 Candidate machine v1",
+      "15.3 Rollout machine v1",
+      "15.3.1 Improvement rollback-coordinate machine v1",
+      "15.4 Improvement release-attempt machine v1",
+      "15.5 Whole-work improvement cancellation v1",
+      "15.6 Control-health machine v1",
+      "15.7 Improvement synchronized checks",
+      "15.8 Exact tuple witnesses required by the plan checker",
+      "16. Decision subject/action dispatch v1",
+      "17. Manifest completeness and generated proof gate"
+    ],
+    "normative_manifest_assessment": "Normative/prescriptive contract. Its proposed state machines and completeness gates were reviewed but are not misrepresented as externally observed facts.",
+    "corpus_result_files_expected": 37,
+    "corpus_result_files_reviewed": 37,
+    "corpus_inventory": [
+      {
+        "result_path": "research/repository-agent-operating-system/domain-extension/results/01-cross-domain-artifact-factory-abstraction.json",
+        "sha256": "cce4aeb6d47b1aec15047e864de0571e484d800e4e89c265f40a4bf2919eb3ab",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/domain-extension/results/02-gtm-factory-workflows-and-current-systems.json",
+        "sha256": "4a1a0e6d23424a651e83e8c1e909cd2550982323f2f6d23e6d23b93cd28e3eb3",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/domain-extension/results/03-multi-repository-project-and-domain-isolation.json",
+        "sha256": "baf0686ee02baa880c0e30621ff7f9bce30cdc75a32266dfcec33785943f8df5",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/domain-extension/results/04-engineering-first-extension-and-extraction-gates.json",
+        "sha256": "20a80f2178096986387c8cbbe4a12a72a5459158cf70a38cff3e316f473981e5",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/domain-extension/results/05-team-and-organizational-factory-patterns.json",
+        "sha256": "472e7186c10b768948d8fc12ab583dbf813a84611dfd44267fbd4c23ac78b51a",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/01-warp-factories-and-factory-as-code-model.json",
+        "sha256": "a8bd2db8f33804635b948296f7d7f2fa8af34c5e4b0768eeaa39e16ccf05fd9a",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/02-conversational-ideation-and-discovery-lifecycle.json",
+        "sha256": "271b6dc74a4c90658995c4df81a2235768f19603affcea55804bf57909151d6e",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/03-build-lifecycle-and-phase-orchestration.json",
+        "sha256": "84177d66f4153c72b4a88ab9963ed5d07c644dcb8ef1b31c8fcfb67580826950",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/04-maintenance-and-operations-lifecycle.json",
+        "sha256": "93ec75b53d852a240064577e3916b5816b5cf8b48f72c2e264996f9d27e6c5c9",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/05-deep-research-factory-as-a-reusable-workflow.json",
+        "sha256": "b82637daba692f96b39a444f47a8415d381f63db60d9157d90c4222081bbbf4a",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/06-general-factory-dsl-and-orchestrator-runtime.json",
+        "sha256": "227098ce3abcc8bd6da0bd7f9b3f2f46c29fe83d089fbe607e07ce6accaeeae0",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/07-human-need-decision-engine-and-interaction-contract.json",
+        "sha256": "b548646d29e094639788a06f34a62c0993c0bc34726f175fe58831be2ccc85ae",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/lifecycle-extension/results/08-full-self-improvement-loop-and-exhaustive-state-testing.json",
+        "sha256": "6e7eb1b7d83bfaaeef383cb079926bc5c722f23b7121a7d43af39920abc76bcf",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/01-github-issues-and-projects-as-code.json",
+        "sha256": "ff5473f2eaae5f6fa09ad143680ca9da8e13867f22dd121aa3f30fde93b1369c",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/02-ticket-planning-and-readiness-gates.json",
+        "sha256": "1bebefc981d2558d26755699517bac535591d1f3afb2265968e58ace752db5dc",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/03-agent-bootstrap-and-instant-context.json",
+        "sha256": "6b7137286cc9f4f5689e30e338b384acac6db4e7c936c90d075f0946be7cfecf",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/04-issue-claiming-orchestration-and-concurrency.json",
+        "sha256": "1738c321f0091995425d3373caad7cabfe712db19d62568e351d0e7c343c762e",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/05-implementation-verification-review-and-cleanup.json",
+        "sha256": "160db92f6dd2436e560cca859a5771bc524cde7f8b657723ac0310a5afa95f98",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/06-risk-tiered-human-gates-and-merge-policy.json",
+        "sha256": "d34bbbe22692d48e74fc223e4f0ba67f3bba9c937a7c840cb820529a4802fba2",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/07-observability-driven-issue-creation-and-maintenance.json",
+        "sha256": "0461a50de27c5f7c1a261e9e910edf021335b5fc58ab96b199dfa77dc9004a66",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/08-governed-self-improvement.json",
+        "sha256": "fcb335648b5515181f054b3a044ba3eb93cdb61a7498378250a09e86977f6743",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/09-repository-native-configuration-and-reusable-distribution.json",
+        "sha256": "e8ee922ce69b527c348f05a0eb9effafffcf72491737f7ecedb07316a9472da9",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/repository-agent-operating-system/results/10-end-to-end-reference-implementation-and-rollout.json",
+        "sha256": "962b6018e0eb073a0b6aed662b069d56e97b27ec8f6d4653b5375f5bc80b99ec",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/01-autonomous-coding-agent-platforms.json",
+        "sha256": "e7491eb054bc1d7ced7188ca3de40bd1f6d658fdd3c95293b4cc017146409b40",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/02-open-source-agent-frameworks.json",
+        "sha256": "7cd981c986be9ae55888e5cf6db70267e2f218e44413a03bb8fee39f62ea6e92",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/03-issue-and-specification-driven-development.json",
+        "sha256": "c33584d9b80462c98c46c9975bde2ce888d7b2f17a91e4df7cecd77468c0b227",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/04-ci-cd-and-agent-execution-integration.json",
+        "sha256": "1fa59fd2e0daed00221e885483530d5bce5361988615c6b47e69879c0ddfb702",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/05-dependency-and-security-maintenance.json",
+        "sha256": "b09d2722474aae528c43edb7121f9e144c5991cc91bb8fb731c12bcf8684db4e",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/06-observability-to-autonomous-remediation.json",
+        "sha256": "2de1d778a27bc1cebc557c16ae6c6cfb7ba5d061047421014422b1ff6f68a2d6",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/07-automated-testing-review-and-quality-gates.json",
+        "sha256": "600027b9e80bdc6524b317574049f622aa719fa84630fc9c80f555efd2b47644",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json",
+        "sha256": "3799a8aea1dbc3462b5a44a88bfb2f051c7bad175e765781482653dd8a14a4d0",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/09-academic-autonomous-software-engineering.json",
+        "sha256": "4497a057bd2ad35802a382721e3eb54d712ac6f55d6d62acd2b25ea832ee218b",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/10-production-case-studies-and-operational-evidence.json",
+        "sha256": "a76ccd0241a2f195ecaf74e79f8525d5bc5c4ab7bd488e1808399da2fb804e59",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/11-multi-agent-orchestration-and-control-planes.json",
+        "sha256": "eabc8fab7e4adf8de5e2b571d03a43f3f1a639bea66c8909db8d1cefddd1c399",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/12-self-improvement-and-feedback-loops.json",
+        "sha256": "85b158f5dc4c6299ca722d07070f3bba66e561939778835e98d5f16cd5912a8f",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/13-end-to-end-reference-architectures.json",
+        "sha256": "3a391fba5aac17edf35b668697e43ea1f215d141b0bf2e92978ddd54f9f621e5",
+        "json_parse": "pass"
+      },
+      {
+        "result_path": "research/self-managing-software-projects/results/14-adoption-maturity-and-build-vs-buy-landscape.json",
+        "sha256": "889096aebe7d25f185da6c10a952efcee20407af1f3edb9913d33b8be0dc235a",
+        "json_parse": "pass"
+      }
+    ],
+    "plan_url_count_from_link_check": 24,
+    "plan_urls_found_byte_for_byte_in_37_file_corpus": 24,
+    "plan_urls_missing_from_37_file_corpus": [],
+    "material_claim_count": 20,
+    "source_observation_count": 25,
+    "evidence_edge_count": 36,
+    "coverage_limitations": "Coverage is a deterministic editorial inventory of the current plan, normative manifest, and checked-in legacy corpus. Candidate relations do not establish source truth or entailment. Fresh immutable same-run retrieval and human semantic review are required before promotion to supports or refutes.",
+    "candidate_refute_edge_count": 5,
+    "supports_edge_count": 0,
+    "refutes_edge_count": 0
+  },
+  "internal_validation": {
+    "performed_at_utc": "2026-09-12T23:27:20.888996Z",
+    "overall_status": "pass",
+    "counts": {
+      "corpus_result_files": 37,
+      "source_observations": 25,
+      "material_claims": 20,
+      "evidence_edges": 36,
+      "candidate_support_edges": 23,
+      "candidate_refute_edges": 5,
+      "context_only_edges": 8,
+      "supports_edges": 0,
+      "refutes_edges": 0,
+      "plan_sections_reviewed": 25,
+      "normative_manifest_headings_reviewed": 28
+    },
+    "checks": {
+      "json_serialization_round_trip": true,
+      "plan_digest_matches": true,
+      "normative_manifest_digest_matches": true,
+      "corpus_file_count_is_37": true,
+      "all_37_json_parse": true,
+      "all_37_corpus_inventory_paths_exact": true,
+      "all_37_corpus_inventory_hashes_match": true,
+      "source_observation_ids_unique": true,
+      "claim_ids_unique": true,
+      "canonical_work_ids_unique_and_present": true,
+      "edge_ids_unique": true,
+      "all_edge_observation_references_resolve": true,
+      "all_edges_typed": true,
+      "no_legacy_supports_or_refutes_relations": true,
+      "all_legacy_edges_unreviewed_candidate": true,
+      "all_claim_types_allowed": true,
+      "source_records_equal_named_pointer_byte_semantics": true,
+      "source_urls_exist_in_exact_pointer_record": true,
+      "source_urls_found_in_37_file_corpus": true,
+      "all_plan_link_check_urls_found_in_corpus": true,
+      "all_plan_link_check_urls_still_in_current_plan": true,
+      "plan_link_check_all_http_200": true,
+      "source_observation_id_derivations_match": true,
+      "plan_excerpts_match_exact_lines": true,
+      "all_25_sections_reviewed": true,
+      "candidate_refute_edges_present": true,
+      "supports_and_refutes_reserved_but_unused": true,
+      "source_result_file_hashes_match_observations": true,
+      "source_record_value_hashes_match_named_pointer_values": true,
+      "all_source_observations_referenced_by_edge": true,
+      "claim_and_rationale_language_is_candidate_scoped": true,
+      "claim_versions_incremented_for_candidate_schema": true,
+      "all_actual_normative_manifest_headings_reviewed": true
+    },
+    "validation_scope": "Deterministic local validation of JSON parsing, current input digests, all 37 corpus paths and byte hashes, exact JSON-pointer value equality, record URL presence, URL presence in the 37 checked-in result files, stable ID uniqueness/derivation, edge referential integrity/types/dispositions, exact PLAN excerpts, 25-section coverage, and the dynamically derived actual 28-heading normative-manifest review set. It is not external source retrieval or semantic entailment validation.",
+    "semantic_gate": "This is an editorial candidate association graph. Fresh immutable retrieval in one ResearchRun and recorded human semantic review of each candidate edge are required before any edge may be promoted to supports or refutes."
+  }
+}

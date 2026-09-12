@@ -1,0 +1,973 @@
+{
+  "scope": {
+    "definition": "A self-improvement loop is a governed process that turns runtime evidence and human judgment into candidate changes to prompts, models, code, tests, runbooks, routing, permissions, and policy. It is not permission for an executing agent to rewrite its own evaluator or production controls.",
+    "covered_planes": [
+      "data plane: production agent/application executions",
+      "evidence plane: correlated traces, metrics, logs, user feedback, incident artifacts",
+      "learning plane: curation, postmortems, eval datasets and analysis",
+      "change plane: versioned proposals, CI/evals, canary and rollback",
+      "governance plane: policy, approval, audit, privacy and budgets"
+    ],
+    "boundaries": "Covers architecture and workflow mechanics for observe→learn→change→verify. Tool-specific execution, general autonomous remediation, and broad governance are included only where they close this loop."
+  },
+  "current_state": [
+    "Verified production primitives exist: vendor-neutral traces/metrics/logs and context propagation (https://opentelemetry.io/docs/specs/otel/overview/; https://www.w3.org/TR/trace-context/), human annotation and production-trace-to-eval workflows (https://docs.langchain.com/langsmith/evaluation; https://docs.langchain.com/langsmith/annotation-queues), executable policy decisions (https://www.openpolicyagent.org/docs), protected deployments (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments), and metric-gated canaries (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/).",
+    "Eval-driven iteration is operationally specified: define objective, collect representative data, choose metrics, compare changes, continuously evaluate, and calibrate automation with humans (https://developers.openai.com/api/docs/guides/evaluation-best-practices). Anthropic separately recommends turning support/bug failures into tests and separating capability from near-100%-pass regression suites (https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents). These are first-party practices, not neutral proof of business impact.",
+    "Blameless postmortems, owned preventive actions, SLO/error-budget decision rules, and canary rollback are mature SRE methods (https://sre.google/sre-book/postmortem-culture/; https://sre.google/workbook/implementing-slos/; https://sre.google/workbook/canarying-releases/). Applying them to stochastic coding agents is conditionally useful, but autonomous mutation of policies, graders, permissions, or production remains unsafe without an independent gate.",
+    "No source establishes a general, unattended recursive self-improving software project. Benchmark gains do not establish production reliability: dataset leakage and weak tests can inflate apparent success (https://arxiv.org/abs/2410.06992), while DORA survey associations show local AI productivity improvements can coexist with worse delivery throughput/stability (https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report).",
+    "A versioned behavior-policy→eval loop is now publicly reproducible: OpenAI archives Model Spec releases (https://github.com/openai/model_spec), and Model Spec Evals maps 225 focus areas to 596 prompts/rubrics with repeated grading (https://alignment.openai.com/model-spec-evals/). This is transparency about intended behavior and an eval sample, not proof every production model implements the Spec; the Spec says models do not yet fully reflect it (https://model-spec.openai.com/2026-08-18.html).",
+    "Important current-status change: OpenAI announced the legacy Evals platform becomes read-only on 2026-10-31 and shuts down 2026-11-30 (https://developers.openai.com/api/docs/deprecations#2026-06-03-evals-platform). As of 2026-09-13 it is usable but not a durable new dependency; use portable data/harness abstractions or the documented migration path."
+  ],
+  "representative_systems": [
+    {
+      "layer": "instrumentation",
+      "systems": "OpenTelemetry API/SDK/Collector and W3C Trace Context",
+      "status": "mature cross-vendor base; GenAI-specific conventions remain evolving",
+      "evidence": [
+        "https://opentelemetry.io/docs/specs/otel/overview/",
+        "https://www.w3.org/TR/trace-context/"
+      ]
+    },
+    {
+      "layer": "evaluation/feedback",
+      "systems": "OpenAI Evals/API/Datasets; Anthropic agent-eval pattern; LangSmith offline/online evaluation and annotation queues",
+      "status": "Usable managed/open components, but OpenAI legacy Evals platform is deprecated for shutdown 2026-11-30; prefer Datasets/portable harnesses. Graders and schemas require local calibration.",
+      "evidence": [
+        "https://github.com/openai/evals",
+        "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+        "https://docs.langchain.com/langsmith/evaluation"
+      ]
+    },
+    {
+      "layer": "operations learning",
+      "systems": "Google SRE postmortems, SLIs/SLOs/error budgets; DORA five metrics; SPACE guardrails",
+      "status": "mature practices, but thresholds are context-specific",
+      "evidence": [
+        "https://sre.google/sre-book/postmortem-culture/",
+        "https://dora.dev/guides/dora-metrics/",
+        "https://queue.acm.org/detail.cfm?id=3454124"
+      ]
+    },
+    {
+      "layer": "controlled evolution",
+      "systems": "GitHub protected environments, OPA, Argo Rollouts",
+      "status": "production-ready enforcement primitives; custom glue needed to bind eval evidence to policy and release state",
+      "evidence": [
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+        "https://www.openpolicyagent.org/docs",
+        "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/"
+      ]
+    },
+    {
+      "layer": "external evaluation",
+      "systems": "SWE-bench/SWE-bench+ and METR task horizons",
+      "status": "research evidence; useful trend/diagnostic signals, not acceptance gates",
+      "evidence": [
+        "https://arxiv.org/abs/2310.06770",
+        "https://arxiv.org/abs/2410.06992",
+        "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/"
+      ]
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "OpenTelemetry defines separable signals and portable API/SDK/export architecture; W3C standardizes cross-process trace context.",
+      "urls": [
+        "https://opentelemetry.io/docs/specs/otel/overview/",
+        "https://opentelemetry.io/docs/specs/otel/logs/",
+        "https://www.w3.org/TR/trace-context/"
+      ],
+      "qualification": "Standards prove interoperability contracts, not that instrumentation is correct or complete."
+    },
+    {
+      "claim": "OpenAI prescribes continuous eval on every change, representative mixed datasets, and human calibration; Anthropic prescribes transcript/outcome-aware agent evals and separate capability/regression suites.",
+      "urls": [
+        "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+      ],
+      "qualification": "Vendor operational guidance; effectiveness claims are not independently quantified."
+    },
+    {
+      "claim": "NIST AI 600-1 calls for ongoing monitoring and periodic review, incident response/disclosure, testing, user feedback/recourse and provenance.",
+      "urls": [
+        "https://doi.org/10.6028/NIST.AI.600-1"
+      ],
+      "qualification": "Voluntary cross-sector risk-management profile, not a certifying control set."
+    },
+    {
+      "claim": "GitHub can require external/manual protection and prevent self-review; OPA separates decision from enforcement; Argo can pause, promote, or abort based on analysis.",
+      "urls": [
+        "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+        "https://www.openpolicyagent.org/docs",
+        "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/"
+      ],
+      "qualification": "Tool capability, not proof that a chosen policy or metric is valid."
+    },
+    {
+      "claim": "Google SRE defines a postmortem as impact, mitigation, causes and preventive follow-ups, and uses SLO/error-budget policies to turn metrics into prioritization decisions.",
+      "urls": [
+        "https://sre.google/sre-book/postmortem-culture/",
+        "https://sre.google/workbook/implementing-slos/"
+      ],
+      "qualification": "Google experience and templates require local adaptation."
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "SWE-Bench+ manually examined successful SWE-Agent+GPT-4 patches and reported 32.67% solution leakage, 31.08% suspicious passes due to weak tests, and a resolution-rate drop from 12.47% to 3.97% after filtering; it also raised pretraining contamination risk for more than 94% of issues.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "strength": "direct empirical benchmark critique; preprint and one benchmark family, so not universal"
+    },
+    {
+      "finding": "SPACE argues developer productivity cannot be reduced to one activity metric; satisfaction, performance, activity, communication and efficiency should be considered across levels.",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "strength": "peer-reviewed independent framework; does not directly test coding agents"
+    },
+    {
+      "finding": "Cook’s complex-systems synthesis warns against one linear root cause: accidents emerge from multiple latent and active conditions and hindsight simplifies causality.",
+      "url": "https://how.complexsystems.fail/",
+      "strength": "foundational human-factors synthesis; older and not agent-specific"
+    },
+    {
+      "finding": "METR framed capability by human task duration and reported an approximately seven-month historical doubling trend, but explicitly labels extrapolation and warns static text/figures are out of date.",
+      "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
+      "strength": "independent data/code-oriented research; selected tasks and extrapolation do not establish production autonomy"
+    },
+    {
+      "finding": "DORA’s 2024 survey summary reported mixed associations between AI adoption and engineering outcomes, including reduced delivery stability/throughput despite some local quality gains.",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report",
+      "strength": "large industry survey program but observational/self-reported associations, not causal experiment"
+    },
+    {
+      "finding": "SWE-bench-Live uses newer monthly-oriented tasks; a matched reported gap (43.20% Verified versus 19.25% Live) supports freshness concerns, but the study had no repeated runs and task/repository mix confounds attribution.",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "strength": "current independent benchmark design and explicit limitations"
+    },
+    {
+      "finding": "AIOpsLab found tested agents plateaued after roughly five interaction steps on 48 live-cloud problems; more feedback/self-repair increased tokens without further performance.",
+      "url": "https://arxiv.org/abs/2501.06706",
+      "strength": "controlled benchmark counterexample to monotonic self-improvement; limited task set and preprint"
+    },
+    {
+      "finding": "Reflexion improved some benchmark results using stored verbal feedback but showed no improvement on 100 WebShop environments after four trials; authors identify local minima, exploration and memory constraints.",
+      "url": "https://arxiv.org/abs/2303.11366",
+      "strength": "peer-reviewed test-time feedback evidence; not durable production learning"
+    }
+  ],
+  "metrics": {
+    "outcome_and_safety": [
+      "task success by risk tier with confidence intervals across repeated stochastic trials",
+      "regression-suite pass rate (target close to 100% per Anthropic, but locally justified: https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)",
+      "escaped-defect, unsafe-action, rollback and security-policy violation rates",
+      "user-visible latency/errors/saturation plus SLI/error-budget burn (https://sre.google/sre-book/monitoring-distributed-systems/)",
+      "segment/cohort disparity, user appeal/override and unresolved complaint rates",
+      "For repeated stochastic trials report pass@1, pass@k (at least one success) and pass^k (all succeed); Anthropic notes 75% per-trial success implies only about 42% probability of three consecutive successes (https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)."
+    ],
+    "loop_health": [
+      "production failures converted to reviewed evals",
+      "time from signal→triage→test→approved change",
+      "postmortem trigger coverage, review latency, action-item age, recurrence after closure",
+      "grader-to-expert agreement and disagreement by slice",
+      "dataset freshness, duplication/leakage, label disagreement and provenance completeness",
+      "canary exposure, abort rate, false-positive/false-negative analysis decisions",
+      "token/compute/reviewer/on-call cost per accepted improvement"
+    ],
+    "evidence_numbers": [
+      "SWE-bench introduced 2,294 tasks from 12 Python repositories and its original best reported result was 1.96% (https://arxiv.org/abs/2310.06770); these historic numbers must not be compared naively to later scaffolds/models.",
+      "SWE-Bench+ reported 12.47%→3.97% after filtering problematic instances (https://arxiv.org/abs/2410.06992), showing why hidden tests and contamination audits matter.",
+      "DORA 2024 reported >75% used AI for at least one daily responsibility; a 25% adoption increase was associated with +7.5% documentation quality, +3.4% code quality, +3.1% review speed, but −1.5% throughput and −7.2% stability; 39% reported little/no trust (https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report). Associations are not causation or universal targets.",
+      "OpenAI Model Spec Evals reported 596 prompts across 225 focus areas, five grader samples with median aggregation, and 20 candidate samples per prompt for published results; the authors warn it is text-only, mostly simple, not use-frequency/importance weighted, and exact absolute results may not reproduce (https://alignment.openai.com/model-spec-evals/; https://github.com/openai/model_spec_evals).",
+      "SWE-bench-Live reported 1,319 post-2024 tasks from 93 repositories; under its matched setup OpenHands+Claude 3.7 scored 43.20% on Verified versus 19.25% Live, but no repetitions and repository/task differences confound a pure contamination claim (https://arxiv.org/abs/2505.23419).",
+      "AIOpsLab reported 49.15%, 55.93%, and 59.32% across agent methods on 48 live-cloud problems and observed accuracy plateau after about five steps, showing extra environment-feedback/self-repair can add tokens without continued gains (https://arxiv.org/abs/2501.06706)."
+    ],
+    "anti_gaming": "Trend service-level metrics, pair throughput with stability and SPACE guardrails, retain raw evidence, and never promote on a composite score alone. DORA itself warns context, aggregation and targets can induce gaming (https://dora.dev/guides/dora-metrics/)."
+  },
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "OBSERVE",
+      "trigger": "scheduled sampling; every agent run/change/deploy; SLO burn; user report; incident/security alert",
+      "mechanics": "Emit correlated trace/span IDs, model/prompt/tool/policy/code versions, inputs/outputs (redacted or referenced), tool calls, environment, cost/latency, test results, cohort and outcome. Capture deploy/change IDs. OTel/W3C supply the carrier, not the schema correctness (https://opentelemetry.io/docs/specs/otel/overview/; https://www.w3.org/TR/trace-context/).",
+      "output": "immutable evidence envelope with retention class and provenance"
+    },
+    {
+      "step": 2,
+      "state": "TRIAGE",
+      "trigger": "evidence enters queue",
+      "mechanics": "Deduplicate; severity/risk/privacy classify; link user feedback to trace with consent; compare against SLI/error budget; route urgent incidents to containment and routine cases to sampling/annotation. Never treat thumbs-up/down alone as ground truth.",
+      "output": "case with owner, risk tier, due date and evidence snapshot"
+    },
+    {
+      "step": 3,
+      "state": "LEARN",
+      "trigger": "qualifying incident, repeated failure cluster, or planned review",
+      "mechanics": "Produce blameless timeline and multiple contributing factors; capture mitigation and failed defenses; assign actions (https://sre.google/sre-book/postmortem-culture/; https://how.complexsystems.fail/). Convert a reproduced failure into a minimized, de-identified eval fixture plus expected outcome/invariants.",
+      "output": "reviewed postmortem, test/eval candidate, runbook/policy candidate"
+    },
+    {
+      "step": 4,
+      "state": "CURATE",
+      "trigger": "candidate fixture or periodic dataset review",
+      "mechanics": "Quarantine; remove secrets/PII and licensing-restricted content; record consent/provenance; deduplicate; isolate future holdout by time/project; label independently; adjudicate disagreement; tag slices/risk; version dataset and schema. Mix production, expert and synthetic examples but preserve origin (https://developers.openai.com/api/docs/guides/evaluation-best-practices).",
+      "output": "versioned train/dev/regression/holdout sets; signed data card/change log"
+    },
+    {
+      "step": 5,
+      "state": "PROPOSE",
+      "trigger": "prioritized gap with owner and budget",
+      "mechanics": "Agent may draft a minimal change to prompt/router/tool/code/test/runbook/policy in a branch. It must state hypothesis, affected versions, expected metric, risk, exposure limit and rollback. The proposal cannot modify its own hidden tests, approval rule, audit log or credentials.",
+      "output": "reviewable change set and experiment plan"
+    },
+    {
+      "step": 6,
+      "state": "OFFLINE_VERIFY",
+      "trigger": "proposal ready",
+      "mechanics": "Run deterministic tests/static/security checks; repeated agent trials; capability and near-100% regression suites; slice and metamorphic/adversarial tests; compare cost/latency. Calibrate LLM graders against blinded experts; investigate grader disagreement/reward hacking (https://developers.openai.com/api/docs/guides/graders). Reject on any safety invariant or statistically/operationally material regression.",
+      "output": "signed evaluation report with raw-run links, uncertainty and promotion recommendation"
+    },
+    {
+      "step": 7,
+      "state": "GATE",
+      "trigger": "offline checks pass",
+      "mechanics": "OPA/policy engine decides eligibility from risk, evidence, error budget, blast radius and change class. Low-risk reversible cases may auto-advance; high-risk permission/schema/dependency/security/policy changes require independent reviewer. Protected environments can block self-review (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+      "output": "deny, request clarification, approve canary, or approve scheduled release"
+    },
+    {
+      "step": 8,
+      "state": "CANARY",
+      "trigger": "approved candidate",
+      "mechanics": "Shadow first when side effects can be suppressed; then smallest representative cohort with concurrent control. Attach version/cohort labels; predeclare success/failure/inconclusive thresholds, max time/traffic/spend/error budget, and kill switch. Argo-style analysis blocks and can promote/abort/pause (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/).",
+      "output": "promote, pause for human review, or rollback with evidence"
+    },
+    {
+      "step": 9,
+      "state": "VERIFY_AND_CLOSE",
+      "trigger": "promotion or rollback",
+      "mechanics": "Watch delayed and segmented outcomes for a fixed window; verify user-facing SLI plus guardrails, not only agent score. Update registry/change log and link decision to evidence. Failed experiments and rollback become cases, not training examples automatically.",
+      "output": "released immutable version or restored last-known-good; experiment record"
+    },
+    {
+      "step": 10,
+      "state": "REVIEW",
+      "trigger": "weekly/monthly risk review and quarterly architecture review",
+      "mechanics": "Audit recurrence, actions, drift, costs, exception expiry, evaluator quality, sampling gaps and policy conflicts. Refine SLO/evals only through versioned proposals and independent review. Retire stale tests while retaining audit history.",
+      "output": "approved backlog and loop-health report"
+    }
+  ],
+  "integration_points": {
+    "telemetry": "OTel SDK/Collector/exporters, W3C trace context, application/agent spans, CI/deployment events, model gateway and cost meters. Correlate logs with TraceId/SpanId (https://opentelemetry.io/docs/specs/otel/logs/).",
+    "feedback": "in-product report/appeal with category and consent; support/issue tracker; annotation queue; incident manager; red-team feed. LangSmith demonstrates SDK-managed focused queues and full-thread review (https://docs.langchain.com/langsmith/annotation-queues/).",
+    "data_and_eval": "object store plus append-only provenance catalog; dataset/version registry; isolated sandbox runner; deterministic test framework; OpenAI Evals or equivalent; human-label platform; model/prompt/tool registry.",
+    "change_control": "Git branch/PR, CODEOWNERS-style review, CI attestations, OPA API/bundles, protected deployment environments and signed artifacts (https://www.openpolicyagent.org/docs; https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+    "delivery": "feature flags, shadow endpoint, canary orchestrator, metrics backend and automatic rollback. Canary must carry candidate/control version tags (https://sre.google/workbook/canarying-releases/).",
+    "operations": "SLO/error-budget dashboard, alert manager, incident timeline, postmortem repository, runbook, action tracker and audit ledger.",
+    "privacy_security": "secret scanner/DLP before telemetry or datasets; access tiers; encryption/deletion/retention workflow; vulnerability/AI incident feeds. OTel recommends minimization and Collector filtering/redaction/transforms (https://opentelemetry.io/docs/security/handling-sensitive-data/)."
+  },
+  "human_gates": [
+    {
+      "gate": "intake/adjudication",
+      "when": "ambiguous, privacy-sensitive, safety-related or high-impact user reports",
+      "why": "feedback is noisy, strategic and potentially adversarial; people confirm consent, severity and desired behavior"
+    },
+    {
+      "gate": "postmortem review",
+      "when": "predeclared incident threshold: material user harm/outage, data loss, rollback/on-call intervention, security breach or monitoring failure",
+      "why": "verify contributing factors and that actions reduce risk, rather than merely closing tickets (https://sre.google/sre-book/postmortem-culture/)"
+    },
+    {
+      "gate": "ground truth/evaluator calibration",
+      "when": "new rubric/slice, high grader disagreement, evaluator-model change, suspected reward hacking",
+      "why": "LLM graders can be exploited; compare to expert judgments (https://developers.openai.com/api/docs/guides/graders)"
+    },
+    {
+      "gate": "change approval",
+      "when": "permissions/secrets, policies/graders, destructive migrations, dependencies/supply chain, public API, legal/safety behavior, large blast radius or exhausted error budget",
+      "why": "independent authority must control the controller; GitHub can prevent initiator self-review (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)"
+    },
+    {
+      "gate": "canary ambiguity",
+      "when": "metric analysis is inconclusive, conflicting, underpowered or detects unexpected segment harm",
+      "why": "Argo explicitly models inconclusive as pause rather than forced promotion (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/)"
+    },
+    {
+      "gate": "appeal/kill switch",
+      "when": "affected user disputes outcome or operator sees emergent harm/cost",
+      "why": "NIST calls for user feedback/recourse and incident processes (https://doi.org/10.6028/NIST.AI.600-1)."
+    }
+  ],
+  "failure_modes": [
+    {
+      "mode": "Goodhart/reward hacking",
+      "detail": "agent learns evaluator shortcuts; synthetic score rises while actual correctness falls",
+      "evidence": "OpenAI describes grader hacking (https://developers.openai.com/api/docs/guides/graders); SWE-Bench+ quantifies leakage/weak-test effects (https://arxiv.org/abs/2410.06992)"
+    },
+    {
+      "mode": "feedback poisoning and selection bias",
+      "detail": "malicious reports steer policy; vocal users and easy-to-measure outcomes dominate; silent failures disappear"
+    },
+    {
+      "mode": "contamination and test overfit",
+      "detail": "production examples leak into holdouts or pretrained models; repeated tuning memorizes benchmark; flaky/non-hermetic environments add noise"
+    },
+    {
+      "mode": "telemetry blind spots/privacy leak",
+      "detail": "sampling drops rare harm; high cardinality explodes cost; unredacted prompts/traces expose secrets/PII; W3C forbids PII in tracestate (https://www.w3.org/TR/trace-context/#security)"
+    },
+    {
+      "mode": "causal misdiagnosis",
+      "detail": "postmortem blames last change/person; overlapping releases and workload drift confound attribution; complex systems have interacting conditions (https://how.complexsystems.fail/)"
+    },
+    {
+      "mode": "metric tunnel vision",
+      "detail": "deploy count or closure rises while stability, user value or team well-being falls; DORA warns against targets/aggregation (https://dora.dev/guides/dora-metrics/)"
+    },
+    {
+      "mode": "unsafe self-modification/control capture",
+      "detail": "agent weakens policy, changes grader, elevates permission, erases audit evidence, or declares its own canary successful; OWASP identifies prompt injection and excessive agency (https://owasp.org/www-project-top-10-for-large-language-model-applications/)"
+    },
+    {
+      "mode": "canary false confidence",
+      "detail": "small/unrepresentative cohort misses rare, delayed, region/tenant/schema effects; loose threshold promotes harm, strict threshold rejects improvements (https://sre.google/workbook/canarying-releases/)"
+    },
+    {
+      "mode": "rollback illusion",
+      "detail": "database/schema/destructive actions or external side effects are irreversible; rollback code may itself fail"
+    },
+    {
+      "mode": "policy/configuration debt",
+      "detail": "conflicting, stale or overly broad policy blocks fleet or opens access; model/tool/vendor updates change behavior without code diff"
+    },
+    {
+      "mode": "organizational/economic collapse",
+      "detail": "annotation, triage, compute, retention and on-call load exceed benefit; action backlog becomes ceremonial; accountability becomes unclear"
+    }
+  ],
+  "controls_and_mitigations": [
+    "Separate proposer/executor from evaluator, policy authority and production credentials. Deny direct writes to holdouts, approval policy and audit storage; use short-lived scoped identities and egress allowlists. This directly addresses OWASP prompt injection/excessive agency risks (https://owasp.org/www-project-top-10-for-large-language-model-applications/).",
+    "Create append-only, signed lineage for trace→case→fixture→dataset→eval run→proposal→approval→deploy→outcome; record model, prompt, code, tool, environment, data and policy hashes.",
+    "Use deterministic invariants first, then calibrated model graders and blinded expert audit. Run multiple stochastic trials, segmented results and adversarial/metamorphic cases. Hold out recent/private projects and audit contamination (https://arxiv.org/abs/2410.06992).",
+    "De-identify/minimize feedback before storage; separate raw restricted evidence from eval fixtures; redact secrets at SDK and Collector; set retention/deletion and access audit (https://opentelemetry.io/docs/security/handling-sensitive-data/).",
+    "Encode policy as code with unit/coverage tests, signed review, shadow/dry run, exception expiry, conflict scans and staged bundles; enforcement points must define fail-safe behavior. NIST SP 800-204C recommends a policy CI/CD pipeline and periodic update/conflict checks (https://csrc.nist.gov/pubs/sp/800/204/c/final).",
+    "Limit each experiment by time, traffic, action count, token/spend, error-budget consumption and permitted side effects. Use concurrent control, representative segmentation, automatic abort and tested manual kill/restore path (https://argo-rollouts.readthedocs.io/en/stable/features/analysis/).",
+    "Use predeclared postmortem triggers, blameless multi-factor review, owned/dated actions, executable regression checks, recurrence measurement and overdue escalation (https://sre.google/sre-book/postmortem-culture/).",
+    "Keep an approved last-known-good bundle and backward-compatible migrations; rehearse rollback. Destructive or externally irreversible changes require two-person review and compensation plan.",
+    "Apply SLO/error-budget rules so reliability loss freezes routine autonomous change while P0/security work continues; treat Google’s thresholds only as examples, not universal defaults (https://sre.google/workbook/error-budget-policy/).",
+    "Measure value net of compute, labeling, review, incident and opportunity cost. Stop loops with poor lift or high uncertainty; use SPACE dimensions as counter-metrics to activity optimization (https://queue.acm.org/detail.cfm?id=3454124)."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful, not autonomously self-governing.",
+    "production_ready": [
+      "correlated application telemetry",
+      "SLOs/error budgets",
+      "blameless postmortems",
+      "versioned deterministic regression suites",
+      "protected CI/deploy gates",
+      "shadow/canary/rollback",
+      "policy-as-code when independently maintained"
+    ],
+    "emerging": [
+      "agent-trajectory schemas and GenAI semantic conventions",
+      "online LLM graders at scale",
+      "automatic conversion of traces to high-quality evals",
+      "cross-model evaluator calibration",
+      "causal diagnosis from production evidence"
+    ],
+    "speculative_or_unsafe": [
+      "unattended recursive changes to graders/policy/permissions",
+      "automated training on raw user feedback",
+      "benchmark-only promotion",
+      "fully automatic high-impact postmortems/remediation"
+    ],
+    "rationale": "The pieces are mature, but labels, objective design, causality, contamination and governance remain socio-technical. Vendor guidance agrees on continuous eval and human calibration, while independent benchmark and DORA evidence warns scores/local productivity can mislead (https://developers.openai.com/api/docs/guides/evaluation-best-practices; https://arxiv.org/abs/2410.06992; https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report)."
+  },
+  "build_vs_buy": {
+    "buy_managed": "Use a managed observability/eval/annotation platform where retention, access control, SDK support and reviewer workflow matter; LangSmith is one concrete option, not an independently proven winner (https://docs.langchain.com/langsmith/evaluation). Cloud deployment protections can supply gates (https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).",
+    "adopt_open": "Use OpenTelemetry/W3C for portability, a repository-controlled evaluation harness/dataset, OPA for decisions, and Argo Rollouts/Flagger-style progressive delivery. Do not start a durable dependency on OpenAI legacy Evals: announced shutdown is 2026-11-30 (https://developers.openai.com/api/docs/deprecations#2026-06-03-evals-platform). OpenAI Evals code can still inform portable harness design (https://github.com/openai/evals).",
+    "must_build_or_own": "Outcome ontology, risk taxonomy, user-consent flow, trace/evidence schema, dataset provenance/splits, domain rubrics/hidden tests, promotion policy, SLOs, postmortem triggers, cost model and accountability cannot safely be outsourced.",
+    "selection_rule": "Prefer open export formats, immutable version APIs, self-host/retrieval paths, granular retention/RBAC and reproducible local evals. Do a proof with replayed traces and measured reviewer/compute cost; do not select by benchmark leaderboard."
+  },
+  "recommended_pattern": {
+    "name": "Governed evidence flywheel with asymmetric autonomy",
+    "architecture": "Five isolated planes: runtime data; append-only evidence; restricted learning/eval; versioned change; independent governance. Agents may observe, cluster, reproduce, draft fixtures and propose reversible changes. They may not approve themselves, alter hidden tests/policy, grant permissions, delete evidence or expand blast radius.",
+    "rollout": "Phase 0 instrument and baseline. Phase 1 human triage/postmortems and deterministic regression corpus. Phase 2 agents propose tests/low-risk patches but humans merge. Phase 3 auto-canary only reversible low-risk classes under hard budgets. Phase 4 consider narrowly scoped auto-promotion after sustained measured precision, zero unresolved critical escapes, tested rollback and periodic independent audit.",
+    "promotion_contract": "Require provenance-clean dataset version; regression/safety invariants; repeated-trial confidence and slice report; cost/latency budget; signed artifact; policy decision; representative shadow/canary; concurrent control; delayed-outcome window; rollback proof. Any missing or inconclusive evidence pauses.",
+    "why": "This captures compounding value—each verified failure becomes durable evidence/test—without creating a positive-feedback controller that rewrites its own objectives. It combines continuous eval guidance (https://developers.openai.com/api/docs/guides/evaluation-best-practices), SRE learning (https://sre.google/sre-book/postmortem-culture/), policy separation (https://www.openpolicyagent.org/docs), and bounded experiments (https://sre.google/workbook/canarying-releases/)."
+  },
+  "open_questions": [
+    "How accurately do offline suites predict user value and safety for long, stateful coding-agent trajectories across model/provider updates?",
+    "What sample size and observation window detect rare/delayed regressions without making canaries too expensive or slow?",
+    "How should consent, deletion, copyright and trade-secret obligations propagate from raw feedback into derived fixtures, embeddings, fine-tunes and postmortems?",
+    "Which grader mixtures remain calibrated under distribution shift and cannot be gamed by the proposer?",
+    "How should causal credit be assigned when model, prompt, tools, repository, dependencies and traffic change together?",
+    "What error-budget and risk thresholds justify auto-promotion per domain, and what evidence proves rollback for irreversible side effects?",
+    "How much net benefit remains after annotation, compute, storage, security review, false alarms and on-call load?",
+    "Can cross-vendor agent telemetry conventions stabilize enough for comparable longitudinal analysis without exposing reasoning/private data?",
+    "How should organizations prevent the feedback loop from narrowing product goals toward only measurable, frequent or majority-user behavior?"
+  ],
+  "sources": [
+    {
+      "title": "Evaluation best practices",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "continuous evaluation on every change",
+        "mix production, expert, historical and synthetic data",
+        "calibrate automated scoring with humans",
+        "evaluation anti-patterns"
+      ]
+    },
+    {
+      "title": "Working with evals",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/evals",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "three-step task/run/analyze loop",
+        "BDD analogy and Evals API"
+      ]
+    },
+    {
+      "title": "OpenAI Evals",
+      "publisher_or_author": "OpenAI",
+      "url": "https://github.com/openai/evals",
+      "publication_or_update_date": "repository current at access",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "open-source evaluation framework and benchmark registry",
+        "private/custom eval support"
+      ]
+    },
+    {
+      "title": "Demystifying evals for AI agents",
+      "publisher_or_author": "Anthropic",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "publication_or_update_date": "2026-01-09",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering guidance",
+      "supported_claims": [
+        "agent trace/outcome/harness definitions",
+        "capability versus regression suites",
+        "convert production failures into tests",
+        "deterministic grading plus human calibration"
+      ]
+    },
+    {
+      "title": "Challenges in evaluating AI systems",
+      "publisher_or_author": "Anthropic",
+      "url": "https://www.anthropic.com/research/evaluating-ai-systems",
+      "publication_or_update_date": "page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "first-party research essay",
+      "supported_claims": [
+        "evaluation validity and measurement challenges"
+      ]
+    },
+    {
+      "title": "LangSmith Evaluation",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/langsmith/evaluation",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "offline and online evaluation",
+        "turn production traces into datasets and regression tests"
+      ]
+    },
+    {
+      "title": "Use annotation queues",
+      "publisher_or_author": "LangChain",
+      "url": "https://docs.langchain.com/langsmith/annotation-queues",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "human review queues, rubrics, pairwise review, SDK integration"
+      ]
+    },
+    {
+      "title": "Signals",
+      "publisher_or_author": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/concepts/signals/",
+      "publication_or_update_date": "2026-03-10",
+      "access_date": "2026-09-13",
+      "source_type": "open standard documentation",
+      "supported_claims": [
+        "traces, metrics, logs and baggage as telemetry signals; profiles/events status"
+      ]
+    },
+    {
+      "title": "Postmortem Culture: Learning from Failure",
+      "publisher_or_author": "Google SRE",
+      "url": "https://sre.google/sre-book/postmortem-culture/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "postmortem contents and preventive actions",
+        "blameless review and shared repository"
+      ]
+    },
+    {
+      "title": "Implementing SLOs",
+      "publisher_or_author": "Google SRE",
+      "url": "https://sre.google/workbook/implementing-slos/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "SLO/error-budget policies as decision mechanisms",
+        "review cadence and escalation"
+      ]
+    },
+    {
+      "title": "NIST AI 600-1: Generative AI Profile",
+      "publisher_or_author": "NIST; Autio et al.",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "publication_or_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/profile",
+      "supported_claims": [
+        "ongoing monitoring and periodic review",
+        "incident response/disclosure",
+        "user feedback and recourse",
+        "pre-deployment testing and provenance"
+      ]
+    },
+    {
+      "title": "Canary deployment strategy",
+      "publisher_or_author": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/canary/",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": [
+        "weighted canary, pause and staged promotion"
+      ]
+    },
+    {
+      "title": "Analysis and progressive delivery",
+      "publisher_or_author": "Argo Rollouts project",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": [
+        "metric analysis can proceed, abort or pause rollout",
+        "baseline/canary experiments"
+      ]
+    },
+    {
+      "title": "Deployments and environments",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "manual and custom deployment protection rules",
+        "required reviewers and prevention of self-review"
+      ]
+    },
+    {
+      "title": "Open Policy Agent documentation",
+      "publisher_or_author": "Open Policy Agent/CNCF",
+      "url": "https://www.openpolicyagent.org/docs",
+      "publication_or_update_date": "continuously updated; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": [
+        "policy-as-code and separation of policy decision from enforcement"
+      ]
+    },
+    {
+      "title": "OWASP Top 10 for Large Language Model Applications",
+      "publisher_or_author": "OWASP Foundation",
+      "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "publication_or_update_date": "2026 edition current",
+      "access_date": "2026-09-13",
+      "source_type": "community security standard",
+      "supported_claims": [
+        "prompt injection, insecure output handling, poisoning, excessive agency and overreliance"
+      ]
+    },
+    {
+      "title": "The ML Test Score",
+      "publisher_or_author": "Breck et al., Google Research",
+      "url": "https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/",
+      "publication_or_update_date": "2017",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / first-party production experience",
+      "supported_claims": [
+        "28 tests and monitoring needs for production ML readiness"
+      ]
+    },
+    {
+      "title": "Hidden Technical Debt in Machine Learning Systems",
+      "publisher_or_author": "Sculley et al., Google Research",
+      "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/",
+      "publication_or_update_date": "2015",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper",
+      "supported_claims": [
+        "feedback loops, data dependencies and configuration debt in ML systems"
+      ]
+    },
+    {
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Jimenez et al.",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2024-11-11 v3; ICLR 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper / benchmark",
+      "supported_claims": [
+        "2,294 tasks from 12 repositories",
+        "original best model solved 1.96%"
+      ]
+    },
+    {
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Aleithan et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-10 v2",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical preprint",
+      "supported_claims": [
+        "solution leakage and weak-test critique",
+        "reported score drop after filtering"
+      ]
+    },
+    {
+      "title": "Measuring AI Ability to Complete Long Software Tasks",
+      "publisher_or_author": "METR",
+      "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
+      "publication_or_update_date": "2025-03-19; page warns some static claims are outdated",
+      "access_date": "2026-09-13",
+      "source_type": "independent research",
+      "supported_claims": [
+        "task horizon framing and approximate seven-month historical doubling claim",
+        "explicit extrapolation and update caveat"
+      ]
+    },
+    {
+      "title": "Announcing the 2024 DORA report",
+      "publisher_or_author": "Google Cloud DORA; Nathen Harvey and Derek DeBellis",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report",
+      "publication_or_update_date": "2024-10-23",
+      "access_date": "2026-09-13",
+      "source_type": "industry survey report summary",
+      "supported_claims": [
+        "AI adoption associations with documentation/code/review and delivery outcomes",
+        "75% usage, trust and stability caveats"
+      ]
+    },
+    {
+      "title": "OpenTelemetry overview",
+      "publisher_or_author": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/specs/otel/overview/",
+      "publication_or_update_date": "current standard; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open standard",
+      "supported_claims": [
+        "API/SDK/export architecture and signal model"
+      ]
+    },
+    {
+      "title": "Trace Context",
+      "publisher_or_author": "W3C",
+      "url": "https://www.w3.org/TR/trace-context/",
+      "publication_or_update_date": "2021-11-23",
+      "access_date": "2026-09-13",
+      "source_type": "W3C Recommendation",
+      "supported_claims": [
+        "vendor-neutral traceparent/tracestate propagation and security/privacy constraints"
+      ]
+    },
+    {
+      "title": "Monitoring Distributed Systems",
+      "publisher_or_author": "Google SRE",
+      "url": "https://sre.google/sre-book/monitoring-distributed-systems/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "four golden signals; symptom-based paging; tail latency"
+      ]
+    },
+    {
+      "title": "Sampling",
+      "publisher_or_author": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/concepts/sampling/",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open standard documentation",
+      "supported_claims": [
+        "sampling cost and evidence-loss tradeoff"
+      ]
+    },
+    {
+      "title": "Handling sensitive data",
+      "publisher_or_author": "OpenTelemetry project",
+      "url": "https://opentelemetry.io/docs/security/handling-sensitive-data/",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open standard documentation",
+      "supported_claims": [
+        "minimization, filtering, redaction and transforms"
+      ]
+    },
+    {
+      "title": "How Complex Systems Fail",
+      "publisher_or_author": "Richard I. Cook",
+      "url": "https://how.complexsystems.fail/",
+      "publication_or_update_date": "original 1998; web version current",
+      "access_date": "2026-09-13",
+      "source_type": "independent human-factors essay",
+      "supported_claims": [
+        "multiple interacting failures, latent conditions, hindsight bias"
+      ]
+    },
+    {
+      "title": "DORA metrics",
+      "publisher_or_author": "DORA",
+      "url": "https://dora.dev/guides/dora-metrics/",
+      "publication_or_update_date": "current guidance; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "industry research guidance",
+      "supported_claims": [
+        "five delivery metrics, service-level trend use and Goodhart/context warnings"
+      ]
+    },
+    {
+      "title": "The SPACE of Developer Productivity",
+      "publisher_or_author": "Forsgren et al.",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "publication_or_update_date": "2021",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed article",
+      "supported_claims": [
+        "multidimensional productivity and harms of single activity metrics"
+      ]
+    },
+    {
+      "title": "Example Error Budget Policy",
+      "publisher_or_author": "Google SRE",
+      "url": "https://sre.google/workbook/error-budget-policy/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational template",
+      "supported_claims": [
+        "release freeze and postmortem triggers linked to budget consumption"
+      ]
+    },
+    {
+      "title": "Canarying Releases",
+      "publisher_or_author": "Google SRE",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational book",
+      "supported_claims": [
+        "bounded concurrent-control canaries and threshold tradeoffs"
+      ]
+    },
+    {
+      "title": "NIST SP 800-204C",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/204/c/final",
+      "publication_or_update_date": "2022",
+      "access_date": "2026-09-13",
+      "source_type": "government standard",
+      "supported_claims": [
+        "policy-as-code CI/CD, periodic update and conflict checks"
+      ]
+    },
+    {
+      "title": "OpenAI Model Spec, 2026-08-18 release",
+      "publisher_or_author": "OpenAI",
+      "url": "https://model-spec.openai.com/2026-08-18.html",
+      "publication_or_update_date": "2026-08-18",
+      "access_date": "2026-09-13",
+      "source_type": "official behavior specification",
+      "supported_claims": [
+        "versioned intended-behavior policy; says production models do not yet fully reflect it; updated from user feedback and lessons"
+      ]
+    },
+    {
+      "title": "OpenAI Model Spec source and archive",
+      "publisher_or_author": "OpenAI",
+      "url": "https://github.com/openai/model_spec",
+      "publication_or_update_date": "current at access; releases archived since 2025-02-12",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "auditable current Markdown and historical policy releases"
+      ]
+    },
+    {
+      "title": "Introducing Model Spec Evals",
+      "publisher_or_author": "OpenAI Alignment",
+      "url": "https://alignment.openai.com/model-spec-evals/",
+      "publication_or_update_date": "2026-03-25",
+      "access_date": "2026-09-13",
+      "source_type": "first-party research report",
+      "supported_claims": [
+        "596 prompts across 225 focus areas, repeated model grading and reported compliance; dataset scope/reproducibility caveats"
+      ]
+    },
+    {
+      "title": "Model Spec Evals repository",
+      "publisher_or_author": "OpenAI",
+      "url": "https://github.com/openai/model_spec_evals",
+      "publication_or_update_date": "current at access",
+      "access_date": "2026-09-13",
+      "source_type": "official source repository",
+      "supported_claims": [
+        "open evaluation code and reproduction caveats"
+      ]
+    },
+    {
+      "title": "Evals platform deprecation notice",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/deprecations#2026-06-03-evals-platform",
+      "publication_or_update_date": "2026-06-03",
+      "access_date": "2026-09-13",
+      "source_type": "official deprecation notice",
+      "supported_claims": [
+        "legacy Evals becomes read-only 2026-10-31 and shuts down 2026-11-30; migration guidance"
+      ]
+    },
+    {
+      "title": "Trace grading",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/api/docs/guides/trace-grading",
+      "publication_or_update_date": "current docs; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "grading end-to-end decisions, tool calls and steps to localize failures"
+      ]
+    },
+    {
+      "title": "SWE-bench Goes Live!",
+      "publisher_or_author": "SWE-bench-Live authors",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "publication_or_update_date": "2025-05-29",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint",
+      "supported_claims": [
+        "1,319 post-2024 tasks across 93 repositories; matched Verified-versus-Live gap and confounders"
+      ]
+    },
+    {
+      "title": "Are Solved Issues in SWE-bench Really Solved Correctly?",
+      "publisher_or_author": "Wang, Pradel and Liu",
+      "url": "https://arxiv.org/abs/2503.15223",
+      "publication_or_update_date": "2025-03-19 v1; later revision",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical paper",
+      "supported_claims": [
+        "developer-test and behavioral-divergence audit of passing patches; estimated score inflation"
+      ]
+    },
+    {
+      "title": "UTBoost",
+      "publisher_or_author": "UTBoost authors",
+      "url": "https://arxiv.org/abs/2506.09289",
+      "publication_or_update_date": "2025-06-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent empirical preprint",
+      "supported_claims": [
+        "extra-test and parser audit; cost and leaderboard changes"
+      ]
+    },
+    {
+      "title": "Reflexion",
+      "publisher_or_author": "Shinn et al.",
+      "url": "https://arxiv.org/abs/2303.11366",
+      "publication_or_update_date": "2023-03-20; NeurIPS 2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": [
+        "verbal reflection results and WebShop non-improvement/loop limitations"
+      ]
+    },
+    {
+      "title": "AIOpsLab",
+      "publisher_or_author": "AIOpsLab authors",
+      "url": "https://arxiv.org/abs/2501.06706",
+      "publication_or_update_date": "2025-01-16",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint",
+      "supported_claims": [
+        "48 live-cloud problems; plateau after repeated environment-feedback steps"
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "High for architectural primitives and SRE control mechanics; medium for agent-specific eval operations; low for claims of unattended self-improvement or universal thresholds.",
+    "high": [
+      "OTel/W3C signal and propagation contracts",
+      "GitHub/OPA/Argo documented enforcement behavior",
+      "Google SRE postmortem/SLO mechanics",
+      "NIST recommended governance activities"
+    ],
+    "medium": [
+      "vendor-reported continuous-eval practices and managed-platform workflows",
+      "DORA observational associations",
+      "transfer of mature SRE methods to coding-agent behavior"
+    ],
+    "low": [
+      "METR extrapolation to long autonomous projects",
+      "benchmark scores as predictors of production outcomes",
+      "future-safe universal auto-promotion thresholds"
+    ],
+    "reasons": "Primary documents directly specify mechanisms. Most product sources do not publish controlled operational outcomes. Independent work exposes benchmark validity and measurement limits. The requested as-of date is in the future relative to some accessible publication timelines, so absence of later evidence is not evidence of no change."
+  },
+  "conflicts": [
+    {
+      "topic": "rapid capability progress versus production autonomy",
+      "claims": "METR reports an approximately seven-month historical task-horizon doubling and extrapolates longer autonomy (https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/), but warns some static claims are outdated; SWE-Bench+ shows benchmark passes can be inflated by leakage/weak tests (https://arxiv.org/abs/2410.06992).",
+      "resolution": "Treat trend as scenario planning; require current private holdouts and production guardrails."
+    },
+    {
+      "topic": "developer productivity versus delivery performance",
+      "claims": "DORA 2024 reports documentation/code/review associations improving with AI adoption while throughput and stability associations worsen (https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report).",
+      "resolution": "Local task speed is not system throughput; measure flow, stability, rework and human outcomes together; observational results are not causal."
+    },
+    {
+      "topic": "automation versus human judgment",
+      "claims": "Vendors promote automated/online evaluation, but also require human calibration (https://developers.openai.com/api/docs/guides/evaluation-best-practices; https://docs.langchain.com/langsmith/evaluation).",
+      "resolution": "Automate collection, replay and deterministic grading; sample/adjudicate ambiguous and high-risk cases with humans."
+    },
+    {
+      "topic": "more telemetry versus privacy/cost",
+      "claims": "Full correlated evidence helps diagnosis, while OTel/W3C highlight sampling cost, sensitivity and PII risk (https://opentelemetry.io/docs/concepts/sampling/; https://opentelemetry.io/docs/security/handling-sensitive-data/; https://www.w3.org/TR/trace-context/#security).",
+      "resolution": "Risk-based retention, tail sampling, redaction and restricted raw evidence; record sampling decisions."
+    },
+    {
+      "topic": "single root cause versus systems view",
+      "claims": "Some postmortem language uses root cause(s) (https://sre.google/sre-book/postmortem-culture/), while Cook argues complex failures emerge from multiple interacting latent conditions (https://how.complexsystems.fail/).",
+      "resolution": "Record triggers and multiple contributing conditions/failed defenses; avoid a single-person or single-change narrative."
+    },
+    {
+      "topic": "static curated benchmark versus rolling fresh benchmark",
+      "claims": "SWE-bench’s original temporal check found little before/after-2023 difference (https://arxiv.org/abs/2310.06770), while later SWE-bench-Live reports a large matched Verified-versus-Live gap (https://arxiv.org/abs/2505.23419) and other audits find weak tests/leakage.",
+      "resolution": "Neither alone proves contamination. Use time-sliced private rolling holdouts, fixed harnesses, repeated trials and manual oracle audits."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "current_state",
+    "metrics",
+    "maturity_assessment",
+    "open_questions"
+  ]
+}

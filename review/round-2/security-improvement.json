@@ -1,0 +1,159 @@
+{
+  "reviewer": "security-improvement-round-2",
+  "scope": "Plan-only adversarial review after round-1 corrections. Focus: tenant isolation, approvals, signed context, capability and sandbox boundaries, typed effects, audit, governed self-improvement, canary/promotion/rollback, and risk tiers R0-R4. The intentionally removed prototype was not treated as a defect or implementation evidence.",
+  "strengths": [
+    "The plan now establishes protected Git, the durable controller, and external systems as distinct authorities, and makes GitHub a projection rather than a lease or lifecycle authority.",
+    "R0-R4 are defined once with conservative escalation, an explicit Release 0 naming distinction, two-signature R3 handling, and a non-waivable R4 boundary.",
+    "Approvals are finite, append-only, exact-digest and purpose bound; contexts are signed and fence/epoch bound; commands use typed catalog IDs rather than model-written shell.",
+    "The plan includes composite tenant ownership, FORCE RLS or stronger isolation, UNKNOWN-effect quarantine, operation-specific GitHub reconciliation, cancellation-to-quiescence, and cleanup terminal predicates.",
+    "Self-improvement correctly keeps protected evidence, evaluators, policy, authority, canary envelopes, and rollback targets outside candidate control, with delayed-harm observation and no self-approval."
+  ],
+  "findings": [
+    {
+      "id": "SECIMP-R2-001",
+      "severity": "high",
+      "title": "The improvement lifecycle still omits required fail-closed canary, promotion, telemetry, and verified-rollback states",
+      "requirement": "P-08 and P-12 require a complete protected lifecycle. The round-1 security resolution further requires orthogonal candidate, release, attempt, and control-health machines with explicit pending, passed, failed, aborting, rollback-failed, and rollback-verified states.",
+      "evidence": {
+        "files": [
+          "PLAN.md:235-239",
+          "PLAN.md:392-406",
+          "PLAN.md:334-345",
+          "review/round-1-resolutions/security-improvement.md (Required data, schema, and state contracts)"
+        ],
+        "urls": [
+          "https://sre.google/workbook/canarying-releases/",
+          "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+          "https://argo-rollouts.readthedocs.io/en/stable/features/rollback/"
+        ]
+      },
+      "reproduction": "Compare PLAN.md section 8.6 with the required notable-state list in the security resolution. The plan has CANARY_ADMISSION/RUNNING/PAUSED/REVIEW and generic FAILED/FROZEN, but no CANARY_PENDING_APPROVAL, CANARY_FAILED, CANARY_PASSED, PROMOTION_PENDING, PROMOTION_FROZEN, METRICS_UNAVAILABLE, EVIDENCE_STALE, ABORTING, ROLLBACK_FAILED, or ROLLED_BACK_VERIFIED. It also presents one overloaded improvement state list rather than the required orthogonal machines.",
+      "impact": "A compiler cannot determine whether a canary passed versus merely reached review, whether telemetry or evidence became stale, or whether rollback failed versus completed and was health-verified. This permits unsafe or irrecoverable transition interpretations and blocks safe implementation of promotion.",
+      "recommendation": "Replace the single improvement list with explicit orthogonal candidate, rollout/release, attempt, and control-health state machines. Define every edge, guard, cancellation path, stale-evidence path, terminal predicate, and product-lifecycle projection. Require ROLLED_BACK_VERIFIED, not ROLLED_BACK, for recovery completion.",
+      "verification": "Compile model/state tests that cover every required state and reject: promotion without CANARY_PASSED, telemetry loss without pause/freeze, evidence staleness without re-evaluation, abort without quiescence, rollback failure treated as success, and recovery without exact-digest plus health-window receipts.",
+      "confidence": "high"
+    },
+    {
+      "id": "SECIMP-R2-002",
+      "severity": "high",
+      "title": "Promotion evidence and the self-improvement enablement gate remain underspecified",
+      "requirement": "P-12 and round-1 RC-12/RC-17 require a signed, complete EvidenceBundle resolved from trusted state and a separate feature flag that cannot reach canary until a one-to-one executable manifest and independent zero-critical/high review pass.",
+      "evidence": {
+        "files": [
+          "PLAN.md:103-118",
+          "PLAN.md:392-406",
+          "PLAN.md:480-484",
+          "PLAN.md:490-512",
+          "review/requirements-traceability.md:28,49",
+          "review/round-1-resolutions/security-improvement.md (corrections 6 and 9)"
+        ],
+        "urls": [
+          "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+          "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+          "https://arxiv.org/abs/2410.06992"
+        ]
+      },
+      "reproduction": "The record catalog names EvidenceBundle, and the flow mentions trials, slices and denominators, but no normative contract requires authenticated signer/builder, nonce/freshness, expected versus received shards, trial seeds/counts, slice numerators/denominators/confidence intervals, raw outcome references, or PASS|FAIL|INCONCLUSIVE. Increment 7 does not require a separate hard-off feature flag, 100% acceptance-manifest coverage, mutation/holdout access tests, or an independently reproduced zero-critical/high closure before canary.",
+      "impact": "An implementation can satisfy the prose using incomplete or selected evaluation output and can enable canary after ordinary roadmap entry checks. That recreates the round-1 forged/selected-evidence promotion blocker.",
+      "recommendation": "Add the minimum EvidenceBundle fields and trusted-state resolution rules from the resolution memo. Add a distinct self-improvement feature flag controlled outside the candidate/promoter. Make 100% manifest coverage, mutation/property/fault/privacy/tenant/holdout tests, rollback drill, and an independent zero-critical/high review atomic prerequisites to CANARY_PENDING_APPROVAL. Treat INCONCLUSIVE as deny.",
+      "verification": "Use adversarial fixtures for missing shards, selected-away failures, zero trials, wrong signer/environment, stale nonce, denominator manipulation, holdout access, forged PASS, and an incomplete manifest. Each must deny promotion and canary admission; removing any guard must fail mutation tests.",
+      "confidence": "high"
+    },
+    {
+      "id": "SECIMP-R2-003",
+      "severity": "high",
+      "title": "The transition boundary still accepts caller-supplied actor identity and does not require session-derived tenant scope",
+      "requirement": "P-04, P-09, and P-13 require authenticated authority and immutable tenant scope. Round-1 correction 5 requires narrow procedures to derive actor and tenant from authenticated session context rather than request fields.",
+      "evidence": {
+        "files": [
+          "PLAN.md:105-116",
+          "PLAN.md:251-255",
+          "PLAN.md:287-289",
+          "PLAN.md:416-426",
+          "review/round-1-resolutions/security-improvement.md (correction 5)"
+        ],
+        "urls": [
+          "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+          "https://www.postgresql.org/docs/current/role-membership.html"
+        ]
+      },
+      "reproduction": "PLAN.md line 289 defines the compare-and-append API as accepting `actor`; no clause says the procedure must derive actor, tenant, repository, and role from authenticated session/channel context and reject conflicting request scope. The tenant and database-role bullets require RLS and role separation but do not close this input trust boundary.",
+      "impact": "A technically conforming implementation could authorize or audit a transition using spoofed actor/tenant request fields while still using CAS, composite keys, and append-only events. This blocks safe READY, approval, effect, deployment, promotion, and audit implementation.",
+      "recommendation": "Require each authority procedure to derive canonical principal, tenant, repository/installation, assurance, and role snapshot from a verified session or signed service identity. Treat request actor/scope only as assertions that must exactly match derived values. Bind the derived authority snapshot into the event and effect intent.",
+      "verification": "For every gateway role, attempt actor aliasing, cross-tenant IDs, pooled-connection scope residue, prepared statements, SECURITY DEFINER search-path abuse, owner/BYPASSRLS use, and request/session mismatch. All must fail before event or outbox append; the audit event must contain the derived identity.",
+      "confidence": "high"
+    },
+    {
+      "id": "SECIMP-R2-004",
+      "severity": "high",
+      "title": "The sandbox contract does not select isolation strength by threat and risk tier",
+      "requirement": "P-11 requires authenticated sandbox bindings, and safe execution of untrusted repository code needs a defined containment profile whose strength matches consequence. R3 covers infrastructure, sensitive data, and large blast radius.",
+      "evidence": {
+        "files": [
+          "PLAN.md:138-150",
+          "PLAN.md:359-369",
+          "PLAN.md:416-424",
+          "PLAN.md:498-504",
+          "research/self-managing-software-projects/results/08-human-oversight-governance-and-security.json"
+        ],
+        "urls": [
+          "https://doi.org/10.6028/NIST.SP.800-190",
+          "https://arxiv.org/abs/2411.07781"
+        ]
+      },
+      "reproduction": "The plan requires non-root, a read-only base, no host socket, limits, and default-deny network, but does not specify read-only root filesystem, dropped Linux capabilities, syscall/device restrictions, user namespaces, kernel isolation, or which R tier requires a VM/microVM or equivalent stronger boundary. A shared-kernel container with only the listed properties satisfies the plan.",
+      "impact": "Build and test commands execute attacker-controlled repository code. A container escape or exposed kernel/device surface can cross workspaces and steal brokered credentials or controller access. This is a blocker before any mutating worker is admitted.",
+      "recommendation": "Define closed sandbox profiles and a risk/threat selection table. At minimum require no-new-privileges, dropped capabilities, seccomp/LSM, device denial, read-only root, isolated user/PID/network/mount namespaces, bounded writable mounts, and external egress enforcement. Require VM/microVM or an explicitly reviewed equivalent for hostile code or higher-consequence profiles, with fail-closed platform attestation.",
+      "verification": "Run escape-oriented fixtures for syscall, device, namespace, mount/symlink, host socket, metadata service, cross-workspace, egress, resource exhaustion, and secret lifetime. Admission must reject a worker whose attested profile is weaker than policy.",
+      "confidence": "medium-high"
+    },
+    {
+      "id": "SECIMP-R2-005",
+      "severity": "medium",
+      "title": "Signed context omits a complete signing-key and context-time lifecycle",
+      "requirement": "P-02 and round-1 correction 4 require a signed context with issuer, key ID/algorithm, context issue/expiry, replay protection, and rotation/revocation behavior.",
+      "evidence": {
+        "files": [
+          "PLAN.md:265-269",
+          "review/requirements-traceability.md:18",
+          "review/round-1-resolutions/security-improvement.md (correction 4)"
+        ],
+        "urls": [
+          "https://www.rfc-editor.org/rfc/rfc7515",
+          "https://www.rfc-editor.org/rfc/rfc8725"
+        ]
+      },
+      "reproduction": "The context list includes issuer, nonce, lease timestamps, and a protected signature, but not `key_id`, an allowlisted signature algorithm, context-level `issued_at`/`expires_at`, or rules for key rotation, overlap, compromise revocation, and retired-key rejection. Lease expiry is not necessarily the context credential lifetime.",
+      "impact": "Implementers can choose ambiguous keys or algorithms and couple token validity incorrectly to lease fields. Emergency key compromise and rotation behavior would be undefined, causing either unsafe acceptance or unnecessary outage.",
+      "recommendation": "Add explicit context `key_id`, algorithm/profile, issued-at, not-before if used, expiry, audience and nonce. Pin allowed algorithms, reject algorithm/key confusion, require context expiry no later than authority expiry, and define rotation overlap, compromise revocation, cache refresh, and retired-key rejection.",
+      "verification": "Test unknown/retired/wrong-purpose keys, algorithm substitution, duplicated key IDs, pre-issue/not-yet-valid/expired contexts, rotation overlap, revocation propagation, verifier cache staleness, and context expiry beyond lease/capability expiry.",
+      "confidence": "high"
+    },
+    {
+      "id": "SECIMP-R2-006",
+      "severity": "medium",
+      "title": "The one-owner roadmap conflicts with canonical-principal independence for governed improvement",
+      "requirement": "P-09 and P-12 require canonical identity separation and prohibit self-approval; role aliases cannot create independence.",
+      "evidence": {
+        "files": [
+          "PLAN.md:251-255",
+          "PLAN.md:392-406",
+          "PLAN.md:468-484",
+          "PLAN.md:526",
+          "review/round-1-resolutions/security-improvement.md (corrections 2, 6, and 7)"
+        ],
+        "urls": []
+      },
+      "reproduction": "PLAN.md line 470 says one owner may initially hold all named roles through distinct authenticated roles. The plan only calls out solo R3 quorum as impossible at line 526, while increments 6-7 require an evaluation owner independent of the proposer and an independent promotion approval. Distinct role sessions for the same canonical person do not satisfy the plan's self/alias denial rule.",
+      "impact": "The roadmap does not say whether governed-improvement canary is blocked pending a second independent principal or whether the same person may act through role aliases. The latter would reintroduce self-approval; the former changes staffing and increment-entry requirements.",
+      "recommendation": "State that independence is evaluated on canonical principals and controlling organizations, not role sessions. Add the required independent principal(s) as entry dependencies for increments 6 and 7, or keep those increments disabled for a solo owner. Clarify which protected evaluator may be a service and who controls it.",
+      "verification": "An alias, second login, bot, or service controlled by the proposer must not satisfy curator/evaluator/approver independence. A fixture with genuinely distinct authorized principals must pass the declared quorum policy.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "This review evaluates plan completeness only. No implementation, database policy, sandbox, signing service, evaluator, canary system, or rollback path exists to validate dynamically.",
+    "The checked-in research provenance remains pending the plan's future UTC timestamp/digest repair; cited research supports threat mechanisms, not local effectiveness.",
+    "No universal canary sample, observation window, sandbox technology, or evaluation threshold can be selected from external sources alone. These must be threat-modeled and validated per repository and risk class."
+  ]
+}

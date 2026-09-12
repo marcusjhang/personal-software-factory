@@ -1,0 +1,206 @@
+{
+  "reviewer": "round-7 independent requirements and architecture closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-6 combined repairs",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-6-resolution.md",
+      "review/round-6-closure/adversarial-consistency.json",
+      "review/round-6-closure/formal-model.json",
+      "review/round-6-closure/evidence-semantics.json",
+      "review/round-6-closure/improvement-recovery.json",
+      "review/round-6-closure/architecture-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/report.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "All 16 requirements; owner UX; authority and readiness; Issues/Projects/status; review, auto-merge, and cleanup; Release 0 roadmap; persistence gates; dogfood, GTM, cross-scope, and security; and plan readability.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, a contradiction, an unsafe or undefined implementation path, or a material evidence overclaim. This audit does not require implementation, a full model proof, fresh immutable retrieval, or completion of future evidence gates."
+  },
+  "contract_reproduction": [
+    {
+      "area": "requirements_and_owner_journey",
+      "result": "pass",
+      "basis": "R-01 through R-16 are present and mapped to exact PLAN sections, sole-roadmap increments, validation, and human gates. PLAN \u00a7\u00a72, 9, 10.1, 14, 15, and 17 specify the install, ideation/research, decision, exact-digest READY, admission, execution, review, effect reconciliation, outcome, rollback, cleanup, release, export, and uninstall journey. The future Issue/CLI commands are explicitly unimplemented, identity-derived, typed, replay-safe, and paired with durable outcomes, waits, errors, and status/why views."
+    },
+    {
+      "area": "authority_and_readiness",
+      "result": "pass",
+      "basis": "Protected Git, authenticated human issuance, approval custody, policy_admission_receipt_issuer, runtime validation, actuators, durable facts, external resources, and workers have separated authority. Delegation is limited to closed R0/R1 bounds after all human-needed predicates are false; R2-R4 and exception, canary, widening, promotion, UNKNOWN, cleanup-risk, and quiescence decisions remain exact-digest human decisions. Solo-owner independence-sensitive improvement stages remain disabled."
+    },
+    {
+      "area": "issues_projects_status_review_merge",
+      "result": "pass",
+      "basis": "GitHub Issues and Projects are non-authoritative projections reconciled by versioned observation, signed plans, optimistic concurrency, operation-specific effects, readback, receipts, and UNKNOWN lookup rather than blind replay. Reviews bind exact head and expire on change. Auto-merge is off through Release 0 and the draft-PR pilot and can later cover only one earned closed R1 profile; protected categories and R2-R4 remain excluded."
+    },
+    {
+      "area": "release_0_persistence_and_roadmap",
+      "result": "pass",
+      "basis": "Release 0 is one-owner/one-repository, read-only, restartable, exportable, and credential-free. Its hash-chained local journal has explicit tail-repair and interior-corruption behavior. Any external writer is blocked until Increment 3 proves PostgreSQL restricted roles, compare-and-append, outbox, database-time leases, restore/replay, and real two-session races. A second repository additionally waits for FORCE ROW LEVEL SECURITY or stronger isolation, cross-repository substitution tests, and Increment 8 admission. PLAN \u00a720 is the sole increment authority."
+    },
+    {
+      "area": "dogfood_gtm_cross_scope_security",
+      "result": "pass",
+      "basis": "Consumer releases inventory and rehash every managed input/output, pin all executable references, emit verification/rollback receipts, and move through self-test, isolated dogfood, and opt-in rings. Tenant plus typed ScopeRef is immutable; every cross-boundary dependency type needs a dual-owner, field/port-limited, expiring and revocable envelope plus import receipt. GTM begins only after engineering admission as owned proposal/read-only research; publish, spend, and contact remain human-gated. The sandbox matrix, typed capabilities, signed context, narrow database roles, supply-chain controls, and break-glass non-waivable boundaries fail closed."
+    },
+    {
+      "area": "round_6_repairs",
+      "result": "partial",
+      "basis": "The A11-before-successor reclaim rule, immutable-terminal C11 remediation path, three DEEP-RESEARCH publication witnesses, rollback/cancellation partitions, deterministic exact-one canary child/link, unconditional EvidenceBundle denial, candidate-attributed PLAN prose, and current-heading-set validation are present in PLAN and/or the normative manifest. The schema-3 heading-set repair reproduces. The cleanup reader summary and durable catalog were not synchronized with C11, as R7-REQ-001 details."
+    },
+    {
+      "area": "schema_3_evidence_package",
+      "result": "pass",
+      "basis": "The generated PLAN SHA-256 e0a3194743e4434fa7f40212ef81c29985b8f63db7e9b24ae62b199c0ed4ed70 and manifest SHA-256 9c54a76d8090485d1a3e84283b4fbf9bda5cf481f4ee887a5ca7d2b46090476a reproduce from current bytes. The exact current numbered manifest-heading set is 27 and equals the 27 reviewed headings, including \u00a7\u00a715.3.1 and 15.8. The graph has 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes; legacy edges are unreviewed candidates. The 37-record boundary remains structural only. report.md and evidence-matrix.md are prominently superseded/non-authoritative and synthesis-coverage.md is traceability-only."
+    },
+    {
+      "area": "status_and_readability",
+      "result": "partial",
+      "basis": "README and round-6-resolution correctly say the combined repair and current-digest candidate graph are complete while implementation, model checking, fresh retrieval, semantic review, and independent closure remain pending. requirements-traceability.md repeats obsolete pre-regeneration statements that directly conflict with that status and with its own later current-status rows, as R7-REQ-002 details."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "partial",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup",
+      "reason": "The authoritative C11 remediation-child path exists, but PLAN \u00a715 contradicts it and the new durable aggregate is absent from the \u00a75.1 catalog."
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R7-REQ-001",
+      "severity": "high",
+      "title": "The cleanup summary still reopens a terminal parent and the new remediation aggregate is missing from the durable catalog",
+      "requirement": "R-07 requires one unambiguous, safely implementable cleanup and retained-risk resurface path, with durable record ownership and authority defined consistently across the plan and incorporated manifest.",
+      "evidence": [
+        "PLAN.md \u00a713 says terminal Work, its parent aggregate, and its terminal CleanupItem are immutable; resurface/revocation/review-due uses C11 to atomically create or confirm a deterministic RemediationObligation and linked MAINTENANCE child while the parent remains historical terminal.",
+        "docs/state-transition-manifests.md \u00a713 C11 stutters ESCALATED_DISPOSITION, creates the separate obligation/link/child absent-or-same, and says the historical disposed item remains terminal. Its following contract says C11 never changes parent Work, its cleanup coordinate, or its terminal CleanupItem.",
+        "PLAN.md \u00a715 instead says the same eligible escalated disposition 'resurfaces the parent to CLEANING'. That is the exact reopening behavior the round-6 R6-AC-002 repair says was removed.",
+        "PLAN.md \u00a75.1 calls itself the durable record catalog and its Effects and reconciliation family lists CleanupEscalationDisposition and quiescence records, but it does not list RemediationObligation or RemediationResurfaceReceipt. The newly required aggregate/receipt therefore lacks a catalogued owner, authoritative storage, and mutation rule even though \u00a713 and the manifest require durable atomic creation."
+      ],
+      "impact": "A reader or implementer can follow \u00a715 and illegally mutate terminal history, or follow C11 without a complete persistence/authority allocation for the obligation and receipt. The conflict reopens the previously confirmed cleanup safety defect and makes R-07 only partially closed at plan level.",
+      "recommendation": "Replace the final \u00a715 clause with the exact immutable-parent C11 behavior. Add RemediationObligation, RemediationResurfaceReceipt, and RemediationClosureReceipt to the appropriate \u00a75.1 durable-record family with the protected owner, authoritative store, append/transition role, absent-or-same transaction boundary, and resource-reuse block already required by manifest \u00a713. Re-scan all cleanup summaries for parent reopening language.",
+      "verification": "No authoritative or explanatory current text permits FAILED/CANCELLED Work, its parent, or a terminal CleanupItem to return to CLEANING. The durable catalog names every C11-created or consumed record and assigns storage/mutation authority consistent with manifest \u00a713; C11 replay/ownership/resource-block tests remain required future implementation gates.",
+      "confidence": "high"
+    },
+    {
+      "id": "R7-REQ-002",
+      "severity": "high",
+      "title": "The current traceability file simultaneously says round-6 graph regeneration is pending and complete",
+      "requirement": "The plan-only package must state evidence/readiness status consistently so an owner can distinguish completed checkout-level repair from the still-pending fresh immutable retrieval, semantic review, implementation, model, and independent-closure gates.",
+      "evidence": [
+        "requirements-traceability.md \u00a76 says the current round-6 edit made the schema-3 graph stale and that 'regeneration is now pending'.",
+        "requirements-traceability.md \u00a77 repeats that the current round-6 edit makes digest bindings 'stale pending combined evidence-prose repair and regeneration'.",
+        "requirements-traceability.md \u00a79 says 'round-6 regeneration is pending' for the round-5 graph, then in the immediately following bullet says round-6 current-digest schema-3 regeneration is complete.",
+        "README.md and round-6-resolution.md say the graph is synchronized, matches current PLAN/manifest digests, and covers 27 headings. Direct recomputation confirms those current digests and exact 27-heading equality."
+      ],
+      "impact": "The named traceability/status artifact gives mutually exclusive readiness states. An owner cannot reliably tell whether the checkout-level regeneration prerequisite is done or still blocks review, and may confuse it with the genuinely pending future immutable same-run semantic gate.",
+      "recommendation": "Rewrite \u00a7\u00a76-7 as dated historical statements that explicitly say the former staleness was repaired by the current round-6 regeneration. Replace \u00a79's 'round-6 regeneration is pending' statement with the current synchronized status. Keep only fresh immutable retrieval, same-run semantic review, reviewed-edge regeneration, implementation/model gates, and independent closure pending.",
+      "verification": "README.md, PLAN \u00a74/\u00a724, requirements-traceability.md, round-6-resolution.md, and material-claims.json all distinguish the completed current-byte candidate-only regeneration from the pending fresh immutable reviewed-evidence run without any present-tense stale/pending contradiction.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 15,
+    "requirements_partial": 1,
+    "round_6_review_files_reviewed": 5,
+    "round_6_high_findings_reproduced": 9,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "low": 0,
+    "total": 2
+  },
+  "residual_uncertainty": [
+    "No implementation, full reachable-product/model proof, operational safety proof, external source truth, or human semantic entailment review was required or inferred.",
+    "The fresh immutable evidence run, same-run semantic review, reviewed-edge regeneration, Increment 0/1 gates, later persistence/admission gates, and independent closure remain future work rather than findings."
+  ],
+  "closure_criteria_pass": false
+}

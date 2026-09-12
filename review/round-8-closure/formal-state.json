@@ -1,0 +1,194 @@
+{
+  "reviewer": "round-8 independent formal-state closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-7 corrections and schema-3 regeneration",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-7-resolution.md",
+      "review/round-7-closure/lease-cleanup-adversary.json",
+      "review/round-7-closure/formal-transitions.json",
+      "review/round-7-closure/improvement-interleavings.json",
+      "review/round-7-closure/requirements-architecture.json",
+      "review/round-7-closure/evidence-currentness.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "All state tables and rows: terminal outgoing edges, reachability, endpoints, canonical guards, cancellation coverage, Effect partitions, RemediationObligation, cleanup synchronization, research/publication and improvement/promotion witnesses.",
+    "severity_rule": "Critical/high only for a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim. No implementation, full reachable-product model, fresh evidence retrieval, or semantic review is required. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_parse_endpoints_and_canonical_adjacency",
+      "result": "pass",
+      "basis": "Parsed 679 unique ID rows with uniform Markdown widths: canonical 90; IDEATION 37; BUILD 74; MAINTENANCE 61; DEEP-RESEARCH 71; FactoryInstance 29; NodeRun 32; Attempt 24; Wait 18; Effect 39; CleanupItem 12; RemediationObligation 14; UnconfirmedQuiescence 10; candidate 36; rollout 91; rollback-coordinate 11; release-attempt 17; whole-work cancellation 5; control-health 5; synchronized-cleanup 3. Every explicit canonical adjacent pair reproduced in the 90-row canonical graph. From their declared initials, the canonical and ordinary factory/runtime tables reach all listed endpoints; their graph sinks agree with declared terminals. The rollback coordinate is product-entered through synchronized rollout rows, so its REQUESTED branch is not claimed reachable from standalone IDLE without that product event."
+    },
+    {
+      "area": "terminal_immutability_and_cleanup_synchronization",
+      "result": "pass",
+      "basis": "FactoryInstance, NodeRun, Attempt, and release-attempt declared terminals have zero outgoing rows; their mutable failure states are distinct. Canonical Work and all built-in private terminals are sinks. RemediationObligation CLOSED has zero outgoing rows. CleanupItem C11 is a state-preserving signal-routing row from historical ESCALATED_DISPOSITION; it does not reopen Work or the item, and ICL01-ICL03/IX04 remain the named single owners of the final improvement cleanup fold and terminal projection."
+    },
+    {
+      "area": "rollback_remediation_reducer_closure",
+      "result": "fail",
+      "basis": "IRB06 now creates the intended rollback-safety RemediationObligation and targets REMEDIATION_WAIT, and IRB09 requires RO09 closure plus real verification before ROLLED_BACK. But REMEDIATION_WAIT is absent from the closed rollback vocabulary and lacks a deterministic priority-7 canonical result, so the new correction cannot be reduced; see R8-FS-001."
+    },
+    {
+      "area": "release_attempt_failure_projection",
+      "result": "fail",
+      "basis": "IA07/IA08 enter release FAILURE_PENDING_CLEANUP and IA16 enters release CLEANING, but IA17 changes only release_attempt_state to FAILED. With a still-running candidate and no rollout failure, the exact FAILED parent conjunction is false, release FAILED is absent from the remaining-value map, and the claimed CLEANING>FAILED projection cannot reproduce; see R8-FS-002."
+    },
+    {
+      "area": "control_health_and_exposure_interleavings",
+      "result": "fail",
+      "basis": "PLAN §8.4 requires HEALTHY for progress and an IH03 continuity completion only after degradation. The manifest makes completed IH03 unconditional on many ordinary progress rows, while its standalone IH01 degradation event leaves an active rollout coordinate paired with degraded control even though the invariant declares that tuple unreachable. No synchronized pause row owns the required atomic change; see R8-FS-003."
+    },
+    {
+      "area": "cancellation_and_remediation_coverage",
+      "result": "fail",
+      "basis": "IX01 names every ReachableNonterminalTupleV1 member, IX02 schedules stops, IX03 excludes unsettled rollback including REMEDIATION_WAIT, and IX04 alone terminalizes after clean. RO09->IRB09->IRB03->IRB07-R/Q is the intended safety settlement. That route is presently blocked by the reducer defect. Separately, a live-obligation revocation delivered through C11 is only appended by RO03-RO05 and need not take RO11-RO13 to REVOKED; see R8-FS-001 and R8-FS-004."
+    },
+    {
+      "area": "effect_partition",
+      "result": "pass",
+      "basis": "All 15 nonterminal Effect sources have explicit bounded outcome/disposition rows. ORIGINAL and COMPENSATION identities remain disjoint. UNKNOWN does not blindly retry; direct E06 and reconstructed E17 remain distinct. E20/E21/E24/E25/E28/E29/E37/E39 have named widening/promotion exposure/no-exposure product rows, and generic final cleanup cannot race ICL01-ICL03 or IX04."
+    },
+    {
+      "area": "research_publication_witnesses",
+      "result": "pass",
+      "basis": "The published no-publication D19/D19C1 path, direct D19P1-P3/D19C2 path, reconstructed D19P4/P6/D19C2 path, and proved-absence D19P5/P7 path reproduce their named canonical edges. Publication receipt/remote identity and the independent NoDeploymentReceipt remain separate guards, and no witness combines outcome with cleanup or uses CW12."
+    },
+    {
+      "area": "improvement_and_promotion_witnesses",
+      "result": "fail",
+      "basis": "Direct/reconstructed widening and promotion identities, exhaustive ambiguous outcomes, canary-generation fencing, rollback remediation, and final cleanup have published §15.8 witnesses. The rollback, release-failure, and control-health witnesses nevertheless fail the exact closed-vocabulary/reducer contracts described in R8-FS-001 through R8-FS-003."
+    },
+    {
+      "area": "schema_3_package_and_status",
+      "result": "fail",
+      "basis": "Current SHA-256 reproduces as PLAN 25f6960b677d7d4a62c7a55c6bcbbe6ebe744e176c41855cbf08ffa5ed2f6acc and manifest b1cd4933042162367d7e6a3d8e42f07f85ad3308ffd5d38b5882500a3f542413; material-claims.json binds both. Schema 3.0.0 has 20 claims, 25 observations and 36 unique edges: 23 candidate_support, 5 candidate_refute, 8 context_only, zero supports/refutes, and exact 28-heading coverage. It remains expressly candidate-only. However, requirements-traceability.md also retains current-tense claims that round-7 regeneration is pending/stale and that the current graph covers 27 headings; see R8-FS-005."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R8-FS-001",
+      "severity": "critical",
+      "title": "IRB06 targets an undeclared rollback symbol that the total reducer cannot map",
+      "requirement": "PLAN §§8.4 and 21 require final rollback failure to remain visibly REMEDIATION_WAIT/BLOCKED, use protected remediation, resume real verification after closure, and only then permit ROLLED_BACK and cancellation cleanup. Manifest §§15 and 15.8 promise an exact closed tuple and witness for this path.",
+      "evidence": [
+        "Manifest §15 declares the closed rollback vocabulary as IDLE, REQUESTED, ROLLING_BACK, VERIFYING, VERIFIED, FAILED, and ROLLED_BACK; REMEDIATION_WAIT is absent.",
+        "IRB06 changes FAILED to REMEDIATION_WAIT. Priority 2, IX03, IRB09, and §15.8 all refer to REMEDIATION_WAIT, so it is intended as a real coordinate value.",
+        "The reducer rejects unknown symbols. Priority 7 lists six rollback values through REMEDIATION_WAIT but gives only five respective canonical results through ROLLBACK_FAILED; it omits BLOCKED for REMEDIATION_WAIT."
+      ],
+      "reproduction": [
+        "Reach rollback VERIFYING and take IRB04 to FAILED.",
+        "With retry forbidden, stale, or exhausted, apply IRB06.",
+        "The resulting rollback_state is not in the closed vocabulary. If admitted despite that contradiction, priority 7 has no corresponding sixth result, so the transaction cannot prove the stated ROLLBACK_FAILED>BLOCKED projection. The RO09/IRB09 recovery and IX cancellation witness cannot start from a valid persisted tuple."
+      ],
+      "impact": "The round-7 safety correction is formally undefined at the exact final rollback-failure point. A compiler must reject IRB06 or invent an unlisted symbol/result, and cancellation/remediation cannot safely reproduce the promised path.",
+      "recommendation": "Add REMEDIATION_WAIT to the closed rollback vocabulary and give it the exact BLOCKED result in priorities 2 and 7. Then execute the published IRB06/RO09/IRB09/IRB03/IRB07/IX03/IX04 witnesses under cancellation NONE, REQUESTED, and QUIESCING.",
+      "confidence": "high"
+    },
+    {
+      "id": "R8-FS-002",
+      "severity": "high",
+      "title": "Release-attempt failure cleanup cannot reach its claimed FAILED projection",
+      "requirement": "The deterministic total reducer, release-attempt table, and PLAN §§8.4 and 21 require every listed release-attempt failure row to have one exact legal canonical projection and a clean terminal end.",
+      "evidence": [
+        "IA07 and IA08 change only the release attempt from VERIFYING/EXECUTING to FAILURE_PENDING_CLEANUP and claim entry to canonical CLEANING; IA16 later changes that coordinate to CLEANING; IA17 changes it to FAILED and claims CLEANING>FAILED.",
+        "The exact parent FAILED conjunction additionally requires candidate or rollout failure/rejection/expiry. IA07, IA08, IA16, and IA17 do not change candidate_state or rollout_state.",
+        "The release-attempt remaining-values map lists only IDLE, READY, and SUCCEEDED. FAILED is neither mapped there nor covered by priorities 12-14. With candidate OFFLINE_RUNNING or SHADOW_RUNNING, the fallback candidate result is VERIFYING, not FAILED."
+      ],
+      "reproduction": [
+        "Use the published offline/shadow sequence with candidate_state OFFLINE_RUNNING or SHADOW_RUNNING and release_attempt_state VERIFYING.",
+        "Take IA07 for an exhausted/failed gate, then IA16 after cleanup scheduling, then attempt IA17 after clean receipts.",
+        "Candidate remains a running symbol. The FAILED conjunction is false and release FAILED has no remaining-value result, so IA17's CLEANING>FAILED projection rejects or the product is stranded."
+      ],
+      "impact": "A normal failed improvement verification attempt has no total terminal failure path. Implementers must either leave it stuck or invent a synchronized candidate-failure edge.",
+      "recommendation": "Define synchronized rows that atomically move the applicable candidate to OFFLINE_FAILED or SHADOW_FAILED with release failure cleanup, or extend the reducer and exact FAILED conjunction with a safe release-attempt-owned failure result. Add executable witnesses for IA07 and IA08 from every legal candidate phase through cleanup and terminal failure.",
+      "confidence": "high"
+    },
+    {
+      "id": "R8-FS-003",
+      "severity": "high",
+      "title": "Control-health guards deadlock the initial healthy path and make active-exposure degradation contradictory",
+      "requirement": "PLAN §8.4 requires progress while control is HEALTHY, requires completed IH03 continuity only after a degradation, and requires a degradation event to pause/stop exposure before further progress. Manifest §§15.6-15.8 claim exact reachable interleavings for that rule.",
+      "evidence": [
+        "IR27 and many ordinary canary/widening/promotion progress rows require both control_health_state=HEALTHY and completed IH03 continuity. A new tuple starts HEALTHY, and IH03 can occur only from CONTROL_PAUSED; no initial continuity receipt or vacuous-history rule is defined.",
+        "PLAN says 'after any degradation' IH03 is required, while the exact rows require it unconditionally. IH05 can restore TELEMETRY_DEGRADED directly to HEALTHY but still cannot satisfy the literal IH03 guard.",
+        "IH01 changes only HEALTHY to TELEMETRY_DEGRADED. During reachable CANARY_RUNNING or WIDENING_EFFECT it therefore leaves rollout active, but the control-health invariant says no tuple pairing those rollout states with degraded control is reachable and says degradation commits first and pauses/stops exposure. No synchronized IH01 plus rollout-to-CANARY_PAUSED row exists."
+      ],
+      "reproduction": [
+        "Start a never-degraded improvement tuple at HEALTHY and reach CANARY_READY. IR27 is false because no IH03 event can have completed without first degrading and pausing control.",
+        "Alternatively reach CANARY_RUNNING under an assumed continuity record and apply IH01. Only control changes, producing the exact active-rollout/degraded-control tuple that the invariant rejects. IR05 can pause rollout only in a later transaction, which cannot be reached if IH01 itself rejects."
+      ],
+      "impact": "The governed improvement success path is needlessly unreachable from its initial healthy state, while real telemetry degradation during exposure has no legal atomic fail-safe projection.",
+      "recommendation": "Make the continuity predicate explicit as 'no prior degradation for this generation OR a fresh completed IH03 bound to it' and add synchronized degradation rows that atomically pause/stop each active exposure coordinate. Define whether IH05 restoration is sufficient when no exposure existed, and test both pristine and restored histories.",
+      "confidence": "high"
+    },
+    {
+      "id": "R8-FS-004",
+      "severity": "high",
+      "title": "A live remediation revocation signal can append without revoking authority or work",
+      "requirement": "PLAN §§13 and 21 and the round-7 resolution require RemediationObligation revocation to be durable, visible, fail closed, and to fence the child/effects until independent re-authorization.",
+      "evidence": [
+        "C11 explicitly covers a resurface, revocation, or review-due signal and routes a distinct signal to the latest live generation through RO03-RO06.",
+        "For OPEN, IN_PROGRESS, and VERIFYING, RO03, RO04, and RO05 are state-preserving appends. They do not revoke grants, stop/quiesce the child, or settle/reconcile effects.",
+        "RO11, RO12, and RO13 do perform OPEN/IN_PROGRESS/VERIFYING -> REVOKED, but no guard or synchronized owner requires a C11 revocation event to take one of those rows rather than completing as the state-preserving append."
+      ],
+      "reproduction": [
+        "Create an obligation, authorize it with RO07, and leave its child/effect active in IN_PROGRESS.",
+        "Deliver the cleanup disposition's revocation trigger through C11 as specified.",
+        "RO04 accepts it as a distinct appended event while status remains IN_PROGRESS and the child/effect binding remains active. No exact contract forces RO12 in the same transaction or before more work."
+      ],
+      "impact": "Revoked retained-risk remediation authority can remain operational, which is an unsafe and contradictory path in the new remediation machine.",
+      "recommendation": "Partition C11 signals by kind. Make revocation from OPEN/IN_PROGRESS/VERIFYING synchronize atomically with RO11/RO12/RO13, including grant fencing and child/effect stop rules; reserve RO03-RO06 self-appends for non-revoking reminders/review signals. Add race witnesses against RO07-RO10 and RO09.",
+      "confidence": "high"
+    },
+    {
+      "id": "R8-FS-005",
+      "severity": "high",
+      "title": "The authoritative traceability file still reports the current round-7 evidence graph as stale and 27-heading",
+      "requirement": "R7-REQ-002, README status, and round-7-resolution.md require the current schema-3 candidate graph status to be stated consistently: regenerated against current round-7 bytes with dynamic coverage of all 28 current headings, without claiming semantic validation.",
+      "evidence": [
+        "requirements-traceability.md §§6-7 says the 'current round-7 formal edit' makes regeneration pending/stale.",
+        "Its §8 says the graph matches current PLAN/manifest digests and all 27 headings.",
+        "The same file §§9-10, README, and round-7-resolution.md say regeneration is complete with 28 headings. material-claims.json matches current PLAN and manifest hashes and records exactly 28 headings."
+      ],
+      "reproduction": [
+        "Read requirements-traceability.md lines 104, 108, 112, 121, and 129 onward as one current authority document.",
+        "Recompute the current hashes and heading set: PLAN 25f6960b677d7d4a62c7a55c6bcbbe6ebe744e176c41855cbf08ffa5ed2f6acc; manifest b1cd4933042162367d7e6a3d8e42f07f85ad3308ffd5d38b5882500a3f542413; 28 numbered headings.",
+        "Observe that the current schema-3 generated_against and coverage set match those values, contradicting the pending/stale and 27-heading sentences."
+      ],
+      "impact": "Readers receive mutually exclusive current evidence-status claims, recreating the material status contradiction that R7-REQ-002 was supposed to correct.",
+      "recommendation": "Recast §§6-8 explicitly as historical round-6 states and remove present-tense claims that the current round-7 graph is pending/stale or has 27 current headings. Preserve the candidate-only and future semantic-gate disclaimers.",
+      "confidence": "high"
+    }
+  ],
+  "counts": {
+    "critical": 1,
+    "high": 4,
+    "medium": 0,
+    "low": 0,
+    "total": 5,
+    "manifest_rows_parsed": 679,
+    "canonical_rows": 90,
+    "current_normative_headings": 28
+  },
+  "residual_uncertainty": [
+    "This is a plan-text and deterministic static-table audit. It does not prove implementation, full reachable-product/model correctness, operational safety, external source truth, or semantic entailment.",
+    "Fresh immutable retrieval in one ResearchRun, same-run human semantic review, reviewed-edge regeneration, and later implementation gates remain future work and were not treated as findings.",
+    "The schema-3 graph is candidate-only with zero supports/refutes. No categorical evidence overclaim was found apart from the contradictory current-status wording in traceability."
+  ],
+  "closure_criteria_pass": false
+}

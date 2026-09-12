@@ -1,0 +1,165 @@
+{
+  "reviewer": "round-12 independent cross-document consistency closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-11 combined correction",
+    "specialty": "Cross-document vocabulary/status/guard contradiction, stale references, undefined state, and unsafe terminal paths.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-11-resolution.md",
+      "review/round-11-closure/cross-consistency.json",
+      "review/round-11-closure/evidence-requirements.json",
+      "review/round-11-closure/formal-state.json",
+      "review/round-11-closure/improvement-races.json",
+      "review/round-11-closure/recovery-cleanup.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "review/plan-link-check.json"
+    ],
+    "accepted_future_gates": [
+      "implementation",
+      "exhaustive reachable-product/full-model proof",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ]
+  },
+  "contract_reproduction": [
+    {
+      "area": "current_identity_and_plan_only_status",
+      "result": "pass",
+      "exact_text": [
+        "README.md: repository intentionally contains a plan, not a working controller or deployed factory.",
+        "review/round-11-resolution.md: no independent closure, implementation, full reachable-product proof, semantic evidence validation, or production safety is claimed."
+      ],
+      "basis": "Recomputed SHA-256 values are 5b320a71b86912845960ad67081137ed270bdf83d4ea019a32923df041d917ab for PLAN.md and 8186b5724f24a60342a40e89d6e8ebb1795cdcbac0700a7dbc0723495dfd2f29 for the normative manifest. They match the round-11 register and schema-3 graph. The plan-only and future-gate disclaimers are otherwise consistent."
+    },
+    {
+      "area": "round_11_inventory_and_closed_vocabulary",
+      "result": "pass",
+      "exact_text": [
+        "review/round-11-resolution.md maps 9/9 raw high findings from 5/5 round-11 closure reviews.",
+        "PLAN.md §14.0 and manifest §15 declare identical 20-symbol candidate and 22-symbol rollout vocabularies.",
+        "The corrected manifest contains 776 unique edge rows: 96 canonical and 680 private/product."
+      ],
+      "basis": "All five historical reviews parse and contain 0 critical and 9 high findings in total. The named correction rows and states exist. Historical findings were treated as correction contracts, not automatically as current defects."
+    },
+    {
+      "area": "rollback_safety_block_release_totality",
+      "result": "fail",
+      "exact_text": [
+        "PLAN.md §13 says B37/M28/IRB06 create rollback-safety obligations and RO09 retains every exposure/resource block, but says only B38/M29 removes the blocks.",
+        "Manifest RO09 and the §13.1 closing prose likewise name only B38/M29 as removal transactions.",
+        "IRB06 enters REMEDIATION_WAIT; IRB09 returns to VERIFYING; IRB03 seals VERIFIED; IRB07-N/R/Q seals ROLLED_BACK without removing the improvement rollback-safety blocks."
+      ],
+      "basis": "The BUILD and MAINTENANCE recovery chains have a post-verification exact unblock row. The parallel IMPROVEMENT chain does not. Cleanup can therefore be entered with permanent rollback-safety blocks or only by inventing an unlisted release. Finding R12-XC-001."
+    },
+    {
+      "area": "active_digest_invalidation_reconciliation_totality",
+      "result": "fail",
+      "exact_text": [
+        "IC24-A changes SHADOW_PASSED to EVIDENCE_STALE and sends an UNSETTLED active Effect to WIDENING_RECONCILING or PROMOTION_RECONCILING.",
+        "The post-settlement IC32 reconciliation rows accept candidate REVOKED or SHADOW_PASSED, not EVIDENCE_STALE.",
+        "IC32-E changes EVIDENCE_STALE to REVOKED only on a separate revocation trigger."
+      ],
+      "basis": "A digest-change-only execution with an unsettled active Effect has no row after reconciliation settles. This contradicts the claimed X/N/UNSETTLED totality and leaves canonical BLOCKED without a defined completion edge. Finding R12-XC-002."
+    },
+    {
+      "area": "checkpoint_and_regeneration_status_consistency",
+      "result": "fail",
+      "exact_text": [
+        "review/round-11-resolution.md line 7: ‘No evidence or material-graph file was edited.’",
+        "The same memo lines 3 and 27, README.md, and traceability state that current-digest schema-3 material-graph regeneration completed.",
+        "review/requirements-traceability.md line 146 calls Round 10 the ‘current’ checkpoint although Round 11 is current elsewhere."
+      ],
+      "basis": "material-claims.json embeds the current round-11 checkpoint and exact current PLAN/manifest digests, so the no-edit statement cannot coexist literally with the asserted regeneration. The unqualified ‘current round-10’ statement is stale. This makes the formal audit trail materially contradictory. Finding R12-XC-003."
+    },
+    {
+      "area": "schema_3_evidence_boundary_and_local_integrity",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json schema_version is 3.0.0 and regeneration_checkpoint is round-11.",
+        "semantic_status is editorial_candidate_associations_only and provenance_status is legacy_unverified.",
+        "supports/refutes remain reserved with zero promoted edges."
+      ],
+      "basis": "All 37 research-manifest result files exist and match their recorded SHA-256 hashes. The graph reports 25 observations, 20 claims, and 36 edges, binds the current formal-source digests, and covers all 28 dynamically derived manifest headings. Fresh retrieval and semantic review remain explicit future gates."
+    },
+    {
+      "area": "requirements_and_authority",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md is the sole roadmap authority and incorporates docs/state-transition-manifests.md as the legal-edge authority.",
+        "Traceability records 16/16 structurally mapped and 0/16 implemented requirements proven."
+      ],
+      "basis": "Authority, plan-only status, requirement aliases, and implementation gates are otherwise consistent. The findings above are formal safety/status defects, not a claim that implementation or future evidence gates should already have run."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R12-XC-001",
+      "severity": "high",
+      "title": "Improvement rollback remediation has no transaction that releases its rollback-safety blocks",
+      "requirement": "Rollback-safety exposure/resource blocks must remain through genuine restoration and independent verification, then be removed by an exact named transition before cleanup or terminality.",
+      "evidence": [
+        "PLAN.md §13 (line 329) and §16 cleanup prose (line 415) name only B38/M29 as rollback-safety block-removal transactions after stating that B37/M28/IRB06 can create those obligations.",
+        "Manifest §13.1 RO09 (line 656) retains rollback-safety blocks for B74/B34/B38 or M62/M25/M29, and the closing contract (line 663) again says only B38/M29 remove them.",
+        "The improvement chain IRB06 -> RO09 -> IRB09 -> IRB03 -> IRB07-N/R/Q has no block-removal effect. IRB08, IR13C-X, and IX03 only schedule cleanup after ROLLED_BACK."
+      ],
+      "impact": "A remediated improvement rollback either reaches cleanup while its rollback-safety blocks remain forever, preventing full resource release and terminality, or an implementation invents an unauthored unblock. Letting RO09 release them would recreate the unsafe pre-verification release that round 11 intended to remove.",
+      "required_correction": "Add an exact IMPROVEMENT block-removal transaction after IRB03 independent verification, preferably atomically in IRB07-N/R/Q while sealing ROLLED_BACK. Align PLAN §13, RO09/§13.1 prose, IRB rows, cleanup/terminal guards, and witnesses."
+    },
+    {
+      "id": "R12-XC-002",
+      "severity": "high",
+      "title": "Active digest invalidation can strand EVIDENCE_STALE in an Effect reconciliation rollout",
+      "requirement": "Every active-rollout digest change must fence first and then complete the X/N/UNSETTLED partition to rollback or no-exposure cleanup without an undefined edge.",
+      "evidence": [
+        "Manifest IC24-A (line 775) changes candidate SHADOW_PASSED -> EVIDENCE_STALE and, for UNSETTLED, preserves the original Effect in WIDENING_RECONCILING or PROMOTION_RECONCILING.",
+        "After settlement, IC32-RWX/RPX/RN require candidate REVOKED; IC32-HWX/HPX/HN require SHADOW_PASSED; IH06-* require control-health degradation. None accepts EVIDENCE_STALE solely to finish IC24-A reconciliation.",
+        "IC32-E requires a separate revocation event. IC25-IC27 refresh the candidate but do not settle the active reconciliation rollout."
+      ],
+      "impact": "A digest change racing an unsettled widening or promotion Effect can remain permanently BLOCKED after the Effect becomes classifiable unless an unrelated revocation arrives or an implementation invents an edge. The claimed IC24-A X/N/UNSETTLED totality is not executable as a closed manifest.",
+      "required_correction": "Add exact EVIDENCE_STALE reconciliation-continuation rows for widening and promotion X and N outcomes. Preserve Effect identity, create or reuse at most one rollback for X, use exactly one cleanup owner for N, and add digest-change-before-settlement witnesses through both outcomes."
+    },
+    {
+      "id": "R12-XC-003",
+      "severity": "high",
+      "title": "The current schema-3 regeneration status contradicts itself and retains a stale current-checkpoint reference",
+      "requirement": "Status and traceability artifacts must state one reproducible current formal/evidence checkpoint without contradictory edit claims or stale current labels.",
+      "evidence": [
+        "review/round-11-resolution.md lines 3 and 27 say current-digest candidate-only graph regeneration completed, while line 7 says ‘No evidence or material-graph file was edited.’",
+        "README.md lines 22 and 29 and traceability lines 124, 153, and 158-160 also identify the round-11 current-digest graph as regenerated.",
+        "review/requirements-traceability.md line 146 says the later regeneration ‘now matches the current round-10 digests,’ although the current checkpoint and embedded graph metadata are round 11."
+      ],
+      "impact": "The formal closure trail gives mutually incompatible accounts of whether the material graph changed and which checkpoint is current. Auditors and automation cannot rely on the status text to distinguish a digest-only regeneration from untouched evidence semantics.",
+      "required_correction": "Replace the line-7 no-edit claim with the exact intended boundary, such as no source-evidence records or edge semantics changed while generated graph metadata/digests were regenerated. Change traceability line 146 to ‘then-current round-10 digests’ or otherwise mark it historical."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "total": 3,
+    "round_11_review_files_reviewed": 5,
+    "round_11_raw_critical_findings_reviewed": 0,
+    "round_11_raw_high_findings_reviewed": 9,
+    "manifest_rows_parsed": 776,
+    "canonical_rows": 96,
+    "private_and_product_rows": 680,
+    "current_normative_headings": 28,
+    "research_manifest_files_hash_checked": 37,
+    "schema_3_material_claims": 20,
+    "schema_3_source_observations": 25,
+    "schema_3_evidence_edges": 36
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static closure audit. It does not claim implementation, exhaustive generated reachable-product proof, runtime safety, or production validation.",
+    "Fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, and deterministic reviewed-edge regeneration remain future gates and were not treated as closure defects.",
+    "Historical round-11 review findings describe pre-correction bytes and were used as correction contracts rather than counted as unresolved solely because their JSON files remain checked in."
+  ],
+  "closure_criteria_pass": false
+}

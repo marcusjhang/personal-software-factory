@@ -1,0 +1,94 @@
+fields:
+  identity:
+  - name: scope
+    description: Exact systems, workflow stage, and definitions covered.
+    detail_level: detailed
+    required: true
+  - name: current_state
+    description: What is demonstrably possible as of the as-of date.
+    detail_level: detailed
+    required: true
+  - name: representative_systems
+    description: Named tools, projects, papers, or services with versions/status where
+      available.
+    detail_level: detailed
+    required: true
+  evidence:
+  - name: primary_evidence
+    description: Specific claims backed by official docs, repositories, papers, standards,
+      or first-party case studies, each with direct URL.
+    detail_level: detailed
+    required: true
+  - name: independent_evidence
+    description: Independent evaluations, community operational evidence, or benchmark
+      critiques with URLs.
+    detail_level: detailed
+    required: true
+  - name: metrics
+    description: Reported success, cost, latency, reliability, benchmark, or adoption
+      metrics, with caveats.
+    detail_level: detailed
+    required: true
+  engineering:
+  - name: reference_workflow
+    description: Reusable step-by-step workflow including triggers, inputs, state
+      transitions, and outputs.
+    detail_level: detailed
+    required: true
+  - name: integration_points
+    description: APIs, webhooks, CI, issue trackers, observability, repositories,
+      environments, and deployment links.
+    detail_level: detailed
+    required: true
+  - name: human_gates
+    description: When and why people approve, clarify, review, or intervene.
+    detail_level: detailed
+    required: true
+  - name: failure_modes
+    description: Technical, product, security, organizational, and economic failure
+      modes.
+    detail_level: detailed
+    required: true
+  - name: controls_and_mitigations
+    description: Least privilege, sandboxing, tests, policy, review, rollback, budgets,
+      audit, and escalation measures.
+    detail_level: detailed
+    required: true
+  decision:
+  - name: maturity_assessment
+    description: Production-ready, conditionally useful, emerging, or speculative,
+      with rationale.
+    detail_level: detailed
+    required: true
+  - name: build_vs_buy
+    description: Available product/framework choices and where custom engineering
+      is needed.
+    detail_level: moderate
+    required: true
+  - name: recommended_pattern
+    description: Concrete recommendation for a largely self-managed project.
+    detail_level: detailed
+    required: true
+  - name: open_questions
+    description: Unresolved questions and evidence gaps.
+    detail_level: detailed
+    required: true
+  metadata:
+  - name: sources
+    description: Deduplicated list of direct URLs with title, publisher, source type,
+      date, access date, and which claims they support.
+    detail_level: detailed
+    required: true
+  - name: confidence
+    description: Overall and claim-level confidence with reasons.
+    detail_level: moderate
+    required: true
+  - name: conflicts
+    description: Conflicting claims or results and likely explanation.
+    detail_level: detailed
+    required: true
+  - name: as_of
+    description: Research currency date.
+    detail_level: brief
+    required: true
+uncertain: []

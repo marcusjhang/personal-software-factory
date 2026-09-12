@@ -1,0 +1,150 @@
+{
+  "reviewer": "round-9 independent formal-state closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-8 combined correction",
+    "specialty": "All 722 normative edge rows; closed vocabularies; reducer arities; terminal immutability and reachability; canonical sequences; remediation revocation; control degradation; terminal Effect product coverage; release failure; C12 cleanup; and trace/evidence currentness.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-8-resolution.md",
+      "review/round-8-closure/evidence-status.json",
+      "review/round-8-closure/formal-state.json",
+      "review/round-8-closure/improvement-product.json",
+      "review/round-8-closure/cleanup-reclaim.json",
+      "review/round-8-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim. Future implementation, exhaustive reachable-product/model proof, fresh immutable retrieval, external source truth, and human semantic review were accepted as unperformed gates. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "manifest_parse_vocabulary_terminal_reachability_and_canonical_sequences",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md §1: ‘Every nonterminal row has an outgoing row. Terminal statuses are only those explicitly marked.’",
+        "docs/state-transition-manifests.md §17: ‘A reproducible static check starts from each declared initial and the closed rows in this file.’"
+      ],
+      "basis": "Parsed 722 unique normative edge IDs: 93 canonical rows (including CW-CQ and CW-QC) plus 629 private/product rows. Markdown widths are uniform within each table. Ordinary declared initials reach every listed symbol when guards are abstracted as edge predicates; graph sinks match declared terminals. Canonical DONE/FAILED/CANCELLED and ordinary FactoryInstance, NodeRun, Attempt, Wait, Effect, RemediationObligation, UnconfirmedQuiescence, candidate, rollout, and release-attempt terminals have no mutating outgoing edge. Cleanup C11 is the expressly state-preserving signal route from historical ESCALATED_DISPOSITION. Every explicit multi-step canonical projection uses only §2 adjacency."
+    },
+    {
+      "area": "round_8_reducer_release_cleanup_and_remediation_repairs",
+      "result": "pass",
+      "exact_text": [
+        "rollback_state={IDLE,REQUESTED,ROLLING_BACK,VERIFYING,VERIFIED,FAILED,REMEDIATION_WAIT,ROLLED_BACK}",
+        "IA17 | CLEANING | FAILED | clean+failed",
+        "ICL02 | CLEANING | FAILED | final required item takes C02 or C12",
+        "RO11/RO12/RO13 atomically append the revocation event, change status, fence authority, and settle or reconcile activity."
+      ],
+      "basis": "Reducer priorities 2 and 7 each enumerate the same six rollback inputs and the same six positional canonical results, including REMEDIATION_WAIT->BLOCKED. IRB06/IRB09 and cancellation guards retain real remediation and verification. The ten IA07-*/IA08-* rows partition five legal candidate phases for both VERIFYING and EXECUTING and establish candidate failure before IA17. ICL02 now admits both final C02 and C12. RO01-R/RO02-R and RO11-RO14 close the round-8 live-generation revocation race with version CAS and replay rules."
+    },
+    {
+      "area": "terminal_effect_product_coverage",
+      "result": "pass",
+      "exact_text": [
+        "docs/state-transition-manifests.md §15.8 requires set equality for direct terminal Effect edges {E09,E10,E30,E31,E33,E35} plus disposition edges {E20,E21,E24,E25,E28,E29,E37,E39} in both WIDENING_EFFECT and PROMOTING.",
+        "Only E06/IR38 or IR18 and E17/IR56 or IR57 can widen bounds or cross MERGED."
+      ],
+      "basis": "The required 14 Effect edge IDs are each crossed with widening/promotion and exposure/no-exposure, yielding 56 distinct IWD/IPD/IW/IP rows. Every exposed product row atomically changes rollback IDLE->REQUESTED; every no-exposure row enters failure cleanup. E34 remains separately assigned to IR43/IR55, although the widening E34 settlement defect is reported below."
+    },
+    {
+      "area": "control_degradation_partition",
+      "result": "partial",
+      "exact_text": [
+        "PLAN §8.4: ‘Safety abort requires either verified real rollback after exposure or a protected NoExposureReceipt, then later single-owner cleanup.’",
+        "Manifest §15.6: IH01-C/W/A/P/D/O exhaustively record degradation for CANARY_RUNNING, WIDENING_EFFECT, APPROVED, PROMOTING, PROMOTED, and OBSERVING."
+      ],
+      "basis": "The active-state degradation event itself is now partitioned and atomic: IH01 is non-active only, while IH01-C/W/A/P/D/O fence progress and select safe rollout targets. HEALTHY plus CURRENT_CONTINUITY guards are present on progress. The later exposed-canary abort settlement is nevertheless undefined because several abort edges do not create the rollback required by IR13A; see R9-FS-002."
+    },
+    {
+      "area": "schema_3_evidence_package",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json schema_version is 3.0.0.",
+        "material-claims.json validation_scope says the validation ‘is not external source retrieval or semantic entailment validation.’"
+      ],
+      "basis": "Recomputed SHA-256 values are PLAN 9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5 and manifest 8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2, exactly matching generated_against. Dynamic numbered-heading derivation yields the exact recorded 28-heading set. All 37 inventory JSON files parse and their hashes match. The graph has 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only, and zero supports/refutes. No material evidence overclaim was found."
+    },
+    {
+      "area": "reader_visible_trace_currentness",
+      "result": "fail",
+      "exact_text": [
+        "requirements-traceability.md §10: ‘The later round-8 formal edit supersedes those normative bytes, so only the current round-8 status below declares regeneration pending.’",
+        "requirements-traceability.md §11: ‘The schema-3 candidate-only material graph now matches the current PLAN and manifest digests and dynamically covers all 28 current headings.’",
+        "README.md: ‘Round 8 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests.’"
+      ],
+      "basis": "Section 10 still says the current round-8 status declares regeneration pending, but §11, README, round-8-resolution, and the reproduced bytes all say regeneration is complete. This defeats R8-C08’s unambiguous-currentness contract; see R9-FS-003."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R9-FS-001",
+      "severity": "high",
+      "title": "Candidate revocation names rollback that the closed rollback machine forbids from being created",
+      "requirement": "A live exposed improvement must revoke authority and enter exactly one real rollback saga; every coordinate delta needs one named synchronized owner.",
+      "evidence": [
+        "IC32 changes candidate SHADOW_PASSED->REVOKED and says ‘start rollback if live’, but its canonical projection is only REDUCE-V1 and it names no rollback_state edge or saga creation.",
+        "§15.3.1 says rollback entry is owned exactly once only by IR19, IR22, exposed IW/IWD/IP/IPD rows, and IH01-W/P/D/O; IC32 is absent.",
+        "§15 says ‘no delta is inferred’, so IC32 cannot legally infer IDLE->REQUESTED."
+      ],
+      "impact": "Revocation can occur while rollout exposure is live, yet the manifest either leaves exposure without the required rollback or requires an unlisted transition that the compiler must reject. This is an unsafe and undefined normative path.",
+      "required_correction": "Partition IC32 by exposure/live-rollout state. Add exact synchronized rollout/effect/rollback coordinates, IDLE->REQUESTED, single-saga creation, canonical projection, and later cleanup owner for exposed cases; add a protected no-exposure failure/cleanup path where rollback is not required. Include the new rows in the exhaustive rollback-entry owner set and witnesses."
+    },
+    {
+      "id": "R9-FS-002",
+      "severity": "high",
+      "title": "Canary abort settlement has reachable exposure and E34 branches with no satisfiable IR13A/IR13B exit",
+      "requirement": "PLAN §8.4 requires every safety abort to prove either verified real rollback after exposure or protected no exposure, then use one later cleanup owner.",
+      "evidence": [
+        "IH01-C can move an exposed CANARY_RUNNING generation to CANARY_PAUSED without creating rollback. IR07, IR09/IR11, and IR10 can then reach CANARY_ABORTING/CANARY_ABORTED, but none is in §15.3.1’s complete rollback-entry owner set.",
+        "IR13A requires a bound rollback already verified/rolled-back. IR13B instead requires NoExposureReceipt and ‘complete effect-set absence’. Thus an exposed abort produced by these rows cannot satisfy either branch.",
+        "IR43 maps widening E34 to CANARY_ABORTING after E34 has made the Effect FAILED_FINAL. Its no-application fact does not satisfy IR13B’s literal complete-effect-set-absence guard because the terminal Effect record exists, while IR13A is inapplicable because exposure is absent.",
+        "§15.8 says E34 uses IR43 and separately says exactly one of IR13A/IR13B settles the abort, but supplies no witness or row that bridges either mismatch."
+      ],
+      "impact": "A safety stop, control failure after pause, child failure/cancellation, or widening E34 can strand the parent nonterminal after effects are stopped/settled. Exposed branches also lack the required verified rollback before cleanup.",
+      "required_correction": "Create exact mutually exclusive exposed/no-exposure abort-entry rows for every reachable IR07/IR09/IR10/IR11 path. Exposed rows must atomically create the one rollback saga; no-exposure rows must carry a protected classifier. Make IR43’s terminal no-application Effect compatible with the no-exposure settlement guard (for example, require settled non-applied effects rather than effect-set absence), and add exact witnesses through IR13C/IX03."
+    },
+    {
+      "id": "R9-FS-003",
+      "severity": "high",
+      "title": "Traceability still contradicts the completed round-8 regeneration status",
+      "requirement": "R8-C08 requires unambiguous evidence currentness after regeneration.",
+      "evidence": [
+        "requirements-traceability.md §10 says the current round-8 status below ‘declares regeneration pending’.",
+        "The status immediately below says the graph ‘now matches’ current digests and 28 headings; README and round-8-resolution also say regeneration is complete.",
+        "The recomputed PLAN/manifest digests and heading set match material-claims.json."
+      ],
+      "impact": "A reader cannot reproduce one authoritative current evidence-package status from the required traceability document.",
+      "required_correction": "Replace the stale §10 clause with historical wording that says the later round-8 edit superseded round-7 and that §11 records completed round-8 regeneration; keep only independent closure and future evidence/model/implementation gates pending."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "low": 0,
+    "total": 3,
+    "manifest_rows_parsed": 722,
+    "canonical_rows": 93,
+    "private_and_product_rows": 629,
+    "current_normative_headings": 28,
+    "effect_product_rows": 56
+  },
+  "residual_uncertainty": [
+    "No implementation, executable compiler/controller, or deployed system was assessed.",
+    "No exhaustive reachable-product/model proof was required. Findings R9-FS-001 and R9-FS-002 follow directly from named rows and complete-owner/branch contracts rather than assuming such a proof.",
+    "Fresh immutable retrieval, external-source validation, same-run human semantic review, and reviewed-edge regeneration remain future gates and were not treated as defects.",
+    "The schema-3 graph remains candidate-only; this audit does not promote any candidate edge to semantic support or refutation."
+  ],
+  "closure_criteria_pass": false
+}

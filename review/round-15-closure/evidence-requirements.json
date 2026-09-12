@@ -1,0 +1,265 @@
+{
+  "reviewer": "round-15 independent evidence/requirements and architecture closure auditor",
+  "scope": {
+    "mode": "independent FINAL PLAN-ONLY closure audit after round-14 correction",
+    "specialty": "Digests, material graph, checkpoint status, all 16 requirements, owner journey, end-to-end architecture, roadmap boundaries, and round-14 correction closure.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-14-resolution.md",
+      "review/round-14-closure/formal-model.json",
+      "review/round-14-closure/improvement-races.json",
+      "review/round-14-closure/cross-consistency.json",
+      "review/round-14-closure/recovery-remediation.json",
+      "review/round-14-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "review/plan-link-check.json"
+    ],
+    "severity_rule": "Critical/high only for an unmet requirement, contradiction, unsafe or undefined path, or material overclaim.",
+    "accepted_unperformed_gates": [
+      "future implementation",
+      "exhaustive reachable-product/full-model execution",
+      "fresh immutable evidence retrieval",
+      "external source-truth validation",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ],
+    "closure_rule": "closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_authority_and_status_boundary",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md status is: ‘revised plan-only implementation contract; no working implementation, semantic evidence validation, or autonomous self-government is claimed.’",
+        "README.md states: ‘This repository intentionally contains a plan, not a working controller or deployed factory.’",
+        "PLAN.md is the sole plan and roadmap-numbering authority and normatively incorporates docs/state-transition-manifests.md as the legal-edge authority; GitHub is a human projection, not the transaction log or lock service.",
+        "Future implementation, exhaustive reachable-product/full-model execution, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation are explicitly accepted as unperformed in this audit."
+      ],
+      "basis": "PLAN, README, and traceability consistently preserve the plan-only authority boundary."
+    },
+    {
+      "area": "current_formal_source_digests_and_schema_3_identity",
+      "result": "pass",
+      "exact_text": [
+        "Recomputed PLAN.md SHA-256: `89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd`.",
+        "Recomputed docs/state-transition-manifests.md SHA-256: `70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271`.",
+        "material-claims.json has schema_version `3.0.0`, regeneration_checkpoint `round-14`, and generated_against binds those exact two current byte digests.",
+        "Its semantic_status is `editorial_candidate_associations_only` and provenance_status is `legacy_unverified`; no edge is promoted to `supports` or `refutes`."
+      ],
+      "basis": "Independent SHA-256 hashing and direct schema-3 JSON parsing reproduced the current formal-source identity and evidence boundary."
+    },
+    {
+      "area": "schema_3_graph_reproducibility_and_research_manifest",
+      "result": "pass",
+      "exact_text": [
+        "The research manifest enumerates 37 unique parseable result files, and every recorded result-file SHA-256 matches the current checked-in bytes.",
+        "The candidate graph has 25 unique source observations, 20 material claims, and 36 unique edges: 23 `candidate_support`, 5 `candidate_refute`, 8 `context_only`, 0 `supports`, and 0 `refutes`.",
+        "All 25 SourceObservation IDs reproduce from `result_path + \"#\" + json_pointer + \"|\" + url`; every pointer resolves, every pointed-value digest and result-file digest matches, and each URL occurs in its exact pointed record.",
+        "Every recorded PLAN excerpt matches the exact current line range; all 25 numbered PLAN sections and the exact dynamically derived 28 normative-manifest headings are recorded reviewed.",
+        "research-manifest.json records semantic evidence validation as `not_performed`; deterministic local structural success is not source truth, provenance, independence, entailment, efficacy, safety, compliance, or ROI evidence."
+      ],
+      "basis": "Independent path, JSON parse, byte-hash, JSON-pointer, canonical-value-hash, stable-ID, URL-presence, edge-reference/type, exact-excerpt, section, and heading-set checks reproduced the schema-3 structural checkpoint."
+    },
+    {
+      "area": "round_14_review_inventory_and_formal_resolution",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-14-closure JSON files parse and contain 0 critical and 5 raw high findings in total.",
+        "The exact raw high-ID set is `R14-IR-001`, `R14-IR-002`, `R14-IR-003`, `R14-XC-001`, and `R14-REC-001`; all five IDs occur in review/round-14-resolution.md and represent five unique defects.",
+        "IA09-IA15 require matching whole-work IX cancellation context, remain canonical stutters under IX dominance, and cannot own parent cleanup or parent terminalization; IX03 and IX04 remain the sole parent cleanup and parent CANCELLED owners.",
+        "The HEALTHY protected-X rollback-adoption partition is exactly IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO over REQUESTED/ROLLING_BACK/VERIFYING/VERIFIED/FAILED/REMEDIATION_WAIT/ROLLED_BACK; each preserves the existing saga and immutable origin and creates no second saga or cleanup.",
+        "The literal interrupt union is IH01-C/W/WR/WV/A/P/PR/PV/D/O plus residual IH01-RX/RN plus rollback-adoption IH01-RAQ/RAR/RAV/RAD/RAF/RAM/RAO.",
+        "IH06-WX/WN/PX/PN require `work_cancel_state=NONE`; after IX01 or IX02 wins, the matching IX06 REQUESTED/QUIESCING X/N path owns settlement and IX03 alone may schedule parent cleanup."
+      ],
+      "basis": "Direct JSON finding extraction and literal PLAN/manifest/resolution comparison reproduce the five correction contracts. Generated witness execution remains an accepted future model gate."
+    },
+    {
+      "area": "normative_manifest_inventory",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest contains 794 unique edge rows: 96 canonical and 698 private/product rows.",
+        "No parsed edge ID is duplicated, and the final parsed row is ICL03.",
+        "The schema-3 graph records the exact dynamically derived current set of 28 numbered normative-manifest headings."
+      ],
+      "basis": "Independent Markdown table-row extraction, edge-ID uniqueness checking, and dynamic numbered-heading extraction."
+    },
+    {
+      "area": "all_16_requirements_and_owner_journey",
+      "result": "pass",
+      "exact_text": [
+        "The normative traceability register contains exactly R-01 through R-16 and maps each to its exact PLAN contract, §20 increment set, validation location, and human gate.",
+        "The mapped contracts cover Issue/Project/status as code; fresh signed context; conversational ideation; rigorous exact-digest READY; build orchestration; maintenance; delivery/review/merge/rollback; complete status; exception-driven humans and break glass; resumable deep research; factory as code; maximum-safe improvement; multi-repository dogfood/releases; engineering-first delivery; future GTM/cross-domain work; and plan-only delivery.",
+        "PLAN §10.1 retains the future owner-visible command contract with session-derived identity, displayed digest/diff, durable event or receipt, wait/error response, replay behavior, and retention/export rules.",
+        "‘Mapped’ remains structural plan coverage only and is not implementation or empirical closure."
+      ],
+      "basis": "Independent extraction found one unique row for every R-01 through R-16; the PLAN and traceability retain the owner journey and plan-only qualification."
+    },
+    {
+      "area": "end_to_end_architecture_and_roadmap",
+      "result": "pass",
+      "exact_text": [
+        "Release 0 is one-owner, one-repository, read-only compilation, conversation/decision capture, GitHub observation, dry-run reconciliation, and deterministic simulation; it has no autonomous repository mutation, merge, deployment, production credential, always-on controller, PostgreSQL requirement, Temporal requirement, fleet scheduler, multi-tenant service, public plugin SDK, or GTM automation.",
+        "Before any external write, the PostgreSQL mutation gate must prove least-privilege compare-and-append, transactional outbox, backup/restore, and a real two-session admission/lease/fence race with no duplicate authority.",
+        "Workers receive typed artifacts and command IDs, cannot issue arbitrary shell or credentials, and cannot approve, merge, promote, or mutate lifecycle state directly.",
+        "The sole roadmap remains engineering-first; second-repository, scale, extraction, and cross-domain/GTM increments remain gated rather than claimed complete."
+      ],
+      "basis": "The decision, architecture, walkthrough, security, and §20 roadmap form one bounded future implementation contract."
+    },
+    {
+      "area": "round_14_checkpoint_status_consistency",
+      "result": "fail",
+      "exact_text": [
+        "review/round-14-resolution.md says: ‘current-digest schema-3 candidate-graph regeneration complete for round 14.’",
+        "The same file says: ‘No research source-evidence record, evidence-edge semantic relation, or generated material-graph byte was changed in round 14.’",
+        "Its R14-XC-001 correction row says README ‘names current round-14 formal bytes with graph regeneration pending.’",
+        "README.md, requirements-traceability.md, material-claims.json, and the later validation/status paragraphs of review/round-14-resolution.md instead identify round-14 graph regeneration as complete and current."
+      ],
+      "basis": "The current schema object is demonstrably regenerated: its checkpoint is round-14 and its generated_against digests are the current round-14 digests, unlike the round-13 checkpoint/digests reproduced in the round-14 source reviews. The resolution register therefore contradicts both itself and the checked-in artifact about whether generated graph bytes changed and whether regeneration is pending."
+    }
+  ],
+  "requirements_coverage": [
+    {
+      "requirement": "R-01",
+      "result": "pass",
+      "contract": "Issue/Project/status as code"
+    },
+    {
+      "requirement": "R-02",
+      "result": "pass",
+      "contract": "fresh signed execution context"
+    },
+    {
+      "requirement": "R-03",
+      "result": "pass",
+      "contract": "conversational ideation"
+    },
+    {
+      "requirement": "R-04",
+      "result": "pass",
+      "contract": "rigorous exact-digest READY"
+    },
+    {
+      "requirement": "R-05",
+      "result": "pass",
+      "contract": "build orchestration"
+    },
+    {
+      "requirement": "R-06",
+      "result": "pass",
+      "contract": "maintenance lifecycle"
+    },
+    {
+      "requirement": "R-07",
+      "result": "pass",
+      "contract": "delivery, review, merge, observation, rollback, and cleanup"
+    },
+    {
+      "requirement": "R-08",
+      "result": "pass",
+      "contract": "complete status model and compiled normative manifest"
+    },
+    {
+      "requirement": "R-09",
+      "result": "pass",
+      "contract": "exception-driven humans, bounded delegation, and break glass"
+    },
+    {
+      "requirement": "R-10",
+      "result": "pass",
+      "contract": "resumable deep research"
+    },
+    {
+      "requirement": "R-11",
+      "result": "pass",
+      "contract": "factory as code"
+    },
+    {
+      "requirement": "R-12",
+      "result": "pass",
+      "contract": "maximum-safe governed improvement"
+    },
+    {
+      "requirement": "R-13",
+      "result": "pass",
+      "contract": "multi-repository dogfood and consumer releases"
+    },
+    {
+      "requirement": "R-14",
+      "result": "pass",
+      "contract": "engineering-first delivery"
+    },
+    {
+      "requirement": "R-15",
+      "result": "pass",
+      "contract": "future gated cross-domain/GTM branch"
+    },
+    {
+      "requirement": "R-16",
+      "result": "pass",
+      "contract": "plan-only delivery"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R15-ER-001",
+      "severity": "high",
+      "title": "Round-14 resolution contradicts the current schema-3 regeneration status and byte-change boundary",
+      "requirement_or_contract": "The plan-only package must state one reproducible current checkpoint and must distinguish unchanged source-evidence records and edge semantics from changed generated graph metadata, current-source digests, checkpoint, coverage locations, and artifact bytes.",
+      "evidence": [
+        "review/round-14-resolution.md:3 says current-digest schema-3 candidate-graph regeneration is complete for round 14.",
+        "review/round-14-resolution.md:7 says no generated material-graph byte was changed in round 14.",
+        "review/round-14-resolution.md:17 says the README names current round-14 formal bytes with graph regeneration pending.",
+        "review/round-14-resolution.md:23 and :34, README.md:22, :34, and :40, and review/requirements-traceability.md:127, :179, and :185 say the round-14 graph regeneration is complete/current.",
+        "material-claims.json is regeneration_checkpoint round-14 and binds PLAN digest 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd and manifest digest 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271; the round-14 source reviews reproduce the superseded round-13 checkpoint and different digests 012934597727e4946f274a4033fc3f0dc0b2337c224155f4e1535323f8682c1a and da76752e03a289075e2a02e3614fccd11448899c2dab639621542cf7f7709c05."
+      ],
+      "impact": "The resolution register repeats the evidence-status ambiguity that R14-XC-001 required it to close. A reader cannot treat its stated change boundary as accurate: regeneration necessarily changed generated metadata and artifact bytes, and it is complete rather than pending. This is a material contradiction in the closure evidence/status contract, even though the current graph itself structurally matches the current formal bytes.",
+      "required_correction": "In review/round-14-resolution.md, replace the false line-7 boundary with: ‘No research source-evidence record or evidence-edge semantic relation changed; generated graph metadata, current-source digests, checkpoint, coverage locations, and material-graph bytes were regenerated.’ In the R14-XC-001 row, replace ‘with graph regeneration pending’ with wording that says the current round-14 graph regeneration is complete. Preserve generated witness/model execution as pending separately.",
+      "references": [
+        "review/round-14-resolution.md:3",
+        "review/round-14-resolution.md:7",
+        "review/round-14-resolution.md:17",
+        "review/round-14-resolution.md:23",
+        "review/round-14-resolution.md:34",
+        "README.md:22",
+        "README.md:34",
+        "README.md:40",
+        "review/requirements-traceability.md:127",
+        "review/requirements-traceability.md:179",
+        "review/requirements-traceability.md:185",
+        "research/repository-agent-operating-system/material-claims.json#/generated_against",
+        "review/round-14-closure/evidence-requirements.json#/contract_reproduction/1"
+      ]
+    }
+  ],
+  "counts": {
+    "requirements_reviewed": 16,
+    "requirements_pass": 16,
+    "requirements_partial": 0,
+    "round_14_review_files_reviewed": 5,
+    "round_14_raw_critical_findings_reviewed": 0,
+    "round_14_raw_high_findings_reviewed": 5,
+    "round_14_unique_defects_reviewed": 5,
+    "normative_manifest_edge_rows": 794,
+    "canonical_edge_rows": 96,
+    "private_and_product_edge_rows": 698,
+    "research_manifest_files_hash_checked": 37,
+    "schema_3_source_observations_checked": 25,
+    "schema_3_material_claims_checked": 20,
+    "schema_3_edges_checked": 36,
+    "current_normative_headings": 28,
+    "critical": 0,
+    "high": 1,
+    "total": 1
+  },
+  "residual_uncertainty": [
+    "This audit establishes structural plan-contract coverage for graph/digests, the 16 requirements, and architecture. It does not establish implementation enforcement, exhaustive reachable-product/full-model proof, operational safety, or production validation.",
+    "Fresh immutable retrieval, external source-truth validation, same-run human semantic edge review, and deterministic reviewed-edge regeneration remain accepted future gates.",
+    "The current schema-3 candidate graph structurally matches the audited PLAN and normative-manifest bytes, but the round-14 resolution memo must correct its contradictory regeneration/change-boundary statements before closure."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,135 @@
+{
+  "artifact": "final-plan-validation",
+  "performed_at_utc": "2026-09-12T23:32:13.784093Z",
+  "scope": "Plan-contract repository snapshot; not implementation or production validation.",
+  "checks": {
+    "structured_research_records": {
+      "count": 37,
+      "validator_exit_code": 0,
+      "pass": true
+    },
+    "json_parse": {
+      "files": 132,
+      "errors": [],
+      "pass": true
+    },
+    "material_graph": {
+      "schema_version": "3.0.0",
+      "checkpoint": "round-16",
+      "internal_status": "pass",
+      "plan_digest_match": true,
+      "manifest_digest_match": true,
+      "counts": {
+        "corpus_result_files": 37,
+        "source_observations": 25,
+        "material_claims": 20,
+        "evidence_edges": 36,
+        "candidate_support_edges": 23,
+        "candidate_refute_edges": 5,
+        "context_only_edges": 8,
+        "supports_edges": 0,
+        "refutes_edges": 0,
+        "plan_sections_reviewed": 25,
+        "normative_manifest_headings_reviewed": 28
+      },
+      "all_internal_checks": true,
+      "pass": true
+    },
+    "plan_sections": {
+      "expected": 25,
+      "actual": 25,
+      "pass": true
+    },
+    "manifest_headings": {
+      "expected": 28,
+      "actual": 28,
+      "exact_match": true,
+      "pass": true
+    },
+    "manifest_rows": {
+      "total": 801,
+      "unique": 801,
+      "canonical": 96,
+      "private_product": 705,
+      "pass": true
+    },
+    "round_17_closure": {
+      "reports": {
+        "formal-model.json": {
+          "critical": 0,
+          "high": 0,
+          "pass": true
+        },
+        "improvement-races.json": {
+          "critical": 0,
+          "high": 0,
+          "pass": true
+        },
+        "cross-consistency.json": {
+          "critical": 0,
+          "high": 0,
+          "pass": true
+        },
+        "recovery-remediation.json": {
+          "critical": 0,
+          "high": 0,
+          "pass": true
+        },
+        "evidence-requirements.json": {
+          "critical": 0,
+          "high": 0,
+          "pass": true
+        }
+      },
+      "critical": 0,
+      "high": 0,
+      "pass": true
+    },
+    "requirements": {
+      "mapped": 16,
+      "total": 16,
+      "unmapped": 0,
+      "pass": true
+    },
+    "markdown_tables": {
+      "files": 48,
+      "errors": {},
+      "pass": true
+    },
+    "local_markdown_links": {
+      "errors": {},
+      "pass": true
+    },
+    "plan_urls": {
+      "count": 24,
+      "http_200": 24,
+      "checked_at_utc": "2026-09-12T23:22:50.756291Z",
+      "pass": true
+    },
+    "secret_scan": {
+      "files": 188,
+      "hits": [],
+      "pass": true
+    },
+    "prototype_runtime_absent": {
+      "unexpected_runtime_files": [],
+      "pass": true
+    },
+    "git_diff_check": {
+      "pass": true,
+      "status": "git diff --cached --check exited 0"
+    },
+    "final_delta_audit": {
+      "critical": 0,
+      "high": 0,
+      "pass": true
+    }
+  },
+  "overall_status": "pass",
+  "bound_digests": {
+    "PLAN.md": "03cc54986c9128fa3d6b8add26080e587c452da28fe64eee053074b5b1c34b0c",
+    "docs/state-transition-manifests.md": "7708c3e89309e06f02681a2b5618a56e46c04b6d22daa87f67a2f25f99611917",
+    "research/repository-agent-operating-system/material-claims.json": "ec9562da9a4aff81041d177bcab6f71b62ee56eb5beea3012a3e6bd5714cfc71",
+    "review/plan-link-check.json": "b71cd3e08a82b32f0e8e93a7e81e7eef189546d6fc248a59539664f63fdb0159"
+  }
+}

@@ -1,0 +1,590 @@
+{
+  "scope": "Design the cold-start path for one replaceable coding/planning agent that has no usable chat transcript. The path begins when a controller admits an authenticated worker and ends when that worker has (a) verified a bounded context bundle, (b) obtained or resumed exactly one valid lease, and (c) identified exactly one policy-eligible next action. It covers objective/spec revision, observed workflow state, repository rules, architecture, build/test commands, curated memory, dependencies, capabilities, lease/heartbeat, and GitHub Project observation. It does not make an LLM the scheduler, state database, policy engine, approver, or owner of GitHub reconciliation. Git is canonical for desired configuration and reviewed knowledge; the controller event store is canonical for attempts/leases/approvals; GitHub Issues/Projects are externally observed collaboration state. Project remote state is not magically made 'status-as-code': it must be read and reconciled through GitHub's API (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).",
+  "current_capabilities": "Verified capabilities and limits at the stated cutoff:\n1. Repository instruction discovery exists but is tool-specific. GitHub Copilot accepts `.github/copilot-instructions.md`, path-specific `.github/instructions/**/*.instructions.md`, nested `AGENTS.md`, and root `CLAUDE.md`/`GEMINI.md`; the nearest `AGENTS.md` takes precedence (https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot). Codex builds a root-to-working-directory chain once per run, checks `AGENTS.override.md` before `AGENTS.md`, uses at most one file per directory, and stops at `project_doc_max_bytes` (32 KiB by default) (https://developers.openai.com/codex/guides/agents-md). Claude Code loads `CLAUDE.md` and auto memory at session start, but explicitly treats them as context rather than enforcement; its docs advise enforcement through hooks/settings and report auto memory startup loading of the first 200 lines or 25 KB (https://docs.anthropic.com/en/docs/claude-code/memory).\n2. GitHub Projects v2 can be queried and mutated with GraphQL. Queries need `read:project`; mutations need `project` for classic PAT examples, while GitHub Apps use Projects permissions. Adding and updating an item require separate mutations, so a crash can expose an intermediate state (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects). `projects_v2_item` webhooks exist, require Projects permission, are organization-only in the documented availability, and remain public preview/subject to change (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item). Therefore bootstrap must query/reconcile rather than trust one webhook or a checked-in status file.\n3. GitHub Actions exposes event/context data, but GitHub warns that some context fields are attacker-controlled and the whole `github` context includes `github.token` (https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs). `GITHUB_TOKEN` permissions can be reduced per workflow/job, and GitHub recommends minimum permissions/read-only contents by default (https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication; https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).\n4. MCP Resources and Roots provide typed resource listing/reading and filesystem boundary hints, including list-change notifications, URI validation, and access-control requirements (version 2025-06-18: https://modelcontextprotocol.io/specification/2025-06-18/server/resources; https://modelcontextprotocol.io/specification/2025-06-18/client/roots). They are discovery transports, not evidence that content is trusted or that a request is authorized.\n5. Durable engines can resume deterministic workflow histories, timers, retries, and heartbeats (Temporal: https://docs.temporal.io/workflow-execution/event; https://docs.temporal.io/develop/python/failure-detection). A small transactional database/outbox can implement the minimum without Temporal.",
+  "representative_systems": [
+    {
+      "system": "GitHub Issues, Projects v2, GraphQL, webhooks, rulesets and Actions",
+      "role": "Human-facing collaboration and repository control surfaces; actual Project field values remain remote observed state.",
+      "urls": [
+        "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+        "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item",
+        "https://docs.github.com/en/rest/orgs/rules",
+        "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions"
+      ]
+    },
+    {
+      "system": "AGENTS.md / Codex, GitHub Copilot custom instructions, Claude Code memory",
+      "role": "Examples of current cold-start instruction discovery and incompatible precedence/size semantics; useful adapters, not the security boundary.",
+      "urls": [
+        "https://developers.openai.com/codex/guides/agents-md",
+        "https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot",
+        "https://docs.anthropic.com/en/docs/claude-code/memory",
+        "https://github.com/agentsmd/agents.md"
+      ]
+    },
+    {
+      "system": "Model Context Protocol 2025-06-18",
+      "role": "Standardized discovery/read channel for resources and declared roots, with explicit validation and access-control duties.",
+      "urls": [
+        "https://modelcontextprotocol.io/specification/2025-06-18/server/resources",
+        "https://modelcontextprotocol.io/specification/2025-06-18/client/roots",
+        "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices"
+      ]
+    },
+    {
+      "system": "Temporal and Kubernetes controller pattern",
+      "role": "Reference semantics for durable attempt history/heartbeats and reconciliation of desired versus actual state.",
+      "urls": [
+        "https://docs.temporal.io/workflow-execution/event",
+        "https://docs.temporal.io/develop/python/failure-detection",
+        "https://kubernetes.io/docs/concepts/architecture/controller/"
+      ]
+    },
+    {
+      "system": "JSON Schema 2020-12, OPA, SLSA 1.2, OpenTelemetry",
+      "role": "Schema validation, policy decision, provenance/integrity, and trace correlation building blocks.",
+      "urls": [
+        "https://json-schema.org/draft/2020-12",
+        "https://www.openpolicyagent.org/docs/latest/",
+        "https://slsa.dev/spec/v1.2/requirements",
+        "https://opentelemetry.io/docs/concepts/signals/traces/"
+      ]
+    }
+  ],
+  "primary_evidence": [
+    "GitHub documents the exact Copilot instruction file types and nearest-file precedence (https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot); OpenAI documents Codex's once-per-run chain, override rule, root-to-CWD order, and default 32 KiB cap (https://developers.openai.com/codex/guides/agents-md). These prove portable repository guidance is feasible but also prove an adapter must record which engine resolved which files.",
+    "Anthropic states that CLAUDE.md/auto memory are context, not enforced configuration, and recommends hooks/settings for blocking behavior (https://docs.anthropic.com/en/docs/claude-code/memory). This directly supports separating human-readable guidance from a deterministic capability gateway.",
+    "GitHub's Projects API guide documents read/write scopes, node-ID discovery, pagination examples, and separate add/update mutations (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects); its webhook reference labels Projects webhooks public preview (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item). These support an observed-state cache plus periodic full reconciliation.",
+    "GitHub warns that workflow contexts can contain attacker-controlled input and sensitive token data (https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs), and recommends minimum `GITHUB_TOKEN` permissions, pinning actions to full commit SHAs, and code-owner protection for workflow files (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).",
+    "MCP 2025-06-18 requires resource URI validation and recommends access control; Roots requires boundary/path validation and advises user consent (https://modelcontextprotocol.io/specification/2025-06-18/server/resources; https://modelcontextprotocol.io/specification/2025-06-18/client/roots). Its security guidance covers confused deputy, SSRF, token passthrough, session hijack, local server compromise, sandboxing and scope minimization (https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices).",
+    "Temporal persists event history and documents heartbeat timeout/error handling (https://docs.temporal.io/workflow-execution/event; https://docs.temporal.io/develop/python/failure-detection); Kubernetes defines controllers as loops that move current state toward desired state (https://kubernetes.io/docs/concepts/architecture/controller/). These are the operational patterns, not mandates to adopt those products."
+  ],
+  "independent_evidence": [
+    "AgentDojo supplies a dynamic benchmark for prompt-injection attacks/defenses against tool-using LLM agents and reports that attacks remain a practical problem rather than solved by prompting alone (Debenedetti et al., 2024, arXiv:2406.13352, https://arxiv.org/abs/2406.13352). Repository issues, comments, code, logs, retrieved memory, and MCP resources must therefore be tagged as data and denied authority to expand tools or rewrite policy.",
+    "OWASP lists prompt injection as LLM01:2025 and notes that RAG/fine-tuning do not fully mitigate it; recommendations include least privilege, human approval for high-impact actions, segregation of untrusted content, and monitoring (https://genai.owasp.org/llmrisk/llm01-prompt-injection/). This challenges claims that an instruction file alone safely bootstraps autonomy.",
+    "SWE-agent found that an Agent-Computer Interface materially affects repository-task performance (Yang et al., 2024, arXiv:2405.15793, https://arxiv.org/abs/2405.15793). This supports curated navigation/commands, but it is benchmark evidence, not proof of production correctness, security, or cross-repository generality.",
+    "Anthropic's own documentation says instructions are context, can conflict, and may be followed inconsistently as they grow (https://docs.anthropic.com/en/docs/claude-code/memory). Vendor evidence itself contradicts treating natural-language bootstrap text as an authorization control.",
+    "GitHub's secure-use guidance warns that a compromised self-hosted runner can have broad impact and that action dependencies should be pinned (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions). A persistent all-repository agent host is therefore a poor default even when startup context is correct."
+  ],
+  "metrics_and_limits": {
+    "instruction_limits": "Codex defaults to a 32 KiB combined project-instruction cap and resolves the chain once per run (https://developers.openai.com/codex/guides/agents-md). Claude's auto-memory startup excerpt is the first 200 lines or 25 KB, while its guidance recommends keeping each CLAUDE.md under 200 lines (https://docs.anthropic.com/en/docs/claude-code/memory). Copilot precedence differs. Measure resolved byte/token count, truncation, conflicts, and hash; never assume every engine saw every file.",
+    "github_projects": "Project API add and field update cannot occur in the same call (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects). Project webhooks are public preview and the documented `projects_v2_item` availability is Organizations (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item). Rate-limit ceilings vary by authentication and query cost, so record GraphQL `rateLimit` data and back off rather than hard-code an unsupported throughput claim.",
+    "bootstrap_slos": "Proposed, not externally validated: p95 admission-to-verified-context <=30 s with a warm repo mirror and <=120 s cold; 100% bundle signature/schema verification; 0 duplicate active leases per work item; >=99.9% heartbeats/reconciliations processed without manual repair; stale observed GitHub state <=60 s normally and <=15 min after webhook loss; 100% commands cite a protected source and base SHA.",
+    "context_budget": "Proposed allocation: <=15% model context for authoritative objective/policy, <=10% architecture/commands, <=10% curated memory summaries; load code/evidence on demand by immutable reference. These percentages are design targets with no universal empirical optimum.",
+    "missing_denominators": "AgentDojo and SWE-agent do not establish production incident rates, bootstrap latency, or multi-tenant security. Vendor docs describe mechanisms, not success rates. Validate locally on the repository's task and attack distributions."
+  },
+  "recommended_design": "Use a controller-issued, content-addressed **Run Context Bundle (RCB)**, not an agent-written startup summary and not prior chat. An authenticated worker calls `POST /v1/claims/next` with worker identity, engine/version, supported capabilities and an idempotency key. In one transaction the controller selects one dependency-satisfied `READY` item, verifies the exact readiness token, creates an attempt and expiring lease, records an outbox event, and returns a signed manifest plus immutable references.\n\nThe RCB has four trust classes: (A) authoritative controller facts: work/attempt IDs, state version, exact `spec_hash`, `plan_hash`, `base_sha`, `policy_digest`, approval token, lease ID/epoch/expiry/heartbeat, budgets and allowed next actions; (B) reviewed repository facts read only from the protected base commit: `AGENTS.md`, architecture/commands/config and hashes; (C) curated memory: reviewed ADR/runbook/eval summaries with provenance, ACL, confidence, TTL and digest; (D) untrusted evidence: issue/comment/PR/log/code/MCP resource references clearly labeled `authority=data`. The gateway, not the model, enforces capabilities. Claude's explicit context-versus-enforcement distinction supports this boundary (https://docs.anthropic.com/en/docs/claude-code/memory), and GitHub's untrusted-context warning makes the data label necessary (https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs).\n\nProvide engine adapters. Resolve a normalized instruction IR (`rule_id`, scope/glob, priority, source SHA/path/lines, conflict policy) from protected repository files, then render native `AGENTS.md`/Copilot/Claude formats. Record the engine's discovered chain and bytes so native precedence can be audited (Codex behavior: https://developers.openai.com/codex/guides/agents-md; Copilot behavior: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot). Do not place secrets or mutable task status in instruction files.\n\nUse three canonical stores: Git for desired/versioned definitions; PostgreSQL/durable workflow history for live leases, events, approval bindings and idempotency; GitHub for actual issue/Project collaboration state. Maintain `desired_project_digest` from Git and `observed_project_revision` from GraphQL. Webhooks trigger an early reconcile, but periodic reads repair loss/out-of-order delivery. Safe additive drift may be auto-corrected; renamed/deleted fields, option semantic collisions, permission/ruleset weakening, and unknown mappings stop dispatch and require a migration/human review. This follows the general reconciliation pattern (https://kubernetes.io/docs/concepts/architecture/controller/) and accounts for separate Project add/update operations (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).",
+  "state_and_event_contract": {
+    "states": [
+      "READY",
+      "LEASED",
+      "BOOTSTRAPPING",
+      "EXECUTING",
+      "BLOCKED",
+      "PROPOSED",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "MERGE_READY",
+      "TERMINAL"
+    ],
+    "bootstrap_invariants": [
+      "Only a controller can change lifecycle state. An agent response, label edit, Project status, issue comment, or repository instruction is evidence/input, never a state-transition authorization.",
+      "Admission requires `READY`, all dependencies satisfied from a fresh observed snapshot, readiness approval bound to `work_item_id + spec_hash + plan_hash + policy_digest + base_sha`, no unexpired conflicting lease, and matching worker capability profile.",
+      "A bundle is acceptable only when schema version is supported; signature and every content digest verify; repository HEAD equals `base_sha`; policy/config sources are from the protected base tree; observed-state age is within policy; and the lease epoch is current.",
+      "One active lease per serialized work item/write set. Attempt number and fencing epoch strictly increase. Every write includes attempt ID, lease epoch, expected remote revision and idempotency key.",
+      "`next_actions` is a controller-computed finite enum such as `inspect`, `run_allowed_command`, `propose_patch`, `request_clarification`, `checkpoint`, `finish`; empty means stop. The model cannot mint a capability or extend expiry."
+    ],
+    "events": [
+      "`bootstrap.requested{request_id,worker,engine,capabilities,at}`",
+      "`claim.admitted|denied{work_item_id,attempt,reason,state_version}`",
+      "`lease.issued|renewed|revoked|expired{lease_id,epoch,owner,scope,expires_at}`",
+      "`context.bundle_issued{bundle_id,schema,manifest_digest,spec_hash,base_sha,policy_digest,observed_revision}`",
+      "`context.verified|rejected{bundle_id,worker,local_digests,reason}`",
+      "`instructions.resolved{engine,ordered_sources,bytes,conflicts,truncated}`",
+      "`context.resource_read{uri,digest,trust_class,bytes}` and `memory.read{record_id,revision}`",
+      "`agent_run.started|checkpointed|blocked|completed|failed|cancelled{attempt,input/output hashes,cost,failure_class}`",
+      "`github.observed|drift_detected|reconcile_planned|reconciled|quarantined{desired_digest,observed_revision,diff,receipts}`"
+    ],
+    "delivery": "Events and webhooks are at-least-once inputs. Deduplicate on provider delivery ID plus installation, use a transactional outbox, keep append-only audit sequence, and make projections rebuildable. Before retrying any external mutation, query the remote receipt/current field value. Temporal event history/heartbeat semantics are a reference (https://docs.temporal.io/workflow-execution/event; https://docs.temporal.io/develop/python/failure-detection).",
+    "stale_and_resume": "Heartbeat at <= one-third TTL. A missed heartbeat prevents new side effects; expiry makes the lease reclaimable only after remote reconciliation. A resumed worker presents checkpoint digest and prior epoch; the controller either renews the same attempt or fences it and issues a new attempt. Completion after fencing is stored as late evidence but cannot advance state.",
+    "project_reconciliation": "`project.desired.yaml` declares logical fields/options/workflows. Resolver maps logical keys to live node IDs. Actual item/status values come from GraphQL and webhook observations. Add-then-update is treated as a saga because GitHub forbids doing both in one call (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects). Periodic full scan detects missed preview webhooks (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item)."
+  },
+  "repository_artifacts": [
+    "`/.agent-os/bootstrap.schema.json` — JSON Schema 2020-12 for RCB manifest (https://json-schema.org/draft/2020-12); disallow unknown security-critical properties.",
+    "`/.agent-os/policy/v1/policy.rego`, `capabilities.yaml`, `risk-tiers.yaml`, `approval-bindings.yaml` — reviewed desired authorization inputs; CODEOWNERS-protected. OPA supplies policy-as-code mechanics, not policy legitimacy (https://www.openpolicyagent.org/docs/latest/).",
+    "`/.agent-os/workflow/v1/states.yaml`, `events.schema.json`, `transitions.yaml`, `failure-classes.yaml` — deterministic lifecycle and retry/stop rules.",
+    "`/.agent-os/github/project.desired.yaml`, `migrations/<version>.yaml`, `mapping.schema.json` — logical Project fields/status option keys and versioned migrations. Never check live Project node IDs/current item status in as if it were authoritative desired state; the controller stores `observed_project_revision`, mapping and mutation receipts outside Git and refreshes by API (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).",
+    "`/.agent-os/architecture/components.yaml`, `interfaces.yaml`, `ownership.yaml`, plus `/docs/adr/*.md` — compact, machine-addressable topology and reviewed decisions.",
+    "`/.agent-os/commands.yaml` — command ID, exact argv template, cwd, prerequisites, timeout, network class, expected artifacts and CI parity; no free shell fragments from issue text.",
+    "`/.agent-os/context/catalog.yaml` — immutable/resource selectors, trust class, ACL, maximum bytes, refresh rule and parser; MCP can expose resources but access checks/URI validation remain mandatory (https://modelcontextprotocol.io/specification/2025-06-18/server/resources).",
+    "`/.agent-os/memory/index.yaml` and `/docs/memory/<id>.md` — only reviewed summaries with source/evidence refs, confidence, owner, created/expires/supersedes fields and deletion class. Raw transcripts and auto-written memories are excluded from authority.",
+    "`/AGENTS.md` and nested `AGENTS.md`; optionally `/.github/copilot-instructions.md`, `/.github/instructions/*.instructions.md`, `/CLAUDE.md`, `/.claude/rules/*.md` — generated or hand-kept views of the normalized rules, with CI checking drift and engine precedence (https://developers.openai.com/codex/guides/agents-md; https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot; https://docs.anthropic.com/en/docs/claude-code/memory).",
+    "`/.github/ISSUE_TEMPLATE/*.yml` for structured intake (schema is documented as public preview: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema); `/.github/CODEOWNERS`; `/.github/workflows/agent-controller.yml` as a pinned, least-privilege trigger; `/tests/agent-os/{contracts,fixtures,attacks,reconcile}`.",
+    "Generated per-run artifacts live outside the mutable worktree: signed `manifest.json`, resolved-instructions report, observed GitHub snapshot, checkpoint, tool receipts and evidence index. Store digests/provenance compatible with SLSA concepts (https://slsa.dev/spec/v1.2/requirements), not credentials."
+  ],
+  "workflow_steps": [
+    "1. **Wake/admit.** Worker authenticates with short-lived workload identity and posts engine/version/capability profile plus idempotency key. Controller refreshes stale GitHub observations and atomically chooses the highest-priority `READY` item whose dependencies, risk, budgets and write-set constraints pass. No eligible item returns `204/no_work` plus retry-after; it does not invite the agent to invent work.",
+    "2. **Fence/issue.** In one DB transaction create `step_attempt`, unique active lease and monotonically increasing epoch; bind requested repo/branch/path/tool/egress scopes; commit outbox event. Mint repo credentials only after admission, with minimum permissions (GitHub guidance: https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication).",
+    "3. **Assemble.** Resolve approved spec/plan, exact base SHA, policy/version, architecture/commands catalog, reviewed memory, untrusted evidence refs, dependency outcomes, current Project/issue/PR observations and controller-computed `next_actions`. Hash each object, sign manifest, set expiry/max bytes. Do not embed long raw histories.",
+    "4. **Verify locally.** Worker validates schema/signature/digests/time/identity/lease epoch, checks out detached `base_sha` from a clean mirror, mounts protected policy read-only, and reports `context.verified`. Any mismatch or unsupported version stops before tools run.",
+    "5. **Resolve instructions.** Adapter walks the protected base tree with recorded engine semantics, emits ordered source paths/hashes/scopes/conflicts/truncation, then loads only rules relevant to the intended paths. Codex resolves once per run and caps its default chain (https://developers.openai.com/codex/guides/agents-md); a changed working directory does not silently redefine the approved policy.",
+    "6. **Orient.** Agent reads the objective/non-goals/acceptance matrix first; then architecture and allowlisted command descriptions; then only needed code, evidence and reviewed memories by immutable URI. All issue text, comments, repository code and external/MCP data remain tagged untrusted.",
+    "7. **Confirm.** Agent returns a structured start acknowledgment: understood objective/spec hash, selected next action, expected files, planned command IDs, open blockers and bundle digest. Deterministic controller rejects undeclared actions, unresolved blockers, stale state, expanded scope or conflicting instructions.",
+    "8. **Execute/checkpoint.** Capability proxy validates every tool action against lease/policy and writes a receipt. Heartbeats carry progress counter/current action/input-output digest/cost. Checkpoints contain patch/tree digest and evidence refs, not hidden chat dependence.",
+    "9. **Stop/reconcile.** On completion, block, cancellation, timeout or lost heartbeat, revoke credentials, capture immutable artifacts, query remote side effects, update event state idempotently, and release/fence lease. Unknown side-effect outcome goes to reconciliation/dead letter, never blind retry.",
+    "10. **Fresh handoff test.** A different clean worker must be able to continue from the current event record + bundle + checkpoint, with no transcript. If it cannot state objective/state/constraints/next action or reproduce evidence, bootstrap completeness failed."
+  ],
+  "human_gates": [
+    "A human product/technical approver must approve the exact `spec_hash + plan_hash + policy_digest + base_sha` before first implementation lease for consequential work. Any objective, non-goal, acceptance oracle, risk, permission or protected-config change invalidates that approval.",
+    "Require explicit human/security-owner approval for new GitHub App permissions, secret class, egress domain/method, MCP server, filesystem root, destructive/mutating command class, cross-repository write, workflow/ruleset/CODEOWNERS change, release/publish/deploy, protected data access, or exception to a failed verification. Approval includes principal/role, quorum, reason, exact hashes, action scope and expiry.",
+    "Repository guidance and memory changes are proposals. CODEOWNERS/rulesets protect `/.agent-os/**`, `AGENTS.md` adapters and `/.github/workflows/**`; GitHub recommends code-owner protection for workflow changes and full-SHA action pinning (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions). The authoring/implementation agent cannot approve its own policy, memory, prompt, eval, or promotion.",
+    "Project drift that deletes/renames fields, changes status semantics, weakens a ruleset, loses required permissions, or cannot map a logical key to exactly one live ID enters `QUARANTINED` and needs a reviewed migration. Routine item-status differences can reconcile automatically only when preconditions and the lifecycle event agree.",
+    "High-risk tool requests derived from issue text, code, PR head, MCP content, logs or retrieved memory require independent policy denial or a human decision; OWASP specifically recommends human approval for high-risk actions under prompt-injection risk (https://genai.owasp.org/llmrisk/llm01-prompt-injection/).",
+    "Emergency override uses two-person approval where feasible, narrow action scope, <=1 hour expiry, incident/ticket link, immutable audit and after-action review. It cannot let an agent alter the gate definition that evaluates itself."
+  ],
+  "security_and_failure_modes": [
+    {
+      "mode": "Indirect prompt injection or policy spoofing in issues, comments, code, READMEs, logs, PR-head instruction files, memories, or MCP resources",
+      "mitigation": "Treat as untrusted data; keep trust labels visible; load protected policy/instructions from approved base SHA; sanitize display but do not claim sanitization solves semantic injection; isolate tools, minimize capability, require high-risk approval and include adversarial fixtures. AgentDojo and OWASP show the risk is not solved by prompting (https://arxiv.org/abs/2406.13352; https://genai.owasp.org/llmrisk/llm01-prompt-injection/). GitHub Copilot code-review guidance indicates instructions may come from PR head, so that mode must never define authorization (https://docs.github.com/en/copilot/concepts/prompting/response-customization)."
+    },
+    {
+      "mode": "Instruction conflict, truncation or engine-dependent precedence",
+      "mitigation": "Compile a normalized rule IR; deterministic conflict lint; record ordered source paths/hashes/bytes and engine version; fail closed on security-rule conflict/truncation. Codex's 32 KiB default and once-per-run behavior are explicit (https://developers.openai.com/codex/guides/agents-md); Claude warns conflicting/large context is less reliable (https://docs.anthropic.com/en/docs/claude-code/memory)."
+    },
+    {
+      "mode": "Stale/double lease, zombie worker or duplicated webhook",
+      "mitigation": "Unique active-lease constraint, compare-and-swap state version, TTL/renew deadline, monotonic fencing epoch, idempotency namespace, and capability-proxy check on every side effect. Model after Kubernetes Lease fields and resourceVersion (https://kubernetes.io/docs/concepts/architecture/leases/)."
+    },
+    {
+      "mode": "Crash between GitHub Project add and field update, lost/out-of-order preview webhook, manual UI drift",
+      "mitigation": "Transactional intent/outbox, remote receipt, add/update saga, periodic GraphQL full scan, expected remote revision, and compensate/quarantine. GitHub says add and update require separate calls (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects) and Projects webhooks remain preview (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item)."
+    },
+    {
+      "mode": "Token leakage or over-broad integration",
+      "mitigation": "GitHub App installation identity, narrow repositories/permissions, just-in-time short-lived token, secret handle outside model context, no whole-context logging, deny-by-default egress. GitHub warns `github.token` is present in context and recommends least privilege (https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs; https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)."
+    },
+    {
+      "mode": "Malicious/compromised action, MCP server or persistent runner",
+      "mitigation": "Pin Actions to full commit SHA, verify source/provenance, allowlist MCP server identity and negotiated protocol, validate resource URIs/root realpaths, sandbox per attempt, destroy host and revoke tokens after use. GitHub and MCP document these hazards (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions; https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices)."
+    },
+    {
+      "mode": "Context-cache poisoning/staleness or memory self-confirmation",
+      "mitigation": "Cache key includes repo/base SHA/cwd/instruction hashes/policy/schema/engine; immutable object digests; dirty overlay separated; TTL and supersedes metadata; only human/independent-review promotion to authoritative memory. Raw transcripts are never canonical; self-written memory remains a proposal."
+    },
+    {
+      "mode": "Unknown side-effect outcome, partial checkpoint, API/rate-limit outage",
+      "mitigation": "Stop new effects, persist ambiguity, query remote state/receipt, bounded retry only for classified transient failures, exponential backoff/jitter, dead letter and operator runbook. Activities/remote effects should be idempotent under at-least-once behavior (https://docs.temporal.io/develop/python/best-practices/error-handling)."
+    },
+    {
+      "mode": "Symlink/path escape or oversized resource denial of service",
+      "mitigation": "Resolve canonical root and path, enforce MCP Roots and filesystem broker, reject escape, enforce per-resource/total byte and MIME/parser limits, list metadata before read. MCP Roots requires URI/path validation and boundary controls (https://modelcontextprotocol.io/specification/2025-06-18/client/roots)."
+    }
+  ],
+  "validation_and_tests": [
+    "**Schema/contract:** validate every repository artifact and emitted bundle against JSON Schema 2020-12; golden fixtures for each schema version; reject unknown security-critical enum/property, invalid URI, expired approval, wrong hash/signature and unsupported adapter/protocol (https://json-schema.org/draft/2020-12).",
+    "**Instruction conformance:** fixtures with root/nested/override/empty/conflicting/oversize files and different cwd values; run Codex, Copilot and Claude adapters; assert documented order, scope, 32 KiB/truncation behavior and emitted hash report (https://developers.openai.com/codex/guides/agents-md; https://docs.github.com/en/copilot/reference/custom-instructions-support; https://docs.anthropic.com/en/docs/claude-code/memory).",
+    "**Fresh-agent acceptance:** from an empty home/no transcript, agent must report exact objective, work state, spec/base/policy hashes, risk/non-goals, architecture owners, valid command IDs, dependency state, lease expiry/epoch and exactly one next eligible action. It must complete a representative task and hand off after forced restart using only checkpoint/bundle/event store. Compare outcome and token/latency against chat-history and full-repo baselines.",
+    "**Concurrency/property:** launch N workers against one item and overlapping write sets; assert only one lease, monotonic epoch, stale writer rejection, idempotent effects and deterministic priority/dependency selection. Randomize clock skew around renew/expiry and crash at every transaction/outbox boundary.",
+    "**GitHub reconciliation:** record/replay duplicate, delayed, reordered and missing webhooks; mutate live Project fields/options/items manually; simulate add-success/update-timeout; assert GraphQL read repairs safe drift, destructive/ambiguous drift quarantines, and Git desired file never falsely reports actual status. Test permission loss and rate exhaustion (API guide: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).",
+    "**Security:** inject instructions into issue/comment, PR-head `AGENTS.md`, source strings, failing-test output, dependency README, MCP resource/tool description and cached memory. Assert no capability/secret/egress expansion and no protected-file mutation. Include AgentDojo/OWASP-style indirect injections (https://arxiv.org/abs/2406.13352; https://genai.owasp.org/llmrisk/llm01-prompt-injection/), symlink escape, decompression bomb, secret-in-log and compromised MCP cases.",
+    "**Permissions:** automated canary inspects actual GitHub App/token scopes, proves read-only bootstrap cannot write, branch writer cannot touch default/protected config, and verifier cannot reuse implementer credentials. Pin every third-party action SHA and run dependency review per GitHub secure-use guidance (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).",
+    "**Recovery/replay:** rebuild projections from append-only events, restore database/object store, expire all leases after controller failover, reconcile each uncertain effect and verify audit completeness. Test current-minus-desired and desired-minus-current Project drift.",
+    "**Go/no-go:** no autonomy promotion until zero duplicate side effects and protected-policy writes in the test campaign; >=99% fresh-agent orientation fields correct on a held-out task suite; all seeded high-risk injections denied/escalated; p95 bootstrap SLO met; human-reviewed evidence shows no worse defect/escape rate. Thresholds are local design gates, not literature-derived guarantees."
+  ],
+  "operational_maintenance": "Run a continuously observable controller, not a pile of startup prompts. Emit an OpenTelemetry trace keyed by `work_item_id/attempt/bundle_id` across claim, context reads, tools, GitHub calls and verification (trace concepts: https://opentelemetry.io/docs/concepts/signals/traces/). Dashboards: eligible queue age, admission/boot p50/p95, bundle bytes/truncation/conflicts, no-work ratio, active/stale/reclaimed leases, heartbeat lag, late fenced writes, GraphQL rate budget, webhook lag/duplicates, Project drift age/classes, cache hit/stale rate, policy denials, clarification rate, resume success, cost and retained outcomes.\n\nScheduled jobs: full Project reconciliation at least every 15 minutes and after webhook gaps; daily expired-lease/credential sweep; weekly orphan branch/worktree/artifact and dead-letter review; monthly GitHub App permission and MCP/egress inventory; quarterly restore/failover/injection exercise. Retention is data-class based; purge raw prompts/logs early, keep signed event hashes/approval evidence as policy requires. Rotate signing keys and support overlapping verification keys.\n\nVersion schemas and adapters; bundles name minimum/maximum supported versions. Roll out controller/policy/instruction changes through offline replay, shadow decision comparison, limited canary and human promotion; keep instant rollback. Never let the proposer approve its own prompt/tool/memory/policy/eval change. MCP negotiates dated protocol versions, so record client/server version and capabilities rather than assuming features (current versioning docs: https://modelcontextprotocol.io/docs/2026-07-28/learn/versioning).\n\nRunbooks: `stale-lease` (fence, revoke, reconcile, resume); `bundle-mismatch` (quarantine cache, refetch base, verify signing key); `github-drift` (read full graph, classify, safe repair or reviewed migration); `unknown-effect` (freeze, remote query, compensate/escalate); `webhook-gap` (cursor/full scan); `permission-denied` (do not broaden automatically); `prompt-injection-suspected` (isolate worker, revoke, preserve evidence, rotate exposed secrets); `schema/adapter regression` (roll back and regenerate).",
+  "maturity_and_uncertainty": {
+    "solved": "Repository instruction discovery, Git SHA pinning, schemas/digests, GitHub App permissions, transactional claims, leases/fencing, event/outbox patterns, sandboxing, and desired/actual reconciliation are established mechanisms. GitHub Projects is API-addressable; agent tools demonstrably load repository instruction files.",
+    "conditional": "A reliable instant-context system is implementable if authoritative state is small, typed, signed and outside chat; capabilities are enforced by software; Project status is reconciled; and every attempt is fenced/idempotent. Cross-engine instruction portability is conditional because precedence, loading time, size and feature support differ (comparison sources: https://developers.openai.com/codex/guides/agents-md; https://docs.github.com/en/copilot/reference/custom-instructions-support; https://docs.anthropic.com/en/docs/claude-code/memory).",
+    "experimental": "Automatic context selection, summaries, memory retrieval, optimal byte/token budgets, task localization quality, and multi-agent handoff without performance loss are empirical. SWE-agent supports the importance of the interface, but not this complete production design (https://arxiv.org/abs/2405.15793). GitHub Projects webhooks and issue-form schema are documented previews, increasing compatibility risk (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item; https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema).",
+    "unsolved_or_not_proven": "No evidence proves prompt injection can be eliminated, that an agent always obeys instructions, that vendor memory is authoritative, or that bundle completeness implies correct code. AgentDojo/OWASP provide counterevidence (https://arxiv.org/abs/2406.13352; https://genai.owasp.org/llmrisk/llm01-prompt-injection/). No universal benchmark establishes production bootstrap SLOs or ideal context allocation.",
+    "overall": "Architecture confidence high; correctness of specific GitHub/tool capabilities high at the requested cutoff; efficacy of automated context selection medium; security against novel indirect prompt injection low-to-medium absent strict capability isolation."
+  },
+  "implementation_recommendation": "**Core decision:** build one controller-issued, signed, bounded RCB plus atomic fenced claim. A fresh agent should never reconstruct authority by reading chat, labels, Project views, the whole repository, or mutable memory. Use root `AGENTS.md` as a portable human view, but compile/verify per-tool adapters and keep enforcement in a capability proxy.\n\n**MVP (2–4 weeks):** PostgreSQL tables for `work_item`, `spec_revision`, `approval`, `attempt`, `lease`, `event`, `side_effect`, `github_observation`; transactional outbox; `POST /claims/next`, heartbeat/checkpoint/finish APIs; JSON Schema bundle; GitHub App read integration and one branch-write capability; protected `/.agent-os/{workflow,policy,architecture,commands,github}` plus `AGENTS.md`; clean ephemeral worker; full Project read/reconcile in shadow mode. Start with one repository, one R0/R1 task, one agent, one branch, no production secrets/network, draft PR only. GitHub Projects requires separate access and API mutation behavior (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).\n\n**Stage 2:** enable item/status writes with idempotent receipts and periodic drift repair; instruction adapters and conformance CI; curated reviewed memory; cold-start/handoff suite; least-privilege GitHub App token broker; adversarial content tests. Never rely on a Project webhook alone because it remains preview (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item).\n\n**Stage 3:** add durable workflow engine only when long-running volume/recovery warrants it; MCP read-only resource adapter with metadata-first selection and protocol/capability negotiation (https://modelcontextprotocol.io/specification/2026-07-28/server/resources); OPA policy gateway; parallel disjoint leases; cross-repo reads; signed evidence/provenance; shadow/canary controller upgrades.\n\nPromotion gates: clean-worker continuation without transcript, no double claim/stale write across crash tests, full observed-state recovery after webhook loss, all protected policy and injection tests pass, required SLOs met, and an independent human approves the exact controller/policy/eval version. Self-improvement may propose rule/context/memory changes and new eval cases, but cannot approve its own permissions, policy, oracle, evaluation result or promotion.",
+  "conflicts": [
+    {
+      "conflict": "`AGENTS.md` is described as a portable convention, yet engines implement different file names, precedence, loading moments and size limits.",
+      "resolution": "Treat it as a human-readable interchange source, not a normative runtime/security standard. Compile adapter-specific views and test actual engine versions (https://agents.md/; https://developers.openai.com/codex/guides/agents-md; https://docs.github.com/en/copilot/reference/custom-instructions-support; https://docs.anthropic.com/en/docs/claude-code/memory)."
+    },
+    {
+      "conflict": "Vendors promote repository instructions/memory as persistent context, but Anthropic says they are context rather than enforcement and GitHub says AI output/instruction following is nondeterministic.",
+      "resolution": "Use natural language for orientation only. Enforce filesystem, tool, network, secret, state and approval constraints outside the model (https://docs.anthropic.com/en/docs/claude-code/memory; https://docs.github.com/en/copilot/concepts/prompting/response-customization)."
+    },
+    {
+      "conflict": "'Projects/status as code' suggests Git is the current truth, while Project fields/items actually live in GitHub and can change through UI/API.",
+      "resolution": "Git contains desired schema/automation/migrations; GraphQL-derived observation contains current remote state; controller event/lease store contains execution truth. Reconcile them explicitly and quarantine ambiguous/destructive drift (https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects; https://kubernetes.io/docs/concepts/architecture/controller/)."
+    },
+    {
+      "conflict": "Webhook-driven startup appears instant, but Projects webhooks are preview and delivery can be duplicated/lost/out of order; add and update are separate calls.",
+      "resolution": "Use webhook as a reconcile hint, transactional outbox/idempotency and periodic full reads. Do not claim exactly-once delivery (https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item)."
+    },
+    {
+      "conflict": "ACP/MCP provide sessions/resources and may be marketed as resume/context standards, but neither provides an authoritative project lease or side-effect ledger.",
+      "resolution": "Use them as negotiated transport/discovery only; keep claim, fencing, approvals, effects and checkpoints in the control plane (https://agentclientprotocol.com/protocol/v1/session-setup; https://modelcontextprotocol.io/specification/2026-07-28/server/resources)."
+    },
+    {
+      "conflict": "More context may improve orientation, while vendor limits and security research show that more content consumes budget, causes conflicts and increases prompt-injection exposure.",
+      "resolution": "Use small authoritative manifest, metadata-first/on-demand retrieval, explicit omissions and held-out completeness/security tests rather than whole-repository injection (https://developers.openai.com/codex/guides/agents-md; https://arxiv.org/abs/2406.13352)."
+    }
+  ],
+  "confidence": {
+    "overall": "High for the proposed control-plane/lease/reconciliation architecture; medium-high that the cited tool/API behavior is current at the 2026-09-13 cutoff; medium for cross-tool instruction normalization; medium-low for any claim that automated context selection will be complete or injection-resistant without repository-specific tests.",
+    "high": [
+      "GitHub Project API requires explicit query/mutation access and separate add/update operations.",
+      "Codex/Claude/Copilot use materially different instruction discovery semantics.",
+      "Natural-language instruction files are not authorization enforcement.",
+      "A fenced lease, idempotency, event log and remote reconciliation are required for safe crash/retry behavior."
+    ],
+    "medium": [
+      "The proposed file layout and bundle fields are sufficient for most single-repository R0/R1 tasks.",
+      "A 30-second warm-start target is practical; this is a local target, not published evidence.",
+      "Root AGENTS.md plus generated adapters will reduce but not eliminate behavioral drift."
+    ],
+    "low_or_unknown": [
+      "Universal optimal context/token allocation.",
+      "Production prompt-injection defeat rate.",
+      "Behavior of future vendor versions or undocumented instruction conflicts.",
+      "Benefit/cost of MCP or Temporal at small scale."
+    ],
+    "method": "Primary official docs were preferred and direct pages were checked; standards/versioned specifications and papers/OWASP challenged vendor claims. No production implementation or benchmark was run for this research item."
+  },
+  "as_of": "2026-09-13",
+  "sources": [
+    {
+      "title": "Adding repository custom instructions for GitHub Copilot",
+      "publisher": "GitHub",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions",
+      "supports": "Copilot instruction file locations, nearest AGENTS.md precedence"
+    },
+    {
+      "title": "Response customization",
+      "publisher": "GitHub",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/concepts/prompting/response-customization",
+      "supports": "instruction precedence, nondeterminism, PR-head behavior"
+    },
+    {
+      "title": "Custom instructions support matrix",
+      "publisher": "GitHub",
+      "type": "official reference",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/reference/custom-instructions-support",
+      "supports": "feature differences by Copilot surface"
+    },
+    {
+      "title": "Best practices for Copilot coding agent tasks",
+      "publisher": "GitHub",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/coding-agent/best-practices-for-using-copilot-to-work-on-tasks",
+      "supports": "task scope and project-context guidance"
+    },
+    {
+      "title": "Custom instructions with AGENTS.md",
+      "publisher": "OpenAI",
+      "type": "official product documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://developers.openai.com/codex/guides/agents-md",
+      "supports": "Codex discovery chain, precedence, once-per-run behavior, 32 KiB default"
+    },
+    {
+      "title": "AGENTS.md open format",
+      "publisher": "Agentic AI Foundation / Linux Foundation",
+      "type": "official project documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://agents.md/",
+      "supports": "portable Markdown convention and nearest-file scope"
+    },
+    {
+      "title": "How Claude remembers your project",
+      "publisher": "Anthropic",
+      "type": "official product documentation",
+      "publication_or_version_date": "live; Claude Code v2.1.213+ behavior noted",
+      "access_date": "2026-09-13",
+      "url": "https://code.claude.com/docs/en/memory",
+      "supports": "CLAUDE.md/import/discovery, context-not-enforcement and size guidance"
+    },
+    {
+      "title": "Claude Code security",
+      "publisher": "Anthropic",
+      "type": "official security documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://code.claude.com/docs/en/security",
+      "supports": "permission, review and sandbox guidance"
+    },
+    {
+      "title": "Using the API to manage Projects",
+      "publisher": "GitHub",
+      "type": "official API guide",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects",
+      "supports": "Projects v2 auth, IDs, pagination and separate add/update mutations"
+    },
+    {
+      "title": "Webhook events and payloads: projects_v2_item",
+      "publisher": "GitHub",
+      "type": "official webhook reference",
+      "publication_or_version_date": "live; public preview",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects-v2-item",
+      "supports": "Project webhook permissions/events/availability and preview status"
+    },
+    {
+      "title": "Automating Projects using Actions",
+      "publisher": "GitHub",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions",
+      "supports": "GITHUB_TOKEN Projects limitation and App/PAT permissions"
+    },
+    {
+      "title": "REST API versions",
+      "publisher": "GitHub",
+      "type": "official API reference",
+      "publication_or_version_date": "2026-03-10 API version",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/about-the-rest-api/api-versions",
+      "supports": "current header and default-version behavior"
+    },
+    {
+      "title": "Generating an installation access token for a GitHub App",
+      "publisher": "GitHub",
+      "type": "official authentication documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "supports": "one-hour expiry and repository/permission narrowing"
+    },
+    {
+      "title": "Contexts reference",
+      "publisher": "GitHub",
+      "type": "official Actions reference",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs",
+      "supports": "untrusted context and sensitive github.token warning"
+    },
+    {
+      "title": "Use GITHUB_TOKEN for authentication in workflows",
+      "publisher": "GitHub",
+      "type": "official Actions documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication",
+      "supports": "job/workflow token permissions"
+    },
+    {
+      "title": "Secure use reference",
+      "publisher": "GitHub",
+      "type": "official security guidance",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "supports": "least privilege, full-SHA action pinning, CODEOWNERS and runner risks"
+    },
+    {
+      "title": "REST API endpoints for rules",
+      "publisher": "GitHub",
+      "type": "official API reference",
+      "publication_or_version_date": "2026-03-10 API family",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/orgs/rules",
+      "supports": "ruleset management surface"
+    },
+    {
+      "title": "Syntax for GitHub's form schema",
+      "publisher": "GitHub",
+      "type": "official schema documentation",
+      "publication_or_version_date": "public preview; live",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema",
+      "supports": "structured issue form and preview limit"
+    },
+    {
+      "title": "Resources, MCP specification",
+      "publisher": "Model Context Protocol",
+      "type": "versioned specification",
+      "publication_or_version_date": "2026-07-28",
+      "access_date": "2026-09-13",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources",
+      "supports": "capability, paginated listing/read, optional changes/subscriptions"
+    },
+    {
+      "title": "Roots, MCP specification",
+      "publisher": "Model Context Protocol",
+      "type": "versioned specification",
+      "publication_or_version_date": "2025-06-18",
+      "access_date": "2026-09-13",
+      "url": "https://modelcontextprotocol.io/specification/2025-06-18/client/roots",
+      "supports": "filesystem boundary and path validation"
+    },
+    {
+      "title": "MCP versioning",
+      "publisher": "Model Context Protocol",
+      "type": "official protocol documentation",
+      "publication_or_version_date": "2026-07-28",
+      "access_date": "2026-09-13",
+      "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/versioning",
+      "supports": "date revisions and negotiation"
+    },
+    {
+      "title": "Security Best Practices",
+      "publisher": "Model Context Protocol",
+      "type": "official security guidance",
+      "publication_or_version_date": "2025-11-25 revision",
+      "access_date": "2026-09-13",
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "supports": "confused deputy, token, SSRF, session, local-server and scope risks"
+    },
+    {
+      "title": "ACP protocol overview",
+      "publisher": "Agent Client Protocol",
+      "type": "versioned protocol specification",
+      "publication_or_version_date": "v1; live at cutoff",
+      "access_date": "2026-09-13",
+      "url": "https://agentclientprotocol.com/protocol/v1/overview",
+      "supports": "JSON-RPC initialization/capability negotiation"
+    },
+    {
+      "title": "ACP session setup",
+      "publisher": "Agent Client Protocol",
+      "type": "versioned protocol specification",
+      "publication_or_version_date": "v1; live at cutoff",
+      "access_date": "2026-09-13",
+      "url": "https://agentclientprotocol.com/protocol/v1/session-setup",
+      "supports": "session/new and conditional session/load replay"
+    },
+    {
+      "title": "Leases",
+      "publisher": "Kubernetes",
+      "type": "official documentation",
+      "publication_or_version_date": "stable coordination.k8s.io/v1; live",
+      "access_date": "2026-09-13",
+      "url": "https://kubernetes.io/docs/concepts/architecture/leases/",
+      "supports": "holder identity, duration, renew time and resourceVersion"
+    },
+    {
+      "title": "Controllers",
+      "publisher": "Kubernetes",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "supports": "desired/current reconciliation loop"
+    },
+    {
+      "title": "Temporal platform / durable execution",
+      "publisher": "Temporal Technologies",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/temporal",
+      "supports": "durable state/progress and recovery"
+    },
+    {
+      "title": "Events and Event History",
+      "publisher": "Temporal Technologies",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/workflow-execution/event",
+      "supports": "persisted event history and replay"
+    },
+    {
+      "title": "Python SDK error-handling best practices",
+      "publisher": "Temporal Technologies",
+      "type": "official documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/develop/python/best-practices/error-handling",
+      "supports": "at-least-once Activities and idempotency"
+    },
+    {
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher": "Debenedetti et al. / arXiv",
+      "type": "security benchmark paper/preprint",
+      "publication_or_version_date": "2024-06-18 initial submission",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "supports": "tool-agent prompt injection benchmark"
+    },
+    {
+      "title": "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      "publisher": "Yang et al. / arXiv",
+      "type": "software-engineering agent paper/preprint",
+      "publication_or_version_date": "2024-05-24 initial submission",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/2405.15793",
+      "supports": "importance of agent-computer interface"
+    },
+    {
+      "title": "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection",
+      "publisher": "Greshake et al. / arXiv",
+      "type": "security research preprint",
+      "publication_or_version_date": "2023-02-23; revised 2023-05-05",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/2302.12173",
+      "supports": "real-world indirect prompt injection"
+    },
+    {
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher": "OWASP GenAI Security Project",
+      "type": "independent security guidance",
+      "publication_or_version_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "supports": "indirect injection, RAG limits, least privilege and approvals"
+    },
+    {
+      "title": "JSON Schema Draft 2020-12",
+      "publisher": "JSON Schema",
+      "type": "open standard specification",
+      "publication_or_version_date": "2020-12",
+      "access_date": "2026-09-13",
+      "url": "https://json-schema.org/draft/2020-12",
+      "supports": "artifact schema validation basis"
+    },
+    {
+      "title": "SLSA Requirements v1.2",
+      "publisher": "OpenSSF / SLSA",
+      "type": "supply-chain standard",
+      "publication_or_version_date": "v1.2",
+      "access_date": "2026-09-13",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "supports": "artifact provenance and integrity concepts"
+    },
+    {
+      "title": "Open Policy Agent documentation",
+      "publisher": "Open Policy Agent / CNCF",
+      "type": "official project documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://www.openpolicyagent.org/docs/latest/",
+      "supports": "policy decision engine option"
+    },
+    {
+      "title": "Traces",
+      "publisher": "OpenTelemetry / CNCF",
+      "type": "official standard documentation",
+      "publication_or_version_date": "live; undated",
+      "access_date": "2026-09-13",
+      "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+      "supports": "cross-component trace correlation"
+    }
+  ],
+  "uncertain": [
+    "metrics_and_limits",
+    "maturity_and_uncertainty"
+  ]
+}

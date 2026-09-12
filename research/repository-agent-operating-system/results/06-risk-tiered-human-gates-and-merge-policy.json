@@ -1,0 +1,486 @@
+{
+  "scope": [
+    "Design the governance track for a GitHub-hosted repository-native agent operating system: deterministic risk classification, human intervention, ownership, rulesets, guarded auto-merge, exceptions, production approval, least-privilege identities, security evidence, audit, and reconciliation. It covers issue/spec approval through merge and production promotion. It does not claim that GitHub configuration alone proves semantic safety.",
+    "The trust boundary is explicit: agents may propose code and policy changes, but they never approve their own plan, review, exception, ruleset/CODEOWNERS/CI change, evaluator or production release. Desired policy may live in Git; effective GitHub rulesets, environments, app grants, and Projects are remote state and must be independently reconciled and audited."
+  ],
+  "current_capabilities": [
+    "GitHub repository/organization rulesets can target branches/tags, layer multiple applicable rules, expose rule insights, support bypass actors and enforcement states, and are manageable by REST; unlike legacy branch protection where only one matching rule applies, layered rulesets can express a risk floor ([S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets), [S2](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), [S3](https://docs.github.com/en/rest/repos/rules), [S17](https://docs.github.com/en/rest/orgs/rules)). Repository rules include required PRs/reviews, status checks, signed commits, linear history, merge queue, deployments, code scanning, file/path/size and workflow restrictions, subject to plan/repository availability ([S2](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)).",
+    "CODEOWNERS is a path-to-owner routing file in `.github/`, repository root, or `docs/`; the first file in that order is used. Required code-owner review is enforcement only when a protected rule/ruleset requires it. Owners need write access, fork PR ownership is evaluated from the base branch, and the file has syntax/size limitations ([S4](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)). Therefore CODEOWNERS is not a general separation-of-duties engine.",
+    "Protected branches/rulesets can require approvals, dismiss stale approvals, require approval of the most recent reviewable push, resolve conversations, require named checks from an expected GitHub App, restrict pushes, require deployments and a merge queue ([S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)). GitHub auto-merge merely waits for branch-protection requirements and must be enabled by an authorized actor; the GraphQL mutation takes the PR ID and merge method ([S8](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/automatically-merging-a-pull-request), [S9](https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge)).",
+    "Merge queue builds a temporary merge group against current base and queued changes. GitHub Actions workflows that supply required checks must subscribe to `merge_group`; a workflow listening only to `pull_request` can leave the queued check missing ([S6](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue), [S7](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#merge_group)).",
+    "GitHub environments can restrict deployment branches/tags, hold environment secrets until protection rules pass, use required reviewers and prevent self-review; however only one listed reviewer needs approve, so two-person release approval needs a custom protection rule/workflow or an external release controller ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments), [S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments), [S28](https://docs.github.com/en/rest/deployments/environments)). Availability and bypass behavior vary by plan and repository visibility.",
+    "Actions supports job/workflow `permissions` for `GITHUB_TOKEN`, OIDC federation, environments and artifact attestations. GitHub warns that compromised third-party Actions and unsafe triggers can expose tokens/secrets; pin third-party actions to a full commit SHA and avoid privileged execution of fork-controlled code ([S12](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication), [S13](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions), [S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/), [S26](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)).",
+    "Organization/enterprise audit logs and APIs record administrative and repository activity and enterprise streaming can export events, but coverage, fields and retention differ by plan/event and are not an append-only application ledger ([S16](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-the-audit-log-for-your-organization), [S27](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise))."
+  ],
+  "representative_systems": [
+    "GitHub rulesets + CODEOWNERS + merge queue are the repository merge enforcement plane; GitHub Actions is the independent evidence runner; GitHub environments/deployments are the production gate; a GitHub App is the narrow automation identity; organization/enterprise audit log is a secondary audit source.",
+    "GitHub ProjectV2 is useful for operator views, not the authoritative policy state. Its GraphQL objects use node IDs and field/item mutations ([S18](https://docs.github.com/en/graphql/reference/objects#projectv2)); the REST Projects API is for classic Projects and is closed in favor of the newer Projects experience ([S29](https://docs.github.com/en/rest/projects)). A controller must resolve symbolic manifest names to live GraphQL IDs and reconcile drift rather than pretending YAML in Git automatically configures the Project.",
+    "OWASP Excessive Agency requires minimum functionality, permissions and autonomy plus downstream authorization ([S22](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)); NIST SSDF provides protected-development/change-control outcomes ([S23](https://csrc.nist.gov/pubs/sp/800/218/final)); SLSA specifies build provenance ([S24](https://slsa.dev/spec/v1.2/requirements)). These standards bound the design but do not certify an agent or GitHub configuration."
+  ],
+  "primary_evidence": [
+    "Ruleset composition and APIs: [S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets), [S2](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), [S3](https://docs.github.com/en/rest/repos/rules), [S17](https://docs.github.com/en/rest/orgs/rules); ruleset webhooks can trigger immediate drift inspection ([S19](https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset)).",
+    "Ownership/review semantics: [S4](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) and [S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches). Key implication: owning `.github/CODEOWNERS`, workflows and policy files and requiring owner review is necessary, but eligible owners with bypass/write authority still need organizational separation.",
+    "Exact-head integration: merge queue behavior [S6](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) and `merge_group` event [S7](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#merge_group); auto-merge UI and GraphQL mutation [S8](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/automatically-merging-a-pull-request), [S9](https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge). Auto-merge is scheduling, not risk acceptance.",
+    "Production protection: environment configuration/review and REST API [S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments), [S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments), [S28](https://docs.github.com/en/rest/deployments/environments). Environment secrets become available to the job only after rules pass; deploy only the reviewed immutable digest and separately verify artifact identity.",
+    "Identity and CI: GitHub App permissions [S15](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app), Actions token permissions [S12](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication), security hardening/full-SHA pinning [S13](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions), OIDC [S26](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect). Use separate App installations/identities for proposing, verifying, merging and deploying.",
+    "Audit/drift: audit log [S16](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-the-audit-log-for-your-organization), enterprise stream [S27](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise), REST API conditional/idempotent practices [S30](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api), and rules troubleshooting [S31](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/troubleshooting-rules)."
+  ],
+  "independent_evidence": [
+    "GitHub Security Lab's 'Preventing pwn requests' shows how `pull_request_target` plus checkout/build of attacker-controlled PR code can yield repository write or secret compromise ([S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/)). This challenges any policy that treats a green Actions run as independent without checking trigger, checkout SHA, token permissions and runner trust.",
+    "CISA's March 18, 2025 alert says `tj-actions/changed-files` was compromised and recommends locating uses, reviewing workflow output for leaked secrets, rotating secrets and updating to a safe version ([S20](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066)). This is operational evidence that third-party CI actions are part of the trusted computing base; tag pinning alone is weaker than reviewed full-SHA pinning plus dependency monitoring.",
+    "A controlled study with 29 professionals and 72 reviews retained 89% of AI-surfaced issues, but the AI surfaced only 42% of 48 injected issues and showed no time saving ([S21](https://arxiv.org/abs/2411.11401)). The sample is small and artificial, but it rejects 'AI review passed' as a substitute for required human/domain review.",
+    "OWASP warns excessive functionality, permissions and autonomy enable damaging agent actions and directs authorization to downstream systems rather than the LLM ([S22](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)). GitHub CodeQL Autofix likewise says suggestions can be incorrect or introduce vulnerabilities and require review/testing ([S25](https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning))."
+  ],
+  "metrics_and_limits": [
+    "CODEOWNERS: GitHub documents a 3 MB file limit; over-limit files are not loaded, and `!` negation and escaping `#` are unsupported. Validate syntax/coverage in CI and split ownership by directory rather than generating an unreviewable file ([S4](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)).",
+    "Environment required reviewers: up to six people or teams may be listed, but only one approval is required; 'prevent self-review' blocks the initiator, not all conflicts of interest ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)-[S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments)). Encode two-person/high-risk approval in an external signed approval record or custom gate.",
+    "Ruleset status checks have an expected-source option; bind critical checks to the verifier GitHub App. Required checks accept successful/skipped/neutral outcomes according to GitHub semantics, so the policy job itself must fail closed rather than emit neutral/skipped for mandatory evidence ([S2](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), [S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)).",
+    "GitHub API use has primary/secondary rate limits and recommends serial requests, conditional requests, avoiding polling and exponential backoff ([S30](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api)). Reconciliation must be event-driven plus periodic, checkpoint cursors/ETags, and pause rather than partially apply after rate-limit/abuse errors.",
+    "Independent review experiment: 29 professionals, 72 reviews, 48 injected issues, 42% surfaced, 89% of surfaced issues retained, no observed time saving ([S21](https://arxiv.org/abs/2411.11401)). This is not a universal reviewer-catch rate.",
+    "Missing denominators: no representative public data establishes ruleset-bypass incidence, approval-rubber-stamp rate, merge-queue escape defects, Project/ruleset drift frequency, or current agent-caused production incidents. Measure locally by risk tier and policy version."
+  ],
+  "recommended_design": [
+    "Adopt a deny-by-default R0-R4 policy. R0 analysis has no mutation. R1 low-risk reversible changes may become auto-merge eligible only after a pilot. R2 material behavior requires plan-owner and CODEOWNER PR approval plus staged release. R3 auth/IAM/crypto/data/destructive migration/CI-policy/infrastructure/package publishing requires specialist plan approval, independent two-person PR/exception approval and production release approval. R4 ambiguous, irreversible, no oracle/rollback, or self-governance is human-led/proposal-only.",
+    "Compute `effective_risk=max(ticket_declared, deterministic diff/path/dependency/capability detectors, runtime findings)`. The agent may recommend but never lower risk. Any edit to `.github/workflows/**`, `.github/CODEOWNERS`, `.github/rulesets/**`, `.github/governance/**`, evaluator/hidden tests, deployment/IAM, lockfiles/new suppliers, migrations, public API, or telemetry/rollback controls raises the floor.",
+    "Separate principals: `proposal-app` can create/update its task branch and PR; `verifier` has read-only contents plus checks write and no branch write; `merge-controller` can enable auto-merge/queue only after signed policy decision; `deploy-controller` receives OIDC only after environment/external approval; human owners administer rules. No principal that authors a change may approve its plan, exception, PR or release.",
+    "Use GitHub-native rules as the last-mile enforcement but keep a deterministic control-plane ledger. Git is the reviewed desired configuration. The controller reads live rulesets/environments/App grants/ProjectV2, produces a plan, requires human approval for weakening/deletion or unexpected ownership changes, applies with API preconditions, reads back canonical state, and records desired hash/live hash/API response/audit event."
+  ],
+  "state_and_event_contract": {
+    "states": [
+      "POLICY_CLASSIFIED",
+      "PLAN_APPROVAL_REQUIRED",
+      "IMPLEMENTING",
+      "VERIFYING",
+      "REVIEW_REQUIRED",
+      "AUTO_MERGE_ELIGIBLE",
+      "QUEUED",
+      "MERGED",
+      "RELEASE_APPROVAL_REQUIRED",
+      "DEPLOYING",
+      "OBSERVING",
+      "CLOSED",
+      "BLOCKED",
+      "ROLLED_BACK"
+    ],
+    "approval_binding": "Every decision token binds work_item_id, spec_revision/hash, PR number, exact head SHA, base SHA, risk tier, policy bundle hash, required evidence digest, approver stable identity/role, decision, timestamp and expiry. A head/base/policy/evidence change invalidates it; comments, labels and Project fields alone are not approval tokens.",
+    "events": [
+      "ticket.ready.v1",
+      "risk.classified.v1",
+      "pr.synchronize.v1",
+      "check.completed.v1",
+      "review.submitted.v1",
+      "ruleset.changed.v1",
+      "merge_group.checks.v1",
+      "merge.completed.v1",
+      "exception.requested|approved|expired.v1",
+      "deployment.requested|approved|completed.v1",
+      "drift.detected|remediated.v1"
+    ],
+    "idempotency": "Use delivery GUID + event type/resource ID as intake key; use `(work_item, head_sha, policy_hash, transition)` as decision key. Store raw webhook first, verify signature, apply compare-and-swap state transitions, use an outbox for API writes, and reread live state after ambiguous timeout.",
+    "reconciliation": "Webhooks accelerate but do not prove completeness. Periodically list live rulesets, environments, App grants and ProjectV2 fields/items; canonicalize unordered/default fields; compare with manifest. Safe additive/tightening drift can be proposed or auto-repaired only by pre-approved policy. Weakening, deletion, bypass additions, ownership changes and unknown objects block merges/deploys and page an owner. Project status is a projection: restore derived fields from ledger, but open a review for human-owned priority/intent conflicts."
+  },
+  "repository_artifacts": [
+    "`.github/CODEOWNERS` — explicit owners for application paths and self-owned control paths; CI tests every protected path and rejects unknown users/teams or an oversized/invalid file.",
+    "`.github/governance/risk-policy.v1.yaml`, `protected-paths.yaml`, `capability-profiles.yaml`, `merge-policy.yaml`, `deployment-policy.yaml` — JSON-Schema-validated enums, escalation predicates, check/App IDs, minimum approval roles/counts, rollback/expiry and no-bypass invariants.",
+    "`.github/rulesets/main.json`, `release-tags.json` and `environments/production.yaml` — normalized desired snapshots. They are inputs to a controller, not GitHub-native declarative state. Generated live snapshots belong under `audit/snapshots/` or an immutable store, never silently written by the proposal agent.",
+    "`.github/workflows/policy-check.yml`, `verify.yml`, `merge-group.yml`, `deploy.yml`, `drift-audit.yml` — minimal explicit permissions, full-SHA pinned actions, concurrency, timeouts, immutable artifact digest handoff. `merge-group.yml` handles `merge_group` and runs the same required check names.",
+    "`schemas/approval-token.v1.json`, `policy-decision.v1.json`, `exception.v1.json`, `evidence-bundle.v1.json`, `audit-event.v1.json`; `policy/rego/*` or equivalent deterministic rules; `tests/policy/*`, `tests/ruleset-fixtures/*`, `tests/codeowners/*`.",
+    "`ops/reconcile-github.py` (or controller service), `ops/project-manifest.yaml`, `ops/github-app-permissions.yaml`, `runbooks/policy-drift.md`, `break-glass.md`, `merge-queue.md`, `production-rollback.md`. Store symbolic organization/team/project/field names plus stable aliases; resolve and persist remote IDs in controller state, not hand-edited manifests."
+  ],
+  "workflow_steps": [
+    "1. Intake authenticates webhook, stores raw event, reads the approved spec revision and computes risk from paths, semantic flags, dependencies, requested capabilities and rollback. Unknown classification stops at `PLAN_APPROVAL_REQUIRED`.",
+    "2. A human signs the exact plan/spec for R2/R3. The proposal App gets a short-lived branch-scoped token; it cannot edit protected control paths unless the task is explicitly governance-classed, in which case execution remains proposal-only.",
+    "3. Agent opens a draft PR with risk/evidence metadata. On every synchronize event, revoke prior decision tokens and rerun clean-room CI using read-only checkout and minimal token. Never build untrusted fork code under `pull_request_target` with secrets/write token ([S12](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)-[S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/)).",
+    "4. The verifier emits a signed evidence digest for the exact head. Policy checks required test/security/provenance results, protected-path ownership, approval roles/counts, unresolved conversations, exception validity and live-policy drift.",
+    "5. R1 proven task classes may become `AUTO_MERGE_ELIGIBLE`; merge-controller—not the author—enables auto-merge or queues the SHA. R2/R3 wait for qualified human approval. Merge queue reruns evidence on `merge_group`; missing, skipped unexpectedly, stale or wrong-App checks fail closed ([S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)-[S9](https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge)).",
+    "6. After merge, build once and attest the immutable artifact. Release policy maps risk/environment. Production waits for an exact artifact+source+policy approval; environment approval unlocks OIDC, then canary/SLO checks promote or roll back ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)-[S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments), [S24](https://slsa.dev/spec/v1.2/requirements), [S26](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)).",
+    "7. Record final SHA/digest, approvals, checks, bypass/exception use, deployment and observation outcome. Reconciler continuously compares Git desired state with actual GitHub state. Close only after the observation window or explicit non-deployment disposition."
+  ],
+  "human_gates": [
+    "R0: no execution approval because identity is read-only; require a human for consequential prioritization or publication. R1: human approves the task/spec during pilot; after measured promotion, no per-PR human is required only for a closed allowlisted class with independent checks, no protected paths/new dependencies, small bounded diff and easy rollback; random audits continue.",
+    "R2: product/technical owner approves the exact spec; at least one independent path-qualified CODEOWNER approves the exact head; release owner approves user-visible/production promotion. Scope or semantic change returns to planning.",
+    "R3: specialist approval before capability grant; two distinct qualified humans approve exact plan/PR/exception, including security/data/operations as applicable; production approval binds the exact artifact digest and rollout/rollback. Because GitHub environment reviewer lists require only one approval, implement the second signature outside that primitive ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)-[S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments)).",
+    "R4: humans own the work. Agent can gather evidence/draft only. Always R4 for changes that grant itself merge/deploy/bypass/admin, alter its own policy/evaluator/hidden acceptance tests, delete audit evidence, or approve its own exception.",
+    "Exception/break-glass: human incident commander plus second approver where feasible; exact failed rule, SHA/digest, reason, scope, compensating controls, expiry, rollback and follow-up. Never waive audit integrity, secret disclosure response, identity separation, unknown artifact provenance or irreversible action without accountable human command."
+  ],
+  "security_and_failure_modes": [
+    "Policy-as-text bypass: issue/comment/repository prompt injection convinces agent to relabel risk or edit gates. Mitigation: risk computed by signed deterministic policy outside model; control paths protected; agent has no rule administration/bypass/approval permission ([S22](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)).",
+    "Check spoofing/staleness: same check name emitted by an untrusted workflow/App, green result for old SHA, skipped/neutral job, or missing `merge_group`. Mitigation: bind check to expected verifier App, SHA/base/policy/evidence digest; fail closed and test merge-group trigger ([S2](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), [S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)-[S7](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#merge_group)).",
+    "CI confused deputy: `pull_request_target`, untrusted checkout, cache/artifact poisoning, compromised action exposes write token/secrets. Mitigation: unprivileged PR workflow, separate privileged follow-up that consumes validated metadata only, explicit token permissions, no secrets, ephemeral runners, full-SHA actions and dependency monitoring ([S12](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)-[S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/), [S20](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066)).",
+    "Ownership/bypass weakness: wildcard CODEOWNERS gap, invalid/oversize file, team loses write access, admin/ruleset bypass, deploy key bypass, actor approves own change. Mitigation: synthetic path coverage, live team membership checks, deny bypass by default, alert on ruleset/owner/App-grant event, separate administrators and quarterly access review ([S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)-[S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches), [S19](https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset)).",
+    "TOCTOU/race: approval attaches to prior head/base/policy while merge queue tests another tree. Mitigation: cryptographic approval binding, stale dismissal, latest-push approval, queue revalidation and CAS transitions.",
+    "Remote drift/API partial failure: Git YAML says safe while live ruleset/environment/Project differs; webhook missed; rate limit leaves half-applied state. Mitigation: inventory remote IDs, canonical read-after-write, outbox/idempotency, periodic full scan, transaction plan with compensating rollback, `POLICY_DRIFT_BLOCKED` kill switch ([S3](https://docs.github.com/en/rest/repos/rules), [S17](https://docs.github.com/en/rest/orgs/rules)-[S19](https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset), [S28](https://docs.github.com/en/rest/deployments/environments)-[S31](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/troubleshooting-rules)).",
+    "Rubber-stamp/AI review failure: green tests and an AI review miss semantics; controlled evidence found only 42% of injected issues surfaced ([S21](https://arxiv.org/abs/2411.11401)). Use qualified human review for material/high risk, bounded diffs, semantic checklist and independent tests.",
+    "Deployment/exception abuse: environment admin bypass, one-of-six reviewer misunderstood as multi-party, expired exception remains active, mutable artifact rebuilt after review. Mitigation: external multi-signature gate, prevent self-review/admin bypass, TTL fail-close, promote exact attested digest, observe and automatically rollback."
+  ],
+  "validation_and_tests": [
+    "Schema/property tests: all policy files parse; every change class maps to exactly one minimum risk; `effective_risk` never decreases when protected paths/capabilities/findings are added; missing/unknown fields deny; author cannot be an approver; expired approval/exception denies.",
+    "CODEOWNERS tests: enumerate repository paths and synthetic changed-file sets; ensure control/security/deploy paths have qualified owner teams; verify fork/base behavior assumptions; reject invalid syntax, 3 MB breach, missing write access and uncovered protected path ([S4](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)).",
+    "Ruleset conformance tests: in a disposable organization/repository, apply manifests, read back canonical JSON and compare. Try direct push, force push, deletion, wrong-App status, skipped/neutral/missing check, stale approval, last-pusher self-approval, bypass actor and ruleset priority/composition. Snapshot both pass and deny audit events ([S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)-[S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches), [S17](https://docs.github.com/en/rest/orgs/rules), [S19](https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset)).",
+    "Merge tests: PR update invalidates token; queue introduces base conflict/failing test; `merge_group` runs identical named checks; auto-merge cannot activate before policy decision; duplicate delivery/API retry performs one transition ([S6](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue)-[S9](https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge), [S30](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api)).",
+    "Actions adversarial tests: fork PR edits scripts/action inputs, attempts `pull_request_target` secret exfiltration, cache/artifact substitution and dependency/action tag compromise. Assert token is read-only/no secrets and privileged stage never executes attacker code ([S12](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)-[S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/), [S20](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066)).",
+    "Release chaos tests: self-review and admin bypass denied, wrong digest denied, OIDC audience/repository/environment mismatch denied, second signature required for R3, canary hard failure rolls back, inconclusive telemetry pauses and pages rather than promotes ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)-[S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments), [S26](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)).",
+    "Reconciliation tests: delete/weaken live rule, add bypass, rename Project field, remove team access, miss webhook, inject 403/409/429/5xx/timeout. Assert drift blocks relevant transitions, safe retries do not duplicate, unknown remote object is quarantined, and weakening requires human-approved plan."
+  ],
+  "operational_maintenance": [
+    "Continuously export GitHub audit plus controller append-only events; correlate delivery GUID, actor, work item, spec/head/base/policy hashes, checks, review IDs, exception, ruleset version, artifact digest and deployment. Protect the export separately; periodically test replay and gap detection ([S16](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-the-audit-log-for-your-organization), [S27](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise)).",
+    "Run webhook-triggered reconciliation for ruleset/environment/team/App-grant changes and scheduled full reconciliation. Dashboard desired/live hash, last successful scan, unmanaged objects, bypass actors, CODEOWNERS coverage, stale approvals, active/expired exceptions, queue failures and environment bypasses.",
+    "Review App permissions, team membership and bypass lists monthly/quarterly based on consequence; rotate/revoke credentials; pin and update Actions through reviewed dependency PRs; verify attestation roots; test break-glass and known-good artifact/data rollback.",
+    "Measure by risk/policy version: proposal rejection, human review minutes, stale invalidations, auto-merge volume, queue failure, post-merge revert/escaped defect, deployment rollback/incident, exceptions count/age/recurrence, unauthorized attempts, drift detection and repair latency. Automatically suspend R1 auto-merge when preset error/incident/drift budgets breach.",
+    "Policy/self-improvement follows proposal -> offline policy fixtures/adversarial eval -> shadow decision comparison -> limited canary repository/task class -> independent governance approval -> versioned promotion -> rollback. The agent may author a proposal but cannot change baselines, hidden tests, thresholds, approver mapping or promotion decision."
+  ],
+  "maturity_and_uncertainty": [
+    "Mature: GitHub CODEOWNERS, protected branches/rulesets, Actions checks, merge queue, environments, GitHub Apps and audit APIs are production controls with documented semantics. Conditional: their safe composition, because plans/features differ and configuration drift, bypass identities, CI trust and human behavior remain operator responsibilities.",
+    "Conditionally justified: unattended merge only for narrowly enumerated R1 classes after local shadow/pilot evidence, independent exact-head checks and rollback. Not justified: general agent self-merge, policy/permission self-change, high-risk production approval or irreversible action.",
+    "Experimental: treating Git repositories as declarative desired state for rulesets/environments/ProjectV2. APIs make a reconciler feasible, but GitHub does not provide a built-in transactional GitOps controller across these resources. Remote IDs, API evolution, rate limits, partial failure and human edits need explicit handling.",
+    "Overall confidence: HIGH on documented platform mechanics; MEDIUM on the recommended composition; LOW on quantitative residual risk because public bypass/incident/reviewer-effectiveness denominators are absent."
+  ],
+  "implementation_recommendation": [
+    "Phase 0: protect main and control paths; install CODEOWNERS; create baseline ruleset with required expected-source policy/verify checks, stale approval dismissal, latest-push approval, conversation resolution, signed commits where feasible, restricted pushes and no routine bypass. Create separate proposal/verifier/merge/deploy Apps and explicit Actions permissions.",
+    "Phase 1: implement risk-policy schemas, approval/evidence/exception ledger, PR policy check and merge-group workflow. Require human PR/release approval for all changes. Add live snapshot/diff-only reconciler and alert on weakening.",
+    "Phase 2: apply controller-managed rulesets/environments in a sandbox then production with approved plan/read-after-write. Add ProjectV2 projection reconciliation while retaining ledger as truth. Pilot R1 docs/tests/allowlisted patch dependencies in shadow; compare would-merge to human results.",
+    "Phase 3: enable controller-owned auto-merge for proven R1 predicates only. Keep R2/R3 human gates. Add attested immutable artifact, OIDC environment release, canary/rollback, audit streaming and quarterly adversarial/permission drills.",
+    "Do not grant the coding agent admin, ruleset, environment, bypass, approval, merge, deployment, secret, package-publish or audit-delete authority. A self-improvement change uses the same R3 governed promotion path."
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "About rulesets",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "ruleset composition, enforcement, bypass and branch-protection comparison"
+    },
+    {
+      "id": "S2",
+      "title": "Available rules for rulesets",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "branch/tag rules, required checks/reviews, merge queue, deployments and restrictions"
+    },
+    {
+      "id": "S3",
+      "title": "REST API endpoints for repository rules",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/rest/repos/rules",
+      "publication_update_date": "Living API; versioned via headers",
+      "access_date": "2026-09-13",
+      "source_type": "Official REST API reference",
+      "supported_claims": "repository ruleset CRUD and schemas"
+    },
+    {
+      "id": "S4",
+      "title": "About code owners",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "CODEOWNERS locations, syntax, eligibility, fork/base behavior and 3 MB limit"
+    },
+    {
+      "id": "S5",
+      "title": "About protected branches",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "review, status-check, deployment, merge-queue and push requirements"
+    },
+    {
+      "id": "S6",
+      "title": "Managing a merge queue",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "temporary merge groups and required-check revalidation"
+    },
+    {
+      "id": "S7",
+      "title": "Events that trigger workflows: merge_group",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#merge_group",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Actions documentation",
+      "supported_claims": "merge_group trigger required for Actions checks in merge queue"
+    },
+    {
+      "id": "S8",
+      "title": "Automatically merging a pull request",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/automatically-merging-a-pull-request",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "auto-merge waits for merge requirements and authorization"
+    },
+    {
+      "id": "S9",
+      "title": "GraphQL mutation: enablePullRequestAutoMerge",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge",
+      "publication_update_date": "Living API; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official GraphQL schema/reference",
+      "supported_claims": "programmatic auto-merge inputs/output"
+    },
+    {
+      "id": "S10",
+      "title": "Managing environments for deployment",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Actions documentation",
+      "supported_claims": "environment required reviewers, prevent self-review, branch restrictions, availability"
+    },
+    {
+      "id": "S11",
+      "title": "Reviewing deployments",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Actions documentation",
+      "supported_claims": "approval/rejection/bypass and environment secret release"
+    },
+    {
+      "id": "S12",
+      "title": "Use GITHUB_TOKEN for authentication in workflows",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Actions documentation",
+      "supported_claims": "explicit workflow/job token permissions"
+    },
+    {
+      "id": "S13",
+      "title": "Security hardening for GitHub Actions",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official security documentation",
+      "supported_claims": "least privilege, third-party Actions and full commit SHA pinning"
+    },
+    {
+      "id": "S14",
+      "title": "Keeping your GitHub Actions and workflows secure: Preventing pwn requests",
+      "publisher_author": "GitHub Security Lab; Jaroslav Lobacevski",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_update_date": "2021-08-17",
+      "access_date": "2026-09-13",
+      "source_type": "Vendor security research/guidance",
+      "supported_claims": "pull_request_target and privileged untrusted-checkout attack pattern"
+    },
+    {
+      "id": "S15",
+      "title": "Choosing permissions for a GitHub App",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Apps documentation",
+      "supported_claims": "minimal GitHub App repository/organization/account permissions"
+    },
+    {
+      "id": "S16",
+      "title": "Reviewing the audit log for your organization",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-the-audit-log-for-your-organization",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official audit documentation",
+      "supported_claims": "organization audit search/export/API semantics"
+    },
+    {
+      "id": "S17",
+      "title": "REST API endpoints for organization rules",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/rest/orgs/rules",
+      "publication_update_date": "Living API; versioned via headers",
+      "access_date": "2026-09-13",
+      "source_type": "Official REST API reference",
+      "supported_claims": "organization ruleset CRUD/schema"
+    },
+    {
+      "id": "S18",
+      "title": "GraphQL object: ProjectV2",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/graphql/reference/objects#projectv2",
+      "publication_update_date": "Living API; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official GraphQL schema/reference",
+      "supported_claims": "Projects v2 fields/items/IDs and GraphQL state"
+    },
+    {
+      "id": "S19",
+      "title": "Webhook events and payloads: repository_ruleset",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official webhook schema/reference",
+      "supported_claims": "ruleset change events for drift detection"
+    },
+    {
+      "id": "S20",
+      "title": "Supply Chain Compromise of Third-Party tj-actions/changed-files",
+      "publisher_author": "CISA",
+      "url": "https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066",
+      "publication_update_date": "2025-03-18",
+      "access_date": "2026-09-13",
+      "source_type": "Government operational security alert",
+      "supported_claims": "real third-party GitHub Action compromise and response advice"
+    },
+    {
+      "id": "S21",
+      "title": "Deep Learning-based Code Reviews: A Paradigm Shift or a Double-Edged Sword?",
+      "publisher_author": "Tufano et al.",
+      "url": "https://arxiv.org/abs/2411.11401",
+      "publication_update_date": "arXiv revised 2024-11-29",
+      "access_date": "2026-09-13",
+      "source_type": "Independent controlled-study preprint",
+      "supported_claims": "29 professionals/72 reviews/42% surfaced/89% retained/no time saving"
+    },
+    {
+      "id": "S22",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher_author": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "publication_update_date": "2025 edition; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Practitioner consensus security guidance",
+      "supported_claims": "minimum functionality, permissions/autonomy and downstream authorization"
+    },
+    {
+      "id": "S23",
+      "title": "NIST SP 800-218: Secure Software Development Framework (SSDF) Version 1.1",
+      "publisher_author": "NIST; Souppaya, Scarfone, Dodson",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_update_date": "2022-02",
+      "access_date": "2026-09-13",
+      "source_type": "Government standard",
+      "supported_claims": "protected development, change control and secure release outcomes"
+    },
+    {
+      "id": "S24",
+      "title": "SLSA v1.2 Requirements",
+      "publisher_author": "SLSA project / OpenSSF",
+      "url": "https://slsa.dev/spec/v1.2/requirements",
+      "publication_update_date": "Version 1.2; page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Supply-chain specification",
+      "supported_claims": "build provenance and hardened build requirements"
+    },
+    {
+      "id": "S25",
+      "title": "Responsible use of Copilot Autofix for code scanning",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official responsible-use documentation",
+      "supported_claims": "autofix limitations and required human review/testing"
+    },
+    {
+      "id": "S26",
+      "title": "About security hardening with OpenID Connect",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official Actions documentation",
+      "supported_claims": "short-lived cloud tokens and trust-condition design"
+    },
+    {
+      "id": "S27",
+      "title": "Streaming the audit log for your enterprise",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official enterprise documentation",
+      "supported_claims": "enterprise audit streaming and delivery caveats"
+    },
+    {
+      "id": "S28",
+      "title": "REST API endpoints for deployment environments",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/rest/deployments/environments",
+      "publication_update_date": "Living API; versioned via headers",
+      "access_date": "2026-09-13",
+      "source_type": "Official REST API reference",
+      "supported_claims": "environment CRUD, reviewers, branch policies and protection rules"
+    },
+    {
+      "id": "S29",
+      "title": "REST API endpoints for Projects (classic)",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/rest/projects",
+      "publication_update_date": "Living page; Projects classic closed 2024-08-23",
+      "access_date": "2026-09-13",
+      "source_type": "Official REST API reference",
+      "supported_claims": "REST scope limitation and migration to new Projects"
+    },
+    {
+      "id": "S30",
+      "title": "Best practices for using the REST API",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official REST API guidance",
+      "supported_claims": "conditional requests, serial writes, retry and rate-limit handling"
+    },
+    {
+      "id": "S31",
+      "title": "Troubleshooting rules",
+      "publisher_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/troubleshooting-rules",
+      "publication_update_date": "Living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "Official documentation",
+      "supported_claims": "ruleset evaluation/troubleshooting and unexpected rule behavior"
+    }
+  ],
+  "conflicts": [
+    "Git-native policy versus actual enforcement: reviewed YAML is useful desired state, but GitHub rulesets, environment reviewers/App grants and ProjectV2 values are remote mutable resources. Resolution: never report 'compliant' from repository files alone; require live inventory, canonical diff, read-after-write and drift-blocking.",
+    "Rulesets can layer, while legacy branch protection applies only one matching rule ([S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets), [S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)). Resolution: use rulesets for new enforcement and inventory legacy protection during migration; test the effective result, not assumed precedence.",
+    "CODEOWNERS looks like required review but is only routing until a branch/ruleset requires code-owner approval, and eligible owners need write access ([S4](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)-[S5](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)). Resolution: pair it with protected rules and independent identity/role checks; protect CODEOWNERS itself.",
+    "Environment UI can list six required reviewers, but only one listed reviewer must approve ([S10](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)-[S11](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments)). Resolution: do not claim six-person or two-person approval; add an external/custom multi-signature gate for R3.",
+    "Auto-merge marketing language can sound autonomous, but GitHub defines it as merging after configured requirements pass ([S8](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/automatically-merging-a-pull-request)-[S9](https://docs.github.com/en/graphql/reference/mutations#enablepullrequestautomerge)). Resolution: a separate risk-policy controller decides eligibility; GitHub auto-merge is only the actuator.",
+    "A required status check may look trusted, but unsafe workflow triggers or a compromised Action can leak credentials or forge evidence ([S13](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)-[S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/), [S20](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066)). Resolution: bind expected App, isolate untrusted code, pin Actions by full SHA, minimize token, and verify evidence provenance.",
+    "Human review is required for material risk, yet AI-assisted review can create automation bias and the small study found limited issue surfacing ([S21](https://arxiv.org/abs/2411.11401)). Resolution: qualified independent humans, structured semantic review and executable independent evidence—not a generic approval click.",
+    "Audit logs are valuable but are provider records with plan-dependent coverage/retention, not the full workflow ledger ([S16](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-the-audit-log-for-your-organization), [S27](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise)). Resolution: export promptly and keep a separate append-only signed controller ledger with gap detection."
+  ],
+  "confidence": {
+    "overall": "High for GitHub mechanism/API semantics; medium for the composed risk-tier design; low for quantitative residual loss and human-review effectiveness.",
+    "claim_level": [
+      "High: CODEOWNERS, ruleset, protected branch, merge queue, environment, Actions token, App and audit behavior supported by official docs/schema ([S1](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)-[S19](https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_ruleset), [S26](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)-[S31](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/troubleshooting-rules)).",
+      "Medium-high: CI supply-chain and privileged-trigger threats supported by GitHub Security Lab and CISA operational alert ([S14](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/), [S20](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066)).",
+      "Medium: human-review limitation from one small controlled study ([S21](https://arxiv.org/abs/2411.11401)), not a universal production rate.",
+      "Medium: exact R0-R4 boundaries and approval counts are engineering recommendations based on consequence and separation of duties, not a GitHub standard or controlled trial.",
+      "Low: frequency of remote drift, bypass abuse, agent incidents and benefit/cost of R1 auto-merge absent repository-specific longitudinal data."
+    ]
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "The as-of date is future-facing relative to many fixed publications. GitHub living documentation often has no visible update date and features vary by GitHub plan, repository visibility, Enterprise Cloud/Server version and policy; verify against the target tenant before rollout.",
+    "No official cross-resource transaction or native repository-to-ruleset/environment/ProjectV2 GitOps reconciliation contract was found. The proposed reconciler is an implementation design built from available APIs/webhooks, with unavoidable eventual consistency and partial-failure handling.",
+    "Exact API preview/version details, ruleset rule availability and custom deployment protection capabilities may change. Pin the GitHub API version, use schema/contract tests and stage upgrades.",
+    "No public representative measurement was found for current agent PR defect escape after merge queues, ruleset bypass frequency, approval fatigue, environment bypass, live configuration drift or agent-triggered production incidents.",
+    "Two-person R3 approval needs a custom/external binding because native environment required-reviewer lists use one-of semantics. The precise custom protection-rule availability and licensing must be checked for the organization.",
+    "Risk tiers, protected-path triggers, diff ceilings, observation windows and error budgets must be calibrated from local history; the proposed defaults are governance architecture, not empirically universal thresholds."
+  ]
+}

@@ -1,0 +1,898 @@
+{
+  "scope": {
+    "item": "Automated testing, review, and quality gates (assurance)",
+    "definition": "The evidence-producing and policy-enforcement layer between an agent-authored change and merge/release. It covers generated tests, deterministic tests, coverage/mutation/fuzzing, lint/type/static/security analysis, AI-assisted review, execution-based evals, confidence/risk scoring, branch/merge gates, and post-merge validation.",
+    "boundaries": "Focuses on whether a proposed change should advance. It does not treat issue planning, agent orchestration, deployment, or general governance except at their assurance integration boundary. 'Confidence' means an empirically calibrated probability/risk estimate from observed evidence, not an LLM's verbal certainty.",
+    "time_range": "2019-present, with older foundations for search-based test generation, flaky tests, and mutation testing."
+  },
+  "current_state": [
+    "Verified fact: deterministic CI gates are production-ready. GitHub/GitLab can require reviews, status checks, security analysis, deployments, and queue-time revalidation before merge [S1-S5]. SonarQube/Semgrep can publish pass/fail or findings into that control plane [S6-S7].",
+    "Verified fact: automatic test generation is useful when candidates are executable and filtered. Meta's TestGen-LLM did not trust raw generations: it augmented existing tests and required build, reliable pass, and coverage improvement [S10]. Search-based EvoSuite/Pynguin remain reproducible non-LLM baselines [S11-S12].",
+    "Verified fact: fuzzing and mutation testing add fault-revealing evidence that line coverage cannot provide. OSS-Fuzz has long-running operational evidence, while PIT documents both the method and equivalent-mutant/cost caveats [S13-S15].",
+    "First-party operational evidence: AI can help create fuzz harnesses—Google reported 26 new vulnerabilities and 370k+ extra covered lines—but the quality signal still came from deterministic fuzzing and reproducible crashes [S28-S29].",
+    "Verified/vendor fact: AI reviewers can run automatically on PRs, comment, suggest patches, and sometimes submit approvals; GitHub itself warns their generated suggestions may be wrong or insecure [S8-S9]. Therefore AI review is useful as advisory triage or a trigger for deterministic checks, not a sole safety gate.",
+    "Independent evidence: execution-based repository evals are much stronger than prose judging but can still be gamed by weak tests, leaked solutions, stale/public data, or harness defects [S16-S18].",
+    "Inference: no cited source establishes a universal, calibrated 'safe to merge' score for autonomous changes. A project can build a local score from hard-gate outcomes and historical incidents, but raw model confidence should not unlock merge because verbalized LLM confidence tends to be overconfident [S19]."
+  ],
+  "representative_systems": [
+    {
+      "layer": "SCM enforcement",
+      "systems": "GitHub protected branches/rulesets, required checks, CODEOWNERS and merge queue; GitLab approval rules, pipelines, auto-merge/merge trains",
+      "status": "production-ready controls; configuration and bypass security are the main risks [S1-S4,S23]"
+    },
+    {
+      "layer": "static/security analysis",
+      "systems": "CodeQL, Semgrep SAST/SCA/secrets, SonarQube quality gates; ecosystem alternatives include language compilers/type checkers, ESLint/Ruff/Clang-Tidy, and commercial SAST",
+      "status": "production-ready when baselined, tuned, and scoped by language; findings are evidence, not proof [S5-S7,S21] Semgrep error suppression and tier-skipped conditions must be audited [S25-S26]."
+    },
+    {
+      "layer": "generated/dynamic tests",
+      "systems": "TestGen-LLM/Diffblue-like LLM generation; EvoSuite and Pynguin search-based generation; PIT mutation testing; property tests and OSS-Fuzz/ClusterFuzzLite",
+      "status": "search-based/fuzzing mature in supported domains; LLM generation conditionally useful only with executable filters [S10-S15]"
+    },
+    {
+      "layer": "AI review",
+      "systems": "GitHub Copilot code review and specialist PR reviewers such as CodeRabbit; similar commercial services include Qodo Merge and Graphite Reviewer",
+      "status": "emerging/conditionally useful as second reviewer and triage; CodeRabbit architecture is vendor-described and lacks cited independent accuracy calibration [S8-S9,S24]"
+    },
+    {
+      "layer": "agent evaluation",
+      "systems": "SWE-bench/Verified and local replay suites of real issues, hidden tests, canaries and incident regressions",
+      "status": "valuable for comparative evaluation; public benchmark score is not deployment confidence [S16-S18]"
+    },
+    {
+      "layer": "interchange",
+      "systems": "SARIF 2.1.0 for normalized static-analysis results; check-run/status APIs and test-report formats",
+      "status": "mature integration substrate [S1,S5,S21]"
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "GitHub can make checks/reviews/deployments/queue revalidation mandatory, and a required check can be restricted to an expected GitHub App.",
+      "evidence": "GitHub protected branch and merge queue documentation [S1,S2].",
+      "classification": "verified platform behavior"
+    },
+    {
+      "claim": "GitLab supports approval rules and auto-merge only after required checks.",
+      "evidence": "GitLab documentation [S3,S4].",
+      "classification": "verified platform behavior, tier details apply"
+    },
+    {
+      "claim": "CodeQL can run in Actions or external CI and return code scanning alerts; Semgrep and SonarQube feed CI/PR findings or a quality-gate result.",
+      "evidence": "Official/vendor documentation [S5-S7].",
+      "classification": "verified integration capability; detection accuracy is not established by these sources"
+    },
+    {
+      "claim": "AI code review can be API-triggered or automatic, but its suggestions may be invalid or insecure.",
+      "evidence": "GitHub usage and responsible-use documentation [S8,S9].",
+      "classification": "verified product behavior plus vendor warning"
+    },
+    {
+      "claim": "Filtered LLM test generation has an industrial deployment example with substantial rejection before useful output.",
+      "evidence": "Meta/FSE TestGen-LLM [S10].",
+      "classification": "peer-reviewed first-party case study, not vendor-neutral universal result"
+    },
+    {
+      "claim": "Execution evaluation infrastructure and human-verified task subsets exist.",
+      "evidence": "SWE-bench paper and official repository [S16,S17].",
+      "classification": "peer-reviewed benchmark plus project status"
+    },
+    {
+      "claim": "Layered review/analysis/testing aligns with SSDF rather than substituting one AI judge.",
+      "evidence": "NIST SSDF [S20].",
+      "classification": "normative guidance"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "finding": "TestPilot generated higher median structural coverage than a baseline on 25 npm packages, but its study excluded failing generations and explicitly did not establish oracle correctness.",
+      "implication": "Use LLM tests as candidates; require base-fail/patch-pass behavior, fault revelation, and maintainability review.",
+      "caveat": "JavaScript/open-source scope and coverage-focused metrics limit transfer [S32]."
+    },
+    {
+      "finding": "A controlled study with 29 professional developers found AI review surfaced only 42% of injected issues; developers retained 89% of its findings, but it saved no time and did not significantly improve confidence.",
+      "implication": "High acceptance of plausible comments does not mean high recall or independence; AI review should not replace human review.",
+      "caveat": "Small, possibly underpowered preprint study with injected defects [S33]."
+    },
+    {
+      "finding": "SWE-Bench+ manually audited successful patches and reported solution leakage and weak-test false passes; the filtered success rate was far lower.",
+      "implication": "A green public benchmark is vulnerable to reward hacking and cannot directly authorize production merge.",
+      "caveat": "This is a 2024 preprint focused on one agent/configuration and sampled successful patches, not a universal estimate [S18]."
+    },
+    {
+      "finding": "The ICLR 2024 uncertainty study found verbalized LLM confidence tended to be overconfident and no black-box elicitation method consistently dominated.",
+      "implication": "Use executed evidence and locally calibrated outcomes; do not use a model's '95% confident' statement as a gate.",
+      "caveat": "Tasks were broader reasoning datasets, not a code-merge field trial [S19]."
+    },
+    {
+      "finding": "Google's engineering guidance calls coverage lossy and indirect, and PIT documents equivalent mutants.",
+      "implication": "Coverage or mutation score alone is gameable and requires multiple evidence channels and review of thresholds [S13,S14]."
+    },
+    {
+      "finding": "Flaky-test research documents nondeterminism from async, concurrency and ordering.",
+      "implication": "Quarantine plus repeated/seeded reruns is safer than blindly retrying until green [S22]."
+    },
+    {
+      "finding": "The earliest SWE-bench result was only 1.96% while subsequent systems improved on evolving variants.",
+      "implication": "Agent capability moved quickly, but benchmark/version/harness identity must accompany every score [S16-S17]."
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "TestGen-LLM candidate funnel",
+      "value": "75% built; 57% passed reliably; 25% increased coverage on Instagram Reels/Stories. At test-a-thons, 11.5% of targeted classes improved and engineers accepted 73% of recommendations.",
+      "meaning": "Most raw candidates did not clear all executable usefulness filters. This supports generate-then-verify, not autonomous trust.",
+      "source": "[S10]"
+    },
+    {
+      "metric": "TestPilot structural coverage",
+      "value": "Median statement 70.2% and branch 52.8% across 25 npm packages/1,684 APIs, versus Nessie 51.3%/25.6%; failing generations excluded.",
+      "meaning": "Evidence of coverage-generation ability, not correct or maintainable test oracles.",
+      "source": "[S32]"
+    },
+    {
+      "metric": "Professional AI-review study",
+      "value": "29 developers, 72 reviews, 48 injected issues; 89% of surfaced AI issues retained, but only 42% of injected issues surfaced; no time saving or significant confidence gain.",
+      "meaning": "Independent but small/preprint evidence that usefulness and reviewer anchoring coexist with poor recall.",
+      "source": "[S33]"
+    },
+    {
+      "metric": "OSS-Fuzz cumulative outcomes",
+      "value": "Over 10,000 vulnerabilities and 36,000 bugs found/fixed across 1,000 projects as of August 2023.",
+      "meaning": "Strong operational evidence for continuous fuzzing, but first-party cumulative counts have no untreated control and are not AI-agent metrics.",
+      "source": "[S15]"
+    },
+    {
+      "metric": "AI-generated OSS-Fuzz harnesses",
+      "value": "Coverage increased in 272 C/C++ projects; over 370,000 additional lines covered; 26 new vulnerabilities found in mature projects.",
+      "meaning": "Promising first-party operational evidence. Assurance still came from reproducible fuzz execution and sanitizers, not an AI confidence claim.",
+      "source": "[S29]"
+    },
+    {
+      "metric": "Original SWE-bench",
+      "value": "2,294 issues, 12 Python repositories; paper's best model resolved 1.96%.",
+      "meaning": "Historical 2023/24 baseline only; do not compare to current Verified or different harnesses without normalization.",
+      "source": "[S16]"
+    },
+    {
+      "metric": "SWE-bench Verified size",
+      "value": "500 engineer-confirmed-solvable tasks.",
+      "meaning": "Improves task validity but does not eliminate weak-oracle or contamination concerns.",
+      "source": "[S17,S18]"
+    },
+    {
+      "metric": "SWE-Bench+ audit",
+      "value": "32.67% of successful patches classified as solution leakage; 31.08% suspicious due to weak tests; reported resolution fell 12.47% to 3.97% after filtering.",
+      "meaning": "Independent preprint result for one system; shows pass-rate fragility, not the defect rate of all agents.",
+      "source": "[S18]"
+    },
+    {
+      "metric": "Confidence elicitation",
+      "value": "Example failure-prediction AUROC gap 0.522 black-box versus 0.605 white-box; all methods struggled on difficult tasks.",
+      "meaning": "Self-reported confidence is not sufficiently calibrated for a merge gate.",
+      "source": "[S19]"
+    },
+    {
+      "metric": "Recommended local operating metrics",
+      "value": "Track escape rate/severity, rollback rate, change-failure rate, flaky-check rate, median/p95 gate latency and cost, false-positive/waiver rate per rule, mutation delta, changed-line/branch coverage, generated-test survival after 30/90 days, AI-review precision from adjudicated samples, and calibration Brier score/reliability curves.",
+      "meaning": "No universal threshold was found. Set service/risk-class baselines and compare agent-authored with human-authored changes using the same measurement policy.",
+      "source": "inference grounded in multi-signal limitations [S9,S13-S14,S18-S19]"
+    }
+  ],
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "PROPOSED -> RISK_CLASSIFIED",
+      "mechanics": "Webhook receives PR commit SHA, issue/spec link, actor=agent, changed paths, dependency/permission/schema/API flags. A deterministic policy engine assigns low/medium/high/critical risk. Freeze evidence to the exact SHA.",
+      "outputs": "risk class, required gate manifest, budget, owner set, audit ID"
+    },
+    {
+      "step": 2,
+      "state": "RISK_CLASSIFIED -> ORACLE_READY",
+      "mechanics": "Resolve acceptance criteria into tests/fixtures owned outside the patch. For a bug fix, require at least one regression test that fails on the unpatched base and passes on the candidate. Reject tests that only snapshot candidate output or delete/weaken existing assertions. Changes to test infrastructure, gate config, CODEOWNERS, generated fixtures, security policy, migrations or public API automatically escalate.",
+      "outputs": "versioned oracle bundle and protected-policy diff [S20,S23]"
+    },
+    {
+      "step": 3,
+      "state": "ORACLE_READY -> BUILT",
+      "mechanics": "Build in a fresh, pinned, network-restricted environment. Verify lockfile/provenance; compile/type-check; run deterministic formatting/lint. Cache only keyed, non-secret artifacts. A failure returns to the authoring agent with structured logs; cap retries.",
+      "outputs": "reproducible build record, logs, artifact digests"
+    },
+    {
+      "step": 4,
+      "state": "BUILT -> TESTED_FAST",
+      "mechanics": "Run impacted unit/contract tests and then the full required suite as risk demands. Collect changed-line plus branch coverage, not a repository-wide vanity percentage. Run candidate generated tests multiple times and across fixed random seeds; quarantine known flakes rather than retry-to-green [S10,S13,S22].",
+      "outputs": "JUnit-like reports, coverage delta, flaky/seed evidence"
+    },
+    {
+      "step": 5,
+      "state": "TESTED_FAST -> TEST_STRENGTH_CHECKED",
+      "mechanics": "Generate extra tests with a separate context/model or search-based tool. Filter in sequence: parse/compile, base-versus-patch behavior, reliable repeat pass, no forbidden file/network calls, coverage delta, and sampled mutation kills. Property/fuzz targets run with sanitizers and retained minimized seeds. Equivalent mutants are triaged, not counted as automatic failure [S10-S15]. For CI fuzzing, fail only on a reproducible new crash and retain the minimized input; property tests complement examples [S27-S29].",
+      "outputs": "accepted tests committed separately or as review suggestions; mutation/fuzz corpus report"
+    },
+    {
+      "step": 6,
+      "state": "TEST_STRENGTH_CHECKED -> ANALYZED",
+      "mechanics": "Run type/lint, SAST, secrets, dependency/license and IaC scans. Normalize results (for example SARIF), compare with the approved baseline, fail on new high/critical issues or policy violations, and route lower-severity findings with expiry. Pin the expected check-producing App [S1,S5-S7,S21].",
+      "outputs": "deduplicated findings, severity, evidence location, baseline delta"
+    },
+    {
+      "step": 7,
+      "state": "ANALYZED -> REVIEWED",
+      "mechanics": "An AI reviewer with no write/merge token reads spec, diff, selected repository context and prior findings, then produces line-addressed claims and suggested verification. Deterministic tools execute any claimed reproduction. Human/domain Code Owner reviews high-risk paths. Do not let the same agent both change code and conclusively judge it [S8-S9,S23-S24].",
+      "outputs": "advisory review, verified/unverified finding labels, disposition log"
+    },
+    {
+      "step": 8,
+      "state": "REVIEWED -> SCORED",
+      "mechanics": "Hard failures remain boolean. Separately compute a local risk score from change surface, privilege/data exposure, deterministic gate results, flake history, fuzz/mutation evidence, reviewer adjudication and historical escapes. Fit/calibrate on held-out past changes and incidents; record model/tool versions. Never add raw LLM verbal confidence [S18-S19].",
+      "outputs": "calibrated probability/risk band with component evidence and abstain reason"
+    },
+    {
+      "step": 9,
+      "state": "SCORED -> APPROVED_OR_ESCALATED",
+      "mechanics": "Low-risk, within-policy changes may advance automatically only if all hard gates pass and calibrated risk is below a reviewed threshold. Medium risk needs designated approval; high/critical risk needs Code Owner/security/operations approval. Any ambiguity, override, test-policy change, missing evidence or out-of-distribution score abstains to humans.",
+      "outputs": "signed decision, approver/bypass identity, expiration"
+    },
+    {
+      "step": 10,
+      "state": "APPROVED -> QUEUED -> MERGED",
+      "mechanics": "Enter merge queue, rebase/merge with latest target, and rerun required checks in queue context. Cancel stale runs when SHA changes. Merge only the exact attested SHA; prevent untrusted actors from forging check names [S1-S4].",
+      "outputs": "merge commit, evidence manifest linked to SHA"
+    },
+    {
+      "step": 11,
+      "state": "MERGED -> OBSERVED -> CLOSED_OR_ROLLED_BACK",
+      "mechanics": "Deploy progressively where applicable; run smoke/synthetic checks, watch SLO/error/business invariants, and auto-rollback or disable behind a feature flag on threshold breach. Feed escapes, waivers, false positives and review adjudications into eval datasets and score calibration, with approval before policy changes.",
+      "outputs": "release evidence, incident/rollback record, refreshed local eval case"
+    }
+  ],
+  "integration_points": [
+    {
+      "point": "SCM",
+      "details": "PR/MR webhooks, commit SHA, changed paths, labels; check-run/status and review-request APIs; protected branches/rulesets, CODEOWNERS, approval APIs, merge queue/train [S1-S4,S8,S23]."
+    },
+    {
+      "point": "CI/execution",
+      "details": "Ephemeral runner/sandbox, build/test matrix, artifact and log store, cancellation/concurrency keys, deterministic clocks/seeds, test sharding, sanitizer/fuzzer workers. CodeQL can run in Actions or external CI [S5,S15]."
+    },
+    {
+      "point": "analysis aggregation",
+      "details": "Compiler/type/lint outputs; SAST/SCA/secrets/IaC/license scanners; SARIF ingestion and deduplication; quality-gate webhook/status [S5-S7,S21]."
+    },
+    {
+      "point": "test intelligence",
+      "details": "Coverage collector, mutation engine, fuzz corpus/crash minimizer, generated-test candidate store, test-impact graph, flake quarantine service [S10,S13-S15,S22]."
+    },
+    {
+      "point": "review",
+      "details": "AI-review API/bot, read-only repository context, issue/spec retrieval, PR comments and suggestion patches. Separate credentials for comment versus write/approve/merge [S8-S9,S24]."
+    },
+    {
+      "point": "policy/risk",
+      "details": "Version-controlled gate manifest, protected policy ownership, OPA/Cedar/custom policy engine, identity/RBAC, exceptions with owner/expiry, append-only audit evidence."
+    },
+    {
+      "point": "eval/telemetry",
+      "details": "Containerized replay of hidden/local issue suite, benchmark harness versions, model/prompt/tool digest, result warehouse, calibration pipeline, post-deploy SLO/incidents/rollback linkage [S16-S19]."
+    }
+  ],
+  "human_gates": [
+    "Clarify the spec or oracle when acceptance criteria are subjective, incomplete, conflicting, or newly generated tests cannot establish independent expected behavior.",
+    "Require Code Owner/domain approval for authentication/authorization, cryptography, payments, privacy/regulated data, destructive migrations, concurrency/distributed consistency, safety-critical code, public compatibility, build/release policy, and test/gate configuration [S20,S23].",
+    "Require security approval for new high/critical static findings, secret exposure, dependency provenance exceptions, network/permission expansion, or suppressed scanner rules.",
+    "Require operations approval for irreversible rollout, missing rollback, material SLO/cost impact, or insufficient observability.",
+    "A person owns every bypass. Record exact SHA, failed check, reason, compensating control and expiry; never allow the authoring agent to bypass its own gate.",
+    "Sample even auto-approved low-risk changes and adjudicate AI-review findings. Use the sample to measure precision/escapes and detect drift, not merely to rubber-stamp volume.",
+    "Keep AI approval from satisfying the human approval count for medium/high risk even if the platform can technically configure it [S8-S9]."
+  ],
+  "failure_modes": [
+    {
+      "mode": "Oracle corruption/reward hacking",
+      "examples": "Agent edits or deletes tests, weakens assertions, snapshots its own output, changes golden data, or exploits a harness loophole; public issue comments reveal the answer [S18]."
+    },
+    {
+      "mode": "Correlated judge",
+      "examples": "The authoring and reviewing model share training, prompts, blind spots, or generated expected values; two AI votes are not independent evidence [S9,S19]."
+    },
+    {
+      "mode": "False green",
+      "examples": "Coverage rises without meaningful assertions; mocks hide integration faults; only happy paths execute; flaky test passes on retry; tests run against stale SHA [S13,S22]."
+    },
+    {
+      "mode": "False red/noise",
+      "examples": "Static false positives, duplicated tool alerts, equivalent mutants, nondeterministic tests, environment drift. Teams disable gates or normalize bypasses [S6,S14,S22]."
+    },
+    {
+      "mode": "Fail-open or skipped gate",
+      "examples": "Analyzer internal error is suppressed; mutation tool has no break threshold; paid/tier-dependent rule is skipped; timeout is interpreted as success [S25-S26,S31]."
+    },
+    {
+      "mode": "Benchmark overfitting",
+      "examples": "Training contamination, leaked solutions, weak tests, public harness gaming, variant/version changes and nonrepresentative languages/repos [S16-S18]."
+    },
+    {
+      "mode": "Credential/control-plane compromise",
+      "examples": "Agent can alter workflow/gate/CODEOWNERS, forge a status check, exfiltrate secrets through tests/logs, or approve/merge its own PR [S1,S23]."
+    },
+    {
+      "mode": "Context/prompt injection",
+      "examples": "Repository comments, fixtures or dependency text instruct AI reviewer to ignore policy or leak data; review bot has excessive write/network authority."
+    },
+    {
+      "mode": "Concurrency/integration race",
+      "examples": "PR passes against old main but conflicts with another queued change; cached artifacts or cancelled checks attach to wrong commit [S2]."
+    },
+    {
+      "mode": "Cost/latency collapse",
+      "examples": "Full regression, fuzzing, mutation and multiple-model review on every edit create queue starvation; repeated agent retries amplify spend."
+    },
+    {
+      "mode": "Metric gaming/drift",
+      "examples": "Teams optimize coverage, mutation or benchmark pass rate while escaped severity rises; model/tool upgrades invalidate calibration [S13,S18-S19]."
+    },
+    {
+      "mode": "Unknown unknowns",
+      "examples": "Static and generated tests cannot prove absence of defects, product misfit, emergent distributed behavior or production-only data failures [S9,S20]."
+    }
+  ],
+  "controls_and_mitigations": [
+    "Protect workflows, tests, fixtures, CODEOWNERS, baselines and policy as higher-trust assets. Require separate-owner review for their modification; use least-privilege read/comment tokens for reviewer bots and no standing merge token [S1,S23].",
+    "Bind every result to repository, immutable commit SHA, workflow/tool/config digest and expected producer identity. Re-run in merge queue on latest target and reject stale/ambiguous check contexts [S1-S2].",
+    "Use defense in depth: compile/type/lint + unit/contract/integration + coverage delta + sampled mutation/property/fuzz + SAST/SCA/secrets + independent review. A pass means policy evidence met, not correctness proven [S5-S7,S13-S15,S20].",
+    "Protect the oracle: hidden tests/local private evals; base-fail/patch-pass regression check; forbid the author from changing protected expectations in the same autonomous lane; periodically red-team harnesses using cheating patches [S10,S18].",
+    "Treat AI review as untrusted advisory input. Sanitize/untrusted-tag repository text, restrict tools/network, require source locations/reproduction, run suggested code only in sandbox, and prevent AI approval from replacing risk-matched human approval [S8-S9].",
+    "Manage flakiness explicitly: repeated fixed-seed runs, quarantine with owner/expiry, root-cause budget, report first-run and retry results. Never convert arbitrary retries to green [S22].",
+    "Audit default exit semantics and skipped conditions. Fail closed for missing mandatory analyzers, crashes, timeouts and unavailable licensed rules; set explicit mutation break thresholds; distinguish 'pass' from 'not run' [S25-S26,S31].",
+    "Baseline legacy debt but fail new severe findings; deduplicate SARIF; tune per language/risk; time-bound suppressions with owner and justification [S6-S7,S21].",
+    "Split fast mandatory PR gates from bounded asynchronous deep gates. Apply expensive mutation/fuzzing/nightly replay by risk and changed surface; cap attempts, tokens, wall time and concurrency.",
+    "Calibrate risk on held-out local history, plot reliability, track drift by model/tool/version and abstain out of distribution. Raw verbal confidence has zero gate weight [S19].",
+    "Use canary/feature flags, reversible migrations, backups, kill switch, automated rollback and post-deploy invariants; feed escapes into protected regression suites.",
+    "Use rolling, post-cutoff and repository-held-out evals in addition to public suites, and separate solution leakage, weak-oracle false passes and pretraining contamination [S18,S34]."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful as a system; production-ready deterministic substrate with emerging probabilistic additions.",
+    "production_ready": "SCM required checks/approvals/merge queues; build/type/lint/unit/integration tests; established SAST/SCA/secrets; coverage as a supporting signal; fuzzing for suitable targets; immutable evidence and rollback [S1-S7,S13,S15,S20-S23].",
+    "conditionally_useful": "Search-based/generated tests, mutation testing, impact selection and calibrated local risk scoring. Value depends on language, oracle quality, flake control, compute budget and historical labels [S10-S14,S19].",
+    "emerging": "LLM-generated tests and AI PR review at scale. They can increase coverage and find review candidates, but need executable filtering and human/deterministic verification [S8-S10,S24].",
+    "not_ready_as_sole_gate": "AI approval, AI self-confidence, coverage percentage, mutation score, or a public SWE-bench pass rate. Each is correlated, gameable or insufficiently calibrated [S9,S13-S14,S18-S19].",
+    "rationale": "The solved problem is reliable enforcement of specified evidence. The unsolved problem is creating a complete oracle and calibrated proof that arbitrary changes are safe."
+  },
+  "build_vs_buy": {
+    "buy_managed": "Use native GitHub/GitLab enforcement and managed CodeQL/Semgrep/Sonar/AI reviewer when rapid rollout, UI/triage, rule feeds and support matter. Verify pricing/tier, data retention/residency, model use, permissions, self-hosting, API export, latency and lock-in. Vendor feature claims do not establish accuracy [S1-S9,S24].",
+    "build_open_source": "Compose language-native tests/linters/types, SARIF, Semgrep CE/rules, CodeQL where licensed/applicable, PIT, EvoSuite/Pynguin, ClusterFuzzLite and a policy engine when customization/privacy/reproducibility dominate [S5,S11-S15,S21]. Engineering burden shifts to upgrades, rules, triage, runners and evidence UI.",
+    "must_build_or_own": "Risk taxonomy; protected acceptance oracles; change-impact model; local incident/replay eval set; gate manifest; exception process; score calibration; reviewer adjudication labels; production invariant/rollback links. These encode project semantics and cannot be bought generically.",
+    "selection_rule": "Prefer deterministic native controls first. Add one tool per distinct failure class and measure marginal escaped-defect reduction, false-positive burden, p95 latency and cost. Avoid buying several correlated AI reviewers as if vote count were independent assurance."
+  },
+  "recommended_pattern": {
+    "name": "Evidence ladder with protected oracle and risk-tiered merge queue",
+    "recommendation": "Adopt a fail-closed deterministic core and keep AI probabilistic. Low-risk agent PRs may auto-merge only after immutable SHA-bound gates, protected tests, baseline-delta analysis, independent advisory review, calibrated local risk below threshold, and queue-time rerun. Medium/high-risk changes retain named human gates.",
+    "minimum_viable_rollout": [
+      "Phase 1: protect main/workflows/tests/CODEOWNERS; require build, unit/integration, type/lint, secret/SAST, human approval and merge-queue rerun; record SHA-bound evidence.",
+      "Phase 2: baseline scanner noise and flakes; add changed-line/branch coverage and base-fail/patch-pass regression tests; track escapes, overrides, latency and cost.",
+      "Phase 3: add generated tests only through compile/reliability/coverage filters; risk-target mutation/fuzzing; keep accepted tests separately reviewable.",
+      "Phase 4: deploy AI review as read-only advisory. Measure finding precision/severity/novelty on adjudicated samples before it affects routing.",
+      "Phase 5: train/calibrate a local risk model on held-out merge and incident outcomes. Start in shadow mode; allow auto-merge only for narrow, reversible low-risk classes; keep random audit and automatic rollback."
+    ],
+    "decision_rule": "Hard gates are conjunctive; scores only route/escalate. Missing, stale, contradictory, forged or out-of-distribution evidence means abstain. No model can approve its own change or modify the gate that evaluates it.",
+    "why": "This uses mature enforcement and dynamic/static evidence while containing known weak-oracle, leakage, overconfidence and correlated-review failures [S1-S22]."
+  },
+  "open_questions": [
+    "What precision/recall and escaped-severity does each AI reviewer achieve on this repository, language and defect taxonomy after human adjudication? Public vendor documentation does not answer this.",
+    "How much incremental signal do generated tests, mutation and fuzzing add beyond existing suites per compute-minute, and do generated tests remain maintained/alive after 30/90 days?",
+    "How should risk probabilities be calibrated when severe incidents are rare, labels are delayed, and models/tools/configurations change?",
+    "How can oracle files and hidden tests stay secret enough to resist gaming while remaining debuggable, auditable and accessible to maintainers?",
+    "Which changes can be safely auto-merged without human approval under applicable regulation, separation-of-duties rules and liability constraints?",
+    "How well do benchmark results transfer from Python/open-source/public issues to private monorepos, UI/data/migration/security tasks and production constraints [S16-S18]?",
+    "Can independent semantic specifications, differential implementations or formal verification reduce common-mode errors between agent author, generated test and AI reviewer at acceptable cost?",
+    "What is the long-run economic effect after scanner triage, flake repair, test maintenance, human override and queue latency—not just raw automation acceptance?"
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "About protected branches",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Protected branches can require PR reviews, successful status checks, signed commits, conversation resolution, deployments and merge queues; required checks must be successful, skipped or neutral.",
+        "A required status check can be pinned to a specific GitHub App; otherwise an integration with write permission can set status, a trust-boundary caveat."
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Managing a merge queue",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "A merge queue validates required checks against the latest target branch and queued PRs and can use GitHub Actions or external CI."
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Auto-merge",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/project/merge_requests/auto_merge/",
+      "publication_update_date": "feature generally available in GitLab 17.7; page continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "GitLab can automatically merge when all required checks pass; the page records feature rollout and UI/API mechanics."
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Merge request approval rules",
+      "publisher_author": "GitLab Docs",
+      "url": "https://docs.gitlab.com/user/project/merge_requests/approvals/rules/",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Approval rules set required counts and eligible approvers and can combine maintainer and Code Owner oversight."
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Code scanning with CodeQL",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "CodeQL identifies vulnerabilities/errors and exposes alerts; it can run through default/advanced GitHub Actions setup or external CI with uploaded results."
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Core deployment",
+      "publisher_author": "Semgrep Documentation",
+      "url": "https://semgrep.dev/docs/deployment/core-deployment",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Semgrep supports SAST, SCA and secret scanning in CI and PR/MR comments.",
+        "Semgrep recommends phased deployment because organizational infrastructure differs; language/rule maturity and triage remain deployment concerns."
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "Understanding quality gates (SonarQube Server 2025.4)",
+      "publisher_author": "SonarSource",
+      "url": "https://docs.sonarsource.com/sonarqube-server/2025.4/quality-standards-administration/managing-quality-gates/introduction-to-quality-gates.md",
+      "publication_update_date": "2025.4 documentation",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "A quality gate is a set of conditions that passes/fails analysis; PR decoration can block merge and status can fail CI.",
+        "Different projects may need different gates; the product includes a gate for projects containing AI code."
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "Using GitHub Copilot code review",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/using-github-copilot/code-review/using-copilot-code-review",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official/vendor documentation",
+      "supported_claims": [
+        "Copilot review can be manually or automatically requested, posts comments/suggested changes, is callable through the reviewer REST API, and uses GitHub Actions for agentic capabilities.",
+        "By default it does not submit Approve/Request changes and does not satisfy required approvals; approval can now be configured, so policy must decide whether to permit that."
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "Application card: GitHub Copilot Agents",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/responsible-use/code-review",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor responsible-use documentation",
+      "supported_claims": [
+        "GitHub warns generated suggestions can be semantically/syntactically wrong or insecure and tells users to review and test them.",
+        "Human oversight and permission prompts are explicit safety mechanisms; AI outputs are not independent proof of correctness."
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Automated Unit Test Improvement using Large Language Models at Meta",
+      "publisher_author": "Nadia Alshahwan et al.; ACM FSE 2024 / Meta",
+      "url": "https://arxiv.org/abs/2402.09171",
+      "publication_update_date": "2024-02-14; FSE 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed industrial research; first-party deployment",
+      "supported_claims": [
+        "TestGen-LLM augments existing human tests and filters candidates for build, reliable pass and measurable coverage improvement.",
+        "On Instagram Reels/Stories, 75% built, 57% passed reliably, and 25% increased coverage; test-a-thons improved 11.5% of targeted classes and engineers accepted 73% of recommendations."
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "EvoSuite: automatic test suite generation for object-oriented software",
+      "publisher_author": "Gordon Fraser and Andrea Arcuri; ACM ESEC/FSE",
+      "url": "https://dl.acm.org/doi/10.1145/2001420.2001750",
+      "publication_update_date": "2011-09-05",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper; older foundation",
+      "supported_claims": [
+        "Search-based automatic unit-test generation predates LLMs and supplies a mature comparative baseline for Java test generation."
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Pynguin: Automated Unit Test Generation for Python",
+      "publisher_author": "Stephan Lukasczyk et al.",
+      "url": "https://arxiv.org/abs/2009.09692",
+      "publication_update_date": "submitted 2020-09-21; revised 2022",
+      "access_date": "2026-09-13",
+      "source_type": "academic paper and open-source project",
+      "supported_claims": [
+        "Pynguin applies search-based unit-test generation to Python and provides a non-LLM alternative where reproducible structural coverage is desired."
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "Code Coverage Best Practices",
+      "publisher_author": "Carlos Arguelles, Marko Ivanković, Adam Bender; Google Testing Blog",
+      "url": "https://testing.googleblog.com/2020/08/code-coverage-best-practices.html",
+      "publication_update_date": "2020-08-07",
+      "access_date": "2026-09-13",
+      "source_type": "first-party engineering guidance",
+      "supported_claims": [
+        "Coverage is objective and actionable but lossy, indirect, not a perfect test-quality measure, and should not be the only source of truth."
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "PIT Mutation Testing: Basic concepts",
+      "publisher_author": "PIT project",
+      "url": "https://pitest.org/quickstart/basic_concepts/",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source project documentation",
+      "supported_claims": [
+        "Mutation testing injects faults and expects effective tests to fail; equivalent mutants and potentially very large mutant sets impose interpretation and cost limits."
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "OSS-Fuzz documentation and project history",
+      "publisher_author": "Google / OpenSSF OSS-Fuzz",
+      "url": "https://google.github.io/oss-fuzz/",
+      "publication_update_date": "trophy metrics dated 2023-08; page continuously updated",
+      "access_date": "2026-09-13",
+      "source_type": "official project documentation and first-party operational evidence",
+      "supported_claims": [
+        "Continuous scalable fuzzing is established for supported languages and integrates fuzzers with sanitizers and distributed execution.",
+        "As of August 2023 OSS-Fuzz reported over 10,000 vulnerabilities and 36,000 bugs found/fixed across 1,000 projects; this is a first-party cumulative count, not an agent-specific controlled study."
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_author": "Carlos E. Jimenez et al.; ICLR 2024",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_update_date": "submitted 2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed benchmark paper",
+      "supported_claims": [
+        "Original SWE-bench has 2,294 issues from 12 Python repositories and uses execution tests to assess patches.",
+        "The original paper's best reported model, Claude 2, resolved 1.96%, showing the difficulty at that time; later leaderboard scores are not directly interchangeable."
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "SWE-bench repository README",
+      "publisher_author": "SWE-bench maintainers",
+      "url": "https://github.com/SWE-bench/SWE-bench/blob/main/README.md",
+      "publication_update_date": "repository status through 2026-09-01",
+      "access_date": "2026-09-13",
+      "source_type": "official benchmark repository",
+      "supported_claims": [
+        "SWE-bench uses Docker for reproducible evaluation and provides local/cloud evaluation mechanics.",
+        "SWE-bench Verified is a 500-problem subset confirmed solvable by software engineers; the repository also records continuing benchmark/version evolution."
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_author": "Reem Aleithan et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_update_date": "2024-10-09; revised 2024-10-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent preprint benchmark audit",
+      "supported_claims": [
+        "Manual audit reported 32.67% of successful SWE-agent+GPT-4 patches had solution leakage and 31.08% were suspicious due to weak tests; filtering reduced reported resolution from 12.47% to 3.97%.",
+        "The paper reports similar issue classes in Lite/Verified and that over 94% of issues predated model knowledge cutoffs; findings conflict with treating public benchmark pass rates as deployment confidence."
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "Can LLMs Express Their Uncertainty? An Empirical Evaluation of Confidence Elicitation in LLMs",
+      "publisher_author": "Miao Xiong et al.; ICLR 2024",
+      "url": "https://arxiv.org/abs/2306.13063",
+      "publication_update_date": "submitted 2023-06-22; revised 2024-03-17",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": [
+        "Across five model/dataset groups, verbalized confidence tended to be overconfident; no elicitation technique consistently won and hard professional tasks remained difficult.",
+        "Reported white-box versus studied black-box failure-prediction AUROC example was 0.605 versus 0.522, supporting empirical calibration rather than raw self-confidence."
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "Secure Software Development Framework (SSDF) Version 1.1: Recommendations for Mitigating the Risk of Software Vulnerabilities (SP 800-218)",
+      "publisher_author": "NIST; Murugiah Souppaya, Karen Scarfone, Donna Dodson",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/guidance",
+      "supported_claims": [
+        "Secure development should integrate review, analysis, testing, provenance and vulnerability response into the lifecycle; assurance is a process of layered practices, not one model score."
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "Static Analysis Results Interchange Format (SARIF) Version 2.1.0",
+      "publisher_author": "OASIS Open",
+      "url": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html",
+      "publication_update_date": "2020-03-27",
+      "access_date": "2026-09-13",
+      "source_type": "open standard",
+      "supported_claims": [
+        "SARIF standardizes static-analysis result exchange, enabling multiple scanners to feed one normalized findings/evidence pipeline."
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "An Empirical Analysis of Flaky Tests",
+      "publisher_author": "Qingzhou Luo et al.; ACM FSE 2014",
+      "url": "https://dl.acm.org/doi/10.1145/2635868.2635920",
+      "publication_update_date": "2014-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper; older foundation",
+      "supported_claims": [
+        "Flaky tests are a longstanding empirical problem with causes including asynchronous waits, concurrency and test-order dependencies, so a single green run is insufficient evidence for unstable tests."
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "About code owners",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "CODEOWNERS can request domain owners automatically and branch rules can require Code Owner approval; ownership files themselves require protection from unauthorized changes."
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "CodeRabbit Architecture: The System Behind Every Review Comment",
+      "publisher_author": "CodeRabbit",
+      "url": "https://docs.coderabbit.ai/overview/architecture",
+      "publication_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor architecture claim",
+      "supported_claims": [
+        "CodeRabbit describes sandboxed repository execution, 50+ analyzers, parallel review/verification/pre-merge agents and feedback memory; these are vendor claims, not independent accuracy evidence."
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "Configuring blocking and errors in CI",
+      "publisher_author": "Semgrep Documentation",
+      "url": "https://docs.semgrep.dev/semgrep-ci/configuring-blocking-and-errors-in-ci",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Blocking findings return exit code 1, but default semgrep ci suppresses internal errors and can pass; --no-suppress-errors makes internal errors fail CI."
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "Quality gate for agentic AI",
+      "publisher_author": "SonarSource SonarQube Cloud",
+      "url": "https://docs.sonarsource.com/sonarqube-cloud/standards/ai-code-assurance/quality-gate-for-agentic-ai.md",
+      "publication_update_date": "living documentation available by 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "Built-in Sonar way for agentic AI applies six new-code conditions, including new-code coverage >=80% and duplication <=3%, plus reliability, security, maintainability and dependency-risk conditions.",
+        "Dependency-risk condition is skipped without the required Advanced Security Enterprise feature, illustrating tier-dependent silent evidence gaps."
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "Hypothesis documentation",
+      "publisher_author": "Hypothesis project",
+      "url": "https://hypothesis.readthedocs.io/en/latest/",
+      "publication_update_date": "living documentation; copyright through 2026",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": [
+        "Property-based tests state properties over input ranges and generate edge cases; the docs frame them as an addition to, not always a replacement for, example unit tests."
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "Continuous Integration (CIFuzz)",
+      "publisher_author": "Google OSS-Fuzz",
+      "url": "https://google.github.io/oss-fuzz/getting-started/continuous-integration/",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official project documentation",
+      "supported_claims": [
+        "CIFuzz runs fuzz targets on PRs; a reproducible newly introduced crash emits a stack trace and crashing input and fails CI, while crashes present in older builds are suppressed."
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "Leveling Up Fuzzing: Finding More Vulnerabilities with AI",
+      "publisher_author": "Google Open Source Security Team",
+      "url": "https://security.googleblog.com/2024/11/leveling-up-fuzzing-finding-more.html",
+      "publication_update_date": "2024-11-20",
+      "access_date": "2026-09-13",
+      "source_type": "first-party operational case study",
+      "supported_claims": [
+        "AI-generated fuzz targets increased coverage in 272 C/C++ OSS-Fuzz projects, added over 370,000 lines of coverage and found 26 new vulnerabilities in already heavily fuzzed projects.",
+        "The value came from AI-authored harnesses combined with deterministic fuzz execution, not AI judging its own output."
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "About GitHub Copilot code review",
+      "publisher_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/code-review",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": [
+        "GitHub explicitly says Copilot is not guaranteed to spot all PR problems, may make mistakes, and should be supplemented with human review."
+      ]
+    },
+    {
+      "id": "S31",
+      "title": "StrykerJS configuration: thresholds",
+      "publisher_author": "Stryker Mutator project",
+      "url": "https://stryker-mutator.io/docs/stryker-js/configuration/#thresholds-object",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": [
+        "StrykerJS only fails the build when an explicit break threshold is set; the default break:null never fails solely on mutation score."
+      ]
+    },
+    {
+      "id": "S32",
+      "title": "An Empirical Evaluation of Using Large Language Models for Automated Unit Test Generation",
+      "publisher_author": "Max Schäfer et al.; IEEE Transactions on Software Engineering",
+      "url": "https://arxiv.org/abs/2302.06527",
+      "publication_update_date": "submitted 2023-02-13; revised 2023-12-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical study",
+      "supported_claims": [
+        "TestPilot on 25 npm packages/1,684 API functions achieved median 70.2% statement and 52.8% branch coverage versus Nessie 51.3% and 25.6%; failing generated tests were excluded.",
+        "Authors caution that coverage is not correctness; oracle quality used a low-bar non-trivial-assertion proxy, readability was not formally assessed, and scope was JavaScript/npm open source."
+      ]
+    },
+    {
+      "id": "S33",
+      "title": "Deep Learning-based Code Reviews: A Paradigm Shift or a Double-Edged Sword?",
+      "publisher_author": "Michele Tufano et al.",
+      "url": "https://arxiv.org/abs/2411.11401",
+      "publication_update_date": "preprint revised 2024-11-29",
+      "access_date": "2026-09-13",
+      "source_type": "independent controlled-study preprint",
+      "supported_claims": [
+        "In 72 reviews by 29 professionals, participants retained 89% of LLM-raised issues, but actual AI review surfaced only 42% of 48 injected issues, saved no time, and did not significantly improve confidence.",
+        "Study was small and possibly underpowered, used injected defects/small programs, and removed 13 timing observations, so it is a warning rather than a universal accuracy estimate."
+      ]
+    },
+    {
+      "id": "S34",
+      "title": "LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code",
+      "publisher_author": "Naman Jain et al.",
+      "url": "https://arxiv.org/abs/2403.07974",
+      "publication_update_date": "submitted 2024-03-12; revised 2024-06-06",
+      "access_date": "2026-09-13",
+      "source_type": "academic benchmark paper",
+      "supported_claims": [
+        "LiveCodeBench uses time-windowed new contest problems and observed sharp performance drops after stated model cutoffs, supporting post-cutoff evaluation as a contamination mitigation.",
+        "Time-based freshness reduces but cannot prove absence of contamination, and contest tasks do not represent repository maintenance."
+      ]
+    },
+    {
+      "id": "S35",
+      "title": "Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback",
+      "publisher_author": "Katherine Tian et al.; EMNLP 2023",
+      "url": "https://aclanthology.org/2023.emnlp-main.330/",
+      "publication_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": [
+        "Verbalized confidence improved expected calibration error on short factual QA but remained imperfect; reported GPT-3.5 TruthfulQA ECE fell from 0.451 to 0.203.",
+        "Authors limit conclusions to factual-recall/short-form QA and do not validate transfer to repository patch safety."
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "High for platform gate mechanics and the need for layered deterministic evidence; medium for measured usefulness of LLM-generated tests; medium-low for generalizing AI-review accuracy and any numeric merge-risk threshold.",
+    "claim_levels": {
+      "high": "Required-check/approval/merge-queue mechanics [S1-S5,S23], CodeQL/Semgrep/Sonar integration capability [S5-S7], TestGen-LLM reported funnel [S10], coverage/mutation/fuzzing principles [S13-S15], benchmark definitions [S16-S17].",
+      "medium": "Operational benefit transfer from Meta/OSS-Fuzz to other stacks [S10,S15]; SWE-Bench+ audit implications beyond its sampled system [S18]; applying general LLM calibration evidence to code review [S19]. Independent AI-review recall/time results are medium-low due to the small preprint study [S33].",
+      "low_or_unknown": "Universal AI-review defect detection rate, universal confidence threshold, cross-vendor ROI, and assurance status of unreleased/future product versions."
+    },
+    "method": "Primary platform docs and standards were used for capabilities; peer-reviewed/first-party papers for measured deployments; an independent preprint for benchmark critique. Vendor architecture statements are labeled and not treated as proof. Exact page update dates are unknown where documentation omits them."
+  },
+  "conflicts": [
+    {
+      "issue": "Benchmark progress versus benchmark validity",
+      "positions": "SWE-bench offers reproducible real-issue execution and Verified adds engineer-screened solvability [S16-S17]; SWE-Bench+ reports leakage and weak tests even in variants [S18].",
+      "resolution": "Both can be true. Use named harness/dataset versions for comparative research, but require private, recent, adversarial and production-linked evals for merge policy."
+    },
+    {
+      "issue": "AI approval capability versus safe approval policy",
+      "positions": "GitHub can now be configured so Copilot leaves Approve reviews [S8], while GitHub also warns AI suggestions can be wrong/insecure and require review/testing [S9].",
+      "resolution": "Capability is not assurance. Exclude AI approval from human counts except possibly a narrow, calibrated low-risk lane with deterministic hard gates and audit."
+    },
+    {
+      "issue": "Coverage/quality gates versus correctness",
+      "positions": "Sonar/CI can block on numeric conditions [S7], while Google says coverage is lossy/indirect and not a sole truth source [S13].",
+      "resolution": "Gate on regression/no-degradation and risk-specific floors, but combine with oracle quality, mutation/fuzz and outcome metrics."
+    },
+    {
+      "issue": "Automation acceptance versus raw yield",
+      "positions": "Meta reports engineers accepted 73% of recommendations, but only 25% of candidate tests increased coverage in one evaluation and 11.5% of targeted classes improved at test-a-thons [S10].",
+      "resolution": "Report the whole funnel and compute/human cost. Do not cite acceptance alone as autonomous success."
+    },
+    {
+      "issue": "Multiple analyzers versus confidence",
+      "positions": "Vendors describe many analyzers/agents [S24], but correlated signals and false positives are possible [S6,S13-S14].",
+      "resolution": "Measure marginal independent defect detection and deduplicate; analyzer count is not a confidence metric."
+    },
+    {
+      "issue": "AI-review adoption/retention versus detection completeness",
+      "positions": "AI-review products automate comments and suggestions [S8,S24,S30]; controlled-study users retained 89% of raised issues, but only 42% of injected issues were surfaced and no time was saved [S33].",
+      "resolution": "Measure precision and recall separately. Treat comments as triage, preserve independent review, and do not infer completeness from acceptance."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    {
+      "topic": "AI reviewer accuracy",
+      "unknown": "No source found with an independent, representative, production-scale precision/recall comparison of Copilot code review, CodeRabbit, Qodo and peers across severity classes as of the stated date.",
+      "impact": "Do not use vendor AI review alone as a required approval; run a local shadow evaluation."
+    },
+    {
+      "topic": "Universal confidence score",
+      "unknown": "No validated cross-project mapping from test/static/review signals to probability of safe merge was found.",
+      "impact": "Keep hard gates and calibrate locally; abstain under drift or missing evidence."
+    },
+    {
+      "topic": "Current commercial product details",
+      "unknown": "Documentation is continuously updated and often lacks page dates; prices, tiers, retention and approval behavior can change.",
+      "impact": "Verify contractual and current product details during procurement."
+    },
+    {
+      "topic": "Benchmark contamination magnitude",
+      "unknown": "SWE-Bench+ is an independent preprint and its exact percentages may not generalize to other agents, later harnesses or private tasks.",
+      "impact": "Treat it as a demonstrated failure mode, not a universal correction factor."
+    },
+    {
+      "topic": "Economics",
+      "unknown": "Comparable total-cost evidence including tokens, CI compute, triage, flakes, generated-test maintenance and escaped incidents is absent.",
+      "impact": "Instrument a staged pilot before broad auto-merge."
+    }
+  ]
+}

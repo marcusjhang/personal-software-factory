@@ -1,0 +1,775 @@
+{
+  "scope": {
+    "definition": "Observability-to-remediation is the closed loop from telemetry/event detection through correlation, diagnosis, action selection, execution, verification, rollback/escalation, and learning. It includes error-centric Sentry/Seer, AIOps correlation assistants, deterministic runbook engines, Kubernetes reconcilers and progressive-delivery rollback. It excludes generic coding agents except when handed an incident-derived diagnosis and excludes mere dashboards/notifications.",
+    "covered_signals": "Errors/stack traces, logs, metrics/SLOs, distributed traces, profiles, release/deployment metadata, topology/change events, incident records and repository/test context [S01,S02,S04,S05,S28].",
+    "autonomy_levels": [
+      "L0 observe/notify",
+      "L1 correlate/summarize/recommend",
+      "L2 human-triggered vetted runbook or patch draft",
+      "L3 policy-triggered bounded runbook with automatic verification/rollback",
+      "L4 agent invents and deploys a novel repair without approval"
+    ],
+    "evidence_boundary": "As of 2026-09-13, L1-L2 are broadly productized; narrow L3 is mature for predefined reversible actions and desired-state reconciliation; general L4 is not supported by credible reliability evidence [S09,S35,S37,S42,S45,S49]."
+  },
+  "current_state": [
+    "Verified: Sentry Seer can consume issue telemetry plus linked source, produce RCA, plan and code, and open a draft PR/MR or hand off to coding agents. Admins cap automation at RCA, plan, or PR draft. Documentation does not describe auto-merge/deploy [S02,S26].",
+    "Verified: PagerDuty, Dynatrace, Datadog and AWS-style stacks connect anomaly/incident context to approved actions or pre-authored runbooks. Their diagnosis and actuation layers must be distinguished: ML/LLM suggestions do not by themselves make execution safe [S09,S10,S12,S35,S36,S38,S39,S42].",
+    "Verified: Kubernetes controllers/probes and Argo Rollouts already implement useful closed loops: converge desired state, restart unhealthy containers, pause/abort/rollback deployments based on metric predicates [S07,S08,S24,S45,S46].",
+    "Independent benchmark evidence is much weaker than product breadth. ITBench's best tested model achieved 13.81% diagnosis and 11.43% mitigation pass@1 on its SRE scenarios and 0% on hard repair; traces materially helped. Therefore novel end-to-end remediation remains experimental [S49].",
+    "Inference: the most production-ready architecture is hybrid: probabilistic systems rank evidence/propose; deterministic policy and reviewed runbooks actuate; CI/canary/postconditions decide promotion or rollback [S13,S32,S35,S39,S49]."
+  ],
+  "representative_systems": [
+    {
+      "system": "Sentry Seer/Autofix",
+      "status": "Autofix/Seer GA since 2025-06; RCA→plan→draft PR, cloud GitHub/GitLab; Seer Agent and some adjacent capabilities retain beta/preview boundaries",
+      "role": "error/trace-to-code proposal",
+      "evidence": "[S01,S02,S26,S27]"
+    },
+    {
+      "system": "Datadog Bits AI SRE/Bits Remediation",
+      "status": "Remediation, one-click actions and Guardrails documented as Preview",
+      "role": "investigate→recommend→human-run or guarded one-click Kubernetes action/code PR",
+      "evidence": "[S11,S35]"
+    },
+    {
+      "system": "Dynatrace Intelligence + Workflows",
+      "status": "Workflows established; agentic Intelligence action surface Preview",
+      "role": "topology-aware diagnosis plus policy workflow/approval",
+      "evidence": "[S10,S36,S37]"
+    },
+    {
+      "system": "PagerDuty AIOps + Event Orchestration + Automation Actions",
+      "status": "commercial deterministic incident/runbook path; add-on/tier constraints",
+      "role": "noise reduction/triage separated from rule-driven vetted actions",
+      "evidence": "[S09,S38,S39,S40]"
+    },
+    {
+      "system": "AWS DevOps Guru + EventBridge/CloudWatch + SSM Automation",
+      "status": "DevOps Guru recommends; SSM executes approved runbooks; Incident Manager unavailable to new customers",
+      "role": "cloud-native anomaly-to-runbook composition",
+      "evidence": "[S12,S41,S42]"
+    },
+    {
+      "system": "OpenTelemetry + Prometheus/Alertmanager",
+      "status": "mature signal/routing foundation, not remediation engine",
+      "role": "normalized evidence, rule state and webhook trigger",
+      "evidence": "[S04,S06,S43,S44]"
+    },
+    {
+      "system": "Kubernetes Operator + Argo Rollouts",
+      "status": "production-grade within bounded declarative/deployment domains",
+      "role": "convergent repair and canary abort/rollback",
+      "evidence": "[S07,S24,S45,S46]"
+    },
+    {
+      "system": "StackStorm/Rundeck",
+      "status": "mature general runbook options; custom operations ownership required",
+      "role": "event-to-idempotent workflow execution",
+      "evidence": "[S47]"
+    },
+    {
+      "system": "Keptn",
+      "status": "CNCF Archived 2025-09-03",
+      "role": "historically useful lifecycle/SLO evaluation pattern; not preferred new control plane",
+      "evidence": "[S48]"
+    }
+  ],
+  "primary_evidence": [
+    "Sentry's current docs explicitly specify data inputs, three-stage collaboration, SCM scope, automation thresholds/stopping points, diff/PR review and optional checks. This verifies mechanics, not model correctness [S01,S02,S03,S27,S28].",
+    "Open standards/project docs verify signal correlation and actuator primitives: W3C Trace Context; OpenTelemetry signal/status/resiliency; Prometheus webhook; Kubernetes controllers/probes; Argo analysis/rollback [S04-S08,S24,S43-S46].",
+    "Vendor docs consistently expose approvals and scope controls rather than unrestricted autonomy: Datadog Ask/Deny guardrails, Dynatrace approval timeout, PagerDuty pre-created actions, and SSM aws:approve [S35,S37,S39,S42].",
+    "Incident postmortems demonstrate mechanism-level hazards: global rollout, excessive capacity removal, shared-fate safety checker failure, fallback/blocklist positive feedback, and control-plane impairment [S16,S17,S29-S31]."
+  ],
+  "independent_evidence": [
+    "ITBench is the closest live, tool-using, multi-signal evaluation. It finds observability useful but low absolute diagnosis/mitigation reliability and 0% hard repairs; injected Kubernetes incidents still underrepresent organic production complexity [S49].",
+    "AIOpsLab supplies an end-to-end evaluation design, but its published prototype result is one case and cannot establish production readiness [S50].",
+    "Peer-reviewed cloud-incident work supports historical-incident retrieval and RCA/mitigation recommendation, not safe autonomous execution [S51].",
+    "APR and repository benchmarks show test-oracle and contamination problems: test-passing can be wrong; SWE-bench's container score omits rollout, security and blast radius; SWE-Bench+ reports leakage/weak-test inflation [S19,S20,S22,S34,S52].",
+    "Independent public evidence specifically auditing Sentry's 94.5% RCA claim, Datadog/Dynatrace agentic actions, or customer MTTR/false-action distributions was not found. Vendor case studies are reported separately [S26,S29,S40]."
+  ],
+  "metrics": [
+    {
+      "metric": "ITBench SRE pass@1",
+      "result": "GPT-4o 13.81% diagnosis; 11.43% mitigation across 42 SRE scenarios ×10 runs; hard repair 0% for every tested model",
+      "classification": "independent academic benchmark",
+      "caveat": "Injected Kubernetes scenarios; model/tool setup specific; pass@1 is not long-term service safety",
+      "source": "[S49]"
+    },
+    {
+      "metric": "ITBench trace ablation",
+      "result": "Removing traces reduced GPT-4o diagnosis 13.81→9.52% and mitigation 11.43→2.86%",
+      "classification": "independent academic benchmark",
+      "caveat": "Supports multi-signal context, not any vendor",
+      "source": "[S49]"
+    },
+    {
+      "metric": "AIOpsLab prototype",
+      "result": "One GPT-4/ReAct case: 14 s detection, 36 s mitigation, 10–12 interactions, about $0.25",
+      "classification": "peer-reviewed preliminary demonstration",
+      "caveat": "single port-misconfiguration case; no general success rate",
+      "source": "[S50]"
+    },
+    {
+      "metric": "Sentry Seer GA telemetry",
+      "result": "38,000+ issues analyzed, 94.5% RCA accuracy, >2 collective developer-years saved",
+      "classification": "vendor claim",
+      "caveat": "public post omits sampling, label/denominator, confidence interval, severity mix, patch correctness and deployment outcomes",
+      "source": "[S26]"
+    },
+    {
+      "metric": "Sentry internal outage",
+      "result": "~80–90% Issue Summary API requests failed; >40,000 errors; automated blocklist cascaded after six raw failures",
+      "classification": "first-party postmortem",
+      "caveat": "Seer aided localization; humans supplied the correct invariant, so this is collaboration rather than autonomous recovery",
+      "source": "[S29]"
+    },
+    {
+      "metric": "Ryanair/PagerDuty",
+      "result": ">25,000 automated jobs/day and >1,000 human hours/year saved",
+      "classification": "vendor-authored customer claim",
+      "caveat": "No independent audit or denominator/failure distribution; bounded restart then human escalation is the relevant pattern",
+      "source": "[S40]"
+    },
+    {
+      "metric": "Knight Capital loss",
+      "result": ">4 million erroneous orders in 45 minutes and >$460 million loss",
+      "classification": "regulator-verified historical operational evidence",
+      "caveat": "Trading deployment, not AIOps, but direct demonstration of automated-actuation blast radius",
+      "source": "[S15]"
+    },
+    {
+      "metric": "SWE-Bench+ audit",
+      "result": "Reported audit: 32.67% of successful SWE-Agent+GPT-4 patches had solution leakage and 31.08% were suspicious due to weak tests; filtering reduced 12.47% resolution to 3.97%",
+      "classification": "independent academic benchmark critique",
+      "caveat": "Specific agent/set; indicates score validity risk rather than universal adjustment",
+      "source": "[S20]"
+    }
+  ],
+  "reference_workflow": [
+    "1. Instrument: emit structured logs, metrics, traces/profiles and release/change IDs through OpenTelemetry; propagate W3C trace IDs; redact secrets/PII at source. Track collector drop/queue health because missing telemetry is an unsafe input [S03-S05,S43,S44].",
+    "2. Detect: evaluate user-impact/SLO symptoms with persistence (`for`), hysteresis and missing-data rules. Group/deduplicate alerts; attach service, environment, version, owner, trace IDs and stable incident/action ID [S06,S14].",
+    "3. Enrich: join recent deploy/commit/config/feature-flag and topology/dependency data; retrieve similar resolved incidents and approved runbooks. Preserve raw evidence and provenance [S28,S36,S51].",
+    "4. Triage: deterministic rules first suppress duplicates and classify known signatures. A probabilistic RCA assistant may rank hypotheses with citations and uncertainty. It must not silently convert correlation to cause [S35,S38,S49].",
+    "5. Choose autonomy: match an allowlisted known condition to a versioned idempotent runbook. Unknown/ambiguous cases create incident + diagnostic bundle. Code defects may enter Sentry RCA→editable plan→patch branch/draft PR, never direct default-branch mutation [S02,S09,S39,S47].",
+    "6. Preflight: acquire per-resource lock; dedupe by incident/action ID; verify preconditions, maintenance/freeze window, current desired state, error-budget/blast-radius budget, recent actions, backups and rollback feasibility. Simulate/dry-run where supported [S07,S13,S32].",
+    "7. Gate: auto-execute only low-risk reversible actions (restart one replica, scale within bounds, fail over a canary, toggle a pre-approved flag). Require named approval/quorum for destructive, stateful, multi-region, permission, schema or novel code changes [S35,S37,S42].",
+    "8. Execute: use short-lived least-privilege identity in an isolated runner. Canary one cell/tenant/replica first; bound concurrency, retries, rate and total affected resources; maintain an out-of-band kill switch [S16,S17,S30-S32].",
+    "9. Verify: compare canary/control and independent user-impact SLO plus technical postconditions over a fixed observation window. Do not treat alert disappearance alone as success. Record action output and telemetry completeness [S07,S29,S32,S52].",
+    "10. Commit or compensate: promote gradually only if all invariants pass. Otherwise stop, roll back/execute compensating action, inhibit repeated retries and page a human with evidence [S07,S24,S47].",
+    "11. Learn: append immutable incident/action/outcome record; link reviewed fix, tests and postmortem; convert only repeatedly successful repairs into candidate allowlisted runbooks through review. Measure recurrence and false-action harm, not just MTTR [S23,S33]."
+  ],
+  "integration_points": [
+    "Telemetry: OpenTelemetry APIs/SDKs/Collector/OTLP; W3C trace context; Sentry SDK/error/log/trace/profile ingestion; Prometheus-compatible metrics [S01,S04,S05,S43,S44].",
+    "Detection/routing: Sentry issue/metric alerts and webhooks; Prometheus rules→Alertmanager webhook; PagerDuty Events/Event Orchestration; CloudWatch/EventBridge [S06,S38,S39].",
+    "Context: service catalog/CMDB, ownership/on-call, deployment/release/commit metadata, feature flags, Kubernetes events/topology, incident history and runbook registry [S28,S36,S51].",
+    "Actuation: SSM Automation, PagerDuty Automation Actions, Dynatrace Workflows, Datadog Private Action Runner, StackStorm/Rundeck, Kubernetes API/Operators and Argo Rollouts [S09,S10,S24,S35,S42,S45-S47].",
+    "Code path: Sentry↔GitHub.com/GitLab.com repos; branch/draft PR/MR; optional coding-agent handoff; CI tests, security/static checks and required owner review before merge [S02,S27].",
+    "State/audit: durable queue plus dedupe ledger, workflow state machine, action/checkpoint/artifact store, append-only audit and incident timeline. Alertmanager webhook alone is not a durable exactly-once job system; idempotency is required because retries/replays are possible [S06].",
+    "Feedback: deployment event closes loop into release health/SLO dashboards; incident tracker/postmortem and private replay suite supply outcome labels [S23,S28,S33]."
+  ],
+  "human_gates": [
+    "Always approve novel code, database/schema/data-destructive changes, security/IAM changes, cross-region/global actions, customer communication and actions without a proven compensator. Reason: correctness and blast radius are not established by RCA confidence [S15-S17,S49].",
+    "Sentry's recommended boundary is concrete: admins cap at RCA/plan/PR draft; users edit plans/diffs; nothing merges without approval. Keep third-party AI review optional rather than a single availability-dependent required check [S02,S26,S27].",
+    "Use explicit approval objects with named roles, quorum and timeout. Dynatrace declines/24h timeout fail the workflow; SSM `aws:approve` pauses for selected principals [S37,S42].",
+    "Auto-run only high-frequency known signatures with a stable deterministic runbook, low bounded impact, recent successful drills, verified rollback and healthy observability. Escalate on ambiguity, missing signals, budget exhaustion, conflicting hypotheses, repeated attempt or verification failure [S09,S32,S44,S47].",
+    "A human incident commander retains kill-switch authority and validates business/user impact. The agent may gather evidence and draft updates, but generated claims require fact checking [S23,S29]."
+  ],
+  "failure_modes": [
+    "Bad/stale/missing telemetry, sampling or collector drops causes false negatives and wrong RCA; trace context may be broken across queues/services [S04,S05,S44,S49].",
+    "Correlation is mistaken for causation; model hallucinates a command, file, dependency or confident RCA; similar-incident retrieval imports obsolete context [S26,S49,S51].",
+    "Test/verification oracle is weak: patch clears a narrow test/alert while violating semantics, security, latency, data integrity or downstream behavior [S20,S22,S34,S52].",
+    "Automation amplification: global rollout, unbounded capacity removal, blocklist/fallback cascade, retries/thundering herd or shared-fate safety checker expands blast radius [S16,S17,S29-S31].",
+    "Non-idempotent webhook retry or duplicate alert repeats a destructive action; concurrent workflows fight; stale desired state causes oscillation/flapping [S06,S45,S47].",
+    "Rollback is unavailable or unsafe after schema migration, irreversible external effect, cache/protocol incompatibility or data corruption; control plane/auth/DNS is impaired by the incident [S17,S24].",
+    "Permissions are too broad; telemetry/repo contains secrets or prompt injection; agent exfiltrates code/data or changes its own controls; subprocessor/data-residency boundary is unacceptable [S03,S35,S37].",
+    "Economic/organizational: noisy triggers, LLM/tool latency and token/telemetry cost, vendor lock-in, workflow drift, abandoned projects (Keptn), missing runbook ownership and automation complacency [S13,S41,S48].",
+    "Evaluation failure: vendor metric lacks denominator; public benchmark is contaminated or not representative; injected faults omit organic socio-technical incidents and long-horizon recurrence [S19,S20,S26,S34,S49]."
+  ],
+  "controls_and_mitigations": [
+    "Identity/data: per-service least privilege, short-lived credentials, network egress allowlist, repo/environment scoping, secret/PII redaction, immutable audit, separation of proposer/approver/executor [S03,S35,S37,S42].",
+    "Trigger quality: SLO/symptom alerts, debounce/hysteresis, maintenance suppression, dedupe/inhibition, minimum evidence and explicit unknown/missing-data state [S06,S14,S44].",
+    "Action safety: signed/versioned allowlist; schema-validated parameters; pre/postconditions; idempotency key and resource lock; max attempts/concurrency/rate/affected resources/cost; cool-down; never let agent edit its policy [S15,S30,S45,S47].",
+    "Blast radius: shadow mode, dry run, single-cell canary, gradual promotion, objective canary/control analysis, protected baseline capacity, circuit breaker and out-of-band kill switch [S07,S16,S17,S29,S32].",
+    "Validation: reproduce in isolated environment; regression/security/static tests; independent SLO and user journey; observation window; require multiple signals for high-risk actions. A passed repository test or cleared alert is insufficient [S20,S34,S49,S52].",
+    "Recovery: precompute compensator/rollback, verify backup restore and break-glass channel, stop retries on failed verification, preserve evidence and page human [S17,S23,S24].",
+    "Governance: named owner/expiry for every runbook; two-person review for scope increases; quarterly incident replays/chaos drills; action outcome labels; kill or narrow automations with rising false-action/rollback rate [S13,S23,S33]."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful, not generally autonomous.",
+    "production_ready": "Signal collection/correlation primitives; actionable alert routing; desired-state Kubernetes reconciliation; health restart; progressive delivery abort/rollback; human-triggered or policy-triggered vetted runbooks for low-risk reversible cases [S04-S10,S24,S43-S47].",
+    "emerging": "AI multi-signal RCA, plan generation, patch drafts and agentic recommendations. Sentry core is GA but relies on approval; Datadog remediation and Dynatrace agentic actions are Preview [S02,S26,S35,S36].",
+    "experimental": "Model chooses and safely executes a novel repair or code deployment across heterogeneous production without human review. ITBench's low pass@1 and 0% hard repair contradict readiness [S49].",
+    "rationale": "The actuator technology is mature; diagnosis validity, test oracles, permissions and blast-radius control are the bottleneck. Production postmortems show deterministic automation can itself be the incident [S15-S17,S29-S31]."
+  },
+  "build_vs_buy": {
+    "buy": "Buy observability/AIOps UI, telemetry retention/correlation, on-call workflow and common integrations when they match existing stack: Sentry for application errors/code context; Datadog/Dynatrace for unified telemetry; PagerDuty for incident/runbook orchestration [S01,S09-S11,S35-S39].",
+    "build_or_own": "Own the safety/control plane even with SaaS: event schema, durable queue/dedupe ledger, service/runbook catalog, permissions, risk classifier, approval policy, canary/postcondition checks, compensators, audit and private replay evaluation. These encode local architecture and business invariants no vendor can infer reliably [S29,S32,S49].",
+    "open_source": "OpenTelemetry + Prometheus/Alertmanager + Kubernetes Operators/Argo Rollouts + StackStorm/Rundeck gives portability and inspectability but transfers HA, upgrades, connector security and runbook maintenance to the team [S04,S06,S07,S43-S47].",
+    "avoid": "Do not base a greenfield control plane on AWS Incident Manager (closed to new customers) or archived Keptn without explicit lifecycle risk acceptance [S41,S48]."
+  },
+  "recommended_pattern": {
+    "pattern": "Guarded two-lane remediation.",
+    "lane_A": "Known-condition lane: deterministic match→versioned low-risk runbook→bounded canary→independent verify→gradual commit or automatic compensate. It may be fully closed loop only inside an explicit autonomy envelope.",
+    "lane_B": "Unknown/code lane: AI assembles evidence and ranked hypotheses→human confirms RCA/plan→sandbox patch→CI/security/replay→draft PR→owner approval→progressive delivery→automatic rollback on SLO breach.",
+    "initial_rollout": "Start shadow-only and replay the last 20–50 incidents. Then enable read-only diagnostics. Next enable human-click runbooks. Auto-run only a handful of reversible actions after severity-stratified trials show acceptable false-action and rollback rates. Expand per service, not globally [S32,S49].",
+    "minimum_metrics": "Detection precision/recall; RCA top-k calibration; action attempt/success; false-action and rollback rate; time to detect bad action; affected-user minutes; recurrence within 7/30 days; telemetry completeness; cost per incident; human override; change failure and recovery time [S33,S49].",
+    "decision_rule": "Optimize user harm and recurrence, not number of auto-fixes or headline MTTR. If telemetry is incomplete, verification disagrees, or rollback is uncertain, fail closed and escalate."
+  },
+  "open_questions": [
+    "What are severity-stratified false-positive RCA and harmful-action rates on recent private incidents, including no-action incidents? Public vendor figures do not answer this [S26,S49].",
+    "How should RCA confidence be calibrated across model/version/tool changes, and what threshold maps to each autonomy envelope?",
+    "Can the organization build a faithful replay/sandbox for stateful, multi-region, security and partial-control-plane incidents without leaking production secrets?",
+    "Which actions have truly reversible compensators after schema/data/external side effects, and how often are rollback paths drilled [S17,S24]?",
+    "How will telemetry provenance and completeness be proved when Collector queues drop data or tracing is sampled/broken [S44]?",
+    "How are prompt injection and untrusted logs/issues/code isolated from tools with write credentials [S03]?",
+    "What are full costs: telemetry retention, model tokens, action runners, false pages, workflow ownership and vendor add-ons?",
+    "Will Preview surfaces (Datadog Bits Remediation, Dynatrace agentic Intelligence) retain APIs/controls and meet compliance/SLA needs [S35,S36]?",
+    "What replacement path is available for AWS Incident Manager greenfield users and for archived Keptn deployments [S41,S48]?"
+  ],
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Seer",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Seer combines issues, traces, logs and profiles; supports Autofix, PR creation and code review; commercial add-on."
+    },
+    {
+      "id": "S02",
+      "title": "Autofix",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/autofix/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Collaborative RCA-to-plan-to-code/PR flow; GitHub.com/GitLab.com repository links; automatic stopping points governed by fixability confidence and configured cap; agent handoffs."
+    },
+    {
+      "id": "S03",
+      "title": "AI Privacy Principles",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/ai-privacy-and-security/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Telemetry and linked code may be processed; no training by default absent permission; third-party/subprocessor boundaries and AI output privacy caveats."
+    },
+    {
+      "id": "S04",
+      "title": "Signals",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/concepts/signals/",
+      "publication_or_update_date": "2026-03-10",
+      "access_date": "2026-09-13",
+      "source_type": "standard/project documentation",
+      "supported_claims": "Defines traces, metrics, logs and baggage as distinct signals; common context is needed for correlation."
+    },
+    {
+      "id": "S05",
+      "title": "Trace Context, W3C Recommendation",
+      "publisher_or_author": "W3C",
+      "url": "https://www.w3.org/TR/trace-context/",
+      "publication_or_update_date": "2021-11-23",
+      "access_date": "2026-09-13",
+      "source_type": "web standard",
+      "supported_claims": "Standard traceparent/tracestate propagation enables cross-service causal correlation; propagation also creates trust/privacy boundaries."
+    },
+    {
+      "id": "S06",
+      "title": "Alertmanager configuration: webhook_config",
+      "publisher_or_author": "Prometheus Authors/CNCF",
+      "url": "https://prometheus.io/docs/alerting/latest/configuration/#webhook_config",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Alertmanager can emit structured webhook batches with resolved status; receiver is only a trigger, not diagnosis or safety control."
+    },
+    {
+      "id": "S07",
+      "title": "Analysis and Progressive Delivery",
+      "publisher_or_author": "Argo Rollouts Authors/CNCF",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Metric analysis can continue, pause, abort or mark rollout inconclusive; supports dry run, thresholds and multiple providers."
+    },
+    {
+      "id": "S08",
+      "title": "Configure Liveness, Readiness and Startup Probes",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Kubelet restarts failed liveness containers; readiness removes endpoints; bad probes can cause cascading restarts/outage."
+    },
+    {
+      "id": "S09",
+      "title": "PagerDuty Automation Actions",
+      "publisher_or_author": "PagerDuty",
+      "url": "https://support.pagerduty.com/main/docs/automation-actions",
+      "publication_or_update_date": "2026-06-08",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Responders can run scripts or Process/Runbook Automation jobs in incident context and inspect an action log; supports controlled human-triggered remediation."
+    },
+    {
+      "id": "S10",
+      "title": "Workflows",
+      "publisher_or_author": "Dynatrace",
+      "url": "https://docs.dynatrace.com/docs/analyze-explore-automate/workflows",
+      "publication_or_update_date": "2026-03-18",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Event/schedule/API-triggered workflows can act on monitoring data; explicit IAM permissions and limits; not intended for mass ingestion/export."
+    },
+    {
+      "id": "S11",
+      "title": "Bits AI SRE",
+      "publisher_or_author": "Datadog",
+      "url": "https://docs.datadoghq.com/bits_ai/bits_ai_sre/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/vendor claims",
+      "supported_claims": "AI-assisted investigation correlates Datadog telemetry and collaboration context; capability is diagnosis assistance, not evidence of safe unreviewed code deployment."
+    },
+    {
+      "id": "S12",
+      "title": "What is Amazon DevOps Guru?",
+      "publisher_or_author": "AWS",
+      "url": "https://docs.aws.amazon.com/devops-guru/latest/userguide/welcome.html",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/vendor claims",
+      "supported_claims": "ML detects anomalous operational patterns and produces reactive/proactive insights and recommendations; operator implements recommendations."
+    },
+    {
+      "id": "S13",
+      "title": "The Evolution of Automation at Google",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/sre-book/automation-at-google/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Known, well-scoped procedures benefit from consistent automation, but thoughtless automation can create as many problems as it solves; autonomous system design is preferable to endless scripts."
+    },
+    {
+      "id": "S14",
+      "title": "Monitoring Distributed Systems",
+      "publisher_or_author": "Google SRE authors",
+      "url": "https://sre.google/sre-book/monitoring-distributed-systems/",
+      "publication_or_update_date": "2016",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Alerts should be actionable and symptom/SLO oriented; noisy monitoring consumes operator capacity and undermines response."
+    },
+    {
+      "id": "S15",
+      "title": "Knight Capital Americas LLC to Pay $12 Million to Settle Charges",
+      "publisher_or_author": "U.S. SEC",
+      "url": "https://www.sec.gov/newsroom/press-releases/2013-222",
+      "publication_or_update_date": "2013-10-16",
+      "access_date": "2026-09-13",
+      "source_type": "regulator enforcement release / independent evidence",
+      "supported_claims": "Defective deployment and inadequate controls caused more than four million erroneous orders in 45 minutes and over $460 million loss; direct evidence that fast automated actuation magnifies errors."
+    },
+    {
+      "id": "S16",
+      "title": "Cloudflare outage on July 2, 2019",
+      "publisher_or_author": "Cloudflare",
+      "url": "https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/",
+      "publication_or_update_date": "2019-07-12",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "A globally deployed WAF regex exhausted CPUs; software rollback existed but global blast radius and deployment path caused a 27-minute outage; supports staged rollout and circuit breakers."
+    },
+    {
+      "id": "S17",
+      "title": "October 4, 2021 outage",
+      "publisher_or_author": "Meta Engineering",
+      "url": "https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/",
+      "publication_or_update_date": "2021-10-05",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "A command unintentionally disconnected backbone capacity and impaired recovery tooling; supports out-of-band control plane, bounded scope and tested break-glass access."
+    },
+    {
+      "id": "S18",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Jimenez et al.",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2024-02-21 (ICLR 2024 version)",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper / benchmark",
+      "supported_claims": "Repository-level repair is measurable on 2,294 real issues; early evaluated models resolved only a small fraction; issue-to-patch remains hard and benchmark differs from live incidents."
+    },
+    {
+      "id": "S19",
+      "title": "Introducing SWE-bench Verified",
+      "publisher_or_author": "OpenAI",
+      "url": "https://openai.com/index/introducing-swe-bench-verified/",
+      "publication_or_update_date": "2024-08-13",
+      "access_date": "2026-09-13",
+      "source_type": "benchmark audit / first-party research",
+      "supported_claims": "Human review found ambiguity and broken tests in original tasks; curated 500-task subset improves evaluation but still tests patch correctness, not safe incident diagnosis/deployment."
+    },
+    {
+      "id": "S20",
+      "title": "SWE-Bench+: Enhanced Coding Benchmark for LLMs",
+      "publisher_or_author": "Yuchen Zhang et al.",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "publication_or_update_date": "2024-10-09",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint / independent benchmark critique",
+      "supported_claims": "Raises data-leakage and test adequacy concerns; benchmark scores can overstate generalization."
+    },
+    {
+      "id": "S21",
+      "title": "AutoCodeRover: Autonomous Program Improvement",
+      "publisher_or_author": "Yuheng Lin et al.",
+      "url": "https://arxiv.org/abs/2404.05427",
+      "publication_or_update_date": "2024-04-08",
+      "access_date": "2026-09-13",
+      "source_type": "academic paper/preprint",
+      "supported_claims": "Combines repository search, program structure and tests to generate patches; demonstrates conditional automated repair but assumes a reproducible issue/test oracle."
+    },
+    {
+      "id": "S22",
+      "title": "Automated Program Repair: a Step Towards Practical Evaluation",
+      "publisher_or_author": "Durieux et al.",
+      "url": "https://doi.org/10.1007/s10664-019-09746-1",
+      "publication_or_update_date": "2019-07-13",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical study",
+      "supported_claims": "Large-scale APR evaluation found tool and benchmark constraints; plausible/test-passing patches are not necessarily semantically correct."
+    },
+    {
+      "id": "S23",
+      "title": "Incident Response",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+      "publication_or_update_date": "2025-04",
+      "access_date": "2026-09-13",
+      "source_type": "government standard/guidance",
+      "supported_claims": "Incident response integrates preparation, detection, response and recovery into cybersecurity risk management; governance and recovery remain required around automation."
+    },
+    {
+      "id": "S24",
+      "title": "Rollback a deployment",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Deployment revision history supports rollback, but rollback success depends on compatibility of data/schema/external effects."
+    },
+    {
+      "id": "S25",
+      "title": "getsentry/seer",
+      "publisher_or_author": "Sentry",
+      "url": "https://github.com/getsentry/seer",
+      "publication_or_update_date": "repository status accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "open-source repository",
+      "supported_claims": "Implementation is inspectable and active; repository existence does not validate vendor accuracy or production outcomes."
+    },
+    {
+      "id": "S26",
+      "title": "Seer, Sentry’s AI Debugger, Is Generally Available",
+      "publisher_or_author": "Sentry",
+      "url": "https://blog.sentry.io/seer-sentrys-ai-debugger-is-generally-available/",
+      "publication_or_update_date": "2025-06-17",
+      "access_date": "2026-09-13",
+      "source_type": "vendor announcement / metrics claim",
+      "supported_claims": "GA status; says nothing is merged without approval; claims 38,000+ issues analyzed, 94.5% root-cause accuracy and over two developer-years saved, with no disclosed independent protocol."
+    },
+    {
+      "id": "S27",
+      "title": "AI Code Review",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/ai-in-sentry/seer/code-review/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "GitHub PR/check permissions and check conclusions; draft PRs skipped; Sentry recommends optional check to avoid service outage blocking merges."
+    },
+    {
+      "id": "S28",
+      "title": "Releases",
+      "publisher_or_author": "Sentry",
+      "url": "https://docs.sentry.io/product/releases/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Release health and regression/new-issue correlation provide change context for diagnosis and post-deploy verification."
+    },
+    {
+      "id": "S29",
+      "title": "Seer Fixes Seer: How Sentry’s Debugging Agent Helped Resolve Its Own Outage",
+      "publisher_or_author": "Sentry",
+      "url": "https://blog.sentry.io/seer-fixes-seer-debugging-agent/",
+      "publication_or_update_date": "2026-03-20",
+      "access_date": "2026-09-13",
+      "source_type": "vendor incident case study",
+      "supported_claims": "Feb. 21, 2026 EU incident: automatic blocklist used six raw failures, banned a mostly successful provisioned region and cascaded across fallback regions; 80–90% API failures and ~40,000 events. Seer localized mechanism, engineers supplied architectural invariant."
+    },
+    {
+      "id": "S30",
+      "title": "Summary of the Amazon S3 Service Disruption in the Northern Virginia Region",
+      "publisher_or_author": "AWS",
+      "url": "https://aws.amazon.com/message/41926/",
+      "publication_or_update_date": "2017-03-02",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "Incorrect maintenance-command input removed too much capacity; AWS added tool safeguards and removal-rate limits. Foundation for bounded automated actions."
+    },
+    {
+      "id": "S31",
+      "title": "Inside Google Cloud’s outage of June 2, 2019",
+      "publisher_or_author": "Google Cloud",
+      "url": "https://cloud.google.com/blog/products/gcp/inside-google-clouds-outage-of-june-2-2019",
+      "publication_or_update_date": "2019-06-18",
+      "access_date": "2026-09-13",
+      "source_type": "first-party incident postmortem",
+      "supported_claims": "Automated configuration/capacity changes cascaded and overload slowed recovery; automation and retries can amplify localized faults."
+    },
+    {
+      "id": "S32",
+      "title": "Canarying Releases",
+      "publisher_or_author": "Google SRE Workbook authors",
+      "url": "https://sre.google/workbook/canarying-releases/",
+      "publication_or_update_date": "2018",
+      "access_date": "2026-09-13",
+      "source_type": "first-party production-practice book",
+      "supported_claims": "Expose a small population, compare canary/control with objective metrics and roll back; applies to remediation changes."
+    },
+    {
+      "id": "S33",
+      "title": "DORA metrics: Four Keys",
+      "publisher_or_author": "DORA/Google Cloud",
+      "url": "https://dora.dev/guides/dora-metrics-four-keys/",
+      "publication_or_update_date": "continuously updated; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "research-backed practitioner guidance",
+      "supported_claims": "Delivery speed must be balanced with change instability and recovery; auto-remediation needs both speed and harm metrics."
+    },
+    {
+      "id": "S34",
+      "title": "SWE-bench Evaluation",
+      "publisher_or_author": "SWE-bench authors",
+      "url": "https://www.swebench.com/SWE-bench/guides/evaluation/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "benchmark documentation",
+      "supported_claims": "A resolved task means a patch applies and passes specified tests in Docker; it does not evaluate live telemetry, rollout safety or production impact."
+    },
+    {
+      "id": "S35",
+      "title": "Bits Remediation",
+      "publisher_or_author": "Datadog",
+      "url": "https://docs.datadoghq.com/bits_ai/bits_remediation/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation; Preview feature",
+      "supported_claims": "RCA can lead to a code-fix PR for review; infrastructure actions are manual command or one-click Run, followed by verification; Guardrails Ask/Deny and tag scope; capabilities remain Preview."
+    },
+    {
+      "id": "S36",
+      "title": "Dynatrace Intelligence",
+      "publisher_or_author": "Dynatrace",
+      "url": "https://docs.dynatrace.com/docs/dynatrace-intelligence",
+      "publication_or_update_date": "2026-01-28",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation; vendor claims; Preview feature",
+      "supported_claims": "Topology/telemetry correlation and agentic proposed/approved actions; agentic workflows are Preview."
+    },
+    {
+      "id": "S37",
+      "title": "Request approval workflow action",
+      "publisher_or_author": "Dynatrace",
+      "url": "https://docs.dynatrace.com/docs/analyze-explore-automate/workflows/default-workflow-actions/approval-request-workflow-action",
+      "publication_or_update_date": "2025-11-03",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Workflow pauses for named user/group approval; decline or 24-hour timeout fails."
+    },
+    {
+      "id": "S38",
+      "title": "PagerDuty AIOps",
+      "publisher_or_author": "PagerDuty",
+      "url": "https://support.pagerduty.com/main/docs/aiops",
+      "publication_or_update_date": "2026-07-15",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation; vendor claims",
+      "supported_claims": "ML-based noise reduction and triage/RCA are separate from deterministic Event Orchestration/runbook execution."
+    },
+    {
+      "id": "S39",
+      "title": "Event Orchestration",
+      "publisher_or_author": "PagerDuty",
+      "url": "https://support.pagerduty.com/main/docs/event-orchestration",
+      "publication_or_update_date": "2026-07-07",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Rules can invoke pre-created Automation Actions before a human is notified; rule interactions, suppression/grouping and scope matter."
+    },
+    {
+      "id": "S40",
+      "title": "Ryanair uses automation to save 1,000 hours a year",
+      "publisher_or_author": "PagerDuty/Ryanair",
+      "url": "https://www.pagerduty.com/customer/ryanair/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-authored customer case study",
+      "supported_claims": "Claims >25,000 automated jobs/day and >1,000 human hours/year saved; bounded restart/fix followed by human escalation; no independent audit."
+    },
+    {
+      "id": "S41",
+      "title": "AWS Systems Manager Incident Manager availability change",
+      "publisher_or_author": "AWS",
+      "url": "https://docs.aws.amazon.com/incident-manager/latest/userguide/incident-manager-availability-change.html",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official service-status documentation",
+      "supported_claims": "Incident Manager is unavailable to new customers; existing customers can continue, limiting greenfield recommendation."
+    },
+    {
+      "id": "S42",
+      "title": "aws:approve – Pause for manual approval",
+      "publisher_or_author": "AWS",
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-action-approve.html",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "SSM Automation supports named principals, quorum, timeout and approve/reject pause; multi-account/Region constraint documented."
+    },
+    {
+      "id": "S43",
+      "title": "OpenTelemetry specification status",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/specs/status/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official project status",
+      "supported_claims": "Tracing and logs bridge API/SDK/protocol stable; metrics mixed at SDK level; profiles protocol development. Signal maturity differs."
+    },
+    {
+      "id": "S44",
+      "title": "Collector resiliency and data loss",
+      "publisher_or_author": "OpenTelemetry Authors/CNCF",
+      "url": "https://opentelemetry.io/docs/collector/resiliency/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Queues, retry/backoff, default eventual drop and file-storage WAL tradeoffs; observability evidence itself can be missing."
+    },
+    {
+      "id": "S45",
+      "title": "Controllers",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Non-terminating reconciliation loops drive current toward desired state; basis for convergent and idempotent low-level remediation."
+    },
+    {
+      "id": "S46",
+      "title": "Operator pattern",
+      "publisher_or_author": "Kubernetes Authors/CNCF",
+      "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/operator/",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Operators encode operational knowledge in custom-resource controllers; useful for bounded domain-specific self-healing."
+    },
+    {
+      "id": "S47",
+      "title": "StackStorm Overview",
+      "publisher_or_author": "StackStorm",
+      "url": "https://docs.stackstorm.com/overview.html",
+      "publication_or_update_date": "accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "open-source project documentation",
+      "supported_claims": "Sensors, triggers, rules, actions and workflows implement event-driven runbooks; error paths can freeze and page humans."
+    },
+    {
+      "id": "S48",
+      "title": "Keptn project status",
+      "publisher_or_author": "CNCF",
+      "url": "https://www.cncf.io/projects/keptn/",
+      "publication_or_update_date": "2025-09-03 archive status",
+      "access_date": "2026-09-13",
+      "source_type": "foundation project status",
+      "supported_claims": "Keptn moved to CNCF Archived; lifecycle/metrics ideas remain useful but maintenance status argues against greenfield control-plane adoption."
+    },
+    {
+      "id": "S49",
+      "title": "ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks",
+      "publisher_or_author": "Jha et al.",
+      "url": "https://arxiv.org/abs/2502.05352",
+      "publication_or_update_date": "2025-02-08",
+      "access_date": "2026-09-13",
+      "source_type": "academic preprint / independent benchmark",
+      "supported_claims": "94 reproducible Kubernetes scenarios; on 42 SRE scenarios best tested GPT-4o had 13.81% diagnosis and 11.43% mitigation pass@1; removing traces reduced mitigation to 2.86%; all models 0% hard repairs."
+    },
+    {
+      "id": "S50",
+      "title": "AIOpsLab: A Holistic Framework to Evaluate AI Agents for Enabling Autonomous Clouds",
+      "publisher_or_author": "Shetty et al.",
+      "url": "https://arxiv.org/abs/2407.12165",
+      "publication_or_update_date": "2024-07-16; SoCC 2024",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper",
+      "supported_claims": "Defines detection-to-mitigation live evaluation; only preliminary single GPT-4/ReAct case: 14s detect, 36s mitigate, 10–12 interactions, ~$0.25, not a general rate."
+    },
+    {
+      "id": "S51",
+      "title": "Recommending Root-Cause and Mitigation Steps for Cloud Incidents using Large Language Models",
+      "publisher_or_author": "Ahmed et al./Microsoft Research",
+      "url": "https://doi.org/10.1109/ICSE48619.2023.00149",
+      "publication_or_update_date": "2023",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed conference paper",
+      "supported_claims": "Retrieves/generates RCA and mitigation from historical incidents; offline human-assessed recommendation, not autonomous execution."
+    },
+    {
+      "id": "S52",
+      "title": "An Analysis of Patch Plausibility and Correctness for Generate-and-Validate Patch Generation Systems",
+      "publisher_or_author": "Qi et al.",
+      "url": "https://doi.org/10.1145/2786805.2786825",
+      "publication_or_update_date": "2015",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed empirical paper",
+      "supported_claims": "GenProg reassessment found only 2 of 105 plausible patches correct, illustrating test-overfitting risk. (Title metadata should be verified; DOI governs citation.)"
+    }
+  ],
+  "confidence": {
+    "overall": "High for architecture/mechanics and maturity classification; medium for comparative product performance; low for vendor outcome metrics.",
+    "high": "Official current docs establish integration, gate and status mechanics [S01-S12,S24,S35-S48]. Standards and regulator/postmortem evidence strongly establish control principles [S05,S13-S17,S23,S29-S33].",
+    "medium": "Academic live benchmarks support the conclusion that novel remediation is unreliable, but scenario/model coverage and production realism are limited [S49,S50].",
+    "low": "Sentry accuracy/time-saved and Ryanair savings lack independent protocol/audit [S26,S40]. No defensible cross-vendor MTTR or total-cost ranking was found.",
+    "claim_policy": "Statements labeled vendor claim/case study are not treated as independent validation; inferences are explicitly marked and grounded in cited mechanisms."
+  },
+  "conflicts": [
+    "Vendor framing versus operational boundary: products use 'autonomous/agentic/remediation' language, while docs require click/approval or stop at draft PR and mark important action surfaces Preview [S02,S35-S37]. Likely cause: autonomy refers to subtasks, not authority to merge/deploy.",
+    "Sentry reports 94.5% RCA accuracy [S26], while ITBench's best tested live-agent diagnosis pass@1 is 13.81% [S49]. These are not comparable: proprietary traffic/labels and undisclosed exclusions versus adversarial reproducible scenarios. Prefer neither as universal; require local replay.",
+    "Repository-repair scores appear to improve, but SWE-Bench+ finds leakage and weak-test inflation and SWE-bench evaluation omits rollout safety [S20,S34]. Likely cause: benchmark/task/test selection and model knowledge contamination.",
+    "Automation improves consistency [S13] but postmortems show it replicates mistakes rapidly [S15-S17,S29-S31]. Resolution: restrict closed loop to convergent/reversible actions with independent invariants and small blast radius.",
+    "Sentry's own incident shows AI can localize an automation cascade while the cascade itself came from flawed automatic protection [S29]. This supports collaborative diagnosis, not a claim that adding AI makes automation safe."
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "No independently audited production distribution for Sentry Seer RCA correctness, patch acceptance, regression rate, deployment outcomes or severity mix was located.",
+    "No apples-to-apples independent benchmark across Sentry, Datadog, Dynatrace, PagerDuty and cloud-native compositions was located.",
+    "Preview/GA labels and commercial tier details can change after 2026-09-13; current docs were used where available.",
+    "ITBench is the best located end-to-end evidence but remains injected Kubernetes scenarios and may not predict organic multi-team incidents.",
+    "Source S52 DOI/title metadata is used only for its well-known 2/105 patch-correctness result; readers should verify publisher metadata during formal bibliography production.",
+    "Costs, latency, regional data residency and availability SLAs are workload/contract specific and could not be normalized from public sources.",
+    "The future of Shoreline functionality after its redirect/acquisition path was not sufficiently documented, so it was excluded from recommendations."
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "reviewer": "round-5-closure-improvement-product",
+  "scope": "Independent final plan-only closure audit of the current snapshot after round-4 repairs. Read PLAN.md, README.md, docs/state-transition-manifests.md, review/requirements-traceability.md, review/round-4-resolution.md, all six round-4 closure JSON reviews, and the current material-claims, research-manifest, synthesis-coverage, evidence-repair, evidence-index, and evidence-cutoff artifacts. Reproduced the improvement-product repairs from the normative rows rather than relying on the resolution register. No implementation proof or completed future gate was required. Specialty: improvement tuple vocabularies, reducer totality/disjointness, candidate/rollout/attempt/control/cancel/rollback/effect/cleanup composition, asynchronous canary child, widening, ExpectedEvaluationManifest completeness, and promotion/rollback/self-improvement boundaries.",
+  "strengths": [
+    "The repaired ExpectedEvaluationManifest contract now binds the exact expected case/shard/seed/evaluator/slice/result-class tuple set, class and total counts, schema digests, exclusions, and duplicate-free set equality. Candidate- or evaluator-authored summaries cannot fill the protected expectation.",
+    "IR04 now creates only a linked child at INBOX. IR27-IR35 consume separate durable child receipts rather than atomically fabricating worker, output, oracle, review, effect, telemetry, and cleanup completion.",
+    "Enablement, canary admission, widening, and promotion use distinct purpose-bound decisions, and candidate code remains barred from policy, evaluator, evidence-selection, permission, and promotion authority.",
+    "The evidence artifacts consistently describe the legacy provenance and semantic support as unverified and retain the future immutable re-fetch and human semantic review as gates rather than passed facts."
+  ],
+  "findings": [
+    {
+      "id": "R5-IMP-001",
+      "severity": "high",
+      "title": "IA01 and IA05 cannot commit under the repaired reducer, so the evaluation attempt cannot follow its declared admission and success projections",
+      "requirement": "R-12/P-12 and manifest \u00a7\u00a715.1, 15.4, and 15.7 require every reachable improvement component event to reduce to its declared legal canonical projection, with IA01-IA05 committed as separate transactions.",
+      "evidence": "IA01 declares release_attempt_state IDLE -> READY with canonical projection READY_REVIEW>READY, but IC06 has already changed candidate_state CURATION_PASSED -> OFFLINE_PENDING; that IC06 REDUCE-V1 event itself maps READY_REVIEW -> READY. Applying the required later separate IA01 therefore leaves canonical READY and yields a stutter, not IA01's declared edge. IA05 has the analogous defect: it declares release_attempt_state VERIFYING -> SUCCEEDED with canonical projection VERIFYING>REVIEW. Section 15.7 says IA05 occurs as a separate transaction and IC13 consumes its already-durable receipt. After IA05 changes only the attempt coordinate, rollout DISABLED and release attempt SUCCEEDED fall through, while priority 17 still maps candidate SHADOW_RUNNING to VERIFYING. The reducer therefore derives VERIFYING, not REVIEW.",
+      "reproduction": [
+        "Apply IC06. Its target candidate OFFLINE_PENDING maps to READY, so IC06 already commits READY_REVIEW>READY. Now apply IA01 separately as \u00a715.7 requires. Candidate remains OFFLINE_PENDING and release attempt READY is a SAVED/fall-through value, so the reducer stays at READY; IA01's declared READY_REVIEW>READY projection cannot be committed.",
+        "Assuming admission is forced past that mismatch, reach release_attempt_state=VERIFYING through IA02-IA04 and candidate SHADOW_RUNNING through IC07, IC08, IC11, and IC12.",
+        "Apply IA05 alone. Rollout DISABLED and release attempt SUCCEEDED save/fall through; candidate SHADOW_RUNNING returns VERIFYING. This disagrees with IA05's VERIFYING>REVIEW projection.",
+        "IC13 cannot repair the second mismatch because it requires the durable IA05 outcome receipt that the preceding transaction could not commit."
+      ],
+      "impact": "The parent evaluation attempt cannot conformingly commit its declared READY admission transition or its successful shadow exit. An implementation must change row projections, violate the separate-transaction ordering, or ignore the persisted canonical-state check.",
+      "recommendation": "Make IC06/IA01 and IA05/IC13 each use compatible staged projections, or define explicit synchronized coordinate transactions and remove the contrary separate-event receipt ordering. Add both exact tuple witnesses to the generated product check.",
+      "confidence": "high"
+    },
+    {
+      "id": "R5-IMP-002",
+      "severity": "high",
+      "title": "Improvement rollback cannot be entered or terminally closed by the published tuple rules",
+      "requirement": "R-12/P-12 requires a deterministic safety rollback path that verifies restoration, reaches ROLLED_BACK, performs cleanup, and then reaches an exact terminal disposition.",
+      "evidence": "IR19 and IR22 change only rollout_state to FAILED but declare canonical projections ending at ROLLBACK_REQUESTED. Under \u00a715's named-coordinate rule, rollback_state remains IDLE, so reducer priority 7 cannot produce ROLLBACK_REQUESTED; rollout FAILED instead maps to CLEANING. No synchronized rollback-coordinate change is named on either row. Independently, if a later rollback event does reach rollback_state=ROLLED_BACK, priority 7 always returns canonical ROLLED_BACK before terminal priorities 9 and 10. Yet the terminal conjunctions explicitly allow rollback_state ROLLED_BACK, and there is no ROLLED_BACK -> IDLE/reset edge. Thus the priority order permanently masks cleanup/terminal resolution after verified rollback.",
+      "reproduction": [
+        "At rollout PROMOTING with rollback IDLE, apply IR19. The target rollout FAILED plus rollback IDLE reduces to CLEANING, not the declared DEPLOYING>ROLLBACK_REQUESTED sequence.",
+        "The same mismatch occurs for IR22 from OBSERVING: changing rollout to FAILED does not change rollback IDLE, so the tuple cannot derive ROLLBACK_REQUESTED.",
+        "Even assuming a separate generic rollback saga advances REQUESTED -> ROLLING_BACK -> VERIFYING -> VERIFIED -> ROLLED_BACK, reevaluate after cleanup receipts and a failure disposition. Priority 7 still returns ROLLED_BACK, so priorities 9-11 never run. No manifest edge clears the rollback coordinate."
+      ],
+      "impact": "Promotion failure or delayed harm has no conforming transition into the required rollback projection, and a separately forced verified rollback cannot reach cleanup/FAILED. This leaves exposed recovery work without a closed, implementable lifecycle.",
+      "recommendation": "Publish explicit synchronized rollout/rollback initiation rows (or separate legal canonical steps) and a post-rollback transition that permits ROLLED_BACK -> CLEANING -> terminal without priority-7 masking. Re-enumerate both failure witnesses through cleanup and terminalization.",
+      "confidence": "high"
+    },
+    {
+      "id": "R5-IMP-003",
+      "severity": "high",
+      "title": "An UNKNOWN widening effect cannot be durably recorded because the reducer demands an illegal canonical edge",
+      "requirement": "R-12/P-12 and PLAN \u00a78.4 require an unknown widening mutation to stop exposure, enter reconciliation, and never be treated as success; every component event must also project through the closed canonical graph.",
+      "evidence": "While rollout_state=WIDENING_EFFECT, its canonical projection is REVIEW. If dispatch loses an ambiguous response, Effect E11 changes a bound effect to UNKNOWN; the effect fold changes effect_set_state to UNRESOLVED. Reducer priority 8 then derives QUARANTINED. The canonical graph has no REVIEW -> QUARANTINED edge (its quarantine entries are BLOCKED -> QUARANTINED and DEPLOYING -> QUARANTINED). Universal rule \u00a71 therefore rejects the very Effect event that must record the ambiguous outcome. IR42 cannot solve this ordering defect: it presupposes the widening effect is UNKNOWN, and unresolved effects continue to dominate its CANARY_PAUSED rollout target as QUARANTINED.",
+      "reproduction": [
+        "Follow IR36 and IR37 to WIDENING_EFFECT with canonical REVIEW and a live widening Effect.",
+        "Apply Effect E11 after an ambiguous response. Fold UNKNOWN to effect_set_state UNRESOLVED per \u00a715.",
+        "Priority 8 changes the canonical result from REVIEW to QUARANTINED. Compare against canonical \u00a72: REVIEW -> QUARANTINED is absent, so the component transaction is illegal and must reject.",
+        "Attempting IR42 first is impossible because its guard requires the UNKNOWN effect; applying it after E11 cannot occur because E11 failed to commit."
+      ],
+      "impact": "The most safety-sensitive widening failure mode cannot be persisted under the closed contract. A runtime would have to lose the ambiguity fact, invent a canonical edge, or bypass the reducer, any of which undermines no-blind-retry and bounded-exposure guarantees.",
+      "recommendation": "Define a legal two-step widening ambiguity projection, such as REVIEW -> BLOCKED -> QUARANTINED or a paused BLOCKED state with effect reconciliation, and align E11, IR42, the reducer priority, and resume/abort exits. Include the exact UNKNOWN transition in the reachable-product proof cases.",
+      "confidence": "high"
+    },
+    {
+      "id": "R5-IMP-004",
+      "severity": "high",
+      "title": "Pre-exposure canary child failure reaches an abort state whose only exit requires an inapplicable rollback receipt",
+      "requirement": "R-12/P-12 requires total real-child failure/cancellation handling and cleanup without fabricating effects or rollback work that never existed.",
+      "evidence": "IR34 and IR35 cover a child that fails or is cancelled after creation/admission while the parent is still CANARY_READY, which can occur before any ExposureEffect. They move to CANARY_ABORTING. IR12 then reaches CANARY_ABORTED after child termination/quiescence. The only outgoing rollout row from CANARY_ABORTED is IR13, whose guard requires 'child rollback verified+child clean.' The contract defines no rollback-not-required or verified-no-exposure receipt, and IR34/IR35 do not create a rollback saga. Consequently an admitted child that fails before exposure cannot satisfy the only exit guard and cannot reach FAILED or parent cleanup.",
+      "reproduction": [
+        "Use IR04 to create the real child while rollout remains CANARY_READY.",
+        "Before IR27 WorkerStarted or IR31 ExposureEffect receipt, let the child finish FAILED or CANCELLED and apply IR34 or IR35.",
+        "Apply IR12 once termination/quiescence and child cleanup are complete; rollout becomes CANARY_ABORTED.",
+        "Search the closed rollout rows: IR13 is the sole source row for CANARY_ABORTED and requires child rollback verified. No exposure or rollback target existed in this trace, and no row defines a no-rollback-required substitute, so the tuple is a nonterminal sink."
+      ],
+      "impact": "A normal asynchronous child start/admission failure can strand the improvement case indefinitely and prevent cleanup/terminal accounting. Implementers must invent a no-op rollback artifact or weaken a published guard.",
+      "recommendation": "Split IR13 into explicit exposure/rollback-required and proven-no-exposure branches. Bind the latter to a protected absence/no-effect receipt, child clean, and settled effects, then enter parent CLEANING in a separate transaction.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": [
+    "This is a plan-only document audit. It does not assert implementation, compiler/model-checker, immutable source re-fetch, or human semantic evidence gates have run.",
+    "The uncommitted round-4 ephemeral parser was not treated as proof. Findings above are direct tuple evaluations against the current normative rows."
+  ],
+  "closure_criteria_pass": false
+}

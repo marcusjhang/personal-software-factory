@@ -1,0 +1,89 @@
+fields:
+  question:
+  - name: scope
+    description: Exact subproblem and boundary.
+    detail_level: detailed
+    required: true
+  - name: current_capabilities
+    description: Verified current platform/tool capabilities and limits.
+    detail_level: detailed
+    required: true
+  - name: representative_systems
+    description: Relevant official products, repositories, standards and patterns.
+    detail_level: detailed
+    required: true
+  evidence:
+  - name: primary_evidence
+    description: Claim-linked direct official docs/repos/standards/papers.
+    detail_level: detailed
+    required: true
+  - name: independent_evidence
+    description: Operational, academic or security counterevidence.
+    detail_level: detailed
+    required: true
+  - name: metrics_and_limits
+    description: Exact limits, measured outcomes, costs or missing denominators with
+      caveats.
+    detail_level: detailed
+    required: true
+  design:
+  - name: recommended_design
+    description: Concrete design and rationale.
+    detail_level: detailed
+    required: true
+  - name: state_and_event_contract
+    description: States, transitions, triggers, idempotency and reconciliation.
+    detail_level: detailed
+    required: true
+  - name: repository_artifacts
+    description: Exact files, schemas and configuration to store in code.
+    detail_level: detailed
+    required: true
+  - name: workflow_steps
+    description: End-to-end steps including inputs, outputs and stop rules.
+    detail_level: detailed
+    required: true
+  - name: human_gates
+    description: When humans are required and exact approval binding.
+    detail_level: detailed
+    required: true
+  - name: security_and_failure_modes
+    description: Threats, faults, abuse and mitigations.
+    detail_level: detailed
+    required: true
+  - name: validation_and_tests
+    description: How implementation and policy behavior are tested.
+    detail_level: detailed
+    required: true
+  - name: operational_maintenance
+    description: Cleanup, upgrades, observability, recovery and runbooks.
+    detail_level: detailed
+    required: true
+  decision:
+  - name: maturity_and_uncertainty
+    description: Solved, conditional, experimental, unknown and rationale.
+    detail_level: detailed
+    required: true
+  - name: implementation_recommendation
+    description: Minimum viable implementation and staged extensions.
+    detail_level: detailed
+    required: true
+  metadata:
+  - name: sources
+    description: Direct URL bibliography with title, publisher, type, date, access
+      date and supported claims.
+    detail_level: detailed
+    required: true
+  - name: conflicts
+    description: Conflicting claims and likely explanations.
+    detail_level: detailed
+    required: true
+  - name: confidence
+    description: Claim-level and overall confidence.
+    detail_level: moderate
+    required: true
+  - name: as_of
+    description: Currency date.
+    detail_level: brief
+    required: true
+uncertain: []

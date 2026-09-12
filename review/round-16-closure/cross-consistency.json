@@ -1,0 +1,154 @@
+{
+  "reviewer": "round-16-cross-consistency",
+  "scope": {
+    "mode": "independent final plan-only closure audit after round-15 correction",
+    "documents_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-15-resolution.md",
+      "review/round-15-closure/formal-model.json",
+      "review/round-15-closure/improvement-races.json",
+      "review/round-15-closure/cross-consistency.json",
+      "review/round-15-closure/recovery-remediation.json",
+      "review/round-15-closure/evidence-requirements.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json"
+    ],
+    "specialty": "Cross-document vocabulary, status, guards, references, reducer, and terminal scan.",
+    "acceptance_boundary": "Future implementation, exhaustive reachable-product/full-model execution, fresh immutable evidence retrieval, same-run human semantic review, deterministic reviewed-edge regeneration, and production validation were explicitly accepted as unperformed and were not treated as defects.",
+    "severity_filter": "Only critical/high unmet requirements, contradictions, unsafe or undefined paths, and material overclaims are reported."
+  },
+  "contract_reproduction": [
+    {
+      "area": "formal_source_identity_and_plan_only_boundary",
+      "result": "pass",
+      "exact_text": [
+        "Recomputed PLAN.md SHA-256: 9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c.",
+        "Recomputed docs/state-transition-manifests.md SHA-256: 4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d.",
+        "Both digests match review/round-15-resolution.md and material-claims.json generated_against.",
+        "PLAN.md, README.md, traceability, and the round-15 register retain the plan-only boundary and leave implementation, exhaustive/full-model execution, fresh semantic evidence gates, production validation, and independent closure pending."
+      ],
+      "basis": "Independent byte hashing reproduced the current formal-source identity; accepted future gates were not converted into findings."
+    },
+    {
+      "area": "round_15_inventory_and_requirements",
+      "result": "pass",
+      "exact_text": [
+        "All five review/round-15-closure JSON files parse.",
+        "They contain 0 critical and 6 high findings with exact IDs R15-IR-001, R15-IR-002, R15-IR-003, R15-XC-001, R15-REC-001, and R15-ER-001; every ID appears in review/round-15-resolution.md.",
+        "The six raw findings are registered as four unique defects.",
+        "review/requirements-traceability.md retains R-01 through R-16 and states 16/16 structural mapping with 0/16 implementation proof."
+      ],
+      "basis": "The prior findings were treated as correction contracts rather than automatically carried forward."
+    },
+    {
+      "area": "normative_manifest_shape_references_reducer_and_terminals",
+      "result": "pass",
+      "exact_text": [
+        "The normative manifest contains 799 unique literal edge IDs: 96 canonical and 703 private/product rows.",
+        "No literal edge ID is duplicated, and every Markdown data row has the width declared by its table header.",
+        "All 27 canonical symbols are reachable from INBOX; canonical sinks are exactly DONE, FAILED, and CANCELLED.",
+        "The deterministic reducer keeps release-attempt CANCEL_REQUESTED|QUIESCING|CLEANING|CANCELLED subordinate at priority 13 as SAVED; canonical parent CANCELLED still requires IX04 and the exact terminal guard.",
+        "IA16/IA17 require cancellation NONE; IA18-F/IA18-C preserve the existing failure CleanupManifest and leave IX03/IX04 as sole parent cleanup/terminal owners.",
+        "The exact IX06 revocation source vocabulary SHADOW_PASSED|FROZEN|EVIDENCE_STALE appears across REQUESTED/QUIESCING and UNSETTLED/N/X partitions, with the claimed IC32 boundary equality and no second cleanup or saga."
+      ],
+      "basis": "Independent table parsing, canonical traversal, reducer inspection, declared-terminal scan, and targeted correction-ID/reference searches found no additional critical/high defect."
+    },
+    {
+      "area": "schema_3_candidate_graph_structure",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json is schema_version 3.0.0 with regeneration_checkpoint round-15 and binds both recomputed current formal-source digests.",
+        "It contains 25 unique source observations, 20 unique claims, and 36 unique edges: 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes.",
+        "All 25 pointed source records reproduce byte-semantically; every source-record value digest and result-file digest matches; all recorded exact PLAN excerpts match.",
+        "The dynamically derived set of all 28 numbered normative-manifest headings matches exactly.",
+        "All 37 research-manifest result paths are unique and their recorded SHA-256 digests match current bytes.",
+        "The graph remains candidate-only with unreviewed legacy provenance."
+      ],
+      "basis": "Local deterministic schema-3 structure, pointers, excerpts, headings, and byte identity reproduce; fresh retrieval and semantic entailment remain accepted future gates."
+    },
+    {
+      "area": "reader_checkpoint_status",
+      "result": "fail",
+      "exact_text": [
+        "README.md:34 says: ‘The round-14 schema-3 graph now matches the current PLAN/manifest digests and all 28 headings.’",
+        "README.md:40 says the round-14 source bytes and graph matched at that checkpoint and round-15 formal bytes supersede them.",
+        "README.md:47, review/requirements-traceability.md:185 and :192, and review/round-15-resolution.md:22 name round 15 as current.",
+        "review/round-14-resolution.md:38-39 records round-14 digests 89d3d1a3864cae50e4236052ff345f33c309ec20b59e787176b658a090835ddd and 70e23025d0fcec99f11c6d037ef65e234384c8551a2c385687c9e3f7fccbf271, which differ from the current round-15 digests."
+      ],
+      "basis": "One reader-facing sentence still calls the historical round-14 graph current, directly contradicting the adjacent historical/superseded statement and the current round-15 checkpoint."
+    },
+    {
+      "area": "cancellation_side_degradation_totality",
+      "result": "fail",
+      "exact_text": [
+        "docs/state-transition-manifests.md:1042 defines ordinary IH01 for a reachable HEALTHY tuple that has no active generation, live exposure, or exposure-capable Effect.",
+        "docs/state-transition-manifests.md:1004 rejects every ordinary IH01 row while cancellation is not NONE, while IX01 at :1008 is authorized from every reachable nonterminal tuple.",
+        "After IX01 from such a no-active-generation tuple, IXH01-R at :1023 is the only claimed REQUESTED cancellation-side degradation row, but its guard requires a current-generation continuity/SLO degradation and its effect writes a generation-bound receipt.",
+        "docs/state-transition-manifests.md:1029 defines CancellationDegradationReceipt.id with active_canary_generation even though that coordinate is absent in the constructed source, and it defines no nullable/no-generation identity or separate receipt form.",
+        "The same paragraph claims IXH01-R/Q/C equal all reachable nonterminal HEALTHY REQUESTED|QUIESCING|CLEANING tuples; PLAN.md:238 likewise says control degradation always commits, including after cancellation enters those states."
+      ],
+      "basis": "The no-active-generation cancellation-first path is reachable by the document's own IX01 closure but has no fully constructible degradation guard/receipt, so the new claimed exact relation is not total as written."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R16-XC-001",
+      "severity": "high",
+      "title": "README still names the historical round-14 graph as current",
+      "requirement_or_contract": "Reader-facing checkpoint status must identify the current round-15 formal bytes and candidate graph consistently and must describe round 14 only as a historical, superseded checkpoint.",
+      "evidence": [
+        "README.md:34: ‘The round-14 schema-3 graph now matches the current PLAN/manifest digests and all 28 headings.’",
+        "README.md:40: ‘The round-14 source bytes and schema-3 candidate graph matched at that checkpoint; round-15 formal bytes supersede them.’",
+        "README.md:47, review/requirements-traceability.md:185, review/requirements-traceability.md:192, and review/round-15-resolution.md:22 identify round 15 as current.",
+        "Current hashes are PLAN 9a9a3aba3f7a98824ba475830ba4adb6e2d0fce798903b9cd956b3327cdb1d3c and manifest 4a35900ab71d43b9b28d6f220a7a883ab47edf206b5dbc29610524b5ee6b046d; review/round-14-resolution.md:38-39 records different historical round-14 hashes."
+      ],
+      "impact": "The README gives mutually exclusive historical/current accounts and recreates the graph-checkpoint ambiguity that the round-15 status correction was required to remove.",
+      "required_correction": "In README.md:34, replace the final sentence with: ‘The round-14 schema-3 graph matched the then-current round-14 PLAN/manifest digests and all 28 headings; round 15 superseded that checkpoint.’",
+      "references": [
+        "README.md:34",
+        "README.md:40",
+        "README.md:47",
+        "review/requirements-traceability.md:185",
+        "review/requirements-traceability.md:192",
+        "review/round-15-resolution.md:22",
+        "review/round-14-resolution.md:38-39"
+      ]
+    },
+    {
+      "id": "R16-XC-002",
+      "severity": "high",
+      "title": "Cancellation-side degradation is undefined for reachable no-active-generation tuples",
+      "requirement_or_contract": "The IXH cancellation-side degradation relation must be total over every reachable nonterminal HEALTHY REQUESTED|QUIESCING|CLEANING tuple and must define a constructible deterministic receipt for every member, including tuples with no active canary generation.",
+      "evidence": [
+        "docs/state-transition-manifests.md:1042 makes a HEALTHY, no-active-generation tuple an explicit ordinary IH01 source before cancellation.",
+        "docs/state-transition-manifests.md:1004 rejects ordinary IH01 while cancellation is not NONE, and :1008 permits IX01 from every reachable nonterminal tuple.",
+        "docs/state-transition-manifests.md:1023 requires a current-generation degradation and a generation-bound receipt for IXH01-R.",
+        "docs/state-transition-manifests.md:1029 claims all reachable nonterminal HEALTHY cancellation tuples are covered but hashes active_canary_generation without defining a no-generation/null encoding.",
+        "PLAN.md:238 materially claims that control degradation always commits after cancellation and that the generated relation equals all such reachable tuples."
+      ],
+      "impact": "A valid IX01-before-degradation interleaving from an inactive/no-exposure tuple must drop the degradation or invent an undefined receipt identity. The exact-equality and always-record claims are therefore not implementable from the current contract.",
+      "required_correction": "Add an explicit cancellation-side no-active-generation guard/receipt partition, or define a canonical nullable generation identity used by IXH01-R/Q/C and CancellationDegradationReceipt. Then require generated source equality for active-generation and no-generation sources and add IX01-before-IH01 race witnesses for inactive/no-exposure tuples.",
+      "references": [
+        "PLAN.md:238",
+        "docs/state-transition-manifests.md:1004",
+        "docs/state-transition-manifests.md:1008",
+        "docs/state-transition-manifests.md:1023-1029",
+        "docs/state-transition-manifests.md:1039-1042",
+        "review/round-15-resolution.md:13",
+        "review/round-15-resolution.md:31"
+      ]
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2
+  },
+  "residual_uncertainty": [
+    "This was a plan-contract audit. Future implementation and exhaustive reachable-product/generated witness execution were not performed.",
+    "Schema-3 checks reproduced local structure and byte identity only; fresh immutable retrieval, same-run human semantic review, and deterministic reviewed-edge regeneration remain pending by contract."
+  ],
+  "closure_criteria_pass": false
+}

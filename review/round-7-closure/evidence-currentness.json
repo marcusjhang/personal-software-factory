@@ -1,0 +1,87 @@
+{
+  "reviewer": "round-7 independent evidence-currentness closure auditor",
+  "scope": {
+    "mode": "independent final plan-only closure audit after round-6 combined repairs",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-6-resolution.md",
+      "review/round-6-closure/adversarial-consistency.json",
+      "review/round-6-closure/formal-model.json",
+      "review/round-6-closure/evidence-semantics.json",
+      "review/round-6-closure/improvement-recovery.json",
+      "review/round-6-closure/architecture-requirements.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/structural-validation.md",
+      "review/plan-link-check.json",
+      "all 37 result JSON files declared by research/repository-agent-operating-system/research-manifest.json"
+    ],
+    "specialty": "Candidate-only semantics across PLAN, report, matrix, synthesis, repair, and schema-3 graph; current digests; exact 27-heading, 37-result, and 23-index contracts; exact excerpts and JSON pointers; and absence of active categorical evidence overclaim.",
+    "severity_rule": "Critical/high only for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. This audit does not require implementation, full model proof, fresh evidence completion, external source truth, or semantic-entailment completion. closure_criteria_pass is true if and only if critical=0 and high=0."
+  },
+  "contract_reproduction": [
+    {
+      "area": "current_digest_binding",
+      "result": "pass",
+      "basis": "Recomputed SHA-256 over current bytes. PLAN.md is e0a3194743e4434fa7f40212ef81c29985b8f63db7e9b24ae62b199c0ed4ed70 and docs/state-transition-manifests.md is 9c54a76d8090485d1a3e84283b4fbf9bda5cf481f4ee887a5ca7d2b46090476a. Both exactly equal material-claims.json generated_against. The current schema-3 material-claims.json byte digest is be1f308d61aee344f6d641f2d036d524ee05ef6f19f88e2b5b5e41394cdddd41; the current research-manifest.json byte digest is 78deb672a870692edb587ed6c514c73d0d0c23cb73b28ee7beb4661053cbca8c."
+    },
+    {
+      "area": "27_current_normative_manifest_headings",
+      "result": "pass",
+      "basis": "Derived 27 numbered level-2 through level-4 headings from the current manifest. The exact derived set equals coverage_validation.normative_manifest_headings_reviewed and includes 15.3.1 Improvement rollback-coordinate machine v1 and 15.8 Exact tuple witnesses required by the plan checker. The recorded reviewed count is 27 and internal_validation names all_actual_normative_manifest_headings_reviewed=true."
+    },
+    {
+      "area": "37_result_corpus",
+      "result": "pass",
+      "basis": "The declared and filesystem sets are exactly equal at 37 result JSON files in the 14 self-managing-software, 10 RAOS core, 8 lifecycle-extension, and 5 domain-extension split; the four outlines declare exactly 14/10/8/5 items. All 37 parse. Every research-manifest.json and material-claims.json corpus-inventory path and SHA-256 matches current bytes. synthesis-coverage.md has exactly 37 track headings in the same 14/10/8/5 split. Manifest source accounting also reproduces exactly: 1,537 source records, 1,546 source-URL occurrences, 884 unique URLs, and encodings split as 35 record_list plus 2 numbered_bibliography_string; the manifest expressly says these are not independent-evidence counts."
+    },
+    {
+      "area": "23_focused_index",
+      "result": "pass",
+      "basis": "evidence-index.md declares and contains exactly 23 focused headings: 10 core, 8 lifecycle, and 5 domain. Indexed bullet counts reproduce as core 29/40/37/27/30/31/26/35/39/35, lifecycle 29/40/40/40/27/40/40/40, and domain 40/40/40/40/40; all obey the declared 40-entry cap. The two bibliography-string inputs are parsed as numbered entries, not characters. The index labels entries as source-field inventory pointers only, disclaims retrieval history and semantic entailment, and keeps fresh immutable retrieval plus human semantic review as a PRE-IMPLEMENTATION gate."
+    },
+    {
+      "area": "schema_3_graph_shape_and_candidate_only_edges",
+      "result": "pass",
+      "basis": "Recomputed 25 unique source observations, 20 unique material claims, and 36 unique evidence edges. Relations are exactly 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, and 0 refutes. Every edge has semantic_disposition=unreviewed_candidate. Claim statuses are exactly 18 candidate_unreviewed, 1 verified_local_structural, and 1 proposed_not_observed; the two non-candidate statuses are limited respectively to checkout-local structural inspection and an explicitly unobserved local outcome hypothesis. Every source observation is referenced and all edge references resolve."
+    },
+    {
+      "area": "exact_pointers_hashes_ids_and_excerpts",
+      "result": "pass",
+      "basis": "Resolved every source-observation JSON pointer against its current result file. Every pointed value equals verbatim_source_record; every source-record value hash, result-file hash, URL-in-record check, and derived SO- plus uppercase first-16 SHA-256 identity reproduces. Every material-claim PLAN line range reproduces exact_excerpt byte-for-text against current PLAN.md. No stale pointer, excerpt, observation ID, file hash, or dangling edge was found."
+    },
+    {
+      "area": "reader_facing_candidate_semantics",
+      "result": "pass",
+      "basis": "PLAN §4 explicitly limits legacy edges to candidate_support|candidate_refute|context_only and reserves supports|refutes for future accepted same-run observations. The repaired PLAN passages explicitly attribute GitHub reviewer/token/webhook/security propositions, JSON Schema/RFC 8785, SLSA, OWASP, OpenTelemetry, and METR statements to unreviewed legacy candidates while separating conservative local requirements and hypotheses. report.md and evidence-matrix.md prominently mark the entire retained bodies SUPERSEDED LEGACY SYNTHESIS and NON-AUTHORITATIVE, including every categorical claim, confidence label, cutoff/date statement, and association. synthesis-coverage.md is TRACEABILITY ONLY, and its formerly problematic evidence-family wording is candidate-scoped. evidence-repair.md preserves the same boundary. No active categorical material evidence overclaim remains."
+    },
+    {
+      "area": "status_and_future_gate_consistency",
+      "result": "pass",
+      "basis": "README.md, PLAN.md, requirements traceability, round-6 resolution, research manifest, schema-3 graph, synthesis, repair, index, cutoff, report banner, and matrix banner consistently distinguish completed local editorial/structural repair from unperformed fresh retrieval and human semantic review. None claims implementation, full model proof, verified legacy provenance, external source truth, semantic entailment, production safety, efficacy, or local outcome proof. The pending future evidence gate was not treated as a closure defect."
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "total": 0
+  },
+  "residual_uncertainty": [
+    "This is a plan-text and deterministic checkout-local evidence audit. It does not prove implementation, full reachable-product/model correctness, operational safety, external source truth, source currentness, or semantic entailment.",
+    "Fresh immutable retrieval in one ResearchRun, actual UTC source observations, and human edge-level semantic decisions remain future pre-implementation gates. Their non-completion is not a finding under this audit scope.",
+    "The legacy bodies of report.md and evidence-matrix.md retain categorical historical prose, but their top-level status expressly scopes the entire documents as superseded, non-authoritative, unreviewed candidate material; therefore that retained text is not an active evidence overclaim."
+  ],
+  "closure_criteria_pass": true
+}

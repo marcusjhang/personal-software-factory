@@ -1,0 +1,131 @@
+{
+  "reviewer": "round-11 independent cross-document consistency closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-10 combined correction",
+    "specialty": "Cross-document vocabulary, status, guard, reference, authority, and unsafe-edge consistency.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-10-resolution.md",
+      "review/round-10-closure/formal-model.json",
+      "review/round-10-closure/evidence-status.json",
+      "review/round-10-closure/improvement-races.json",
+      "review/round-10-closure/recovery-adversary.json",
+      "review/round-10-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md"
+    ],
+    "accepted_future_gates": [
+      "implementation",
+      "exhaustive reachable-product/full-model proof",
+      "fresh immutable evidence retrieval",
+      "same-run human semantic review",
+      "deterministic reviewed-edge regeneration",
+      "production validation"
+    ]
+  },
+  "contract_reproduction": [
+    {
+      "area": "authority_status_and_current_identity",
+      "result": "pass",
+      "exact_text": [
+        "PLAN.md: ‘Status: revised plan-only implementation contract; no working implementation, semantic evidence validation, or autonomous self-government is claimed.’",
+        "README.md: ‘Round 10 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest bytes.’",
+        "review/round-10-resolution.md: ‘This memo does not claim independent closure, implementation, full reachable-product proof, semantic evidence validation, or production safety.’"
+      ],
+      "basis": "PLAN remains the sole roadmap authority and incorporates the manifest as the legal-edge authority. README, traceability, and the round-10 register consistently distinguish completed text/current-digest candidate regeneration from pending independent closure and future execution gates. Recomputed SHA-256 values are 29804814db262399090c60bbd5d6c15527ed9fdce2f72cecce7eea0be9d31063 for PLAN.md and d8e3c02cdffd28a7b8c33ab2cb9133ecc5dd4be8e99cf3a251b9ced50af65599 for the normative manifest, exactly matching the register and schema-3 graph."
+    },
+    {
+      "area": "round_10_correction_inventory_and_closed_vocabularies",
+      "result": "pass",
+      "exact_text": [
+        "review/round-10-resolution.md: ‘All 9/9 raw high findings in all 5/5 review/round-10-closure/*.json files are mapped below.’",
+        "PLAN.md §14.0 includes rollout symbols WIDENING_RECONCILING and PROMOTION_RECONCILING.",
+        "docs/state-transition-manifests.md §15 declares the same exact rollout set and says generated validation fails on an omitted or extra symbol."
+      ],
+      "basis": "The five historical round-10 reviews contain 0 critical and 9 high findings, agreeing with the correction register. The current manifest parses to 764 unique edge IDs, with 96 canonical and 668 private/product rows, also agreeing with the register. The PLAN and manifest rollout vocabularies agree, and the new reconciliation projections use named canonical adjacency."
+    },
+    {
+      "area": "round_10_recovery_and_cleanup_guards",
+      "result": "pass",
+      "exact_text": [
+        "BUILD and MAINTENANCE each declare distinct private ROLLBACK_REMEDIATION_WAIT states projected to BLOCKED.",
+        "B75/M63 record cancellation without cleanup or terminalization; B74/M62 are the sole exits after obligation closure, genuine restoration, and independent verification authority.",
+        "Reducer priority 7a and terminal prose partition cleanup as WIDENING_ABORT plus NONE to IR13C, other origins plus NONE to IRB08, and pending cancellation to IX03."
+      ],
+      "basis": "The current PLAN inventory, private rows, reducer, rollback rows, IR13C, and witness text reproduce the round-10 recovery and cleanup-owner corrections without the earlier generic BLOCKED escape or VERIFIED-before-cleanup defect."
+    },
+    {
+      "area": "whole_work_cancellation_no_exposure_totality",
+      "result": "fail",
+      "exact_text": [
+        "docs/state-transition-manifests.md §15.5: ‘IX01 is authorized for each member’ of ReachableNonterminalTupleV1.",
+        "docs/state-transition-manifests.md §15.5: while cancellation is not NONE, ordinary candidate, rollout, control, widening, promotion, and new business-effect edges are rejected; the only closed safety allowlist is IX06-UR/UQ/NR/NQ/XR/XQ, rollback, Effect reconciliation, quiescence closure, and IX cleanup.",
+        "IX03 requires, when rollback is IDLE, a protected NoExposureReceipt covering every bound target Effect and proving no prior/reversible application.",
+        "IX06-NR/NQ require an already-protected NoExposureReceipt and cover only CANARY_RUNNING, CANARY_PAUSED, CANARY_FAILED, WIDENING_EFFECT, WIDENING_RECONCILING, PROMOTING, and PROMOTION_RECONCILING."
+      ],
+      "basis": "The declared initial reachable tuple is candidate DISCOVERED with rollout DISABLED. IX01 and then IX02 can move its cancellation coordinate to QUIESCING with rollback IDLE and no exposure, but IX03 cannot pass because no row creates the required NoExposureReceipt. The same undefined receipt-production path exists for other pre-exposure states, including CANARY_READY. IR34/IR35 can atomically create the receipt only on child FAILED/CANCELLED from CANARY_READY, but they are ordinary rollout rows excluded by the closed post-IX01 allowlist; IX06-NR/NQ neither include CANARY_READY nor create the receipt they require. This contradicts the claim that no reachable nonterminal tuple lacks a completing cancellation path. Finding R11-XC-001."
+    },
+    {
+      "area": "schema_3_evidence_and_claim_status",
+      "result": "pass",
+      "exact_text": [
+        "material-claims.json schema_version is 3.0.0 and regeneration_checkpoint is round-10.",
+        "scope_and_method.semantic_status is editorial_candidate_associations_only and provenance_status is legacy_unverified.",
+        "The graph reserves supports/refutes but records zero supports and zero refutes."
+      ],
+      "basis": "The schema-3 artifact matches the current PLAN/manifest digests. Its local validation records 37 corpus files, 25 observations, 20 claims, 36 edges (23 candidate_support, 5 candidate_refute, 8 context_only), 25 PLAN sections, and all 28 dynamically derived manifest headings. The checked-in inventory JSON parses and its status language does not promote candidate association to semantic or provenance proof."
+    },
+    {
+      "area": "requirements_and_reference_consistency",
+      "result": "pass",
+      "exact_text": [
+        "review/requirements-traceability.md: ‘Mapped means the revised plan has a proposed contract and acceptance location. It does not mean implemented or empirically closed.’",
+        "review/requirements-traceability.md records structurally mapped 16/16 and implemented requirements proven 0/16.",
+        "README.md identifies docs/state-transition-manifests.md as normative and other docs as supporting drafts superseded by PLAN.md on conflict."
+      ],
+      "basis": "Requirement aliases, status labels, roadmap authority, normative references, and plan-only boundaries are consistent. No material implementation, evidence-validity, production-safety, or independent-closure overclaim was found. The cancellation defect is a manifest totality/safety defect, not a traceability-count or status-label mismatch."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R11-XC-001",
+      "severity": "high",
+      "title": "IX01 can strand no-exposure work because the closed cancellation allowlist has no NoExposureReceipt creation path",
+      "requirement": "Whole-work cancellation must be total for every member of ReachableNonterminalTupleV1, must classify exposure safely, and must reach cleanup exactly once when there is no exposure.",
+      "evidence": [
+        "Manifest §15.5 authorizes IX01 for every reachable nonterminal tuple and then rejects ordinary rollout/candidate/control edges while cancellation is pending.",
+        "IX03 permits rollback IDLE only with a protected all-target NoExposureReceipt.",
+        "IX06-NR/NQ require rather than create that receipt and omit DISABLED, ENABLEMENT_REVIEW, CANARY_PENDING_APPROVAL, and CANARY_READY.",
+        "The declared initial DISCOVERED/DISABLED tuple is reachable and has no named receipt-producing edge. After IX01→IX02 it cannot satisfy IX03. At CANARY_READY, IR34/IR35 are the only explicit atomic NoExposureReceipt producers, but they are not in the closed cancellation allowlist."
+      ],
+      "impact": "A literal controller can accept cancellation before exposure and then remain permanently in REQUESTED/QUIESCING even though no rollback is needed. This violates cancellation totality and leaves child/resource cleanup and terminal disposition undefined.",
+      "required_correction": "Add exact REQUESTED and QUIESCING no-exposure settlement rows for every reachable pre-exposure coordinate, including the initial/pre-canary states and CANARY_READY. Each row must atomically stop/quiesce any child, recheck the complete generation effect set and absence of dispatch/application, create a protected generation-bound all-target NoExposureReceipt, and preserve one IX03 cleanup owner. Alternatively, define a prior mandatory receipt producer and prove it is reachable before IX03 for every rollback-IDLE cancellation tuple. Add generated equality and witnesses for initial-state, pre-approval, CANARY_READY IX01-first, child-cancel-first, and replay races."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 1,
+    "total": 1,
+    "round_10_review_files_reviewed": 5,
+    "round_10_raw_critical_findings_reviewed": 0,
+    "round_10_raw_high_findings_reviewed": 9,
+    "manifest_rows_parsed": 764,
+    "canonical_rows": 96,
+    "private_and_product_rows": 668,
+    "current_normative_headings": 28,
+    "schema_3_material_claims": 20,
+    "schema_3_source_observations": 25,
+    "schema_3_evidence_edges": 36
+  },
+  "residual_uncertainty": [
+    "This is a plan-only static cross-document audit. It does not claim implementation, exhaustive generated reachable-product proof, runtime safety, or production validation.",
+    "Fresh immutable evidence retrieval, external source-truth validation, same-run human semantic review, and reviewed-edge regeneration remain future gates and were not treated as closure defects.",
+    "Historical round-10 review findings describe pre-correction bytes; they were used as correction contracts rather than counted as unresolved merely because their files remain checked in."
+  ],
+  "closure_criteria_pass": false
+}

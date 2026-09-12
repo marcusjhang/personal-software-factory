@@ -1,0 +1,111 @@
+{
+  "reviewer": "round-6 adversarial consistency closure auditor",
+  "scope": {
+    "mode": "independent final plan-only closure audit after round-5 corrections",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-5-resolution.md",
+      "review/round-5-closure/architecture-consistency.json",
+      "review/round-5-closure/evidence-integrity.json",
+      "review/round-5-closure/formal-transition.json",
+      "review/round-5-closure/improvement-product.json",
+      "review/round-5-closure/requirements-authority.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "Cross-document contradictions and unsafe edge races, with emphasis on cancellation in every state, UNKNOWN/no-apply, cleanup terminals, effect receipts, lease overlap, cross-scope isolation, canonical projection, and stale references.",
+    "severity_rule": "Critical/high is reserved for a direct unmet user requirement, contradiction, unsafe or undefined implementation path, or material evidence overclaim. This audit does not require implementation, full model proof, or completion of fresh evidence gates."
+  },
+  "contract_reproduction": [
+    {
+      "area": "round_5_formal_corrections",
+      "result": "pass_with_findings_below",
+      "basis": "Re-read the current normative rows rather than trusting the resolution register. The repaired release-attempt order/projections, rollback coordinate sequence, widening and promotion UNKNOWN branches, pre-exposure abort split, Release 0 no-publication branch, explicit built-in cancellation coverage, and Effect E30-E39 partitions are present. No stale ACTIVE_DISJOINT_ONLY authority remains."
+    },
+    {
+      "area": "unknown_no_apply_and_effect_receipts",
+      "result": "pass",
+      "basis": "E11 enters UNKNOWN without retry; reconciliation preserves ORIGINAL versus COMPENSATION origin; widening and promotion can resume only after E17 receipt verification, while E34 supplies the proven no-application/final-no-retry branch. ACCEPTED_RISK does not fabricate RECEIPT_VERIFIED."
+    },
+    {
+      "area": "cancellation_and_quiescence",
+      "result": "partial_pass",
+      "basis": "The four built-in factory tables and Wait table contain the repaired explicit cancellation/adopt/defer coverage, and unconfirmed quiescence grants no successor authority. The ordinary reclaim prose still conflicts with the normative unfinished-attempt predicate as R6-AC-001 describes."
+    },
+    {
+      "area": "cleanup_terminal_contract",
+      "result": "fail",
+      "basis": "Cleanup entry and terminalization are separate, and success cannot use an escalated cleanup disposition. However, C11 promises post-disposition reopening after the parent may already have terminalized, with no legal parent/canonical reopening edge; see R6-AC-002."
+    },
+    {
+      "area": "scope_and_projection_consistency",
+      "result": "pass",
+      "basis": "Durable records bind tenant_id plus typed ScopeRef, cross-boundary dependencies require dual-owner closed envelopes and exact import receipts, and no inspected prose adds a canonical edge. The readable projection index defers to the normative manifest."
+    },
+    {
+      "area": "schema_3_material_claims",
+      "result": "pass",
+      "basis": "Recomputed SHA-256 values match generated_against for PLAN.md (27dd19254d98cf346812b2f5980f47f5a7168bac71534ebeba5115db7777c483) and the normative manifest (6994ec9c5c4c701f3b4b62f2207ba65d8a053d14c82d2abb0b3459c37d244e92). Parsed schema 3.0.0 with 20 claims, 25 observations, and 36 edges: 23 candidate_support, 5 candidate_refute, 8 context_only; all 36 are unreviewed_candidate and none uses supports/refutes. README, PLAN, traceability, and the package retain the future retrieval/human-review gate and do not claim implementation or semantic proof."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R6-AC-001",
+      "severity": "high",
+      "title": "The normal lease-reclaim sequence can create a successor while the stopped predecessor is still normatively unfinished",
+      "requirement": "Lease reclaim must have one unambiguous transaction order that preserves the stated invariant of at most one unfinished Attempt per node across all fences.",
+      "evidence": [
+        "PLAN.md \u00a713 defines the exact reclaim order as recording STOPPED plus quiescence/effect receipts and then creating the new attempt/lease/fence/outbox.",
+        "docs/state-transition-manifests.md A10 reaches STOPPED with cleanup pending and explicitly marks the Attempt 'not finished'.",
+        "A11 is the later STOPPED->CANCELLED edge requiring cleanup complete/no unresolved effect, and the normative finished predicate says STOPPED remains unfinished.",
+        "PLAN.md \u00a7\u00a78.2 and 13 independently require at most one unfinished Attempt per node across all fences, but the exact reclaim sequence does not require A11 before successor creation."
+      ],
+      "reproduction": [
+        "Start Attempt A and follow A07-A10 after a missed renewal; termination and effect receipts exist, but cleanup is pending, so A is STOPPED and unfinished.",
+        "Follow PLAN \u00a713 step (5) and create successor Attempt B. B is also unfinished from CREATED onward.",
+        "A and B now violate the across-fences uniqueness invariant. If admission instead rejects B to preserve the invariant, the documented 'exact reclaim' path is incomplete because it omitted A11 and cleanup as a prerequisite."
+      ],
+      "impact": "A literal implementation permits overlapping unfinished attempts and their retained cleanup/resource obligations; an invariant-enforcing implementation deadlocks or diverges from the stated exact sequence.",
+      "required_plan_correction": "Make successful ordinary reclaim require the old Attempt's effects and cleanup to settle and A11 to commit before successor admission, or redefine the finished/uniqueness contract with a safe separate carrier and prove that it cannot overlap authority. Align PLAN \u00a713, A10/A11, and admission guards explicitly."
+    },
+    {
+      "id": "R6-AC-002",
+      "severity": "high",
+      "title": "A retained-risk cleanup disposition may terminalize its parent, but its mandatory resurface path cannot reopen that parent",
+      "requirement": "A revocable or review-due cleanup disposition must have a legal, deterministic parent projection when it resurfaces; terminal work cannot silently hide newly live cleanup risk.",
+      "evidence": [
+        "docs/state-transition-manifests.md C09 makes CleanupItem ESCALATED_DISPOSITION, which is declared terminal and is terminal-equivalent for eligible FAILED or CANCELLED work.",
+        "The same \u00a713 says a resurface trigger, revocation, or review due takes C11 to RETRY_WAIT and 'returns the parent to CLEANING'.",
+        "The canonical graph has CLEANING->FAILED and CLEANING->CANCELLED, but no FAILED->CLEANING or CANCELLED->CLEANING edge. Built-in and aggregate terminal states likewise have no reopening event.",
+        "Reducer priority 11 can map a reopened improvement cleanup coordinate to CLEANING, but after an improvement tuple has canonically terminalized this would still require an unlisted FAILED|CANCELLED->CLEANING canonical edge."
+      ],
+      "reproduction": [
+        "Let cleanup fail, follow C07 and C09, and use the eligible disposition to terminalize the parent as FAILED or CANCELLED.",
+        "Trigger the disposition's review_due_at, revocation, or resurface condition. C11 makes the CleanupItem nonterminal RETRY_WAIT.",
+        "The contract requires the parent to return to CLEANING, but no legal canonical or parent-aggregate transition exists from its terminal state. Leaving it terminal contradicts the clean/settled terminal predicate because required cleanup is live again."
+      ],
+      "impact": "Retained resources or data can require remediation after the parent is terminal, while the status model either rejects the required reopening event or reports a terminal item whose cleanup is no longer settled.",
+      "required_plan_correction": "Choose and specify one legal design: keep the parent nonterminal CLEANING for the lifetime of revocable dispositions; add an explicit non-work remediation aggregate whose status remains visible without reopening immutable work; or add fully enumerated reopening transitions and revise terminal semantics. Align C09/C11, canonical edges, all parent aggregates, and the improvement reducer."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "low": 0,
+    "total": 2
+  },
+  "residual_uncertainty": [
+    "This is a plan-text and deterministic local-structure audit, not implementation validation or full model checking.",
+    "Fresh immutable retrieval and same-run human semantic review remain future blocking gates and were not treated as closure failures."
+  ],
+  "closure_criteria_pass": false
+}

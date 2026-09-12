@@ -1,0 +1,1030 @@
+{
+  "scope": {
+    "exact_question": "Use Warp Factories as a reference system for a repository-owned factory-as-code lifecycle, while separating its documented Early Access product from an implementable safety model. Coverage: definition files, roles, intake/triggers, work-item/run lifecycle, durable conversation, handoffs, evaluation/benchmarks, human review and governed improvement. As-of 2026-09-13.",
+    "boundary": "Warp factory files are desired configuration, not live state: Warp explicitly says work items, runs and metrics are never written to those files [S1]. The extension therefore uses Git for immutable desired definitions and a separate durable event/decision/effect store for actual state. It does not equate a completed Warp work item with merge/deploy; Warp says Complete means human handoff [S4,S5].",
+    "non_goals": [
+      "Do not claim Warp exposes a formal workflow DSL, transactional event log, leases, exactly-once execution, deployment authority, or autonomous promotion; those were not found in current public schemas/docs.",
+      "Do not treat prompts as permission enforcement. Repository/IAM controls remain authoritative [S5,S17].",
+      "Do not call proposal generation fully autonomous self-improvement. The safe maximum is automatic propose→offline evaluate→shadow→bounded canary→automatic rollback, with protected tests/graders/policy/permissions/promotion authority outside the candidate."
+    ]
+  },
+  "verified_capabilities": [
+    {
+      "capability": "Factory definition as code",
+      "verified": "`factory.yaml` plus agents, automations, runners, benchmark suites/tasks, scorers, skills and webhooks. `schemaVersion` only supports `v1alpha1`; machine schemas reject unknown keys. GitHub-backed changes receive `warp/factory-config`; invalid definitions do not partially apply and the last valid definition continues [S1,S2].",
+      "limit": "Only configuration is represented; no resource for phase graph, gates, approvals, budgets, retries, artifacts, policies, work items or event history exists in v1alpha1."
+    },
+    {
+      "capability": "Roles and workflow",
+      "verified": "Exactly one FOREMAN/MAIN; optional CUSTOM, TRIAGE, SPEC, IMPLEMENT, REVIEW and VERIFY roles. Default product flow is Intake→Triage→optional Planning→human spec approval→Building→Reviewing↔Building→human handoff→Complete, with Cancelled terminal. The foreman routes and talks to requester; review is advisory and agents do not merge [S4,S5].",
+      "limit": "Shortest-path choice, clarification, spec gate and routing live in mutable natural-language foreman instructions. This is policy-by-prompt, not a deterministic transition/gate schema."
+    },
+    {
+      "capability": "Triggers and integrations",
+      "verified": "Automations route GitHub/GitLab/Slack/Linear/Jira/schedule/custom-webhook/factory-stage events to an agent. Filters AND keys and OR values; omitted filters match all; overlapping automations each start a run. Webhook filters fail closed. Webhooks support signatures/tokens, deduplicate accepted deliveries, and attach untrusted JSON context [S6,S16].",
+      "limit": "Provider delivery ordering and exactly-once start are not guaranteed. Custom-webhook deliveries are independent, unordered, and do not continue a thread; log retention is only at least 50/latest seven days."
+    },
+    {
+      "capability": "Conversation and local/cloud handoff",
+      "verified": "Foreman reuses the same specialist conversation for revision/follow-up. Factory MCP keeps a single task record/history, reads conversation, messages foreman and hands a pushed branch/PR back to the same task [S5,S7]. Agent API supports follow-up and cancel [S10].",
+      "limit": "MCP local pickup neither claims, locks nor pauses factory work, so concurrent duplicate writes are explicitly possible; notifications are best-effort. Public docs do not define versioned decisions, optimistic concurrency, context-snapshot hashes or transcript retention guarantees."
+    },
+    {
+      "capability": "Runs and state observation",
+      "verified": "Runs are individually observable, hierarchical, steerable and stoppable. Versioned SDK RunState enum is QUEUED, PENDING, CLAIMED, INPROGRESS, SUCCEEDED, FAILED, BLOCKED, ERROR, CANCELLED [S8,S10,S11]. Inbox projects asked/answered question, spec review, PR review, blocked and failed items [S9].",
+      "limit": "Run states are not work-item states. No public complete work-item state enum, legal-transition table, lease/fence, retry/reconciliation, stale detection or effect receipt schema was found."
+    },
+    {
+      "capability": "Scorers",
+      "verified": "An LLM judge classifies selected completed agent runs under user criteria; labels carry 0..1 scores, a passing threshold, sampling rate (default 25%), model and optional selfImprovement flag. On-demand rescoring replaces the old result [S1,S2,S13].",
+      "limit": "No deterministic executable scorer type is in schema, and no grader version digest, calibration set, blind review, multiple-judge adjudication, immutable result history or confidence interval is documented."
+    },
+    {
+      "capability": "Benchmarks",
+      "verified": "A suite fixes one agent and ordered tasks; tasks have prompt, success criteria, optional source run and optional exact full-SHA starting repository refs. Launch varies model/runner, scorers and repetitions; stored run inputs protect past results from later suite edits [S1,S15].",
+      "limit": "Current docs say third-party harness comparison is not yet available. Only model and runner configuration changes are documented in the launch UI. No predeclared statistical promotion rule or protected holdout is specified."
+    },
+    {
+      "capability": "Self-improvement",
+      "verified": "For enabled scorers, a scheduled check starts after 25 unreviewed failures or the oldest is seven days old; failures are grouped by agent and a run can propose application or factory-definition PR changes linked to regressions. Nothing is adopted without review [S14].",
+      "limit": "It is proposal automation, not autonomous validated improvement. Public material does not document offline qualification of the diff, shadow/canary rollout, causal attribution, automatic rollback, protected evaluator independence or promotion authority separation."
+    },
+    {
+      "capability": "Security/authority boundaries",
+      "verified": "Control plane stays with Warp; self-hosting moves execution only. Per-agent allowlists, provider permissions and repository protection control actual reach. Team Owners/Admins control config; no factory-specific approver role exists [S17].",
+      "limit": "Factory MCP has no read-only or per-factory scope and acts with the authenticated account’s full permissions [S7]. Vendor docs are not an independent audit."
+    }
+  ],
+  "evidence_and_limits": {
+    "evidence_grade": {
+      "high": "Public parser-generated v1alpha1 JSON schemas, content-addressed official source/examples/SDK, and explicit product limitations [S1-S17].",
+      "medium": "Warp user-facing docs describe runtime/UI behavior but no public service implementation or external certification was found.",
+      "low": "WarpBench and self-improvement outcomes are internal vendor reports [S18,S19]. Independent sources support evaluation/governance principles but do not validate Warp [S20-S24]."
+    },
+    "claim_audit": [
+      "“Every factory is defined by files” means desired configuration only; the same page says runtime work, runs and metrics are not files [S1].",
+      "“Self-improving” means accumulated failures cause an agent-authored PR that a human reviews; it does not mean autonomous adoption [S4,S14].",
+      "“Complete state” marketing is not supported: v1alpha1 omits work-item/state-machine/effect schemas and the service control plane is closed [S2,S17].",
+      "WarpBench reports 30 selected tasks, a $2,130.57 benchmark, $80→$30 median cost/PR and 69%→87% task compliance [S18]. It also states A/B testing is future work. No raw tasks, grader prompts/results, variance, production denominator, defect/severity outcome or independent reproduction is available. Therefore it is directional evidence only.",
+      "Warp’s blog reports >10 improvement PRs with concrete anecdotes [S19], but not how many proposals failed, were rejected, regressed, or remained effective. No denominator or sustained controlled comparison supports “most on auto-pilot.”",
+      "LLM judge classifications are vulnerable to known bias and need calibrated human agreement [S21]; Warp docs advise manual checking but define no enforced calibration protocol [S12,S13].",
+      "Published JSON Schema says scorer `name` is required, yet both official example scorers omit it and the official tree validator returned `valid:true` on 2026-09-13 while disclosing state-dependent checks were skipped [S2,S3,S25]. “Generated from the same parser” is therefore not sufficient proof of identical acceptance semantics; test both schema and live validator and preserve both versions.",
+      "Docs call Factory REST public, but released OpenAPI has no `/factory` routes and current stable Python SDK lacks `factories` [S10,S26,S29]. Direct HTTP/MCP may exist, but SDK/OpenAPI support is not release-stable.",
+      "Public Warp-authored issues show a very large benchmark transcript could leave the UI loading indefinitely and flag unresolved Factory MCP team scoping [S27,S28]. These demonstrate failure modes, not frequency or external production impact."
+    ],
+    "independent_evidence": "SWE-bench Live motivates fresh, audited tasks rather than leaked/static public benchmarks [S20]. NIST AI RMF/SSDF support independent evaluation, provenance, protected artifacts, monitoring and response [S22,S24]. OpenGitOps supports a reconciler between versioned desired and actual state [S23]. None independently demonstrates Warp’s runtime reliability or ROI.",
+    "missing_denominators": [
+      "number and distribution of factory work items/attempts",
+      "accepted/rejected/reverted improvement PR counts and escaped defects",
+      "human-review time and interventions",
+      "scorer confusion matrix versus blinded experts",
+      "failure/retry/cancellation/data-loss rates",
+      "benchmark task/result corpus and uncertainty",
+      "security incident and permission-bypass evidence",
+      "longitudinal deployment and rollback outcomes"
+    ]
+  },
+  "actors_and_authority": {
+    "actors": [
+      {
+        "actor": "requester/product owner",
+        "authority": "owns intent, acceptance criteria, priority, ambiguity decisions and cancellation; decisions are signed/versioned records, not chat summaries."
+      },
+      {
+        "actor": "foreman/orchestrator",
+        "authority": "may propose routing and dispatch under a compiled policy; cannot grant itself capability, approve specs/policy, promote changes or merge."
+      },
+      {
+        "actor": "triage/spec/implement/review/verify workers",
+        "authority": "bounded artifact production. Reviewer/verifier use a distinct identity and preferably different model/harness; none approves its own output."
+      },
+      {
+        "actor": "deterministic controller",
+        "authority": "canonical transition checks, leases/fences, budgets, idempotency receipts, fanout/join, timers, reconciliation and kill switch. LLM text never directly changes canonical state."
+      },
+      {
+        "actor": "evaluator service",
+        "authority": "runs immutable protected tests and versioned graders; candidate has read-only result access and cannot edit cases, thresholds or result ledger."
+      },
+      {
+        "actor": "policy/security owner",
+        "authority": "owns risk classes, permissions, protected paths, grader/test changes and exceptions."
+      },
+      {
+        "actor": "human approver/promoter",
+        "authority": "accepts product/spec/high-risk/definition promotion. Promotion credentials are isolated from proposal/evaluation identities."
+      },
+      {
+        "actor": "reconciler",
+        "authority": "compares desired definition to observed Warp/GitHub/provider state, applies only allowlisted changes with read-after-write, quarantines conflicts."
+      },
+      {
+        "actor": "Warp control plane/external providers",
+        "authority": "observed external systems, not canonical proof of local authorization; their IDs/statuses are stored with provenance."
+      }
+    ],
+    "separation_rules": [
+      "No candidate can modify protected tests, grader code/prompts/models, baselines/holdouts, pass thresholds, risk policy, branch protection, CODEOWNERS, secrets, IAM, audit store, promoter or rollback controller.",
+      "Proposal, evaluation, approval, promotion and production execution use distinct service identities.",
+      "Prompt promises such as “never merge” are backed by repository permissions/branch protection [S5,S17].",
+      "MCP’s full-account scope is unsuitable for autonomous broad use; place it behind a narrow proxy/account or do not expose it [S7]."
+    ]
+  },
+  "complete_state_catalog": {
+    "work_item_states": [
+      "INTAKE_RECEIVED",
+      "INTAKE_DEDUPED",
+      "TRIAGE_ACTIVE",
+      "WAITING_CLARIFICATION",
+      "TRIAGE_COMPLETE",
+      "SPEC_ACTIVE",
+      "WAITING_SPEC_REVIEW",
+      "SPEC_CHANGES_REQUESTED",
+      "READY",
+      "BUILD_QUEUED",
+      "BUILD_ACTIVE",
+      "WAITING_RESOURCE",
+      "WAITING_DEPENDENCY",
+      "BUILD_BLOCKED",
+      "VERIFY_QUEUED",
+      "VERIFY_ACTIVE",
+      "VERIFY_FAILED",
+      "REVIEW_ACTIVE",
+      "REVISION_REQUIRED",
+      "WAITING_HUMAN_DECISION",
+      "HANDOFF_READY",
+      "COMPLETED_HANDOFF",
+      "DEFERRED",
+      "REJECTED",
+      "CANCEL_REQUESTED",
+      "CANCELLING",
+      "CANCELLED",
+      "STALE",
+      "RECONCILING",
+      "ROLLBACK_PENDING",
+      "ROLLING_BACK",
+      "ROLLED_BACK",
+      "FAILED_RETRYABLE",
+      "FAILED_TERMINAL",
+      "SUPERSEDED"
+    ],
+    "attempt_states": [
+      "CREATED",
+      "QUEUED",
+      "PENDING",
+      "CLAIMED",
+      "INPROGRESS",
+      "CHECKPOINTED",
+      "SUCCEEDED",
+      "FAILED",
+      "BLOCKED",
+      "ERROR",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "TIMED_OUT",
+      "LEASE_EXPIRED",
+      "ORPHANED",
+      "STALE_OUTPUT",
+      "CLEANING",
+      "CLEANED"
+    ],
+    "decision_states": [
+      "QUESTION_OPEN",
+      "ANSWER_RECORDED",
+      "DECISION_PROPOSED",
+      "DECISION_ACCEPTED",
+      "DECISION_REJECTED",
+      "DECISION_REVISED",
+      "DECISION_INVALIDATED",
+      "APPROVAL_PENDING",
+      "APPROVED",
+      "CHANGES_REQUESTED",
+      "EXPIRED",
+      "REVOKED"
+    ],
+    "improvement_states": [
+      "SIGNAL_COLLECTING",
+      "CLUSTER_READY",
+      "PROPOSAL_ACTIVE",
+      "PROPOSAL_REJECTED",
+      "OFFLINE_EVALUATING",
+      "OFFLINE_FAILED",
+      "SHADOW_READY",
+      "SHADOW_ACTIVE",
+      "SHADOW_FAILED",
+      "CANARY_PENDING_APPROVAL",
+      "CANARY_ACTIVE",
+      "CANARY_PAUSED",
+      "PROMOTION_PENDING",
+      "PROMOTED",
+      "ROLLBACK_TRIGGERED",
+      "ROLLED_BACK",
+      "MONITORING",
+      "RETIRED"
+    ],
+    "note": "Warp publicly documents only broad stages and the run enum [S4,S11]; the additional waiting, stale, reconciliation, cleanup and improvement states are the required extension, not claimed Warp capability."
+  },
+  "transition_contract": {
+    "envelope": [
+      "event_id UUID",
+      "aggregate_type/id",
+      "aggregate_revision and expected_revision",
+      "event_type/schema_version",
+      "occurred_at/received_at",
+      "actor/service identity",
+      "source and external event ID",
+      "definition/spec/policy/evaluator versions and SHA-256 digests",
+      "attempt_id/lease_id/fencing_token",
+      "causation_id/correlation_id",
+      "payload digest/redaction class",
+      "signature/attestation"
+    ],
+    "rules": [
+      "Controller accepts an event once by `(source, external_event_id)` or content+scope key; duplicate returns prior receipt. No LLM can write state directly.",
+      "Transition requires exact current state/revision, valid actor capability, unexpired lease/fence, current spec/definition/policy heads, satisfied dependencies, budget and required approvals bound to those digests.",
+      "Every effect uses `(aggregate_id, transition_revision, effect_kind)` idempotency key. Commit state plus outbox atomically; worker performs effect and writes request/response digest receipt; reconciler handles ambiguous timeout by observe-before-retry.",
+      "Late/stale output is stored as evidence but cannot advance state. A changed user decision/spec/base SHA/policy/evaluator invalidates downstream approvals/evidence and transitions to earliest affected phase.",
+      "Cancellation first prevents new dispatch, revokes leases/capabilities, attempts compensations/cleanup, then reaches CANCELLED; irreversible side effects escalate rather than claim rollback.",
+      "Reconciliation imports Warp/GitHub/provider observed state with ETag/revision; drift never silently overwrites human edits. Unknown resources are preserved/quarantined.",
+      "Retries use typed failure class, bounded count/backoff/jitter and same effect key; budget/security/policy failures do not retry automatically.",
+      "Invalid transitions are rejected and audited. Every nonterminal state has timeout/escalation/recovery; terminal states are immutable except explicit reopen/supersede events."
+    ],
+    "warp_mapping": "Map Warp stages and run states as observed projections only [S4,S11]. A webhook 202 proves acceptance for evaluation, not run creation [S16]. A Warp Complete proves handoff, not merge/deploy [S4]."
+  },
+  "artifact_contracts": {
+    "common_envelope": [
+      "artifact_id/type/schema_version",
+      "logical revision and immutable content digest",
+      "work_item/attempt/phase IDs",
+      "producer identity and tool/model/harness versions",
+      "definition/spec/policy/evaluator digests",
+      "source URI and retrieved/access timestamps",
+      "parents/causation/provenance",
+      "confidentiality/retention/redaction labels",
+      "signature/attestation",
+      "status current/superseded/invalidated"
+    ],
+    "catalog": [
+      "request.snapshot.json",
+      "conversation.event.jsonl",
+      "question.json",
+      "decision.json",
+      "decision.supersedes.json",
+      "intent.md",
+      "alternatives.md",
+      "research.plan.yaml",
+      "evidence-record.json",
+      "source-snapshot/receipt",
+      "triage-report.json",
+      "product-spec.md",
+      "technical-spec.md",
+      "acceptance-criteria.yaml",
+      "risk-assessment.json",
+      "dependency-dag.json",
+      "approval.json",
+      "exception.json",
+      "factory-lock.json",
+      "run-plan.json",
+      "lease.json",
+      "checkpoint.json",
+      "effect-receipt.json",
+      "workspace-manifest.json",
+      "patch.diff",
+      "commit/PR refs",
+      "test-plan.yaml",
+      "test-result.json",
+      "visual-evidence manifest",
+      "review.json",
+      "verification.json",
+      "SBOM/provenance/attestation",
+      "handoff.json",
+      "cleanup-report.json",
+      "incident/postmortem.json",
+      "eval-case.yaml",
+      "benchmark-suite/task/config/launch/result",
+      "scorer-definition/result/calibration.json",
+      "improvement-proposal.json",
+      "shadow/canary report",
+      "promotion/rollback record",
+      "observed-state snapshot/drift plan"
+    ],
+    "warp_native": "Warp v1alpha1 natively versions only factory configuration resources and benchmark task repository starting refs; runtime work/history lives in its app [S1,S2]. `sourceRunId` is provenance only; it may point to a deleted run [S1]. Therefore export/hash critical run transcripts, inputs, outputs and decisions into the independent ledger subject to privacy rules.",
+    "protected_artifacts": [
+      "policy",
+      "permissions",
+      "grader/scorer code and prompts",
+      "golden/holdout tests",
+      "benchmark eligibility and promotion thresholds",
+      "audit/event ledger",
+      "CODEOWNERS/branch/ruleset/CI definitions",
+      "release/rollback controller"
+    ]
+  },
+  "conversation_and_handoffs": {
+    "durable_protocol": [
+      "Append every human/agent turn as immutable `conversation.event` with author, timestamp, channel message ID, parent turn, visibility, raw-content digest and attachments. Do not overwrite prior answers.",
+      "Extract each material preference/constraint/approval into a proposed `decision` referencing exact turns. Human accepts/revises it. New decisions point to `supersedes`; current product state is a deterministic fold over accepted decisions.",
+      "Before dispatch, compile a bounded context bundle: goal, current accepted decisions, unresolved questions, current spec/base/definition/policy digests, provenance index and exclusions. Store its digest on the run.",
+      "On answer/follow-up, bind to question and expected aggregate revision. If it conflicts with an accepted decision, open a revision rather than silently reconcile. Recompute affected artifacts and invalidate stale approvals/tests.",
+      "Checkpoint includes branch/SHA, tool side-effect receipts, pending questions, next legal actions, leases and context digest. Resume verifies all heads and reacquires a fenced lease.",
+      "Handoff includes outputs/evidence, unresolved risks, exact validation, provenance, ownership and next authority. Receiving actor acknowledges or rejects against revision."
+    ],
+    "warp_comparison": "Warp says foreman continues existing specialist conversations and Factory MCP keeps one task/history [S5,S7], but webhook events have no thread continuation and local pickup does not lock/pause [S16,S7]. The durable decision/revision/lease protocol is therefore an extension.",
+    "compaction": "Compaction is a derived artifact only. It lists source turn IDs and a digest; it cannot delete or replace raw authoritative decisions. Sensitive raw data may expire per policy, but tombstones/digests and decision records remain."
+  },
+  "orchestration_and_composition": {
+    "model": [
+      "Compile the declarative graph to controller-owned phase instances. Each node declares input/output artifact types, role/capability, guard, budget, timeout, retry, checkpoint, cleanup and compensation.",
+      "Fanout creates immutable child intents with disjoint write scopes and dependency edges. Join policy is ALL, QUORUM, FIRST_VALID, REDUCE or HUMAN_SELECT; it records missing/cancelled children and never trusts narrative completion.",
+      "Subfactories receive capability tokens, budget slices, context digest and return schema. Parent owns cancellation propagation and deterministic join. Cycles are rejected except explicit bounded revision loops.",
+      "One writer per branch/resource or fenced merges. Warp foreman child runs are observable [S8], but public files do not declare DAGs/joins/leases; do not infer these guarantees."
+    ],
+    "budgets": [
+      "max wall/CPU/token/money/tool calls/children/retries/network bytes",
+      "per-source rate and concurrency limits",
+      "deadline and human-wait pause semantics",
+      "hard stop/circuit breaker on security, spend, repeated failure or drift"
+    ],
+    "cleanup": [
+      "revoke credentials/leases",
+      "stop descendants",
+      "archive manifests/receipts",
+      "delete or quarantine workspace/branch per retention",
+      "reconcile remote effects",
+      "report cleanup failure as nonterminal work"
+    ]
+  },
+  "human_need_policy": {
+    "deterministic_ask_or_stop": [
+      "ASK_CLARIFICATION when a required acceptance field is missing, two accepted decisions conflict, product behavior has more than one materially different interpretation, or requested evidence cannot be obtained.",
+      "REQUIRE_APPROVAL for product/spec baseline; destructive/irreversible action; production/deploy/data migration; security/privacy/IAM/secrets; new external dependency or network destination; spend/time above approved budget; exception; protected artifact; canary/promotion; merge unless a separately approved narrow low-risk auto-merge policy applies.",
+      "ESCALATE on suspected secret/prompt injection, compromised provenance, failed protected test, flaky/irreproducible oracle, permission mismatch, ambiguous external effect, stale output, repeated same failure, rollback failure or SLO/circuit-breaker breach.",
+      "PAUSE on WAITING_* with deadline, owner and reminder; STOP/CANCEL on user cancellation, revoked authority, budget exhaustion, policy denial or no safe reversible next action.",
+      "CONTINUE only when next transition is legal, evidence current, confidence threshold met, ambiguity non-material, capability and fenced lease valid, budget remains and no required gate is open."
+    ],
+    "probabilistic_use": "Model confidence may prioritize a question or recommend a route, never waive deterministic gates. Calibrate per decision class against labeled maintainer outcomes; abstain below class threshold or under distribution drift. Report confidence and evidence, not a scalar alone.",
+    "warp_gap": "Warp defaults to spec approval, questions and human merge/handoff [S4,S5], but two gates are editable prompt policy. Convert them to enforced typed guards. Inbox is a personal projection and cannot be the sole approval authority [S9]."
+  },
+  "factory_as_code_schema": {
+    "warp_v1alpha1_exact": "Root requires `schemaVersion,name,repositories,agentDefaults`; agent resource config+Markdown prompt; automation resource config+Markdown prompt; runner; benchmark suite/task; scorer; webhook; skills directories. Agents accept roles CUSTOM/FOREMAN(MAIN)/TRIAGE/SPEC/IMPLEMENT/REVIEW/VERIFY. Parser schema is closed-key [S1,S2].",
+    "extension_example": "apiVersion: repo-agent-os/v1alpha1\nkind: Factory\nmetadata: {name: payments, revision: 17}\nspec:\n  imports:\n    - {ref: warp-factory, version: v1alpha1, digest: sha256:...}\n  roles:\n    implement: {identity: app/implement, capabilities: [git.branch.write], writes: [patch,test_result]}\n    verify: {identity: app/verify, capabilities: [repo.read,ci.run], independentOf: [implement]}\n  workflow:\n    initial: INTAKE_RECEIVED\n    states:\n      READY: {on: [{event: claim, to: BUILD_ACTIVE, guard: ready_and_fenced}]}\n      BUILD_ACTIVE: {timeout: PT2H, retry: bounded_transient, cleanup: workspace_cleanup}\n    phases:\n      build: {role: implement, inputs: [spec@digest,base@sha], outputs: [patch,test_result]}\n      verify: {role: verify, needs: [build], join: ALL, outputs: [verification]}\n  interaction:\n    decisions: {appendOnly: true, requireHumanAccept: product_intent, invalidateDependents: true}\n  budgets: {usd: 25, wall: PT4H, children: 4, retries: 2}\n  gates:\n    spec: {authority: product-owner, binds: [spec,definition,policy]}\n    promotion: {authority: platform-owner, protected: true}\n  evaluation:\n    protectedRef: evals@sha256:...\n    offline: {minCases: 50, repeats: 3, nonInferiority: 0.02}\n    shadow: {minDays: 14}\n    canary: {maxPercent: 5, autoRollbackOn: [invariant_failure,slo_breach]}\n  reconciliation: {mode: preserve-unknown, interval: PT15M}\n",
+    "additional_resource_schemas": [
+      "FactoryDefinition",
+      "Role",
+      "WorkflowGraph",
+      "State",
+      "Transition",
+      "Trigger",
+      "ArtifactType",
+      "InteractionPolicy",
+      "Decision",
+      "Gate",
+      "CapabilityPolicy",
+      "Budget",
+      "RetryPolicy",
+      "Cleanup/Compensation",
+      "Evaluator",
+      "Benchmark",
+      "ImprovementPolicy",
+      "Reconciler",
+      "ObservedState"
+    ],
+    "compile_checks": [
+      "JSON Schema/type/reference validation",
+      "unique IDs and exactly one initial state",
+      "reachable-state and terminal-state analysis",
+      "no unbounded cycle",
+      "all waits have owner/timeout",
+      "all effects have idempotency/reconcile/compensation rule",
+      "all transitions define authority/guard",
+      "separation-of-duty graph",
+      "capability ≤ policy",
+      "protected refs content-addressed",
+      "all artifacts have producer/consumer and schema",
+      "worst-case budget bound"
+    ]
+  },
+  "end_to_end_workflows": [
+    "Intake: authenticate source; persist raw delivery; dedupe; classify untrusted content; create immutable request snapshot; acknowledge without claiming work started.",
+    "Triage: acquire fenced lease; compile context; research/reproduce; create evidence-linked scope/risk/open questions; ask through decision protocol; choose reject/defer/spec/build only through policy guard.",
+    "Spec: iterate product/technical alternatives and acceptance criteria as revisions; preserve each user answer/decision; require digest-bound product/security approval; READY token expires on relevant change.",
+    "Build: provision isolated workspace at full base SHA and definition/spec/policy digests; implement under narrow capability; checkpoint/effect receipts; create draft PR and evidence; never merge.",
+    "Verify/review: separate clean identity reproduces exact candidate; run protected deterministic tests plus advisory LLM review; failures return typed findings to build; changed head invalidates evidence.",
+    "Handoff: present PR, evidence, uncertainties and unresolved risks; human/repository policy decides merge. Warp Complete maps only to COMPLETED_HANDOFF [S4]. Reconcile merge/deploy separately.",
+    "Maintenance: authenticated signal→dedupe/cluster→triage→approved runbook or normal spec/build flow; production effects need explicit authority, canary and rollback; incident/postmortem yields proposed protected regression case.",
+    "Research: version outline/fields/item/evidence requirements; parallel source collection with exact URLs/access dates/snapshots; validate every JSON; conflict audit; human decisions become revisions; refresh stale sources; report never promotes a factory change.",
+    "Improvement: gather immutable outcomes and sampled audits; cluster failures; create minimal candidate without protected access; offline repeated temporal/holdout evaluation; security/fault testing; non-authoritative shadow; human-approved bounded canary; independent controller promotes or auto-rolls back; continue post-promotion monitoring."
+  ],
+  "self_improvement_boundary": {
+    "maximum_safe_automation": [
+      "Automatically collect/redact evidence, detect drift/failure clusters, draft minimal changes, run reproducible offline tests, shadow outputs, recommend a canary, monitor a pre-authorized canary and automatically roll back on fixed triggers.",
+      "Candidate may change ordinary prompts, skills, routing/config and application code only inside declared scope. Every stage uses immutable candidate/baseline/evaluator/spec/policy digests.",
+      "Promotion requires an external policy decision and separate credential. Low-risk promotion may be pre-authorized only by a human-owned rule with narrow scope, minimum samples/duration, non-inferiority and zero protected-invariant failures; candidate cannot modify that rule."
+    ],
+    "protected_invariants": [
+      "protected tests/holdout/grader and calibration set",
+      "permissions/secrets/IAM/network allowlist",
+      "risk policy/gates/thresholds",
+      "event/audit/provenance ledger",
+      "branch/ruleset/CODEOWNERS/CI controls",
+      "promotion/rollback authority and SLO triggers",
+      "product intent and legal/security decisions"
+    ],
+    "automatic_rollback": [
+      "immutable prior known-good definition",
+      "health/error/security/cost/quality guardrails",
+      "freeze new starts then route new work to baseline",
+      "cancel/quarantine candidate attempts when safe",
+      "reconcile effects and preserve evidence",
+      "require human review after security, irreversible or ambiguous effects"
+    ],
+    "cannot_safely_or_currently_autonomize": [
+      "Choosing/changing product intent, ethics/legal risk or organizational priority without delegated human policy.",
+      "Approving its own spec, change, grader/test, exception, permission, policy, merge or production promotion.",
+      "Inventing a trustworthy oracle for ambiguous UX/business/security behavior.",
+      "Autonomous high-risk/irreversible production change or rollback where compensation is unproven.",
+      "Claiming causal improvement from Warp scorer trends/vendor anecdotes alone.",
+      "Eliminating human review based on Warp’s current proposal-only self-improvement.",
+      "Exactly-once side effects, conflict-free local/cloud takeover, or durable lifecycle recovery using documented Warp primitives alone.",
+      "Self-modifying protected tests/graders/permissions/policy/promotion authority."
+    ],
+    "warp_finding": "Warp itself keeps adoption human-reviewed [S14]. This is a sound minimum boundary; calling it fully self-improving overstates the documented behavior."
+  },
+  "validation_strategy": {
+    "schema_static": [
+      "Validate official Warp files against saved v1alpha1 schemas and extension files against pinned JSON Schemas; reject unknown keys; cross-reference roles/resources; compare schema endpoint digest for drift.",
+      "Compile graph and exhaustively enumerate reachable states/transitions; fail orphan/unreachable states, missing cancellation/timeout, unbounded loops, authority conflicts and effects without idempotency/reconcile rules."
+    ],
+    "model_property": [
+      "Model-check safety: never BUILD without current READY approval; never promote candidate that wrote evaluator; never publish stale-fence output; never mark merged/deployed from Warp Complete; cancelled work never starts new effects.",
+      "Property/fuzz event order, duplicate/out-of-order webhook, repeated follow-up, decision revision, head drift, retry and crash at every effect boundary. Replay from log must yield identical state."
+    ],
+    "fault_security": [
+      "Kill controller/worker before/after external calls; drop webhook/outbox delivery; expire lease; return 429/5xx; corrupt artifact; concurrent MCP/local and cloud work; unavailable Warp; rollback failure.",
+      "Prompt-inject issue/webhook/repo content; forge author/delivery IDs; secret exfiltration; symlink/artifact poisoning; dependency compromise; scope escalation; candidate attempts to edit evaluator/policy. Assert denial/audit/circuit breaker."
+    ],
+    "evaluation": [
+      "Use deterministic checks first. Calibrate each LLM scorer against blinded expert labels; publish confusion matrix by task/risk, disagreement and abstention. Keep immutable result history—do not replace prior results as Warp on-demand rescoring does [S13].",
+      "Use representative temporal/private holdout, exact starting SHAs, repeated trials, frozen evaluator, matched baseline, predeclared non-inferiority/quality/cost thresholds and confidence intervals. Check contamination and test validity [S20].",
+      "Shadow all consequential changes. Canary by narrow cohort with automatic rollback and negative controls where feasible. Measure accepted change, escaped severity, review time, total cost, retries, interventions and rollback—not only PR/LLM scores."
+    ],
+    "acceptance": "MVP exits only after duplicate/replay/restore/fencing/permission tests pass, all approvals bind exact digests, zero protected-path bypasses, and humans can inspect/reject every action. Autonomy expands only per predeclared local evidence; no vendor metric alone is an exit criterion."
+  },
+  "implementation_recommendation": {
+    "core_decision": "Use Warp v1alpha1 as an adapter and UX/reference configuration, not the canonical factory OS. Add a repository-owned typed extension and durable controller. Preserve Warp’s human handoff and repository-enforced merge boundary.",
+    "phase_0": "Pin/export Warp schemas and examples; commit extension schemas; protect factory/policy/eval paths; create separate identities; implement append-only event, decision, approval, lease, effect and observed-state tables. Import Warp/GitHub read-only; shadow-compile all states.",
+    "phase_1": "One repo, one foreman+implement+independent verify, authenticated label/API intake, deterministic READY gate, disposable workspace, draft PR only, every conversational decision versioned. Add full reconciliation and crash/duplicate/fence tests; humans approve all specs/changes.",
+    "phase_2": "Add typed fanout/join, maintenance/research subfactories, budgets/timeouts/cleanup, scorer calibration and protected offline benchmark runner. Warp scorers remain signals, not promotion authority.",
+    "phase_3": "Enable automatic proposal and shadow. After sufficient representative local evidence, human-authorize ≤5% reversible low-risk canary with independent rollback. Keep merge/deploy and protected controls human/externally governed.",
+    "do_not_build_on_assumptions": [
+      "Do not use Warp prompt instructions as authorization.",
+      "Do not assume Factory MCP pickup locks work.",
+      "Do not assume Warp files contain runtime state.",
+      "Do not use `Complete` as merged/deployed.",
+      "Do not let self-improvement results directly apply.",
+      "Do not claim harness benchmarking: current docs say it is not available yet [S15]."
+    ]
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Factory definition syntax",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 5ad0545fdb14d9be328895a5397f85e5c8b9f386, 2026-09-11; schema v1alpha1",
+      "accessed": "2026-09-13",
+      "type": "official documentation and public source",
+      "url": "https://docs.warp.dev/factories/factory-as-code/",
+      "claims_supported": [
+        "file tree and keys",
+        "Git-backed apply/check behavior",
+        "configuration is not runtime state",
+        "machine-readable schema"
+      ],
+      "limits": "Product documentation; operational behavior is not independently audited."
+    },
+    {
+      "id": "S2",
+      "title": "Warp Factory file schemas v1alpha1",
+      "publisher": "Warp",
+      "authors": "generated from Warp Factory file parser",
+      "published_or_version": "v1alpha1 retrieved 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official unauthenticated JSON Schema API",
+      "url": "https://app.warp.dev/api/v1/factory-files/schemas/v1alpha1",
+      "claims_supported": [
+        "nine schema documents",
+        "closed key sets",
+        "required fields and enums",
+        "schema currently covers config rather than lifecycle state"
+      ],
+      "limits": "Mutable endpoint, not content-addressed; saved research should retain response digest."
+    },
+    {
+      "id": "S3",
+      "title": "warp-factory-examples",
+      "publisher": "Warp (warpdotdev)",
+      "authors": "Warp contributors",
+      "published_or_version": "commit 84e7c952f1506c4bd2784d96fd40a6f4d6398cad, 2026-08-25",
+      "accessed": "2026-09-13",
+      "type": "official public Git repository",
+      "url": "https://github.com/warpdotdev/warp-factory-examples/tree/84e7c952f1506c4bd2784d96fd40a6f4d6398cad",
+      "claims_supported": [
+        "default role prompts",
+        "SDLC examples",
+        "automations and scorers",
+        "validation scripts"
+      ],
+      "limits": "Only two commits and one pull request at observation; no public production runtime, work-item ledger, benchmark suite files, or outcome dataset."
+    },
+    {
+      "id": "S4",
+      "title": "How Warp Factories work",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 5ad0545fdb14d9be328895a5397f85e5c8b9f386, 2026-09-11",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/how-factories-work/",
+      "claims_supported": [
+        "work item identity",
+        "default stages",
+        "human spec approval and handoff",
+        "proposal-only self-improvement"
+      ],
+      "limits": "Stages are descriptive and foreman-prompt governed, not a published formal transition schema."
+    },
+    {
+      "id": "S5",
+      "title": "Factory agents",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit ffb1f7a13a62072da4e57670f8ed5b62ea105d05, 2026-08-28",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-agents/",
+      "claims_supported": [
+        "FOREMAN/TRIAGE/SPEC/IMPLEMENT/REVIEW responsibilities",
+        "same-conversation continuation",
+        "advisory review",
+        "permissions versus prompt conventions"
+      ],
+      "limits": "Role behavior is primarily natural-language instructions and can be changed by customers."
+    },
+    {
+      "id": "S6",
+      "title": "Factory automations",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/automations/",
+      "claims_supported": [
+        "event routing",
+        "AND/OR filter semantics",
+        "overlap starts duplicate runs",
+        "fail-closed webhook-filter evaluation"
+      ],
+      "limits": "No published exactly-once guarantee for provider events or global ordering contract."
+    },
+    {
+      "id": "S7",
+      "title": "Factory MCP for coding agents",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 5b35ebeccb8a364ddef107aa6032baca0a7dd3c0, 2026-09-09",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-mcp/",
+      "claims_supported": [
+        "single task/history across cloud/local handoffs",
+        "task tools",
+        "no claim/lock/pause on local pickup",
+        "best-effort notifications",
+        "full-account scope warning"
+      ],
+      "limits": "MCP tool schemas are served dynamically; no stable public version of task record schema was found."
+    },
+    {
+      "id": "S8",
+      "title": "Factory dashboard",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-dashboard/",
+      "claims_supported": [
+        "run hierarchy and steering",
+        "metrics definitions",
+        "management surfaces",
+        "live-managed mode"
+      ],
+      "limits": "UI documentation does not expose durable event, retention, or concurrency semantics."
+    },
+    {
+      "id": "S9",
+      "title": "Factory inbox",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/factory-inbox/",
+      "claims_supported": [
+        "question/spec/PR/blocked/failed inbox kinds",
+        "personal rather than team queue",
+        "read/resolved state"
+      ],
+      "limits": "Automatic clearing and personal ownership are projections, not a canonical approval ledger."
+    },
+    {
+      "id": "S10",
+      "title": "Oz API & SDK reference",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official API documentation",
+      "url": "https://docs.warp.dev/reference/api-and-sdk/",
+      "claims_supported": [
+        "create/list/retrieve/follow-up/cancel runs",
+        "run provenance fields",
+        "factory runs are ordinary agent runs"
+      ],
+      "limits": "High-level page points to separate schemas; factory work-item transition API is not specified here."
+    },
+    {
+      "id": "S11",
+      "title": "RunState generated type",
+      "publisher": "Warp (warpdotdev)",
+      "authors": "generated from Warp OpenAPI by Stainless",
+      "published_or_version": "oz-sdk-python commit de8a441f945aa93cb3b8a5ef34a93d4786d3fe5a, 2026-08-21",
+      "accessed": "2026-09-13",
+      "type": "official versioned SDK source",
+      "url": "https://github.com/warpdotdev/oz-sdk-python/blob/de8a441f945aa93cb3b8a5ef34a93d4786d3fe5a/src/oz_agent_sdk/types/agent/run_state.py#L1-L10",
+      "claims_supported": [
+        "QUEUED/PENDING/CLAIMED/INPROGRESS/SUCCEEDED/FAILED/BLOCKED/ERROR/CANCELLED run states"
+      ],
+      "limits": "Run state is not the same as work-item/stage state and transitions/guards are not defined."
+    },
+    {
+      "id": "S12",
+      "title": "Measure and improve a factory",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/",
+      "claims_supported": [
+        "metric definitions and caveats",
+        "practical measurement loop",
+        "cost and causality limitations"
+      ],
+      "limits": "No public raw dataset or confidence intervals."
+    },
+    {
+      "id": "S13",
+      "title": "Configuring Scorers",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 5ad0545fdb14d9be328895a5397f85e5c8b9f386, 2026-09-11",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/scorers/",
+      "claims_supported": [
+        "LLM classification judge",
+        "sample and on-demand scoring",
+        "replacement of prior result"
+      ],
+      "limits": "No calibration, inter-rater reliability, blind judging, protected grader, or appeal protocol is documented."
+    },
+    {
+      "id": "S14",
+      "title": "Configuring and reviewing Self-improvement",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 5ad0545fdb14d9be328895a5397f85e5c8b9f386, 2026-09-11",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/measure-and-improve/self-improvement/",
+      "claims_supported": [
+        "25-failure/7-day scheduled thresholds",
+        "group by agent",
+        "application or definition PR proposals",
+        "human review before adoption"
+      ],
+      "limits": "No protected holdout, causal validation, canary, automatic rollback, or independent promoter is documented."
+    },
+    {
+      "id": "S15",
+      "title": "Benchmarking factory agent configurations",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 9ff6935aac36fcf38bab5256d7f081b2c7138e29, 2026-09-09",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/benchmarks/",
+      "claims_supported": [
+        "task/configuration/repetition matrix",
+        "fixed stored launch inputs",
+        "full-SHA starting repository references",
+        "third-party harness comparison unavailable"
+      ],
+      "limits": "LLM scoring validity and statistical decision rules are left to the user."
+    },
+    {
+      "id": "S16",
+      "title": "Triggering automations with custom webhooks",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "docs commit 6c9c5a9bbaab7f9c949bf563c6375bd85208d8bf, 2026-09-03",
+      "accessed": "2026-09-13",
+      "type": "official documentation",
+      "url": "https://docs.warp.dev/factories/webhooks/",
+      "claims_supported": [
+        "authentication",
+        "deduplication precedence",
+        "delivery log retention",
+        "no ordering/thread continuation",
+        "untrusted payload envelope"
+      ],
+      "limits": "At least 50/7-day history is not an archival event ledger; identical-body hashing can suppress legitimate repeats without an external ID."
+    },
+    {
+      "id": "S17",
+      "title": "Warp Factories infrastructure and security",
+      "publisher": "Warp",
+      "authors": "Warp documentation team",
+      "published_or_version": "current 2026-09-13",
+      "accessed": "2026-09-13",
+      "type": "official security architecture documentation",
+      "url": "https://docs.warp.dev/factories/infrastructure-and-security/",
+      "claims_supported": [
+        "control/execution plane split",
+        "credential boundaries",
+        "self-hosting limits",
+        "team-role governance"
+      ],
+      "limits": "Vendor description, not a public independent security assessment; control-plane state remains with Warp."
+    },
+    {
+      "id": "S18",
+      "title": "WarpBench: Measuring, testing and improving coding agents on your own codebase",
+      "publisher": "Warp",
+      "authors": "Zach Lloyd",
+      "published_or_version": "2026-09-02",
+      "accessed": "2026-09-13",
+      "type": "vendor case study",
+      "url": "https://www.warp.dev/factories/benchmarks/warpbench",
+      "claims_supported": [
+        "30-task internal benchmark",
+        "$2,130.57 run cost",
+        "reported $80 to $30 cost/PR change",
+        "task-compliance 69% to 87%"
+      ],
+      "limits": "Internal, selected tasks; no task data, raw scores, variance, denominator for production PRs, statistical test, defect follow-up, or independent replication; A/B testing stated as future work."
+    },
+    {
+      "id": "S19",
+      "title": "The missing feedback loop for software factories",
+      "publisher": "Warp",
+      "authors": "Varoon Kodithala",
+      "published_or_version": "2026-08-26",
+      "accessed": "2026-09-13",
+      "type": "vendor engineering blog",
+      "url": "https://www.warp.dev/blog/engineering-self-improving-software-factories",
+      "claims_supported": [
+        "claimed scorer mechanics",
+        "claimed ten-plus internally merged improvement PRs",
+        "examples of proposed prompt/skill changes"
+      ],
+      "limits": "Anecdotes only; no comparison group, escaped-defect measure, raw PRs, audit, or sustained outcome series."
+    },
+    {
+      "id": "S20",
+      "title": "Software Engineering Body of Knowledge paper: SWE-bench Goes Live!",
+      "publisher": "OpenReview / ICLR 2025",
+      "authors": "Carlos E. Jimenez et al.",
+      "published_or_version": "2025",
+      "accessed": "2026-09-13",
+      "type": "independent academic benchmark paper",
+      "url": "https://openreview.net/forum?id=fevB4PimPS",
+      "claims_supported": [
+        "contamination-resistant evaluation requires newer tasks and audited tests",
+        "benchmark scores can be affected by test issues"
+      ],
+      "limits": "Evaluates SWE-bench agents, not Warp Factories."
+    },
+    {
+      "id": "S21",
+      "title": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+      "publisher": "NeurIPS 2023 / arXiv",
+      "authors": "Lianmin Zheng et al.",
+      "published_or_version": "arXiv:2306.05685, 2023",
+      "accessed": "2026-09-13",
+      "type": "independent academic paper",
+      "url": "https://arxiv.org/abs/2306.05685",
+      "claims_supported": [
+        "LLM judges can show position, verbosity and self-enhancement biases",
+        "human agreement and calibration matter"
+      ],
+      "limits": "General LLM evaluation; not an audit of Warp scorers."
+    },
+    {
+      "id": "S22",
+      "title": "AI Risk Management Framework: Generative Artificial Intelligence Profile",
+      "publisher": "NIST",
+      "authors": "NIST",
+      "published_or_version": "NIST AI 600-1, 2024-07",
+      "accessed": "2026-09-13",
+      "type": "independent government guidance",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "claims_supported": [
+        "independent evaluation, human oversight, provenance, incident handling and monitoring for generative AI risk"
+      ],
+      "limits": "Voluntary general guidance, not a product certification."
+    },
+    {
+      "id": "S23",
+      "title": "OpenGitOps Principles v1.0",
+      "publisher": "CNCF OpenGitOps",
+      "authors": "OpenGitOps Working Group",
+      "published_or_version": "v1.0.0",
+      "accessed": "2026-09-13",
+      "type": "independent standard/principles",
+      "url": "https://opengitops.dev/",
+      "claims_supported": [
+        "declarative, versioned/immutable, pulled automatically, continuously reconciled desired state"
+      ],
+      "limits": "Kubernetes/GitOps principles require adaptation to an agent control plane."
+    },
+    {
+      "id": "S24",
+      "title": "Secure Software Development Framework (SSDF) Version 1.1",
+      "publisher": "NIST",
+      "authors": "NIST",
+      "published_or_version": "SP 800-218, 2022-02",
+      "accessed": "2026-09-13",
+      "type": "independent government standard",
+      "url": "https://doi.org/10.6028/NIST.SP.800-218",
+      "claims_supported": [
+        "protect software/evaluation artifacts, review changes, provenance and response practices"
+      ],
+      "limits": "Software-development framework, not agent-specific."
+    },
+    {
+      "id": "S25",
+      "title": "Factory file live validation endpoint exercised via official validator",
+      "publisher": "Warp",
+      "authors": "Warp server and warpdotdev example validator",
+      "published_or_version": "v1alpha1 response on 2026-09-13; examples commit 84e7c952...",
+      "accessed": "2026-09-13",
+      "type": "official live parser behavior",
+      "url": "https://app.warp.dev/api/v1/factory-files/validate",
+      "claims_supported": [
+        "official example 02 validates even though scorer files omit JSON-Schema-required name",
+        "state-dependent apply checks are excluded"
+      ],
+      "limits": "POST behavior is mutable and not content-addressed; test result was independently reproduced during this research."
+    },
+    {
+      "id": "S26",
+      "title": "Warp documentation API drift decisions",
+      "publisher": "Warp (warpdotdev)",
+      "authors": "Warp docs maintainers",
+      "published_or_version": "docs commit d0d12d90b7538efd9ce2bf552d118249537d785f, 2026-09-11",
+      "accessed": "2026-09-13",
+      "type": "official versioned internal documentation ledger",
+      "url": "https://github.com/warpdotdev/docs/blob/d0d12d90b7538efd9ce2bf552d118249537d785f/.agents/skills/missing_docs/references/changelog_decisions.md#L38-L47",
+      "claims_supported": [
+        "released OpenAPI contains zero /factory routes and factory routes are treated as unreleased surface"
+      ],
+      "limits": "Factory HTTP routes exist behind authentication; this establishes release/spec drift, not absence of the service."
+    },
+    {
+      "id": "S27",
+      "title": "Factory benchmark session loading failure",
+      "publisher": "Warp public issue tracker",
+      "authors": "warp-agent-staging",
+      "published_or_version": "warpdotdev/warp issue #15406, opened 2026-08-21, open at cutoff",
+      "accessed": "2026-09-13",
+      "type": "official public defect report",
+      "url": "https://github.com/warpdotdev/warp/issues/15406",
+      "claims_supported": [
+        "~119.9 MB benchmark conversation response caused QUIC failure and endless loading UI",
+        "nontrivial internal benchmark use"
+      ],
+      "limits": "Staging/bot-authored single issue; not independent production reliability data."
+    },
+    {
+      "id": "S28",
+      "title": "Factory MCP team scoping gap",
+      "publisher": "Warp public issue tracker",
+      "authors": "Warp contributor",
+      "published_or_version": "warpdotdev/warp issue #15608, 2026",
+      "accessed": "2026-09-13",
+      "type": "official public defect report",
+      "url": "https://github.com/warpdotdev/warp/issues/15608",
+      "claims_supported": [
+        "unresolved team-selection/billing context for built-in Factory MCP"
+      ],
+      "limits": "Issue evidence may be stale or staging-specific; verify resolution before deployment."
+    },
+    {
+      "id": "S29",
+      "title": "oz-agent-sdk Python package metadata",
+      "publisher": "PyPI / Warp",
+      "authors": "Warp",
+      "published_or_version": "0.15.0 uploaded 2026-08-20, latest at cutoff",
+      "accessed": "2026-09-13",
+      "type": "public package registry metadata",
+      "url": "https://pypi.org/pypi/oz-agent-sdk/json",
+      "claims_supported": [
+        "latest stable Python SDK at cutoff did not contain the documented factories resource"
+      ],
+      "limits": "Factory REST route may work directly; package lag is a release-coordination issue, not service absence."
+    }
+  ],
+  "conflicts": [
+    {
+      "claim": "Factories-as-code completely specifies factory state / is Terraform-like.",
+      "evidence": "Warp marketing says “complete state”/factory is specified, but reference docs explicitly exclude work items, runs and metrics, and v1alpha1 lacks workflow/gate/state resources [S1,S2,S19].",
+      "resolution": "Interpret as desired configuration only. Add observed-state reconciliation and event store."
+    },
+    {
+      "claim": "Human key decisions versus optional policy.",
+      "evidence": "Lifecycle page says humans make key decisions; agent page says spec/question policy lives in editable instructions, while merging is repository-enforced [S4,S5].",
+      "resolution": "Treat only provider/IAM/repository enforcement as authority. Compile spec/question gates into controller policy."
+    },
+    {
+      "claim": "Benchmark supports harness comparisons.",
+      "evidence": "Marketing says compare harnesses and “soon”; current benchmark docs explicitly say third-party harness comparisons are not available yet; WarpBench says cross-harness is future/not fully supported [S15,S18].",
+      "resolution": "Current verified capability: model/runner comparisons; harness comparison uncertain/not available."
+    },
+    {
+      "claim": "Historical replay restores original state.",
+      "evidence": "Vendor case study claims original environment/config replay [S18], but public task schema only guarantees optional exact repository SHAs and provenance sourceRunId [S1,S2].",
+      "resolution": "Do not claim full environment/data/service replay; require explicit lockfiles, images, fixtures and digests."
+    },
+    {
+      "claim": "Self-improvement is autonomous.",
+      "evidence": "Blogs use autonomous/auto-pilot language, but official reference says it proposes PRs and nothing is adopted without review [S14,S19].",
+      "resolution": "Call it automated diagnosis/proposal with human adoption, not autonomous self-promotion."
+    },
+    {
+      "claim": "Definitions example coverage.",
+      "evidence": "Docs say examples include benchmark suites; public repository at pinned commit contains agents, automations, runners, skills and scorers but no `benchmarks/` files [S1,S3].",
+      "resolution": "Use parser schema/docs for benchmark syntax and record repository coverage gap."
+    },
+    {
+      "claim": "Machine JSON Schema is generated from the same parser and is authoritative.",
+      "evidence": "Live v1alpha1 schema requires scorer `name`; pinned official scorer examples omit it; official live validator still returns valid and says state-dependent checks were not run [S2,S3,S25].",
+      "resolution": "Run both pinned local schema and live parser checks, archive responses/digests, and treat mismatches as blocking drift rather than deleting data."
+    },
+    {
+      "claim": "Factory API/SDK is public/current.",
+      "evidence": "Docs show three Factory routes and Python `client.factories`, while released OpenAPI has zero Factory routes and stable Python SDK 0.15.0 lacks the resource [S10,S26,S29].",
+      "resolution": "Classify REST/SDK factory surface as preview/release-drifted; use feature detection and pinned alpha SDK/direct API only after contract tests."
+    }
+  ],
+  "uncertainties": [
+    "Factory service implementation, work-item persistence schema, transition guards, database durability, retries, delivery semantics and recovery behavior are closed/not publicly specified.",
+    "Exact retention/export guarantees for task conversations, full run traces, decisions and artifacts are not stated in reviewed factory docs.",
+    "Dynamic Factory MCP tool schemas and task status enum were not found as a pinned public specification.",
+    "Whether definition rollback/canary/A-B/model-routing mentioned in marketing exists as a generally usable current factory-as-code resource; v1alpha1 schema has no routing/canary resource.",
+    "Scorer judge prompt/context truncation, sampling randomness, replacement history, calibration, security isolation and reproducibility.",
+    "Benchmark raw task corpus, trial data, variance, scorer definitions, production denominator, defect outcomes and independent WarpBench replication.",
+    "Factory availability remains Early Access/limited teams; behavior may change before a stable schema.",
+    "Independent production/security audit or peer-reviewed assessment of Warp Factories was not found.",
+    "Resolution and prevalence of open benchmark-session loading and Factory MCP team-scoping defects [S27,S28].",
+    "Which contract wins when the published JSON Schema and live validation parser disagree [S2,S25].",
+    "Stable release date/compatibility for Factory REST in OpenAPI and Python/TypeScript SDKs [S26,S29]."
+  ],
+  "confidence": {
+    "overall": "High for public v1alpha1 file/schema surface, roles, documented default workflow, run enum and explicit human-review boundary; medium for hosted runtime behavior because evidence is vendor documentation; low for ROI/self-improvement effectiveness and causal improvement claims.",
+    "claim_level": {
+      "schema_and_roles": "0.95",
+      "documented_workflow_and_human_boundary": "0.90",
+      "runtime_state_and_delivery_behavior": "0.65",
+      "scorer_and_benchmark_mechanics": "0.80",
+      "WarpBench_outcomes": "0.35",
+      "self_improvement_effectiveness": "0.30",
+      "recommended_extension_safety_model": "0.85 (design synthesis grounded in prior validated project results and independent governance/evaluation sources, not proof of deployed behavior)"
+    }
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "complete_state_catalog",
+    "conversation_and_handoffs",
+    "evidence_and_limits",
+    "factory_as_code_schema",
+    "orchestration_and_composition",
+    "self_improvement_boundary",
+    "transition_contract",
+    "uncertainties",
+    "verified_capabilities"
+  ]
+}

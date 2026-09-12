@@ -1,0 +1,851 @@
+{
+  "scope": {
+    "definition": "Operational evidence for software projects in which agents or deterministic bots take work from a trigger (issue, alert, dependency update, scheduled audit, chat/ticket) through investigation and a proposed or merged change. Production means used on a live organization's real repositories/workflow, not merely a benchmark.",
+    "covered": "Issue-to-PR coding agents (Devin, Claude Code, GitHub Copilot cloud agent), internal/customer deployments, human-AI productivity experiments and surveys, and mature dependency-maintenance automation (Renovate/Dependabot) as a lower-risk baseline.",
+    "excluded": "Pure model leaderboard scores as proof of production reliability; unverified social-media anecdotes; fully autonomous direct-to-production deployment claims without auditable evidence. Benchmarks appear only to explain the production-evidence gap."
+  },
+  "current_state": {
+    "verified": "Agents can run real repository work asynchronously in isolated environments, use repository/ticket/observability context, execute builds/tests/linters, and open PRs. Cognition documents 659 agent PRs merged into its own codebase in one week in February 2026. GitHub documents an ephemeral Actions-backed cloud-agent path and explicit human approval controls. Renovate provides mature CI-gated automerge for narrow dependency updates.",
+    "vendor_claims": "Rakuten reports a 79% feature time-to-market reduction and a seven-hour autonomous code task; TELUS reports 30% faster code shipping and large aggregate savings; Cognition reports production session measurement across eight deployments. These are useful existence proofs, but are selected vendor/customer accounts without raw denominators, control groups, full costs, or post-merge defect rates.",
+    "independent_reality": "Results vary sharply by task, user, and measurement. Answer.AI got only 3 successes in 20 Devin tasks. METR's early-2025 RCT found experienced maintainers 19% slower, while its later 2026 data weakly suggested speedup but was too selection-biased for a reliable estimate. Stack Overflow shows high use but low trust and substantial debugging burden.",
+    "bottom_line": "As of 2026-09-13, supervised issue-to-PR operation is demonstrably usable; unattended general software ownership is not. Narrow, testable, reversible maintenance can be highly automated. Product/spec decisions, cross-repository changes, difficult validation, security-sensitive actions and production deployment still need explicit human or policy gates."
+  },
+  "representative_systems": [
+    {
+      "system": "Devin",
+      "status": "Commercial production use documented through 2026",
+      "evidence_role": "Largest detailed first-party operational workflow here, plus an adverse independent trial."
+    },
+    {
+      "system": "Claude Code",
+      "status": "Commercial; enterprise and internal case studies through 2026",
+      "evidence_role": "Long-running/parallel agent and human-guided testing cases; figures are vendor/customer supplied."
+    },
+    {
+      "system": "GitHub Copilot cloud agent",
+      "status": "Production product with official workflow/security documentation as accessed 2026-09-13",
+      "evidence_role": "Concrete controls, limits and consumption model; independent outcome evidence for the autonomous cloud agent itself remains thin."
+    },
+    {
+      "system": "Renovate and Dependabot",
+      "status": "Mature production dependency-update bots",
+      "evidence_role": "Proven narrow automation pattern; official docs expose real CI, merge queue, rebasing and review burden."
+    },
+    {
+      "system": "METR productivity experiments; DORA; Stack Overflow survey",
+      "status": "Independent/industry evidence",
+      "evidence_role": "Counterweight to selected customer stories and lab benchmarks."
+    },
+    {
+      "system": "SapFix, Getafix and Repairnator",
+      "status": "Foundational industrial/continuous automated-repair systems (2017-2019)",
+      "evidence_role": "Rare published operational funnels proving that reproduction, overfitting filters and human review dominate apparent patch success."
+    }
+  ],
+  "primary_evidence": [
+    {
+      "claim": "Cognition used Devin through web, Slack, Linear/Jira, CLI and API and merged 659 Devin-authored PRs in one week; review became the bottleneck.",
+      "classification": "verified first-party report, not independently audited",
+      "url": "https://cognition.com/blog/how-cognition-uses-devin-to-build-devin"
+    },
+    {
+      "claim": "Cognition's production estimator dataset had 258 sessions from 126 users across eight deployments; it removes roughly 1-20% of non-PR sessions as unproductive by customer, and admits merged PRs can hide later defects.",
+      "classification": "vendor measurement with candid limitations",
+      "url": "https://cognition.com/blog/ai-productivity"
+    },
+    {
+      "claim": "GitHub's cloud agent runs in an ephemeral Actions environment, produces a branch/PR, consumes Actions minutes and AI credits, and is limited to one repository/branch/PR with a 59-minute hard session cap.",
+      "classification": "verified product mechanics",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent"
+    },
+    {
+      "claim": "GitHub keeps Actions workflows behind a write-user's approval by default, limits triggers to write users, requires an extra PR approval where approvals already apply, and identifies prompt injection as a risk.",
+      "classification": "verified documented safeguard",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "claim": "Rakuten reports 24-to-5-working-day feature delivery and a seven-hour single-run vLLM change; TELUS reports 30% faster engineering delivery.",
+      "classification": "vendor/customer claims; no raw study or independent audit",
+      "urls": [
+        "https://claude.com/customers/rakuten",
+        "https://claude.com/customers/telus"
+      ]
+    },
+    {
+      "claim": "Renovate waits for required checks and its maintainers advise automerge only for changes a human would merge anyway, with good tests for production dependencies.",
+      "classification": "verified workflow guidance, not an outcome study",
+      "url": "https://docs.renovatebot.com/key-concepts/automerge/"
+    },
+    {
+      "claim": "Wiz reports that a feature-flagged Python-to-Go migration matched 99% of production outputs, yet the remaining 1% revealed 20-30 distinct issues; testing, differential production comparison and feature flags were required before full rollout.",
+      "classification": "vendor/customer report with unusually concrete failure evidence",
+      "url": "https://claude.com/customers/wiz"
+    },
+    {
+      "claim": "Cognition reports a 67% Devin PR merge rate in 2025 versus 34% the prior year, but merge is not issue resolution, defect-free operation or net value.",
+      "classification": "vendor aggregate telemetry; denominator/task mix and review cost not disclosed",
+      "url": "https://cognition.com/blog/devin-annual-performance-review-2025"
+    },
+    {
+      "claim": "GitHub's billing team reports technical-debt work changed from weeks of intermittent attention to minutes writing a precise issue plus hours reviewing/iterating, and warns against 100+-file agent PRs.",
+      "classification": "first-party internal case study without standardized baseline",
+      "url": "https://github.blog/ai-and-ml/github-copilot/how-the-github-billing-team-uses-the-coding-agent-in-github-copilot-to-continuously-burn-down-technical-debt/"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "result": "Answer.AI month-long field use: 3 successes, 14 failures and 3 inconclusive among 20 tasks. Impossible tasks could consume more than a day while the agent invented nonexistent capabilities; an attempted feature consumed several human hours before the team wrote it in about 90 minutes.",
+      "strength": "Direct detailed practitioner report with task appendix; small, one team, early product version.",
+      "url": "https://www.answer.ai/posts/2025-01-08-devin.html"
+    },
+    {
+      "result": "METR early-2025 RCT: 16 experienced open-source developers completed 246 real issues in familiar repositories and took 19% longer with AI; PR quality was similar.",
+      "strength": "Randomized real-work design; narrow population, tools and 20-minute-to-4-hour task range.",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+    },
+    {
+      "result": "METR 2026 follow-up raw estimates suggested 18% speedup for returning developers and 4% for new recruits, but intervals included no effect and authors judged selection/timing bias severe; 30-50% reported withholding some tasks from randomization.",
+      "strength": "Transparent update; explicitly not a reliable causal estimate.",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/"
+    },
+    {
+      "result": "Stack Overflow 2025: 46% distrusted AI accuracy versus 33% who trusted it; 66% encountered almost-right results and 45% said debugging generated code takes more time. For agents, 87% expressed accuracy concern and 81% security/privacy concern.",
+      "strength": "Large broad survey; self-report, respondents and question denominators differ.",
+      "url": "https://survey.stackoverflow.co/2025/ai"
+    },
+    {
+      "result": "DORA 2024 observed that 25% higher AI adoption correlated with 7.5% better documentation, 3.4% better code quality and 3.1% faster review, but also 1.5% lower throughput and 7.2% lower stability.",
+      "strength": "Broad industry research, but associations are not causal and cover AI assistance generally, not only autonomous agents.",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report"
+    },
+    {
+      "result": "A 2023 peer-reviewed Dependabot study covering 1,823 projects and 502,752 PRs found >70% merged, median four-hour merge lag, and mean technical lag falling from 48.99 to 25.38 days after 90 days. Yet 11.3% of projects deprecated it; notification noise, missing grouping/configuration/package support/automerge were cited, and most switchers chose Renovate.",
+      "strength": "Large observational production dataset plus 131-developer survey; correlation/adoption selection and 2023 product behavior limit causal/current inference.",
+      "url": "https://arxiv.org/abs/2206.07230"
+    },
+    {
+      "result": "Repairnator's continuous-operation funnel processed 11,523 CI failures, locally reproduced 3,551 (30.82%), generated 15 patches (0.13%), and submitted none because all overfit despite passing the failing test.",
+      "strength": "Direct operational funnel shows environment/test-oracle burden; 2017-2018 Java ecosystem is foundational rather than current frontier-agent evidence.",
+      "url": "https://arxiv.org/abs/1811.09852"
+    },
+    {
+      "result": "Facebook's SapFix first three months covered 57 crashes: 165 candidates, 131 that built/passed tests, 55 exposed to developers; about half of exposed fixes were judged correct, and all 18 revert suggestions were declined. A high-volume experiment was stopped after three days to avoid reviewer spam.",
+      "strength": "Peer-reviewed industrial deployment on six very large apps; narrow crash repair and 2019 technology.",
+      "url": "https://discovery.ucl.ac.uk/10084761/1/SapFix-Automated-End-to-End-Repair-at-Scale-v2.pdf"
+    },
+    {
+      "result": "Facebook Getafix surfaced suggestions for about 250 null-dereference warnings in three months; 106 (42%) were accepted directly, leaving 58% needing custom/equivalent fixes, code removal, assertion or another pattern.",
+      "strength": "Peer-reviewed production integration; narrow learned repair patterns, not general coding agents.",
+      "url": "https://arxiv.org/abs/1902.06111"
+    }
+  ],
+  "metrics": {
+    "production_activity": [
+      "659 Devin PRs merged in one week at Cognition (first-party, 2026), versus its best 2025 week of 154.",
+      "Cognition productivity-estimator dataset: 258 sessions, 126 users, eight deployments; approximately 1-20% of non-PR sessions classified unproductive depending on customer.",
+      "Rakuten: claimed feature cycle 24 to 5 working days (79%); claimed 99.9% accuracy on complex code modifications; one seven-hour autonomous run in 12.5M-line codebase. Definitions and denominators are not published.",
+      "TELUS: claimed 57,000 active generative-AI users, 500,000+ hours saved, $90M+ benefit across 47 large-scale solutions and 30% faster engineering shipping. Attribution to Claude/coding agents and cost basis are not isolated.",
+      "Cognition 2025 aggregate: vendor-reported 67% of Devin PRs merged versus 34% in the prior year; merge does not measure latent defects or reviewer cost.",
+      "OpenAI 2025 internal rollout: nearly all engineers reportedly used Codex and merged 70% more PRs/week; uncontrolled before/after correlation with no task-size or defect adjustment.",
+      "Wiz migration: claimed 50,000 Python lines to 18,413 Go lines in about 20 hours versus a 2-3 specialist-month estimate; 99% differential parity still hid 20-30 distinct issues.",
+      "Money Forward: >80% adoption, >90% code acceptance, and early-adopter self-report of seven hours saved/engineer/week; selection, task counts and defect rates unknown."
+    ],
+    "controlled_or_independent": [
+      "Answer.AI Devin: 15% success, 70% failure, 15% inconclusive (3/20, 14/20, 3/20).",
+      "METR early 2025: 19% slower across 246 issues/16 maintainers.",
+      "METR 2026 follow-up: point estimates of 18% and 4% speedup, both statistically compatible with no effect and considered biased.",
+      "GitHub 2022 lab task: Copilot group 55% faster (1h11m vs 2h41m) and completion 78% vs 70%; vendor-run, one task, assistant rather than autonomous agent.",
+      "GitHub 2024 lab task: 202 valid submissions; access associated with 53.2% greater chance of passing all ten tests and 5% higher blind approval; vendor-run and narrow.",
+      "Dependabot 2023 study: >70% of 502,752 PRs merged; median merge lag four hours; 11.3% of projects later deprecated the bot.",
+      "Repairnator: only 30.82% of 11,523 CI failures reproduced locally; 0.13% yielded patch candidates; zero passed human overfitting review for submission.",
+      "SapFix: 165 generated -> 131 build/test-pass -> 55 shown -> about half judged correct; test pass therefore greatly overstated usable repair.",
+      "Getafix: 106/approximately 250 (42%) suggestions accepted with one click; final human disposition remained necessary."
+    ],
+    "cost_and_burden": [
+      "GitHub cloud-agent sessions consume both Actions minutes and AI credits; current individual sticker prices shown on the accessed plan page are $10/$39/$100 per user-month with included credits. Actual run cost varies by model/tokens and CI time.",
+      "Cognition's estimator is noisy per session: about 50% within factor two and 2-3x errors common; therefore ROI measurement itself needs aggregation and maintenance.",
+      "Unpriced but repeatedly observed costs: repository setup/indexing, custom instructions/playbooks, MCP credentials, CI compute, flaky-test handling, human clarification/review, failed-session triage, post-merge defect remediation and security governance.",
+      "No cited vendor case provides a complete total-cost-of-ownership calculation or controlled net ROI after those costs."
+    ]
+  },
+  "reference_workflow": [
+    {
+      "step": 1,
+      "state": "intake",
+      "mechanics": "Accept only authenticated triggers from an issue tracker, dependency alert, scheduled audit, CI/observability event or approved chat user. Store task ID, repository, requester, risk class, acceptance tests and budget. Reject vague or impossible requests to clarification rather than letting the agent persist."
+    },
+    {
+      "step": 2,
+      "state": "scope/route",
+      "mechanics": "A deterministic controller checks repo ownership, single/multi-repo need, data sensitivity, deploy impact and available verification. Route low-risk lockfile/docs/lint/test work to automation; route product ambiguity, migrations and security-critical work to a human planner."
+    },
+    {
+      "step": 3,
+      "state": "plan",
+      "mechanics": "Index only needed code/docs/history. Agent proposes affected files, tests, external tools, stop conditions and rollback. Human approves plans for schema/API/auth/infrastructure changes. Split long work into isolated sessions; GitHub's cloud agent has a 59-minute hard cap."
+    },
+    {
+      "step": 4,
+      "state": "execute",
+      "mechanics": "Create ephemeral least-privilege workspace and dedicated branch. Default network deny/allowlist. Provide short-lived secrets only when required. External production systems and databases are read-only. Record prompts, commands, tool calls, token/CI usage and artifacts."
+    },
+    {
+      "step": 5,
+      "state": "verify",
+      "mechanics": "Run formatting, lint, unit/integration/contract/property/security/license checks. Reproduce bugs first and add regression tests. Treat agent self-review as advisory; use an independent reviewer/tool and verify generated tests are meaningful."
+    },
+    {
+      "step": 6,
+      "state": "proposed",
+      "mechanics": "Open one small PR with task link, plan, diff summary, tests, unresolved risks, generated-code disclosure, cost and rollback. Failed checks trigger a bounded repair loop; repeated or novel failure escalates with full trace."
+    },
+    {
+      "step": 7,
+      "state": "merge gate",
+      "mechanics": "Branch protection, CODEOWNERS and required checks remain authoritative. Allow bot automerge only for preclassified reversible changes with strong tests (for example lockfile maintenance or known-safe patch updates). Agent PRs that affect behavior require human approval."
+    },
+    {
+      "step": 8,
+      "state": "deploy/canary",
+      "mechanics": "Normal signed CI/CD deploys, not the coding agent. Use canary/feature flag, health/SLO and security checks, automatic rollback and incident escalation. No agent receives direct unrestricted production write access."
+    },
+    {
+      "step": 9,
+      "state": "observe/learn",
+      "mechanics": "Link incidents, rollbacks, review edits and escaped defects to session/task. Measure accepted/merged/reverted rates, lead and review time, human touches, compute/credit cost, change failure rate and net hours. Promote a task class to more autonomy only after enough local evidence; version playbooks and policies."
+    }
+  ],
+  "integration_points": {
+    "triggers": [
+      "GitHub/GitLab/Bitbucket issues and PRs",
+      "Linear/Jira tickets",
+      "Slack/Teams commands restricted by identity",
+      "Dependabot/security alerts",
+      "Sentry/Datadog/CI/deployment webhooks",
+      "schedules for documentation/design-system/dependency audits"
+    ],
+    "execution": [
+      "GitHub Actions or equivalent ephemeral runners",
+      "repository setup workflow (.github/workflows/copilot-setup-steps.yml)",
+      "agent APIs/CLI",
+      "container/package registries and build caches",
+      "MCP/tools with explicit per-tool permissions"
+    ],
+    "context": [
+      "repository code/history/issues/PRs",
+      "custom instructions and versioned playbooks",
+      "read-only logs/traces and database replicas",
+      "architecture/runbooks and acceptance tests"
+    ],
+    "control_and_output": [
+      "protected branches, CODEOWNERS, merge queues and required checks",
+      "artifact/SBOM/security scanners and secret scanning",
+      "PR with audit trace and cost metadata",
+      "signed CI/CD, feature flags, canary, SLO alarms and rollback"
+    ]
+  },
+  "human_gates": [
+    {
+      "gate": "task admission/clarification",
+      "why": "Operational failures often begin with impossible or underspecified tasks; Answer.AI observed days of futile work."
+    },
+    {
+      "gate": "plan approval for high impact",
+      "why": "Humans own product intent, architecture, cross-repository coordination, schema/API/auth/infrastructure and legal/security decisions."
+    },
+    {
+      "gate": "secret/network/tool grant",
+      "why": "Prompt injection or compromised repository content can turn agent tool access into data exfiltration or supply-chain action."
+    },
+    {
+      "gate": "PR review and workflow approval",
+      "why": "GitHub's default design requires a write-user to approve workflow execution and preserves required approvals; agent self-review is not independent assurance."
+    },
+    {
+      "gate": "production rollout",
+      "why": "Delivery stability can worsen even when local coding metrics improve; deployment uses the existing accountable release process."
+    },
+    {
+      "gate": "exception/escalation",
+      "why": "Timeout, repeated failed tests, ambiguous expected behavior, unexpected diff size, missing credentials, security findings or budget breach must stop rather than invite unbounded retries."
+    }
+  ],
+  "failure_modes": [
+    {
+      "category": "task/reasoning",
+      "modes": [
+        "hallucinated platform capabilities",
+        "persistence on impossible work",
+        "scope creep and needless complexity",
+        "wrong but plausible implementation",
+        "loss of multi-repo/system context",
+        "long-task timeout"
+      ]
+    },
+    {
+      "category": "verification",
+      "modes": [
+        "tests generated to match the bug rather than intent",
+        "flaky or absent CI",
+        "passing narrow unit tests while breaking contracts/performance/security",
+        "merged PR used as a false proxy for value or quality",
+        "post-merge defects omitted from ROI",
+        "99% differential parity can still conceal dozens of edge-case defects, as Wiz's customer story reports",
+        "CI failure cannot be reproduced locally because environment/flakiness differs",
+        "patch passes the failing test but overfits and is not semantically correct"
+      ]
+    },
+    {
+      "category": "security/supply chain",
+      "modes": [
+        "prompt injection in issues/comments/docs",
+        "secret leakage",
+        "overbroad MCP/network/database rights",
+        "malicious or too-new dependency",
+        "agent-modified workflow files",
+        "untrusted code execution"
+      ]
+    },
+    {
+      "category": "operations",
+      "modes": [
+        "review queue becomes bottleneck",
+        "branch drift/rebase churn and merge-queue serialization",
+        "environment/setup mismatch",
+        "token/CI runaway",
+        "automation noise and abandoned PRs",
+        "ownership ambiguity during incidents",
+        "repair suggestions spam maintainers; SapFix stopped a high-volume experiment after three days"
+      ]
+    },
+    {
+      "category": "measurement/economics",
+      "modes": [
+        "self-selection and survivor bias in case studies",
+        "self-reported counterfactual hours",
+        "counting lines/PRs rather than outcomes",
+        "parallel sessions make time accounting hard",
+        "license plus compute plus review exceeds saved labor"
+      ]
+    },
+    {
+      "category": "organization/product",
+      "modes": [
+        "low trust blocks adoption",
+        "junior skill erosion or reviewers rubber-stamp",
+        "non-engineers create unsupported apps",
+        "fast output expands batch size and harms stability",
+        "unclear liability for defects"
+      ]
+    }
+  ],
+  "controls_and_mitigations": [
+    "Use a risk-tier allowlist: deterministic dependency/docs/test chores first; never grant blanket autonomy by repository.",
+    "Keep agents on ephemeral branches/runners with least privilege, egress allowlists, short-lived secrets, read-only production observability/data and explicit tool schemas.",
+    "Preserve protected branches, CODEOWNERS, required CI/security checks, merge queues and signed releases. Do not let the same agent author, approve and deploy.",
+    "Set hard limits for time, tokens/credits, commands, retries, diff size, files/repositories and concurrent sessions. Escalate on limit rather than silently extend.",
+    "Require bug reproduction and regression tests; add contract/integration/property/fuzz/security/performance tests according to risk. Mutate or inspect generated tests to avoid tautological checks.",
+    "For dependencies, use cooldown/minimum release age where supported, group carefully, pin digests/lockfiles, produce SBOMs, and automerge only after meaningful checks. Keep majors and production-critical libraries human-reviewed.",
+    "Canary/feature-flag behavioral changes, watch SLOs and business metrics, auto-rollback, and link incident/revert data to the originating agent session.",
+    "Maintain versioned custom instructions/playbooks with postconditions and forbidden actions. Treat repository text, issue text and web pages as untrusted input.",
+    "Audit outcomes by cohort and task class: assignment-to-accepted PR, merge and revert rates, escaped defects, review minutes, total cost, lead time and change failure rate. Run holdouts where feasible.",
+    "For migrations, run old and new implementations in parallel behind a feature flag and compare outputs on real traffic; investigate the residual mismatches rather than accepting a high aggregate parity percentage.",
+    "Measure repair as a full funnel (trigger → reproduced → compiled → tests passed → reviewer-accepted → merged → no regression). A test-passing patch is only a candidate; retain semantic/human review and suppress duplicate/noisy proposals."
+  ],
+  "maturity_assessment": {
+    "rating": "Conditionally useful in production; mature for narrow deterministic maintenance; emerging for general issue-to-PR; not production-ready for unattended end-to-end project ownership.",
+    "rationale": "Existence and volume are proven, but general success-rate evidence is sparse and inconsistent. Strong outcomes cluster around scoped, well-tested, reversible tasks with good repository context. Real deployments shift labor from typing to specification, environment setup, review and governance. Independent trials and surveys show large failure, distrust and debugging burdens.",
+    "maturity_by_task": {
+      "dependency lockfile/dev-tool patches": "production-ready with CI-gated automerge",
+      "documentation/tests/lint/small bug fixes": "production-ready under review",
+      "well-scoped feature PRs": "conditionally useful",
+      "cross-repo migrations/ambiguous features/security-critical code": "emerging; senior supervision",
+      "direct autonomous production changes/product management": "speculative/high risk"
+    }
+  },
+  "build_vs_buy": {
+    "buy": "Hosted agents (GitHub Copilot cloud agent, Devin, Claude Code) buy sandbox execution, models, repository UI/integrations and upgrades. Dependabot buys GitHub-native dependency alerts/PRs. This reduces platform work but creates metered usage, data/control-plane and vendor-lock-in concerns.",
+    "build_or_self_host": "Renovate/self-hosted runners or custom orchestration give policy, network, model and data control. They require queue/state/idempotency, workspace lifecycle, secret brokerage, logging, upgrades, evals and on-call ownership.",
+    "always_custom": "Repository instructions, executable acceptance tests, risk classification, identity/permission mapping, MCP/tool allowlists, CI gates, release/canary/rollback, cost attribution and outcome dashboards are organization-specific even when the agent is bought.",
+    "decision_rule": "Buy agent execution first; build the thin policy/evidence control plane around it. Self-host only for regulated data, bespoke tools, predictable high volume or vendor-independent operation where a team can own the maintenance burden."
+  },
+  "recommended_pattern": {
+    "pattern": "Supervised autonomy with evidence-based promotion",
+    "implementation": "Start with a shadow lane for dependency, documentation, test, lint and reproducible small-bug tasks. The agent may research, plan, edit and open a PR, but cannot approve or deploy. After a local sample (for example 50-100 tasks per task class) meets preset accepted-PR, escaped-defect, review-time and net-cost thresholds, permit CI-gated automerge only for the lowest-risk reversible class. Keep behavioral changes human reviewed and production rollout under ordinary CI/CD.",
+    "operating_model": "One durable controller owns intake, state, budgets, retries and audit. Use disposable execution workers. Separate author/reviewer/deployer identities. Version task policies and playbooks. Feed review edits, failed CI, rollbacks and incidents into an eval set before changing prompts/models or expanding autonomy.",
+    "success_criteria": "Report accepted/merged/reverted/incident rates rather than raw PRs or tokens; median/p95 lead and human-review time; cost per accepted change including CI and review; change failure/SLO impact; and task-class coverage. Maintain a non-agent or prior-version control cohort where practical.",
+    "do_not_do": "Do not infer production reliability from SWE-bench alone, use merged PRs as the only success label, expose broad production credentials, disable approvals to increase throughput, or scale parallel agents faster than review and deployment capacity."
+  },
+  "open_questions": [
+    "What are audited task-level success, revert and escaped-defect rates for current 2026 versions across representative enterprise repositories?",
+    "What is net TCO after subscriptions/API tokens, Actions/runner compute, integration upkeep, reviewer time, failed attempts and incident remediation?",
+    "Which task features predict success well enough for safe automatic routing, and how stable are those predictors across model upgrades?",
+    "Do gains persist under randomized organization-level measurement when workers can use multiple concurrent agents without selection bias?",
+    "How often do agent-authored changes cause delayed security/reliability regressions after merge, and who bears liability?",
+    "What is the right independent-review design when both author and reviewer use correlated models/training data?",
+    "How can multi-repository and long-running tasks preserve state, least privilege and rollback without widening blast radius?",
+    "How much ongoing labor do repository instructions, playbooks, MCP integrations and eval suites require per month?"
+  ],
+  "sources": [
+    {
+      "title": "Introducing Devin, the first AI software engineer",
+      "publisher_or_author": "Cognition / Scott Wu",
+      "url": "https://cognition.com/blog/introducing-devin",
+      "publication_or_update_date": "2024-03-12",
+      "access_date": "2026-09-13",
+      "source_type": "vendor announcement / benchmark claim",
+      "supported_claims": [
+        "Sandboxed shell/editor/browser workflow",
+        "13.86% SWE-bench result on random 25% subset; unassisted; vendor-reported"
+      ]
+    },
+    {
+      "title": "Thoughts On A Month With Devin",
+      "publisher_or_author": "Answer.AI / Hamel Husain, Isaac Flath, Johno Whitaker",
+      "url": "https://www.answer.ai/posts/2025-01-08-devin.html",
+      "publication_or_update_date": "2025-01-08",
+      "access_date": "2026-09-13",
+      "source_type": "independent practitioner case study",
+      "supported_claims": [
+        "20-task field trial: 3 successes, 14 failures, 3 inconclusive",
+        "Failure modes: impossible-task persistence, hallucinated capabilities, long detours, review burden"
+      ]
+    },
+    {
+      "title": "Estimating the Productivity of an Autonomous AI Software Engineer",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/ai-productivity",
+      "publication_or_update_date": "2026-06-04",
+      "access_date": "2026-09-13",
+      "source_type": "vendor production measurement study",
+      "supported_claims": [
+        "258 sessions from 126 users across eight deployments",
+        "1-20% of non-PR sessions filtered as unproductive depending on customer",
+        "Held-out estimator r_log=0.74; only ~50% individual estimates within factor 2; common 2-3x errors",
+        "Merged-PR proxy misses post-merge defects and hours are not business value"
+      ]
+    },
+    {
+      "title": "How Cognition Uses Devin to Build Devin",
+      "publisher_or_author": "Cognition Team",
+      "url": "https://cognition.com/blog/how-cognition-uses-devin-to-build-devin",
+      "publication_or_update_date": "2026-02-27",
+      "access_date": "2026-09-13",
+      "source_type": "first-party internal production case study",
+      "supported_claims": [
+        "659 Devin PRs merged in one week versus prior 2025 best of 154",
+        "Slack/Linear/Jira/API/Sentry/Datadog/database workflow mechanics",
+        "Review became bottleneck; humans review/test PRs; read-only database for debugging"
+      ]
+    },
+    {
+      "title": "Rakuten Claude Code case study",
+      "publisher_or_author": "Anthropic / Rakuten",
+      "url": "https://claude.com/customers/rakuten",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-published customer case study",
+      "supported_claims": [
+        "Vendor/customer reports 7-hour single-run task on 12.5M-line vLLM codebase",
+        "Vendor/customer reports feature time-to-market reduction 24 to 5 working days (79%)",
+        "24-session ambient-agent approach is described as being built, not established production proof"
+      ]
+    },
+    {
+      "title": "TELUS Claude Platform case study",
+      "publisher_or_author": "Anthropic / TELUS",
+      "url": "https://claude.com/customers/telus",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-published customer case study",
+      "supported_claims": [
+        "57,000 active users, 500,000+ hours claimed saved, 47 scaled solutions and $90M claimed benefits",
+        "Engineering teams claimed to ship 30% faster",
+        "Metrics combine a multi-model internal platform with Claude, so attribution to coding agents is unclear"
+      ]
+    },
+    {
+      "title": "How Anthropic teams use Claude Code",
+      "publisher_or_author": "Anthropic",
+      "url": "https://claude.com/blog/how-anthropic-teams-use-claude-code",
+      "publication_or_update_date": "2025-07-24",
+      "access_date": "2026-09-13",
+      "source_type": "first-party internal case study",
+      "supported_claims": [
+        "Production debugging, test generation, GitHub Actions PR comments and codebase navigation use cases",
+        "Security team guides test-driven work and checks in periodically"
+      ]
+    },
+    {
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "Issue/chat to ephemeral Actions environment to branch/PR workflow",
+        "Consumes Actions minutes and AI credits",
+        "One repo, one branch, one PR and 59-minute maximum execution limit"
+      ]
+    },
+    {
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "Prompt-injection risk",
+        "Write-access trigger restriction, human workflow approval, extra PR approval, secret scanning"
+      ]
+    },
+    {
+      "title": "Configure the development environment for Copilot cloud agent",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "copilot-setup-steps.yml mechanics, dependencies, hosted/self-hosted runners, firewall and secrets"
+      ]
+    },
+    {
+      "title": "Research: quantifying GitHub Copilot’s impact on developer productivity and happiness",
+      "publisher_or_author": "GitHub / Eirini Kalliamvakou",
+      "url": "https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/",
+      "publication_or_update_date": "2022-09-07; updated 2024-05-21",
+      "access_date": "2026-09-13",
+      "source_type": "vendor controlled experiment",
+      "supported_claims": [
+        "Single JavaScript HTTP-server task: Copilot group 55% faster; completion 78% versus 70%",
+        "Copilot users averaged 1h11m versus 2h41m; narrow task and vendor-run study"
+      ]
+    },
+    {
+      "title": "Does GitHub Copilot improve code quality? Here’s what the data says",
+      "publisher_or_author": "GitHub / Jared Bauer",
+      "url": "https://github.blog/news-insights/research/does-github-copilot-improve-code-quality-heres-what-the-data-says/",
+      "publication_or_update_date": "2024-11-18; updated 2025-02-06",
+      "access_date": "2026-09-13",
+      "source_type": "vendor controlled experiment",
+      "supported_claims": [
+        "202 valid submissions from experienced Python developers",
+        "Copilot access associated with 53.2% greater likelihood of passing all 10 tests and 5% higher approval in blind review",
+        "Lab task, not autonomous issue-to-production operation"
+      ]
+    },
+    {
+      "title": "Announcing the 2024 DORA report",
+      "publisher_or_author": "Google Cloud DORA",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report",
+      "publication_or_update_date": "2024-10-22",
+      "access_date": "2026-09-13",
+      "source_type": "industry research summary",
+      "supported_claims": [
+        "25% higher AI adoption associated with documentation/code/review gains",
+        "Also associated with 1.5% lower delivery throughput and 7.2% lower stability; observational associations",
+        "39% reported little or no trust in AI-generated code"
+      ]
+    },
+    {
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "METR / Becker, Rush, Barnes, Rein",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_or_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized controlled trial",
+      "supported_claims": [
+        "16 experienced maintainers, 246 issues in their own repositories",
+        "AI use made tasks take 19% longer in this setting; similar-quality PRs",
+        "Limited to early-2025 tools and 20-minute-to-4-hour tasks"
+      ]
+    },
+    {
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "publisher_or_author": "METR / Becker et al.",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "publication_or_update_date": "2026-02-24",
+      "access_date": "2026-09-13",
+      "source_type": "independent follow-up experiment report",
+      "supported_claims": [
+        "Later raw estimates: 18% speedup for returning subgroup and 4% for new recruits, both confidence intervals include no effect",
+        "30-50% reported withholding some tasks because they did not want the no-AI condition; selection and parallel-agent timing made signal unreliable"
+      ]
+    },
+    {
+      "title": "Measuring the Self-Reported Impact of Early-2026 AI on Technical Worker Productivity",
+      "publisher_or_author": "METR / Joel Becker",
+      "url": "https://metr.org/blog/2026-05-11-ai-usage-survey/",
+      "publication_or_update_date": "2026-05-11",
+      "access_date": "2026-09-13",
+      "source_type": "independent survey",
+      "supported_claims": [
+        "349 technical workers self-reported median 1.4-2x value gain and 3x speed gain",
+        "Authors warn early-2025 participants overestimated time effect by 40 percentage points"
+      ]
+    },
+    {
+      "title": "AI | 2025 Stack Overflow Developer Survey",
+      "publisher_or_author": "Stack Overflow",
+      "url": "https://survey.stackoverflow.co/2025/ai",
+      "publication_or_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "independent large developer survey",
+      "supported_claims": [
+        "84% use or plan AI; agents not mainstream; 52% do not use agents or only simpler AI and 38% have no plans",
+        "46% distrust AI accuracy versus 33% trust",
+        "66% cite almost-right output; 45% cite time-consuming debugging; 87% concerned about agent accuracy and 81% about security/privacy"
+      ]
+    },
+    {
+      "title": "Automerge configuration and troubleshooting",
+      "publisher_or_author": "Renovate maintainers / Mend",
+      "url": "https://docs.renovatebot.com/key-concepts/automerge/",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "Waits for required tests; recommends automerge only where human would merge anyway",
+        "No-test, branch protection, required review, CODEOWNERS and rebasing operational constraints",
+        "One branch/PR per target branch per run because consecutive merges are unreliable"
+      ]
+    },
+    {
+      "title": "Dependabot options reference",
+      "publisher_or_author": "GitHub Docs",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official product documentation",
+      "supported_claims": [
+        "Scheduled dependency update PRs, grouping, cooldown, ignore, registries and rebasing configuration",
+        "Shows configuration surface that teams must maintain; not outcome evidence"
+      ]
+    },
+    {
+      "title": "GitHub Copilot plans and pricing",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.com/features/copilot/plans",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing page",
+      "supported_claims": [
+        "As accessed, individual tiers list $10, $39 and $100 per user/month with included credits",
+        "Sticker price excludes review labor, Actions minutes beyond allowances, setup, security and remediation"
+      ]
+    },
+    {
+      "title": "Devin Annual Performance Review 2025",
+      "publisher_or_author": "Cognition",
+      "url": "https://cognition.com/blog/devin-annual-performance-review-2025",
+      "publication_or_update_date": "2025-11-14",
+      "access_date": "2026-09-13",
+      "source_type": "vendor telemetry and selected customer cases",
+      "supported_claims": [
+        "Vendor reports 67% of Devin PRs merged versus 34% prior year and best fit as clear, verifiable junior-engineer tasks",
+        "Selected examples report 14-20x faster migrations/remediation; denominators, matching, defects and review cost are unclear"
+      ]
+    },
+    {
+      "title": "How the GitHub billing team uses the coding agent in GitHub Copilot to continuously burn down technical debt",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.blog/ai-and-ml/github-copilot/how-the-github-billing-team-uses-the-coding-agent-in-github-copilot-to-continuously-burn-down-technical-debt/",
+      "publication_or_update_date": "2025-06-12; updated 2025-08-20",
+      "access_date": "2026-09-13",
+      "source_type": "first-party internal case study",
+      "supported_claims": [
+        "Precise issue and acceptance criteria to draft PR to human review/iteration workflow",
+        "Reported shift from weeks of intermittent work to minutes of issue writing plus hours of review; recommends avoiding 100+-file PRs"
+      ]
+    },
+    {
+      "title": "Money Forward Claude Code case study",
+      "publisher_or_author": "Anthropic / Money Forward",
+      "url": "https://claude.com/customers/money-forward",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-published customer case study",
+      "supported_claims": [
+        ">80% adoption, >90% code acceptance and seven self-reported hours saved per engineer/week",
+        "Internal Lumos agent reportedly fixes Kubernetes issues and opens PR within five minutes",
+        "Selected/self-reported figures, task counts and defect outcomes not published"
+      ]
+    },
+    {
+      "title": "Wiz Claude Code case study",
+      "publisher_or_author": "Anthropic / Wiz",
+      "url": "https://claude.com/customers/wiz",
+      "publication_or_update_date": "unknown/not stated on page",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-published customer case study",
+      "supported_claims": [
+        "50,000-line Python-to-Go migration in about 20 hours and claimed 2-3 specialist-month baseline",
+        "99% output parity still exposed 20-30 distinct issues on real customer data",
+        "Feature flags, differential production comparison and extended testing safeguarded rollout"
+      ]
+    },
+    {
+      "title": "Codex is now generally available",
+      "publisher_or_author": "OpenAI",
+      "url": "https://openai.com/index/codex-now-generally-available/",
+      "publication_or_update_date": "2025-10-06",
+      "access_date": "2026-09-13",
+      "source_type": "vendor product announcement and internal telemetry",
+      "supported_claims": [
+        "Nearly all OpenAI engineers reportedly used Codex and users merged 70% more PRs/week",
+        "Codex reportedly reviewed almost every internal PR; Cisco claimed up to 50% faster complex-PR review",
+        "Before/after correlation without defect, task-size or review-cost controls"
+      ]
+    },
+    {
+      "title": "An Empirical Study of Dependabot Security Pull Requests",
+      "publisher_or_author": "He et al.; IEEE Transactions on Software Engineering",
+      "url": "https://arxiv.org/abs/2206.07230",
+      "publication_or_update_date": "2023-05-25 (arXiv v3; IEEE TSE 2023)",
+      "access_date": "2026-09-13",
+      "source_type": "independent peer-reviewed empirical study",
+      "supported_claims": [
+        "1,823 projects and 502,752 Dependabot PRs; >70% merged and median merge lag four hours",
+        "Mean technical lag 48.99 to 25.38 days after 90 days; 35.7% reached zero",
+        "11.3% deprecated Dependabot; noise/config/package-manager/automerge shortcomings cited; most switchers chose Renovate"
+      ]
+    },
+    {
+      "title": "An empirical study of bots in software development: characteristics and challenges from a practitioner’s perspective",
+      "publisher_or_author": "Erlenhov, de Oliveira Neto, Leitner; PeerJ Computer Science",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9044236/",
+      "publication_or_update_date": "2022-03-03",
+      "access_date": "2026-09-13",
+      "source_type": "independent peer-reviewed empirical study",
+      "supported_claims": [
+        "42,158 issues/PRs across 93 projects and five dependency bots",
+        "Renovate had 76% observed merge share; 77% of projects experimented with more than one bot",
+        "Maintainers cited bot-behavior opacity and noise overload"
+      ]
+    },
+    {
+      "title": "Repairnator: a program repair bot for continuous integration",
+      "publisher_or_author": "Urli et al.; ICSE-SEIP",
+      "url": "https://arxiv.org/abs/1811.09852",
+      "publication_or_update_date": "2018-11-23 (preprint; ICSE-SEIP 2018)",
+      "access_date": "2026-09-13",
+      "source_type": "independent/open-source production-like repair-bot study",
+      "supported_claims": [
+        "11,523 CI failures: 30.82% locally reproduced; 15 patch candidates (0.13%); none proposed because all overfit",
+        "Compilation, environment mismatch and flaky/nonreproducible tests dominated funnel loss",
+        "Human patch analyst retained as correctness gate"
+      ]
+    },
+    {
+      "title": "SapFix: Automated End-to-End Repair at Scale",
+      "publisher_or_author": "Marginean et al.; Facebook / ICSE-SEIP",
+      "url": "https://discovery.ucl.ac.uk/10084761/1/SapFix-Automated-End-to-End-Repair-at-Scale-v2.pdf",
+      "publication_or_update_date": "2019",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed industrial production deployment paper",
+      "supported_claims": [
+        "Six Facebook Android apps; first three months: 57 crashes, 165 patches, 131 passed build/tests, 55 shown to developers",
+        "About half of proposed fixes judged correct; all 18 revert recommendations declined",
+        "Median detection-to-published-fix around one hour; high-volume experiment stopped to avoid spam"
+      ]
+    },
+    {
+      "title": "Getafix: Learning to Fix Bugs Automatically",
+      "publisher_or_author": "Bader et al.; Facebook / PACMPL OOPSLA",
+      "url": "https://arxiv.org/abs/1902.06111",
+      "publication_or_update_date": "2019-09-18",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed industrial production deployment paper",
+      "supported_claims": [
+        "About 250 production warnings with suggestions in three months; 106 (42%) accepted directly",
+        "58% required another disposition; integration latency and final developer action matter",
+        "Narrow learned bug patterns, not general autonomous maintenance"
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "Moderate",
+    "high": [
+      "Official workflow limits/security controls",
+      "Answer.AI's reported trial counts",
+      "METR study designs/results and stated caveats",
+      "Renovate automerge mechanics"
+    ],
+    "moderate": [
+      "Cognition internal PR volume and production-estimator dataset",
+      "Stack Overflow/DORA broad operational sentiment and associations"
+    ],
+    "low_to_moderate": [
+      "Rakuten/TELUS speed, accuracy, savings and benefit claims because methods, costs, denominators and independent audits are absent",
+      "Any generalization from assistant lab tasks or single-team trials to autonomous production work"
+    ],
+    "reason": "The source set deliberately triangulates product docs, first-party production use, vendor customer stories, practitioner failures, randomized trials and broad surveys. However, standardized audited production success/TCO data remain rare and fast model/product changes reduce temporal transfer."
+  },
+  "conflicts": [
+    {
+      "claims": "Selected enterprise/customer stories report 30-79% faster delivery and large savings, while Answer.AI saw only 3/20 successes and METR early-2025 found 19% slowdown.",
+      "likely_explanation": "Different product generations, task selection, repository familiarity, training/support, success definitions and publication/selection bias. Customer stories omit failed-task denominators; METR covers experienced maintainers and bounded real issues."
+    },
+    {
+      "claims": "GitHub lab experiments show 55% faster completion and quality gains, while DORA associates greater AI use with reduced throughput/stability.",
+      "likely_explanation": "A single-task individual coding measure is not system delivery performance. Faster code can increase batch size/review/deployment load; observational DORA results are also not causal."
+    },
+    {
+      "claims": "METR early-2025 found slowdown; raw late-2025/early-2026 follow-up suggests 4-18% speedup; 2026 survey reports 1.4-2x value and 3x speed.",
+      "likely_explanation": "Tools improved, but later experiment suffered strong opt-out/task-selection and concurrent-agent measurement bias; surveys overstate counterfactual time (40 percentage points in METR's prior comparison). Treat direction as plausible, magnitude unknown."
+    },
+    {
+      "claims": "High adoption coexists with low trust and non-mainstream agent use.",
+      "likely_explanation": "Developers use AI selectively as an assistant while retaining review; usage is not evidence of unattended autonomy or positive net ROI."
+    },
+    {
+      "claims": "Cognition reports 67% PR merge rate and OpenAI reports 70% more PRs/week, but neither establishes equivalent useful or reliable output.",
+      "likely_explanation": "Merge/PR volume is an activity proxy affected by task size, changed review thresholds and agent-generated work supply; latent defects and human review remain outside the metric."
+    },
+    {
+      "claims": "Dependabot shows >70% merge throughput, while Repairnator submitted 0 of 15 generated candidates and SapFix exposed only 55 of 165 generated patches.",
+      "likely_explanation": "Dependency version bumps have structured edits and strong ecosystem metadata; general crash/program repair faces environment reproduction and weak test oracles. Automation maturity is task-class specific."
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    {
+      "claim": "Rakuten's 99.9% accuracy and 79% cycle-time reduction",
+      "reason": "No public metric definition, sample, baseline controls, failure denominator, costs or independent audit on the cited page.",
+      "impact": "Do not use as a forecast; use only as a deployment existence proof."
+    },
+    {
+      "claim": "TELUS's 500,000+ hours, $90M benefit and 30% faster shipping attributable to Claude/coding agents",
+      "reason": "The case covers a multi-model enterprise AI platform and many solution types; attribution and calculation method are not disclosed.",
+      "impact": "Cannot calculate coding-agent ROI."
+    },
+    {
+      "claim": "Current general production task success rate",
+      "reason": "No comparable audited multi-customer denominator by task class/version; published evidence ranges from adverse trials to selected successes.",
+      "impact": "Requires a local canary/shadow evaluation before staffing or autonomy decisions."
+    },
+    {
+      "claim": "Net maintenance burden/TCO",
+      "reason": "Public cases rarely report setup, playbook/MCP upkeep, CI, review, security and escaped-defect costs.",
+      "impact": "Budget caps and full-cost telemetry are mandatory."
+    },
+    {
+      "claim": "Post-merge quality of vendor production sessions",
+      "reason": "Cognition explicitly notes merged-PR filtering misses subtle later bugs; customer stories do not publish revert/incident rates.",
+      "impact": "Track delayed defects, rollback and SLO impact for weeks after merge."
+    },
+    {
+      "claim": "2026 causal productivity effect",
+      "reason": "METR's later RCT was compromised by opt-out, task withholding and concurrent-agent time accounting; its survey is self-report.",
+      "impact": "Evidence suggests improving utility but does not establish magnitude."
+    },
+    {
+      "claim": "Cognition 67% merge rate and OpenAI 70% PR increase as productivity/quality measures",
+      "reason": "No task-size normalization, holdout, review-time, revert or escaped-defect denominator is published.",
+      "impact": "Track these only as funnel/activity metrics, never primary ROI."
+    }
+  ]
+}

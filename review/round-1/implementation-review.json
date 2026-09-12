@@ -1,0 +1,345 @@
+{
+  "reviewer": "round-1 implementation and contract reviewer (OCR delegation, independent adversarial pass)",
+  "scope": {
+    "review_type": "Decision-plan feasibility prototype review; code/config/SQL are treated as disposable prototypes, not as production-shipping implementation.",
+    "requirements_reviewed": [
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/review-protocol.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "all 23 JSON records under repository-agent-operating-system/results, lifecycle-extension/results, and domain-extension/results",
+      "docs/**",
+      ".agent-os/**",
+      "src/**",
+      "migrations/**",
+      "tests/**",
+      "tests-sql/**",
+      "deploy/**",
+      ".github/workflows/agent-os-validate.yml"
+    ],
+    "deterministic_review": {
+      "tool": "ocr delegate",
+      "mode": "workspace",
+      "total_files": 154,
+      "reviewable_files": 107,
+      "excluded_files": 47,
+      "implementation_reviewable_files": 62,
+      "reviewed_reviewable_files": 107,
+      "skipped_reviewable_files": 0,
+      "coverage_rate": 1.0,
+      "rule_groups_resolved": true
+    },
+    "executed_checks": [
+      {
+        "command": "uv sync --all-groups && uv run pytest",
+        "result": "pass: 22 tests"
+      },
+      {
+        "command": "uv run --with-requirements .agent-os/requirements.txt python .agent-os/bin/validate.py",
+        "result": "pass: 8 schemas checked"
+      },
+      {
+        "command": "python compile check through the project environment",
+        "result": "source imported and tests collected successfully under uv"
+      },
+      {
+        "command": "docker compose -f deploy/docker-compose.yml config -q",
+        "result": "pass"
+      },
+      {
+        "command": "tests-sql/001_integrity.sql, 002_leases.sql, 003_effects_and_roles.sql against fresh PostgreSQL 16 compose database",
+        "result": "pass when each script was fed to psql inside the container"
+      }
+    ]
+  },
+  "strengths": [
+    "The documents clearly label the architecture and operating model as proposed and do not claim a deployed production controller.",
+    "The authority split among protected Git, PostgreSQL runtime state, and GitHub remote resources is consistent at the design level.",
+    "The SQL prototype includes useful negative guardrails: immutable core evidence/event tables, one unreleased lease, fencing-token references, idempotent outbox keys, UNKNOWN effect state, and an unprivileged agent marker role.",
+    "The Python prototype rejects unknown model fields, stale digest approvals, agent approvals, self-approval in improvement promotion, expired approvals, and cross-repository reconciliation snapshots.",
+    "GitHub Actions use least privilege, exact-SHA action pins, and a merge_group trigger. The desired-config validator and all current unit and SQL tests pass in their intended environments.",
+    "Research uncertainty is stated explicitly; repeated vendor or derived sources are not presented here as independent corroboration."
+  ],
+  "findings": [
+    {
+      "id": "IMPL-001",
+      "severity": "high",
+      "title": "Protected artifact schemas and executable Python models are incompatible",
+      "requirement": "A decision-grade plan needs one versioned boundary contract. Protected Git artifacts, exported schemas, loaders, and CLI behavior must agree before any prototype can demonstrate feasibility.",
+      "evidence": {
+        "files": [
+          ".agent-os/config.yaml",
+          ".agent-os/schemas/config.schema.json",
+          ".agent-os/schemas/ticket.schema.json",
+          ".agent-os/schemas/approval.schema.json",
+          ".agent-os/schemas/context.schema.json",
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/factories/build.yaml",
+          "src/agent_os/models.py",
+          "src/agent_os/loaders.py",
+          "src/agent_os/cli.py",
+          "tests/test_loaders_cli.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `uv run agent-os config-validate --path .agent-os/config.yaml`; it exits 1 with 11 validation errors. Run `uv run agent-os factory-validate .agent-os/factories/build.yaml`; it exits 1 with 15 validation errors. Tests pass because they construct a different, private YAML shape.",
+      "impact": "The Git-reviewed contracts cannot drive the executable prototype, and passing tests provide no evidence that repository artifacts can be loaded or executed.",
+      "recommendation": "Choose one canonical schema/version. Generate or validate Pydantic models against it. Add golden fixtures for every checked-in config, ticket, approval, context, decision, and factory artifact. State in the plan that implementation cannot begin until this compatibility gate passes.",
+      "verification": "Both CLI commands succeed on checked-in artifacts; JSON Schema and Pydantic accept/reject the same golden and adversarial fixtures; CI runs these fixtures.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-002",
+      "severity": "high",
+      "title": "Lifecycle policy has two contradictory transition graphs",
+      "requirement": "Protected Git is the desired-policy authority, and all declared states must have consistent legal entry, exit, cancellation, stale/retry, cleanup, and terminal behavior.",
+      "evidence": {
+        "files": [
+          ".agent-os/lifecycle.yaml",
+          "src/agent_os/lifecycle.py",
+          "src/agent_os/models.py",
+          ".agent-os/bin/validate.py",
+          "tests/test_core.py",
+          "docs/end-to-end.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "`.agent-os/lifecycle.yaml` allows `MERGED -> OBSERVING`, `TRIAGED -> NEEDS_CLARIFICATION`, and `ROLLED_BACK -> DONE`. Each corresponding `uv run agent-os transition ...` command exits 1. Python also permits BLOCKED resumes absent from YAML. The validator never compares the executable table to protected policy.",
+      "impact": "A controller built from the prototype can reject required recovery/no-deploy paths or admit paths not reviewed in Git. Policy changes in Git would not affect runtime behavior.",
+      "recommendation": "Compile one transition table from the protected lifecycle artifact or generate both representations from one source. Model blocked-state resume provenance explicitly rather than allowing phase jumps without a saved state and revalidation.",
+      "verification": "Exhaustively enumerate all state pairs and assert loader, schema, controller transition function, documentation, cancellation, retry, rollback, and terminal behavior agree.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-003",
+      "severity": "high",
+      "title": "Definition of Ready can approve arbitrary content and perpetual non-SHA work",
+      "requirement": "READY must bind an authenticated item in READY_REVIEW to exact canonical spec/plan/oracle/base/policy/capability inputs, an authorized unexpired human approval, and resolved dependency facts.",
+      "evidence": {
+        "files": [
+          "src/agent_os/readiness.py",
+          "src/agent_os/approval.py",
+          "src/agent_os/models.py",
+          "src/agent_os/digest.py",
+          "tests/test_core.py",
+          "docs/end-to-end.md",
+          "docs/database.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Construct an INBOX Ticket with `base_revision='main'`, an ApprovalEnvelope with digest `00...00`, claimed human identity and `expires_at=None`, then call `validate_definition_of_ready(... expected_digest='00...00')`. It returns `{'ready': True, 'reasons': []}`. The function accepts the caller's digest without receiving/recomputing spec, plan, or policy.",
+      "impact": "A stale or fabricated digest, branch-like base, wrong lifecycle, unauthenticated claimed human, or non-expiring approval can satisfy the public readiness API. Recorded dependency IDs cannot coexist with readiness because every nonempty dependency list is treated as unresolved.",
+      "recommendation": "Redesign readiness as a trusted command over canonical stored revisions and observed dependency states. Recompute the digest internally; require exact commit format, READY_REVIEW, expiry, approval ID/purpose/role/authentication/invalidation, and dependency status evidence.",
+      "verification": "Add negative tests for caller-supplied digest substitution, INBOX, branch names, missing expiry, unverified roles, invalidated approval, removed role, and resolved versus unresolved DAG dependencies.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-004",
+      "severity": "high",
+      "title": "Run Context Bundles are optional-unsigned and contain no lease or fencing authority",
+      "requirement": "The worker must receive and verify a signed, bounded, controller-issued bundle tied to exact base/spec/policy hashes, worker/attempt identity, current lease/fence/expiry, budgets, and allowed actions before tools run.",
+      "evidence": {
+        "files": [
+          "src/agent_os/context.py",
+          "src/agent_os/models.py",
+          "src/agent_os/cli.py",
+          ".agent-os/schemas/context.schema.json",
+          "tests/test_core.py",
+          "docs/architecture.md",
+          "docs/end-to-end.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Call `create_run_context(...)` or `agent-os context-create` without `signing_key`. It emits `signature_scheme='none'`. Inspect RunContextBundle: it has no attempt_id, lease_id, fencing token, lease expiry, holder/worker identity, cancellation epoch, budgets, or verification routine. A current unit test explicitly expects unsigned output.",
+      "impact": "The artifact cannot establish that a worker is current, scoped, or controller-authorized. A stale worker receives indistinguishable context and there is no supported consumer-side signature/fence verification contract.",
+      "recommendation": "Make signed context mandatory outside an explicitly named inert demo type. Add lease/attempt/holder/fence/expiry/cancellation/budget/action fields, key ID and asymmetric or managed signing scheme, plus a fail-closed verify API. Keep authorization enforced again at every effect boundary.",
+      "verification": "Golden sign/verify tests pass; missing/unknown key, tampering, expired lease, stale fence, wrong worker, changed digest, and unsigned production context all fail before runner/tool invocation.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-005",
+      "severity": "high",
+      "title": "Authorization hashing claims RFC 8785 but uses ordinary json.dumps",
+      "requirement": "Exact cross-component approval binding requires a specified canonicalization implemented consistently; `.agent-os/config.yaml` declares RFC 8785 JSON.",
+      "evidence": {
+        "files": [
+          ".agent-os/config.yaml",
+          "src/agent_os/digest.py",
+          "tests/test_core.py",
+          "docs/architecture.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Run `uv run python -c \"from agent_os.digest import canonical_bytes; print(canonical_bytes({'n':1.0,'z':-0.0}))\"`; output is `b'{\"n\":1.0,\"z\":-0.0}'`. RFC 8785 serializes these numbers as `1` and `0`; Unicode property ordering also differs from Python's default string ordering.",
+      "impact": "Approver, controller, verifier, and non-Python consumers can derive different authorization digests for the same logical input, producing denial or inconsistent acceptance at a security boundary.",
+      "recommendation": "Use a reviewed RFC 8785 implementation or change the declared canonicalization to an exact, fully specified format. Reject unsupported numeric/value types and version the canonicalization.",
+      "verification": "Run official RFC 8785 vectors plus negative-zero, integral float, exponent, Unicode/non-BMP key-order, escaping, and cross-language digest fixtures in CI.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-006",
+      "severity": "high",
+      "title": "SQL foreign keys permit cross-work-item and cross-effect provenance substitution",
+      "requirement": "Evidence, approvals, deployments, outcomes, attempts, and receipts must bind to the same aggregate/effect and exact digest; unrelated records must not be attachable.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql",
+          "tests-sql/001_integrity.sql",
+          "tests-sql/003_effects_and_roles.sql",
+          "docs/database.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect the FKs: `evidence_bundles.attempt_id -> attempts(id)`, `deployments.approval_id -> approvals(id)`, `outcomes.deployment_id -> deployments(id)`, and `effect_receipts.attempt_id -> effect_attempts(id)` do not include their owning work_item/effect. Insert two work items/effects in one transaction and attach item A's evidence/deployment/receipt to item B's referenced row; current constraints accept it. Existing SQL tests contain no cross-owner negative case.",
+      "impact": "A trusted-runtime bug or compromised service could construct a false provenance chain and make unrelated approval, execution, or receipt evidence appear to authorize another item/effect.",
+      "recommendation": "Add composite unique keys and foreign keys for ownership, effect identity, approval purpose and bound subject digest. Where SQL cannot express current-policy checks, expose guarded procedures and remove direct table write paths.",
+      "verification": "Negative SQL tests for every cross-work-item, cross-attempt, cross-effect, wrong-purpose, and wrong-digest association fail with constraint errors; valid same-owner chains pass.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-007",
+      "severity": "high",
+      "title": "Durable ledger omits mandatory aggregate and exact-candidate identities",
+      "requirement": "The canonical ledger needs monotonic aggregate versions/CAS and schema/idempotency/policy bindings. Verification evidence must bind exact candidate and merge-group SHAs. Webhook dedupe is installation-scoped.",
+      "evidence": {
+        "files": [
+          "migrations/0002_schema.sql",
+          ".agent-os/config.yaml",
+          "docs/architecture.md",
+          "docs/end-to-end.md",
+          "docs/database.md",
+          "tests-sql/001_integrity.sql"
+        ],
+        "urls": []
+      },
+      "reproduction": "Query the schema or inspect DDL: `event_ledger` has no aggregate_version, event schema_version, idempotency_key, policy_commit, before/after state, or bound spec/plan/base hashes and no `(work_item_id, aggregate_version)` uniqueness. `evidence_bundles` has no candidate/head/merge-group SHA. `webhook_inbox` keys only `(provider, delivery_id)` although config says `installation_id_and_delivery_id` and stores no installation_id.",
+      "impact": "The proposed controller cannot perform compare-and-append, deterministically order per-item transitions, prove evidence applies to the candidate, or implement its declared multi-install delivery identity from these records.",
+      "recommendation": "Correct the plan's minimum schema before implementation: add versioned aggregate/event envelopes with CAS uniqueness, exact candidate/merge-group identities on evidence, and the declared installation/repository delivery scope. Define migration and replay compatibility.",
+      "verification": "Schema introspection tests assert required columns/constraints; duplicate aggregate versions fail; stale expected-version commands fail; evidence for a different SHA and delivery collisions across/same installations follow the specified behavior.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-008",
+      "severity": "high",
+      "title": "Trusted runtime role can delete authorization and durable operational history",
+      "requirement": "Approvals and other authorization/effect records are append-oriented audit evidence. Normal runtime identities must not erase them.",
+      "evidence": {
+        "files": [
+          "migrations/0003_security.sql",
+          "migrations/0002_schema.sql",
+          "tests-sql/003_effects_and_roles.sql",
+          "docs/database.md",
+          "docs/security.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "`0003_security.sql` grants `SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA polar TO polar_runtime`. Immutability triggers cover spec_revisions, event_ledger, evidence_bundles, receipts, observations, outcomes, and audit_log, but not approvals, readiness_decisions, effect_attempts, outbox_effects, deployments, or eval_candidates. `has_table_privilege('polar_runtime','polar.approvals','DELETE')` is therefore true and deletion is not rejected by a trigger.",
+      "impact": "A compromised runtime or application bug can erase approvals, readiness decisions, effect attempts, deployment records, or improvement state, defeating investigation and exact authorization history.",
+      "recommendation": "Grant per-table/per-operation privileges. Represent approval invalidation and effect history with append-only decisions/events or narrowly controlled procedures. Deny DELETE to service roles except explicit retention/tombstone procedures with audit.",
+      "verification": "Role-matrix SQL tests prove DELETE/unauthorized UPDATE fail on every durable record and approved state-change procedures append an attributable audit record.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-009",
+      "severity": "high",
+      "title": "Factory validation checks shape but not executable DAG or authority semantics",
+      "requirement": "Factory composition must reject cycles, unknown phases/roles/artifacts, unresolved inputs, conflicting capabilities, unsafe parallel write sets, missing terminal/cancellation/cleanup behavior, and authority expansion.",
+      "evidence": {
+        "files": [
+          ".agent-os/schemas/factory.schema.json",
+          ".agent-os/factories/composition.yaml",
+          ".agent-os/factories/registry.yaml",
+          ".agent-os/bin/validate.py",
+          ".agent-os/factories/build.yaml",
+          ".agent-os/factories/deep-research.yaml",
+          ".agent-os/factories/ideation.yaml",
+          ".agent-os/factories/maintenance.yaml",
+          "docs/adr/0001-repository-agent-os.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Validate an object with `phases:['A']` and transition `{from:'MISSING',to:'MISSING',guard:'true'}` against factory.schema.json; it produces zero schema errors. The repository validator validates only JSON shape and explicitly skips composition.yaml and registry.yaml semantic validation. Guards are unchecked prose strings.",
+      "impact": "A green validator can bless a cyclic, unreachable, uncleanable, authority-expanding, or non-executable factory. Thus the prototypes do not yet support the plan's core factory-as-code feasibility claim.",
+      "recommendation": "Add a deterministic factory compiler with typed guards, symbol resolution, graph reachability/cycle rules, terminal/cancel/retry/cleanup checks, capability lattice/intersection, budget delegation, artifact types, and parallel resource-conflict analysis. Schema composition and registry too.",
+      "verification": "Adversarial fixtures for unknown symbols, cycles, unreachable nodes, absent cancellation/cleanup, budget/capability expansion, overlapping writes, invalid joins, and registry digest/path mismatch all fail; every checked-in factory compiles to a pinned digest.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-010",
+      "severity": "medium",
+      "title": "Reconciliation classifies all same-name differences as directly updateable",
+      "requirement": "Semantic/destructive/permission/ambiguous drift must freeze automatic apply; unknown remote objects are preserved; mutations require reviewed plans and read-back.",
+      "evidence": {
+        "files": [
+          "src/agent_os/reconciliation.py",
+          "src/agent_os/models.py",
+          "tests/test_reconciliation.py",
+          ".agent-os/project-fields.yaml",
+          "docs/operations.md",
+          "docs/architecture.md"
+        ],
+        "urls": []
+      },
+      "reproduction": "Create desired and observed fields with the same name but different `type` values and call `plan_reconciliation`; it returns an `update` operation. There is no drift class, stable logical identity, before fingerprint/precondition, risk class, ambiguity result, migration gate, pagination evidence, or read-back requirement in ReconcileOperation.",
+      "impact": "If a later adapter applies the plan through `apply_reviewed_plan`, destructive type or semantic changes are indistinguishable from safe cosmetic updates and can lose/overwrite remote state.",
+      "recommendation": "Make reconciliation output a classified, preconditioned dry-run plan. Freeze type/rename/removal/security/ambiguous changes for reviewed migration. Separate add-item and update-field effects and require read-after-write receipts.",
+      "verification": "Tests show cosmetic/additive changes can be planned, while type changes, renames, removals, duplicate mappings, stale fingerprints, permission drift, and ambiguous reads yield CONFLICT/UNKNOWN and no automatic mutation.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-011",
+      "severity": "medium",
+      "title": "CI's only job omits Python and PostgreSQL contract suites",
+      "requirement": "Exit criteria require Python, configuration, SQL, and end-to-end tests. Critical policy artifacts and migrations need merge-gating coverage, including merge_group.",
+      "evidence": {
+        "files": [
+          ".github/workflows/agent-os-validate.yml",
+          "pyproject.toml",
+          "uv.lock",
+          "tests/test_core.py",
+          "tests/test_improvement.py",
+          "tests/test_loaders_cli.py",
+          "tests/test_reconciliation.py",
+          "tests-sql/run.sh"
+        ],
+        "urls": []
+      },
+      "reproduction": "Inspect the workflow: it installs only `.agent-os/requirements.txt` and runs only `.agent-os/bin/validate.py`. It never installs the package, runs pytest, initializes migrations, runs tests-sql, checks schema/model compatibility, or executes an end-to-end fixture. Local `uv run pytest` passes, but a regression in src or migrations would not affect the CI job.",
+      "impact": "The required branch check can stay green while executable contracts or database invariants are broken, weakening exact-head and merge-queue evidence.",
+      "recommendation": "For the research-only PR, state this as a pre-implementation gate. Before treating the prototype as evidence or reuse, add locked Python unit/contract jobs, PostgreSQL migration/negative tests, schema compatibility, and one inert end-to-end plan fixture on pull_request and merge_group.",
+      "verification": "Introduce a controlled failing Python test and SQL invariant on a test branch and confirm the required CI check fails; restore them and confirm all jobs pass on pull_request and merge_group.",
+      "confidence": "high"
+    },
+    {
+      "id": "IMPL-012",
+      "severity": "medium",
+      "title": "Risk taxonomy silently collapses the research's R4 human-led tier",
+      "requirement": "The research decision defines R0 as read-only and R4 for ambiguous, irreversible, missing-oracle/rollback, or self-governance work. Effective risk cannot be lowered by agents.",
+      "evidence": {
+        "files": [
+          "research/repository-agent-operating-system/report.md",
+          ".agent-os/risk-policy.yaml",
+          ".agent-os/project-fields.yaml",
+          ".agent-os/schemas/ticket.schema.json",
+          ".agent-os/schemas/approval.schema.json",
+          "src/agent_os/models.py"
+        ],
+        "urls": []
+      },
+      "reproduction": "Compare the report's R0-R4 table with policy/schema/models. The artifacts expose only R0-R3; unknown/ambiguous maps to R3; R0 examples include formatting/generated refresh mutations; Python instead uses `low|medium|high|critical`. No compatibility or deliberate-collapse rule is recorded.",
+      "impact": "Different components can assign different floors and gates to the same work. Ambiguous/self-governance work may lose an explicit human-led representation, while R0 no longer consistently means no mutation.",
+      "recommendation": "Choose and document one taxonomy. Prefer preserving R0-R4 from the research or formally prove/map a reduced taxonomy without weakening gates. Generate enums across config, schemas, models, Project projection, and tests.",
+      "verification": "A table-driven test maps every detector/example and ensures all layers compute the same effective tier; unknown, irreversible, missing rollback/oracle, and governance changes resolve to the explicit human-led/proposal-only tier.",
+      "confidence": "high"
+    }
+  ],
+  "residual_uncertainty": {
+    "coverage_summary": "Every OCR-reviewable entry was accounted for. Every handwritten Python, SQL migration, SQL test, shell/deploy file, workflow, JSON schema, factory/config YAML, and Python test was inspected. OCR-excluded Markdown requirements and operational docs were also inspected. Generated __pycache__ bytecode was intentionally not reviewed as source.",
+    "prototype_boundary": "These findings test whether the prototypes support or contradict the decision-grade plan. They do not demand that the final research-only PR ship a controller.",
+    "environment_limits": [
+      "Host-to-compose localhost reached an unrelated PostgreSQL service in this review environment, so SQL tests were executed through docker compose exec against the fresh repository container instead of tests-sql/run.sh over the published host port.",
+      "No live GitHub App, organization Project v2, webhook delivery, merge queue, sandbox, object store, or production identity was available; adapter and operational claims remain untested."
+    ],
+    "evidence_independence": "The research report and extension records often cite the same primary sources. Finding confidence is based on executable repository behavior and local contracts, not on counting repeated citations as independent evidence.",
+    "remaining_validation": "After plan corrections, add schema compatibility fixtures, semantic factory/lifecycle tests, negative cross-aggregate SQL tests, RFC 8785 vectors, and CI jobs that run Python plus PostgreSQL suites. A later shipping implementation still needs live-provider, fault-injection, identity, restore, and sandbox testing."
+  }
+}

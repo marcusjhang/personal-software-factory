@@ -1,0 +1,58 @@
+topic: Factory-as-code lifecycle from ideation through build, maintenance, deep research
+  and governed self-improvement
+objective: Extend the repository agent OS into a reusable Warp-Factories-like system
+  declared in code, with durable conversational ideation, complete build and maintenance
+  lifecycles, reusable deep-research and orchestration factories, deterministic human-need
+  decisions, and the maximum evidence-supported self-improvement loop with exhaustive
+  state/transition validation.
+as_of: '2026-09-13'
+time_range: 2023-present plus foundational workflow/state-machine/evaluation/safety
+  work
+items:
+- name: Warp Factories and factory-as-code model
+  category: reference-system
+  description: Trace current official Warp factory definitions, roles, workflows,
+    scorers, benchmarks, triggers, state, human review and self-improvement claims;
+    distinguish documented capability from evidence.
+- name: Conversational ideation and discovery lifecycle
+  category: ideation
+  description: Design durable user-agent back-and-forth from raw idea through research,
+    alternatives, product decisions, specifications, prototypes, deferral/cancellation
+    and READY review.
+- name: Build lifecycle and phase orchestration
+  category: building
+  description: Exhaustively model decomposition, dependencies, leases, implementation,
+    checkpoints, verification, review, cleanup, merge, deploy and exception paths.
+- name: Maintenance and operations lifecycle
+  category: maintenance
+  description: Model intake from users/logs/CI/security/dependencies, triage, dedupe,
+    diagnosis, planned remediation, runbooks, incidents, rollback, postmortem and
+    recurrence prevention.
+- name: Deep-research factory as a reusable workflow
+  category: factory
+  description: Define a factory-as-code workflow for outlining, adding items/fields,
+    parallel primary-source research, validation, conflict audit, report generation,
+    user decisions, resume and evidence refresh.
+- name: General factory DSL and orchestrator runtime
+  category: factory
+  description: Define versioned declarative factory schemas for roles, phases, transitions,
+    artifacts, tools, budgets, parallel fanout/join, checkpoints, gates, escalation,
+    retries, cleanup and composition.
+- name: Human-need decision engine and interaction contract
+  category: governance
+  description: Define deterministic plus evidence-based policies for when agents continue,
+    ask clarifying questions, request approval, escalate, pause or stop across ideation/build/maintenance.
+- name: Full self-improvement loop and exhaustive state testing
+  category: improvement
+  description: Define maximal safe automated improvement, protected invariants, evaluator
+    governance, state-machine model testing, fault/adversarial tests, promotion/rollback
+    and what cannot be made autonomous.
+execution:
+  batch_size: 8
+  items_per_agent: 1
+  output_dir: ./results
+  approval_between_batches: false
+source_policy:
+  prefer_primary: true
+  require_urls: true
+  record_access_date: true

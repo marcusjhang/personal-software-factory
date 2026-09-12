@@ -1,0 +1,115 @@
+{
+  "reviewer": "round-9 independent remediation-cleanup closure auditor",
+  "scope": {
+    "mode": "FINAL PLAN-ONLY closure audit after round-8 combined correction",
+    "specialty": "full RemediationObligation creation, replay, later signals, revocation, re-authorization, child/effect/cleanup closure, resource blocking, retained cleanup risk, immutable parents, and A11 reclaim",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-8-resolution.md",
+      "review/round-8-closure/evidence-status.json",
+      "review/round-8-closure/formal-state.json",
+      "review/round-8-closure/improvement-product.json",
+      "review/round-8-closure/cleanup-reclaim.json",
+      "review/round-8-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_policy": "Only critical/high findings are reported. A finding requires a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim.",
+    "accepted_future_gates": "Implementation, exhaustive/full reachable-product model proof, fresh immutable evidence retrieval, external-source truth, human semantic evidence review, reviewed-edge regeneration, and production-safety proof are explicitly accepted as unperformed future gates. They are not closure defects in this plan-only audit."
+  },
+  "contract_reproduction": [
+    {
+      "contract": "A11-before-ordinary-successor and unconditional one-unfinished-attempt exclusion",
+      "exact_text": [
+        "PLAN.md §13: ‘finish every required predecessor CleanupItem from previously committed receipts and then commit A11 `STOPPED -> CANCELLED`; (6) only in a later admission transaction create the successor attempt/lease/fence/epoch/outbox.’",
+        "PLAN.md §13: ‘No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits.’",
+        "PLAN.md §13: ‘This at-most-one-unfinished invariant is unconditional; retained cleanup or an isolated old process creates no exception.’",
+        "docs/state-transition-manifests.md A01: ‘ordinary reclaim predecessor must have committed A11’.",
+        "docs/state-transition-manifests.md A11: ‘all effects settled+every required cleanup item complete from previously committed receipts+no live authority/resource ownership’; ‘consumes receipts; creates no successor’; ‘cancelled/finished; ordinary successor admission may occur only in a later transaction’."
+      ],
+      "audit_result": "pass; ordinary reclaim orders A10, predecessor cleanup receipts, A11, and only then a separate A01 admission. No retained-risk or isolation exception permits overlapping unfinished attempts."
+    },
+    {
+      "contract": "Retained-risk cleanup eligibility and immutable historical parent/item",
+      "exact_text": [
+        "PLAN.md §15: ‘a narrowly eligible escalated disposition can satisfy only `FAILED|CANCELLED`, never hide credentials, live authority, shared mutable resources, public exposure, or unknown classification, and never reopens terminal Work or its terminal CleanupItem.’",
+        "docs/state-transition-manifests.md §13: ‘It is terminal-equivalent only for `FAILED` or `CANCELLED` work when policy explicitly lists that cleanup class as retainable.’",
+        "docs/state-transition-manifests.md §13: ‘It is never terminal-equivalent for `DONE`, secrets/credentials, live lease/grant, shared mutable workspace, public exposure, or an unclassified item.’",
+        "PLAN.md §13: ‘Terminal Work is immutable. When retained risk resurfaces, the parent Work and terminal CleanupItem never reopen.’"
+      ],
+      "audit_result": "pass; eligibility is narrow, unsafe resource classes cannot be waived, DONE requires actual cleanup, and C11 leaves the historical parent and CleanupItem unchanged."
+    },
+    {
+      "contract": "Deterministic obligation creation, generations, and exact replay",
+      "exact_text": [
+        "docs/state-transition-manifests.md §13: ‘Its exact IDs are `obligation_id = H(\"remediation-obligation-v2\", tenant_id, ScopeRef, parent_work_id, cleanup_item_id, disposition_digest, generation)`, `link_id = H(\"remediation-link-v2\", obligation_id)`, and `child_id = H(\"remediation-child-v2\", obligation_id)`.’",
+        "docs/state-transition-manifests.md §13: ‘Event-ID lookup precedes current-status routing: same-event replay after any state change returns the original byte-identical receipt and performs no new transition; conflicting bytes reject.’",
+        "docs/state-transition-manifests.md §13: ‘First materialization is one atomic absent-or-same CAS over the obligation, link, child, event, and receipt; non-revoking creation uses `OPEN` plus child-at-`INBOX`, while revocation creation uses `REVOKED` plus a fenced/non-admitted child record.’",
+        "docs/state-transition-manifests.md RO02/RO02-R: after a CLOSED generation, the next generation is exact prior+1 and the prior generation remains immutable."
+      ],
+      "audit_result": "pass; first creation, post-close generation creation, same-event replay after state change, distinct-event append, and conflicting/out-of-order rejection are defined without reopening history."
+    },
+    {
+      "contract": "Later signals and transactional revocation",
+      "exact_text": [
+        "PLAN.md §13: ‘C11 partitions non-revoking resurface/review reminders from revocation. Non-revoking signals use status-preserving RO03–RO06.’",
+        "PLAN.md §13: ‘Revocation at an absent or post-closure generation atomically creates the exact next generation in `REVOKED` with no active authority; revocation of `OPEN`, `IN_PROGRESS`, or `VERIFYING` atomically appends the event, moves to `REVOKED`, fences grants, quiesces the child, and settles or reconciles effects through RO11–RO13.’",
+        "docs/state-transition-manifests.md §13: ‘A later distinct signal in `REVOKED` uses RO06.’",
+        "review/round-8-resolution.md R8-C07: ‘Event lookup precedes status routing, so same-event replay returns its original receipt after the transition; a later distinct REVOKED signal uses RO06.’"
+      ],
+      "audit_result": "pass; the round-8 correction removes the former live-generation status-preserving revocation defect. Every revocation class now has an exact atomic creation or transition route."
+    },
+    {
+      "contract": "Sole re-authorization path and child/effect containment",
+      "exact_text": [
+        "docs/state-transition-manifests.md RO14: `REVOKED -> IN_PROGRESS` requires ‘new independent purpose-bound authorization, child quiescent, old effects settled, fresh attempt budget; no work/admission/effect before this row commits’.",
+        "PLAN.md §13: ‘RO14 is the sole reauthorization row and no work may occur before it commits.’",
+        "docs/state-transition-manifests.md RO12: revocation requires the ‘child quiescence receipt and terminal Effect dispositions’ to commit atomically, with ‘no hidden activity behind BLOCKED’."
+      ],
+      "audit_result": "pass; revoked work cannot restart by signal replay, child reset, stale authority, or an alternate row. Re-entry preserves the generation/history and requires fresh joint authority and settled prior activity."
+    },
+    {
+      "contract": "Verification, closure, and resource unblock",
+      "exact_text": [
+        "docs/state-transition-manifests.md RO08: `IN_PROGRESS -> VERIFYING` requires ‘child terminal-clean; every child effect settled; every CleanupItem terminal-clean; claimed resource release/removal receipts already committed’.",
+        "docs/state-transition-manifests.md RO09: `VERIFYING -> CLOSED` requires the protected closure oracle, a signed `RemediationClosureReceipt` binding the generation and receipt set, and ‘no authority/resource ownership remains’.",
+        "docs/state-transition-manifests.md §13.1: ‘Only RO09 is terminal.’",
+        "docs/state-transition-manifests.md §13.1: ‘Admission may remove a bound resource-key block only in the RO09 transaction and only when `status=CLOSED` and the exact `RemediationClosureReceipt` verifies. No human waiver, CleanupEscalationDisposition, child terminal, or accepted risk alone unblocks it.’",
+        "PLAN.md §15: ‘every bound resource remains blocked until the obligation is `CLOSED` with its verified closure receipt.’"
+      ],
+      "audit_result": "pass; child completion alone cannot close or unblock. Closure consumes already committed child/effect/cleanup/resource receipts, uses an independent verifier, and atomically controls the block removal."
+    },
+    {
+      "contract": "Schema-3/currentness boundary",
+      "exact_text": [
+        "README.md: ‘Round 8 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests. The graph dynamically covers all 28 current numbered headings.’",
+        "research/repository-agent-operating-system/material-claims.json generated_against: PLAN SHA-256 `9f3ecb1f4dc2540872cbf66e8a8ab382574e681fb153180533eeef64acab8be5`; normative manifest SHA-256 `8fb44b75c774f6e4da9c1bbb1407617158538e685811ea43d5ea8c2c3ff6b6b2`.",
+        "material-claims.json internal_validation counts: 37 corpus result files, 20 material claims, 25 source observations, 36 edges, 23 candidate_support, 5 candidate_refute, 8 context_only, 0 supports, 0 refutes, and 28 normative manifest headings reviewed.",
+        "material-claims.json semantic_gate: ‘This is an editorial candidate association graph. Fresh immutable retrieval in one ResearchRun and recorded human semantic review of each candidate edge are required before any edge may be promoted to supports or refutes.’"
+      ],
+      "audit_result": "pass; independently recomputed current PLAN and manifest digests match the schema-3 binding. The currentness statements are consistent and do not promote candidate associations into evidence claims."
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "total": 0
+  },
+  "residual_uncertainty": [
+    "The audit establishes plan-contract closure only. It does not establish that an implementation enforces these transitions or atomicity rules.",
+    "The generated/full reachable-product checks and model proof remain future gates.",
+    "Fresh immutable evidence retrieval, human semantic edge review, reviewed-edge regeneration, and production-safety validation remain future gates."
+  ],
+  "closure_criteria_pass": true
+}

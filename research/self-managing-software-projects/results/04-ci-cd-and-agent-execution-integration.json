@@ -1,0 +1,722 @@
+{
+  "scope": [
+    "Workflow integration only: event intake, agent execution in hosted/local CI and ephemeral sandboxes, patch/PR handoff, CI verification, approvals, artifact build, deployment, audit and rollback. It covers GitHub Actions, GitLab CI/CD, hosted Codex/Copilot, Claude actions, and self-hosted OpenHands-style runtimes; it does not compare model quality except where it constrains workflow safety [S1,S7-S20].",
+    "“Agent” means an LLM-controlled process allowed to inspect a repository and invoke tools. “Autonomous deployment” is treated separately from autonomous patch generation: a bot-produced commit may enter ordinary CI, but production promotion remains a policy decision [S5,S17-S18,S29-S30]."
+  ],
+  "current_state": [
+    "Verified capability: issue/comment/schedule/CI-failure events can launch an agent in a GitHub Actions job, GitLab CI job, or vendor-created per-task container; the agent can install declared dependencies, edit one workspace/branch, run tests, return structured output, commit, and open a PR/MR [S1-S2,S7-S10,S12-S13,S16].",
+    "Verified control surface: Actions/GitLab provide scoped job tokens, protected environments, required reviewers, OIDC cloud federation, logs, and attestations. Vendor agents add network allowlists and sandbox modes, but those controls must be configured and do not turn model output into trusted code [S3-S6,S11-S14,S17-S19,S30].",
+    "Operational conclusion: narrow, reversible issue-to-PR and CI-triage loops are production-usable. Unattended merge is conditional on deterministic gates and low blast radius. General “failure to production fix” without human approval is not supported by the security or reliability evidence [S23-S28]."
+  ],
+  "representative_systems": [
+    {
+      "system": "GitHub Copilot cloud agent",
+      "status": "paid-plan hosted agent; GitHub Actions-powered",
+      "mechanics": "issue/Chat assignment -> background session -> branch/one optional PR; custom setup, hooks, skills, MCP; 59-minute maximum and one repo/branch/PR per task",
+      "evidence": "[S1-S3]"
+    },
+    {
+      "system": "Claude Code Action / GitLab CI",
+      "status": "maintained vendor integrations",
+      "mechanics": "@claude, PR/MR, manual, schedule or other Git event -> isolated runner job -> commits/comments/MR; OIDC or secret auth",
+      "evidence": "[S7-S8]"
+    },
+    {
+      "system": "OpenAI Codex cloud / codex-action / codex exec",
+      "status": "hosted GitHub and GitLab integration plus scriptable CI action",
+      "mechanics": "per-task cloud container or runner; setup/cache; read-only/workspace-write/danger profiles; JSONL/output-file; review diff/PR",
+      "evidence": "[S9-S14]"
+    },
+    {
+      "system": "GitLab Duo Agent Platform Software Development Flow",
+      "status": "documented GA in GitLab 18.8; other catalog/governance features have distinct tier/beta status",
+      "mechanics": "GitLab-native session/flow operates through user-authorized APIs, issue/MR context and audit events",
+      "evidence": "[S15-S16]"
+    },
+    {
+      "system": "OpenHands Docker sandbox / SWE-agent",
+      "status": "open-source building blocks, operator-managed",
+      "mechanics": "agent runs commands in a container/remote runtime; custom orchestration must create branch/PR, tokens, cleanup and gates",
+      "evidence": "[S20,S22]"
+    }
+  ],
+  "primary_evidence": [
+    "GitHub explicitly describes a GitHub Actions-powered autonomous environment and documents branch/PR limits, a hard 59-minute session cap, Actions-minute/AI-credit consumption, repository instructions, MCP, hooks and skills [S1]. A reserved copilot-setup-steps job runs before the agent and should have only minimal declared permissions [S2].",
+    "Anthropic documents event-driven GitHub/GitLab pipelines, isolated jobs, workspace-scoped writes and review through PR/MR; it also documents OIDC cloud authentication, fork-secret withholding and the fact that commits made with default GITHUB_TOKEN do not trigger more workflows [S7-S8].",
+    "OpenAI documents per-task containers, setup and maintenance scripts, cache invalidation, default-off internet during the agent phase, action sandbox choices and a noninteractive two-stage pattern that emits a patch from read-only context before a separate write-capable job opens a PR [S9-S14].",
+    "GitLab documents that Software Development Flow can perform writes under the user’s permissions and warns not to provide added credentials/secrets; protected environments and deployment approvals retain a separate promotion gate [S15-S18].",
+    "CI platform security docs say runner jobs execute user-controlled code. GitLab recommends privileged containers only on isolated ephemeral VMs, while GitHub warns against privileged pull_request_target/workflow_run checkouts of untrusted changes [S4,S19,S28].",
+    "Copilot-created Actions runs are treated like outside-contributor code and require “Approve and run workflows” by default because workflows may access tokens/secrets; administrators can opt out. This is a concrete human gate, not merely guidance [S35]. Its firewall does not cover MCP servers or setup-step processes, so process/credential separation remains required [S3].",
+    "GitLab flow execution downloads the Duo CLI to a runner; agent configuration is read from the default branch and ignored on feature branches. Composite identity uses the intersection of the agent service account and initiating human permissions, with both identities attributable [S37-S38]. Sessions can pause for Approve/Reject/Modify and are automatically deleted 30 days after last activity [S39].",
+    "OpenHands explicitly recommends Docker over its unsafe Process runtime, and warns that a conversation is not a security boundary when conversations share sandbox credentials/files/failure domain [S40-S42]. SWE-agent’s official docs call it maintenance-only and superseded by mini-swe-agent [S43]."
+  ],
+  "independent_evidence": [
+    "SWE-bench established repository issue repair as materially harder than snippet generation: the original 2,294-task/12-repository study reported only 1.96% for its best evaluated model at the time [S21]. SWE-agent later reported 12.5% SWE-bench pass@1, showing that the agent-computer interface changes outcomes as well as the model [S22]. Neither figure measures safe deployment, organization-specific tests, or production rollback.",
+    "METR measured Claude 3.7 Sonnet at roughly a 50-minute “50% time horizon” on its task distribution and estimated frontier time horizons doubled about every seven months since 2019. Authors expressly flag external-validity limits; this supports small batches and timeouts, not a universal SLA [S23].",
+    "AgentDojo (97 tasks, 629 security cases), ASB (400+ tools; 27 attacks/10 defenses; highest reported average attack success 84.30%), and RedCode (4,050 risky execution plus 160 risky generation cases across 19 LLMs/3 frameworks) show that tool agents can be induced to misuse tools or execute risky code and that defenses remain incomplete [S24-S26].",
+    "DORA’s 2024 survey analysis associated a 25% increase in AI adoption with 1.5% lower delivery throughput and 7.2% lower delivery stability. It is observational and vendor-affiliated, so it conflicts with simple productivity marketing rather than proving causation [S27].",
+    "SWE-bench-Live evaluated 1,319 issues from Jan 2024–Apr 2025 across 93 repositories. Under one setup, OpenHands plus Claude 3.7 Sonnet scored 43.20% on Verified but 19.25% on Live, more than a twofold gap; authors raise overfitting/contamination, though the result does not isolate its cause [S31].",
+    "ARGUS found critical code-injection vulnerabilities in 4,307 of 2,778,483 analyzed GitHub workflows and 80 of 31,725 analyzed actions. This is pre-agent evidence that CI interpolation/trigger/token composition is already error-prone [S32].",
+    "Unit 42 documented the 2025 tj-actions/changed-files compromise (an action used by 23,000+ repositories): malicious code dumped runner process memory/environment secrets into workflow logs. Ephemeral teardown did not stop in-run theft [S33]. Invariant Labs separately demonstrated—not a known breach—that a malicious public issue could prompt a GitHub MCP-enabled agent to read private-repository data and place it in a public PR [S34]."
+  ],
+  "metrics": [
+    {
+      "metric": "Copilot session boundary",
+      "value": "59 minutes maximum; one repository, one branch and exactly one PR per assigned task",
+      "meaning": "forces decomposition and bounds individual sessions, but does not establish correctness",
+      "evidence": "[S1]"
+    },
+    {
+      "metric": "SWE-bench historical baselines",
+      "value": "Claude 2 1.96% in original study; SWE-agent 12.5% pass@1 later",
+      "meaning": "results differ by model/interface and benchmark version; not comparable to production acceptance rate",
+      "evidence": "[S21-S22]"
+    },
+    {
+      "metric": "Measured task horizon",
+      "value": "~50 minutes at 50% success for Claude 3.7 Sonnet on METR distribution; estimated ~7-month doubling",
+      "meaning": "reliability falls with task length; external validity is limited",
+      "evidence": "[S23]"
+    },
+    {
+      "metric": "Security stress tests",
+      "value": "AgentDojo 629 cases; ASB highest average attack success 84.30%; RedCode 4,050 execution and 160 generation cases",
+      "meaning": "not incident rates, but strong evidence that model-only defenses cannot be the trust boundary",
+      "evidence": "[S24-S26]"
+    },
+    {
+      "metric": "Delivery correlation",
+      "value": "25% AI-adoption increase associated with -1.5% throughput and -7.2% stability",
+      "meaning": "survey association, not causal and not specific to autonomous CI agents",
+      "evidence": "[S27]"
+    },
+    {
+      "metric": "Cost meters",
+      "value": "GitHub agent consumes Actions minutes plus AI credits; Claude action consumes Actions minutes plus API/subscription tokens",
+      "meaning": "set per-run and monthly budgets; vendors provide no cross-tool normalized cost/reliability SLA here",
+      "evidence": "[S1,S7]"
+    },
+    {
+      "metric": "Fresh-issue generalization",
+      "value": "OpenHands + Claude 3.7 Sonnet: 43.20% SWE-bench Verified versus 19.25% SWE-bench-Live in the reported same setup",
+      "meaning": "fresh issues/generalization can be more than 2x worse; authors raise but do not prove contamination as cause",
+      "evidence": "[S31]"
+    },
+    {
+      "metric": "Existing CI injection surface",
+      "value": "4,307 workflows and 80 actions with critical injection vulnerabilities among 2,778,483 workflows and 31,725 actions analyzed",
+      "meaning": "static-analysis study, not exploit incidence; shows CI configuration is an independent attack surface",
+      "evidence": "[S32]"
+    }
+  ],
+  "reference_workflow": [
+    "1. Trigger: accept only a labeled/assigned issue, trusted maintainer comment, schedule, dependency alert, or completed failing-CI event. Snapshot event actor, issue/spec, base SHA, allowed paths, risk class and budget into durable task state. Default-deny forks/untrusted actors [S7,S12-S13,S28].",
+    "2. Plan gate: require acceptance criteria, test command and prohibited areas. For ambiguous, cross-repository, migration, auth/billing or production-data tasks, route to a human before execution; Copilot’s one-repo and 59-minute limits favor such decomposition [S1,S23].",
+    "3. Provision: create a fresh hosted runner/container/ephemeral VM at the pinned base SHA. Install from lockfiles in a setup phase; use a maintained immutable image where possible. Do not reuse self-hosted worktrees or privileged hosts across trust boundaries [S2,S10,S19-S20].",
+    "4. Credential phase separation: setup gets read-only package/repository access; agent gets only workspace write and test tools, no production secret. Internet is off or method/domain-allowlisted. Prefer OIDC short-lived credentials when a cloud API is necessary [S3,S6,S10-S14].",
+    "5. Execute: run the agent with repository instructions and fixed tool policy. Stream immutable logs; cap wall time, tokens, commands, network destinations and retries. Produce plan, patch, tests run, exit status, unresolved risks and machine-readable result [S1,S7,S12-S13].",
+    "6. Validate in a clean second environment: discard agent container, apply patch to clean checkout, run format/type/unit/integration/security/license checks. Treat agent-authored tests as untrusted and include protected regression/holdout tests. The two-stage patch/artifact pattern keeps the first job read-only [S4,S13,S24-S26,S28].",
+    "7. Publish review object: a separate narrowly write-authorized bot creates a signed branch/PR/MR. Attach patch, logs, test evidence, dependency diff, risk label and spend. Never give the reasoning job repository-write and deployment credentials together [S13,S28-S30].",
+    "8. Merge gate: require protected-branch status checks and code-owner/human approval for medium/high risk. Allow auto-merge only for allowlisted low-risk classes after clean-room checks; cancel if the base changed and revalidate [S4-S5,S17-S18].",
+    "9. Build once in trusted CI, generate SBOM/provenance and sign/attest the immutable artifact; do not deploy an artifact built inside the agent sandbox. Promote the same digest through staging [S29-S30].",
+    "10. Deploy: staging smoke/canary plus monitored soak. Production is a separate protected environment using required reviewers or policy approval and short-lived deploy identity. Auto-promote only when service risk policy permits; otherwise human gate [S5-S6,S17-S18].",
+    "11. Observe/rollback: correlate task/PR/SHA/artifact/deployment IDs, watch SLOs and rollback automatically to last known digest on explicit thresholds. Feed failures into an eval set, but do not let telemetry text directly grant an agent tools or trigger privileged deployment [S24-S26]."
+  ],
+  "integration_points": [
+    {
+      "point": "Intake",
+      "interfaces": "GitHub Issues/PR comments/assignee/webhooks; GitLab issues/MRs/notes; schedules; workflow_run/CI failure",
+      "contract": "verify actor and event type; store base SHA/idempotency key; sanitize all free text",
+      "evidence": "[S1,S7-S9,S12-S13,S16,S28]"
+    },
+    {
+      "point": "Repository",
+      "interfaces": "GitHub App/GITHUB_TOKEN, GitLab CI_JOB_TOKEN/project access token, vendor connectors",
+      "contract": "read checkout in reasoning job; separate write token for branch/PR; protected branch blocks direct main writes",
+      "evidence": "[S4,S7-S8,S12-S13,S16]"
+    },
+    {
+      "point": "Runtime",
+      "interfaces": "GitHub-hosted/ARC runner, GitLab runner, Codex per-task container, Docker/E2B/OpenHands runtime",
+      "contract": "fresh workspace, immutable image, CPU/memory/time quota, cleanup, no host socket/privileged mode",
+      "evidence": "[S2,S10,S14,S19-S20]"
+    },
+    {
+      "point": "Context/tools",
+      "interfaces": "repository instructions, MCP, linters/tests, package registry, issue API",
+      "contract": "allowlist tools and egress; tool outputs are untrusted prompt-injection input",
+      "evidence": "[S1-S3,S12,S24-S26]"
+    },
+    {
+      "point": "CI and artifact",
+      "interfaces": "required checks, patch artifacts, attestations, registry",
+      "contract": "clean-room rebuild/test and provenance bind artifact digest to source/workflow",
+      "evidence": "[S4,S13,S29-S30]"
+    },
+    {
+      "point": "Deployment",
+      "interfaces": "GitHub environments/OIDC; GitLab protected environments/approvals; cloud deployment API",
+      "contract": "separate identity, reviewer/policy gate, environment-scoped secrets, immutable digest",
+      "evidence": "[S5-S6,S17-S18]"
+    },
+    {
+      "point": "Audit/economics",
+      "interfaces": "Actions/GitLab logs, GitLab AI audit events, Copilot usage metrics, token/runner billing",
+      "contract": "retain prompt/tool/patch/gate/deployment IDs with redaction; alert on budget/denial anomalies",
+      "evidence": "[S1,S7,S15-S16]"
+    }
+  ],
+  "human_gates": [
+    "Before execution for unclear specs, broad/refactoring tasks, architecture/data-schema changes, new dependencies or requests needing cross-repository/production access [S1,S23].",
+    "Before exposing more network, MCP tools, secrets, privileged Docker, self-hosted runners, or danger-full-access. These change the trust boundary, not merely convenience [S3,S12-S14,S19-S20,S24-S26].",
+    "At PR/MR review for security/auth/crypto, billing, privacy, data migration, infrastructure and public API changes. Review the diff and independent test evidence; do not approve only the agent summary [S4,S7-S8,S16].",
+    "At production promotion except preapproved low-risk services with canary, proven rollback and policy-as-code. GitHub/GitLab environment approvals implement this boundary [S5,S17-S18].",
+    "On repeated timeout/test failure, anomalous spend, unexpected egress/tool request, flaky/nonreproducible result, base-branch drift or rollback. Stop and clarify rather than recursively granting privilege [S1,S3,S23-S26].",
+    "Keep the default approval for agent-authored GitHub Actions workflows. Disabling it lets workflow code run with repository token/secret access before ordinary code review; only opt out for tightly constrained trusted repositories [S35,S4,S28]."
+  ],
+  "failure_modes": [
+    {
+      "class": "technical",
+      "modes": "nonreproducible setup/cache, dependency drift, flaky tests, timeout, context loss, wrong base SHA, recursive CI loops, bot commits not retriggering CI, self-hosted residue",
+      "evidence": "[S1-S2,S7,S10,S19]"
+    },
+    {
+      "class": "correctness/product",
+      "modes": "patch optimizes visible tests, misunderstands acceptance criteria, adds plausible but wrong tests, scope creep, multi-repository change cannot complete, benchmark success overstates real work",
+      "evidence": "[S1,S21-S23]"
+    },
+    {
+      "class": "security",
+      "modes": "prompt injection in issue/log/tool/web content; secret/code exfiltration via egress; malicious dependency/setup; poisoned cache/artifact; privileged runner escape; unsafe generated shell; token writes beyond branch",
+      "evidence": "[S3-S4,S11-S14,S19,S24-S26,S28]"
+    },
+    {
+      "class": "pipeline",
+      "modes": "agent and deploy share credentials; privileged pull_request_target/workflow_run checks out attacker code; agent-produced artifact bypasses trusted rebuild; unsigned artifact substitution; approval rubber-stamping",
+      "evidence": "[S4-S6,S13,S17-S19,S28-S30]"
+    },
+    {
+      "class": "organizational/economic",
+      "modes": "review queue grows, ownership blurs, noisy PRs reduce trust, token/runner retries cost more than task value, vendor policy/status changes, metrics reward PR volume over escaped defects",
+      "evidence": "[S1,S7,S15,S27]"
+    },
+    {
+      "class": "operational security evidence",
+      "modes": "third-party action compromise can dump in-run secrets before ephemeral teardown; combining public issue content with private-read/public-write MCP tools enables cross-boundary exfiltration in a demonstrated attack",
+      "evidence": "[S33-S34]"
+    },
+    {
+      "class": "control-plane bypass",
+      "modes": "administrator disables default agent-workflow approval; agent edits feature branch but mutable policy is also accepted from that branch; two conversations of different trust share sandbox credentials/files",
+      "evidence": "[S35,S37,S41]"
+    }
+  ],
+  "controls_and_mitigations": [
+    "Identity: read-only repository defaults; job-level permissions; separate reasoning and publisher/deployer identities; OIDC short-lived cloud tokens; protect branches/environments and forbid agent bypass actors [S4-S6,S13,S17-S18].",
+    "Isolation: disposable hosted runner or ephemeral VM/container per task; unprivileged user, no Docker socket/host network, drop sudo/capabilities, resource quotas and guaranteed deletion. A writable mount is explicitly writable by the agent [S14,S19-S20].",
+    "Network/secrets: no secrets in prompts or checkout; environment-scoped secrets released only after gates; firewall off-by-default/allowlist exact domains and HTTP methods; redact logs; rotate on suspected exposure [S3,S5,S10-S12,S16].",
+    "Input/tool safety: authenticate trigger actor; escape/sanitize issue, diff, log and HTML content; treat repository files and MCP/web results as adversarial data; fixed allowlisted tools; require approval for state-changing calls [S12,S24-S26,S28].",
+    "Validation: fresh clean-room rerun, protected tests not writable by agent, static/security/dependency/license checks, deterministic thresholds, base-SHA freshness, bounded retries and no self-approval [S4,S13,S21-S23].",
+    "Supply chain/deploy: pin third-party actions to full commit SHAs, lock dependencies, build once in trusted CI, sign provenance/attestation, deploy by digest, canary and automatic rollback [S4,S29-S30].",
+    "Governance: immutable audit trail linking trigger/session/tool calls/patch/checks/approval/artifact/deployment; per-task token/time/egress budget; kill switch and escalation; track acceptance, revert/incident rate and human review time rather than PR count [S1,S15-S16,S27].",
+    "Pin external actions by full commit and isolate dependency/setup, analysis, publication and deployment jobs; ephemerality limits persistence but not in-run theft. Never give a session both untrusted public content, private-repository read, and public-write tools [S4,S28,S32-S34].",
+    "Keep execution policy/configuration on the protected default branch, separate from the agent patch. Where supported, use composite identity so effective access cannot exceed either the bot or initiating human [S37-S38].",
+    "Do not treat a chat/conversation as isolation. Allocate a separate sandbox when repository, user or security trust changes, and place HIGH/UNKNOWN tool actions behind explicit confirmation [S41-S42]."
+  ],
+  "maturity_assessment": {
+    "overall": "Conditionally useful / production-ready for bounded issue-to-PR, review, CI diagnosis and low-risk autofix. Emerging for agent-authored changes that auto-merge. Speculative and unsafe as a default for unrestricted production deployment.",
+    "rationale": "The CI, ephemeral compute, token scoping, review, provenance and deployment-gate primitives are mature [S4-S6,S17-S19,S29-S30], and multiple vendors expose working agent adapters [S1,S7-S16]. The weak link is reliable long-horizon reasoning and resistance to malicious context, not event wiring [S21-S27].",
+    "maturity_by_stage": {
+      "trigger_and_sandbox": "mature if configured",
+      "patch_and_PR": "production-capable with review",
+      "deterministic low-risk auto-merge": "conditional",
+      "autonomous production promotion": "only narrow preapproved services",
+      "unbounded self-healing": "experimental/speculative"
+    }
+  },
+  "build_vs_buy": [
+    "Buy hosted Copilot/Codex/GitLab flows when repository integration, managed ephemeral compute and vendor UI/audit are more valuable than portability. Accept their quotas, billing, rapidly changing feature tiers and less control over runtime [S1-S3,S9-S11,S15-S16].",
+    "Use Claude Code Action, codex-action/exec, OpenHands or SWE-agent when prompts/models/runners must be composed in existing GitHub/GitLab CI. The operator must build trigger authorization, queues/idempotency, images, secret broker, policy gates, audit retention and cleanup [S7-S8,S12-S14,S19-S20,S22].",
+    "Custom engineering remains necessary in either case for risk classification, org-specific acceptance tests, protected holdouts, cross-repo coordination, cost/SLO dashboards, deployment policy and rollback. CI/CD controls cannot be delegated to the same model they constrain [S4-S6,S17-S19,S24-S30]."
+  ],
+  "recommended_pattern": [
+    "Adopt a “two-key, three-environment” pattern: (1) untrusted planner/executor in a disposable no-secret sandbox; (2) independent clean-room verifier; (3) trusted build/deploy pipeline. Use separate tokens so no one job can both author and promote [S4-S6,S13-S14,S17-S20,S28-S30].",
+    "Start with label-gated documentation, tests, formatting, small dependency or localized bug tasks. Require PR review and measure accepted-without-major-edit, escaped defects/reverts, median review minutes, total compute/token cost and time-to-rollback. Expand auto-merge only per task class after enough local evidence [S1,S21-S23,S27].",
+    "Keep production approval human for high-impact systems. For low-risk services, policy may auto-promote an attested digest only after protected tests, canary health and an automatic rollback check. Agents may propose deployment changes but cannot alter the gate, protected tests or rollback policy [S5,S17-S18,S29-S30]."
+  ],
+  "open_questions": [
+    "No cited source provides a normalized production task success/cost/latency comparison across Copilot, Codex, Claude, GitLab Duo and self-hosted frameworks; vendor billing units and task distributions differ [S1,S7,S9,S15].",
+    "How often real issue/log/repository content causes prompt injection, secret exposure or unsafe tool calls in production CI remains unknown; security benchmarks demonstrate possibility, not base rates [S24-S26].",
+    "What local sample size and escaped-defect threshold justify auto-merge for each repository/task class? Public benchmarks do not answer this [S21-S23].",
+    "How should shared caches, MCP servers and agent memory be attested, tenant-isolated and revoked across long-running workflows? Vendor docs describe controls but not comparative residual risk [S1,S10-S12,S15].",
+    "Which GitLab Agent Platform capabilities and tiers remain GA/beta at the exact deployment version? The page is version-sensitive and must be checked against the installed release [S15-S16]."
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Actions issue/chat-to-branch/PR; one repo/branch/PR; 59-minute cap; costs/metrics/customization."
+    },
+    {
+      "id": "S2",
+      "title": "Configure the development environment",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/how-tos/agents/copilot-coding-agent/customize-the-agent-environment",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "copilot-setup-steps.yml, pre-agent setup, least permissions, ARC."
+    },
+    {
+      "id": "S3",
+      "title": "Customizing or disabling the firewall for GitHub Copilot",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/how-tos/agents/copilot-coding-agent/customize-the-agent-firewall",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": "Firewall allowlists and exfiltration warning."
+    },
+    {
+      "id": "S4",
+      "title": "Secure use reference",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": "Token, secrets, pinning, privileged-trigger/cache risks, environment reviews."
+    },
+    {
+      "id": "S5",
+      "title": "Managing environments for deployment",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Required reviewers, timers, branch rules, secret release."
+    },
+    {
+      "id": "S6",
+      "title": "OpenID Connect",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/concepts/security/openid-connect",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Short-lived federated cloud credentials."
+    },
+    {
+      "id": "S7",
+      "title": "Claude Code GitHub Actions",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/github-actions",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "Triggers, PR commits, OIDC, costs, fork secrets and GITHUB_TOKEN caveat."
+    },
+    {
+      "id": "S8",
+      "title": "Claude Code GitLab CI/CD",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/gitlab-ci-cd",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "Triggers, isolated jobs, scoped writes, MR review, token/OIDC."
+    },
+    {
+      "id": "S9",
+      "title": "Codex cloud",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "GitHub/GitLab integration, background tasks, logs/diffs/PR."
+    },
+    {
+      "id": "S10",
+      "title": "Cloud environments",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud/environments",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "Per-task containers, setup/cache/secrets, default-off agent internet."
+    },
+    {
+      "id": "S11",
+      "title": "Agent internet access – Codex web",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/cloud/internet-access",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor security documentation",
+      "supported_claims": "Domain/method allowlisting and risks."
+    },
+    {
+      "id": "S12",
+      "title": "Codex GitHub Action",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/github-action",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "Action inputs, sandboxes, trigger allowlists, prompt/key/output safety."
+    },
+    {
+      "id": "S13",
+      "title": "Non-interactive mode",
+      "publisher_or_author": "OpenAI",
+      "url": "https://developers.openai.com/codex/noninteractive",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "vendor documentation",
+      "supported_claims": "codex exec, JSONL, sandbox modes, split CI-fix patch/PR example."
+    },
+    {
+      "id": "S14",
+      "title": "openai/codex-action repository",
+      "publisher_or_author": "OpenAI",
+      "url": "https://github.com/openai/codex-action",
+      "publication_or_update_date": "repository state accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": "Privilege dropping, protections, profiles and limitations."
+    },
+    {
+      "id": "S15",
+      "title": "GitLab Duo Agent Platform",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/",
+      "publication_or_update_date": "reflects GitLab 18.x; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Sessions/flows, approval policies, audit/governance, tier/status."
+    },
+    {
+      "id": "S16",
+      "title": "Software Development Flow",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/foundational_flows/software_development/",
+      "publication_or_update_date": "GA in GitLab 18.8 per page history",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Issue/MR operations, inherited permissions, APIs/audit, secret warning."
+    },
+    {
+      "id": "S17",
+      "title": "Deployment approvals",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/ci/environments/deployment_approvals/",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Protected-environment approval/rejection."
+    },
+    {
+      "id": "S18",
+      "title": "Protected environments",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/ci/environments/protected_environments/",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Deploy restrictions and approval rules."
+    },
+    {
+      "id": "S19",
+      "title": "Security for self-managed runners",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/runner/security/",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": "Runner trust; privileged Docker danger; ephemeral VM/network/worktree advice."
+    },
+    {
+      "id": "S20",
+      "title": "Docker Sandbox",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/runtimes/docker",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": "Container runtime; writable mounts and host-network concerns."
+    },
+    {
+      "id": "S21",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Jimenez et al. (ICLR 2024)",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": "2,294 issues/12 repos; initial Claude 2 1.96% baseline."
+    },
+    {
+      "id": "S22",
+      "title": "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      "publisher_or_author": "Yang et al.",
+      "url": "https://arxiv.org/abs/2405.15793",
+      "publication_or_update_date": "2024-05-06; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "research paper",
+      "supported_claims": "ACI design; 12.5% SWE-bench and 87.7% HumanEvalFix pass@1."
+    },
+    {
+      "id": "S23",
+      "title": "Measuring AI Ability to Complete Long Software Tasks",
+      "publisher_or_author": "METR",
+      "url": "https://arxiv.org/abs/2503.14499",
+      "publication_or_update_date": "2025-03-18; later revisions available",
+      "access_date": "2026-09-13",
+      "source_type": "independent research paper",
+      "supported_claims": "~50-minute 50%-success horizon for Claude 3.7; ~7-month doubling; validity caveat."
+    },
+    {
+      "id": "S24",
+      "title": "AgentDojo",
+      "publisher_or_author": "Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "publication_or_update_date": "2024-06-19; revised 2024-11-24",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed security research",
+      "supported_claims": "97 tasks/629 cases; tool-data prompt injection and benign failures."
+    },
+    {
+      "id": "S25",
+      "title": "Agent Security Bench (ASB)",
+      "publisher_or_author": "Zhang et al. (ICLR 2025)",
+      "url": "https://arxiv.org/abs/2410.02644",
+      "publication_or_update_date": "2024-10-03; ICLR 2025",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed security research",
+      "supported_claims": "400+ tools, 27 attacks, 10 defenses; max average attack success 84.30%."
+    },
+    {
+      "id": "S26",
+      "title": "RedCode",
+      "publisher_or_author": "Guo et al.",
+      "url": "https://arxiv.org/abs/2411.07781",
+      "publication_or_update_date": "2024-11-12; later revisions available",
+      "access_date": "2026-09-13",
+      "source_type": "research paper",
+      "supported_claims": "4,050 risky execution/160 generation cases; 19 LLMs, 3 frameworks."
+    },
+    {
+      "id": "S27",
+      "title": "Announcing the 2024 DORA report",
+      "publisher_or_author": "DORA / Google Cloud",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report",
+      "publication_or_update_date": "2024-10-22",
+      "access_date": "2026-09-13",
+      "source_type": "industry empirical research (vendor-affiliated)",
+      "supported_claims": "AI-adoption associations with throughput/stability; not causal."
+    },
+    {
+      "id": "S28",
+      "title": "Preventing pwn requests",
+      "publisher_or_author": "GitHub Security Lab",
+      "url": "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/",
+      "publication_or_update_date": "2020-12-16",
+      "access_date": "2026-09-13",
+      "source_type": "first-party security research",
+      "supported_claims": "Privileged untrusted PR checkout exploit and split-workflow pattern."
+    },
+    {
+      "id": "S29",
+      "title": "SLSA v1.1 Security levels",
+      "publisher_or_author": "OpenSSF / SLSA",
+      "url": "https://slsa.dev/spec/v1.1/levels",
+      "publication_or_update_date": "v1.1; release context 2025-04-22",
+      "access_date": "2026-09-13",
+      "source_type": "open standard",
+      "supported_claims": "Provenance, hosted/isolated/hardened build requirements."
+    },
+    {
+      "id": "S30",
+      "title": "Artifact attestations",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/concepts/security/artifact-attestations",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Signed build provenance and verification."
+    },
+    {
+      "id": "S31",
+      "title": "SWE-bench-Live: Can AI Agents Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "SWE-bench-Live authors (NeurIPS 2025)",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "publication_or_update_date": "2025-05-29; NeurIPS 2025",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper",
+      "supported_claims": "1,319 fresh issues/93 repos; same setup scored 43.20% Verified vs 19.25% Live, raising contamination/overfitting concerns."
+    },
+    {
+      "id": "S32",
+      "title": "ARGUS: A Framework for Staged Static Taint Analysis of GitHub Workflows and Actions",
+      "publisher_or_author": "Muralee et al. (USENIX Security 2023)",
+      "url": "https://www.usenix.org/conference/usenixsecurity23/presentation/muralee",
+      "publication_or_update_date": "2023-08",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed security paper",
+      "supported_claims": "Analysis of 2,778,483 workflows/31,725 actions found critical injection flaws in 4,307 workflows and 80 actions."
+    },
+    {
+      "id": "S33",
+      "title": "GitHub Actions Supply Chain Attack: ReviewDog and tj-actions Compromised",
+      "publisher_or_author": "Palo Alto Networks Unit 42",
+      "url": "https://unit42.paloaltonetworks.com/github-actions-supply-chain-attack/",
+      "publication_or_update_date": "2025-03-20; updated 2025-04-02",
+      "access_date": "2026-09-13",
+      "source_type": "independent incident investigation",
+      "supported_claims": "Real compromised action dumped runner memory/env secrets to logs; tj-actions/changed-files used by 23,000+ repositories."
+    },
+    {
+      "id": "S34",
+      "title": "MCP Security Notification: Tool Poisoning Attacks and GitHub MCP Exploitation",
+      "publisher_or_author": "Invariant Labs",
+      "url": "https://invariantlabs.ai/blog/mcp-github-vulnerability.html",
+      "publication_or_update_date": "2025-05-26",
+      "access_date": "2026-09-13",
+      "source_type": "independent security demonstration",
+      "supported_claims": "Malicious public issue prompted tool chain to read private repository and publish data; demo, not observed breach."
+    },
+    {
+      "id": "S35",
+      "title": "Optionally skip approval for Copilot coding agent Actions workflows",
+      "publisher_or_author": "GitHub Changelog",
+      "url": "https://github.blog/changelog/2026-03-13-optionally-skip-approval-for-copilot-coding-agent-actions-workflows",
+      "publication_or_update_date": "2026-03-13",
+      "access_date": "2026-09-13",
+      "source_type": "official changelog",
+      "supported_claims": "Agent-authored workflow runs require human Approve and run by default; admin may disable gate."
+    },
+    {
+      "id": "S36",
+      "title": "Configure secrets and variables for Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/configure-secrets-and-variables",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Dedicated Agents secret class; MCP-prefixed secret exposure."
+    },
+    {
+      "id": "S37",
+      "title": "Configure flow execution",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/flows/execution/",
+      "publication_or_update_date": "introduced GitLab 18.3; living page",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Runner executes Duo CLI; default-branch read-only agent-config and WebSocket workflow service."
+    },
+    {
+      "id": "S38",
+      "title": "Composite identity",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/composite_identity/",
+      "publication_or_update_date": "GA GitLab 18.8; automatic since 18.9",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": "Effective permissions are intersection of service account and initiating human; visible attribution/audit."
+    },
+    {
+      "id": "S39",
+      "title": "Sessions",
+      "publisher_or_author": "GitLab",
+      "url": "https://docs.gitlab.com/user/duo_agent_platform/sessions/",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Statuses/logs, cancellation, human Approve/Reject/Modify pause, 30-day deletion."
+    },
+    {
+      "id": "S40",
+      "title": "OpenHands sandbox overview",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/sandboxes/overview",
+      "publication_or_update_date": "2026-02-11",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": "Docker recommended, Process unsafe, Remote option."
+    },
+    {
+      "id": "S41",
+      "title": "Conversations and Sandboxes",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/enterprise/conversations-and-sandboxes",
+      "publication_or_update_date": "2026-08-13",
+      "access_date": "2026-09-13",
+      "source_type": "vendor/open-source documentation",
+      "supported_claims": "Multiple conversations can share sandbox files/credentials/failure domain; conversation is not security boundary."
+    },
+    {
+      "id": "S42",
+      "title": "OpenHands Security",
+      "publisher_or_author": "OpenHands SDK",
+      "url": "https://docs.openhands.dev/sdk/arch/security",
+      "publication_or_update_date": "2026-01-26",
+      "access_date": "2026-09-13",
+      "source_type": "open-source architecture documentation",
+      "supported_claims": "Action risk labels and confirmation policy; event history."
+    },
+    {
+      "id": "S43",
+      "title": "Environments",
+      "publisher_or_author": "SWE-agent",
+      "url": "https://swe-agent.com/latest/config/environments/",
+      "publication_or_update_date": "living page accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "open-source documentation",
+      "supported_claims": "Docker deployment/image selection; SWE-agent maintenance-only, superseded by mini-swe-agent."
+    },
+    {
+      "id": "S44",
+      "title": "Deployments and environments",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "publication_or_update_date": "continuously updated; exact page date not stated",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": "Required reviewers, prevent self-review, wait timer, branch rules, custom protection apps and gated secrets."
+    }
+  ],
+  "confidence": {
+    "overall": "High for documented workflow mechanics and CI security primitives; medium for maturity/recommendation; low-to-medium for comparative economics and real-world incident frequency.",
+    "claim_level": {
+      "official_mechanics": "high—direct current documentation/repositories [S1-S20,S29-S30]",
+      "agent_capability_limits": "medium—peer-reviewed/independent tasks, but model and benchmark versions age quickly [S21-S23]",
+      "security_risk": "high that the risk exists; low for production prevalence [S24-S26,S28]",
+      "delivery_effect": "low-to-medium—DORA is observational and not agent-CI-specific [S27]",
+      "future_currency": "medium—evidence was accessed on the requested date, but continuously updated pages lack stable publication dates."
+    }
+  },
+  "conflicts": [
+    "Vendor docs describe autonomous implementation and secure sandboxing [S1,S7-S16], while independent studies show steep task-length reliability decay and material prompt-injection/risky-code failures [S23-S26]. Reconciliation: the integrations reliably run an agent; they do not guarantee the agent produces safe/correct output.",
+    "SWE-bench moved from 1.96% in the original evaluation to 12.5% for SWE-agent [S21-S22] and later leaderboards may be higher. Model, harness, test subset and contamination change, so benchmark numbers are not a deployment SLA.",
+    "AI is promoted as improving throughput, yet 2024 DORA reports negative associations with throughput and stability [S27]. This is not a direct contradiction in causal evidence: adoption may correlate with difficult environments, and local process/testing quality mediates delivery.",
+    "Sandbox labels differ. Codex documentation warns read-only alone does not protect secrets because the action process may remain privileged [S12-S14]; GitLab warns privileged Docker can expose the host [S19]. Therefore use OS/VM isolation plus least credentials, not a vendor mode name alone.",
+    "Static curated benchmarks can overstate current generalization: one SWE-bench-Live setup fell from 43.20% Verified to 19.25% Live [S31]. The gap is evidence; contamination is one proposed explanation, not established as the only cause."
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "open_questions",
+    "comparative production success/cost/latency",
+    "production prompt-injection and incident base rates",
+    "continuously updated source publication dates",
+    "installed-version-specific GitLab feature/tier status",
+    "retrieval confirmed through 2026-09-12 UTC; same-day 2026-09-13 changes cannot be excluded"
+  ]
+}

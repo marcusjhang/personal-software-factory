@@ -1,0 +1,889 @@
+{
+  "scope": {
+    "question": "For an engineering-first repository agent operating system, choose the smallest stable domain-neutral runtime seam now; keep software lifecycle meaning in the engineering repository; define measured gates for self-hosting, consumer onboarding, extracting a domain SDK, and opening a separate GTM repository.",
+    "in_scope": [
+      "kernel versus domain-owned contracts",
+      "dogfooding/self-hosting and consumer-repository gates",
+      "cross-repository artifact handoffs",
+      "GTM artifacts, metrics, privacy/compliance, brand/claims, approval, CRM and publication boundaries",
+      "protected self-improvement"
+    ],
+    "out_of_scope": [
+      "one universal ontology for code and marketing",
+      "a marketplace/plugin platform before a second domain proves the seam",
+      "autonomous external publication, prospect contact, legal interpretation, budget movement or CRM truth mutation",
+      "claims that vendor features equal audited business outcomes"
+    ],
+    "decision": "Ship engineering first. Make only execution mechanics, artifact/event envelopes, identity/capability enforcement, durable run state, policy/gate hooks, evidence/provenance, budgets and adapter interfaces generic. Keep issues/PRs/branches/tests/deploys/risk rubrics and all GTM semantics domain-owned. Self-host in shadow then bounded production; onboard consumer engineering repos before extracting an SDK. Start GTM only as a separate repository after the engineering, extraction, data-governance and business-value gates below pass."
+  },
+  "verified_capabilities": [
+    "Open standards already cover useful narrow seams: JSON Schema validates versioned payloads [S2]; CloudEvents supplies a portable event envelope but explicitly is not a workflow engine [S1]; OpenTelemetry supplies portable telemetry [S4]; SLSA supplies provenance concepts [S6]. Reuse these rather than designing a universal domain model.",
+    "Mature extension systems favor explicit, narrow seams: VS Code isolates/lazy-activates extensions [S30], Backstage keeps extension points plugin-owned [S31], and OSGi makes imports/exports and versions explicit [S32]. These are design precedents, not proof arbitrary extensions are safe.",
+    "Durable workflow products document replay/history/retry mechanics [S3]. GitHub documents short-lived repository-scoped App tokens, webhook delivery practices, protected environments and reusable security controls [S9-S12]. These are implementation capabilities, not audited safety or ROI outcomes.",
+    "A2A documents task/message/artifact interchange [S7] and MCP documents tool/security boundaries [S8], but neither transfers business authorization, consent, brand approval or responsibility. The receiver must re-authorize every handoff.",
+    "GTM systems expose real workflow surfaces: HubSpot documents marketing-email approval [S19] and CRM association APIs [S20]; Google Ads documents campaign experiments [S21]. These prove configurable features only. They do not establish correct consent, clean CRM data, causal revenue attribution, brand accuracy or productivity.",
+    "Regulators establish non-optional domain gates: CAN-SPAM identity/opt-out duties [S15], endorsement disclosure [S16], GDPR lawfulness/minimization/rights/security/DPIA obligations [S17], and EDPB guidance for social targeting/profiling [S18]. Exact jurisdictional advice still requires counsel."
+  ],
+  "evidence_and_limits": {
+    "primary_evidence": "The recommended generic seam maps to versioned standards and documented platform interfaces [S1-S21]. Standards show interoperability/control primitives, not that this implementation is correct. Vendor docs establish available knobs, not realized outcomes.",
+    "challenge_evidence": [
+      "METR's randomized study found a 19% slowdown for 16 experienced maintainers across 246 early-2025 tasks even though participants expected/perceived speedups; authors later warn the snapshot is dated [S22].",
+      "DORA 2024 reports mixed observational associations, including worse throughput/stability alongside individual gains; causality is not established [S23].",
+      "Stack Overflow's 2025 survey reports accuracy distrust and security/privacy concern despite adoption interest [S24].",
+      "Fresh SWE-bench-Live performance was materially below Verified for the same setup, challenging static benchmark graduation [S25].",
+      "Independent prompt-injection guidance and a tool-poisoning demonstration show that shared tools plus untrusted repository/CRM/web content can cross trust boundaries [S26,S27].",
+      "ARGUS reported critical injection findings across thousands of GitHub workflows/actions, showing that centrally reused automation enlarges blast radius unless pinned, isolated and tested [S34].",
+      "Large advertising field experiments show observational/platform attribution can materially miss randomized causal effects [S38,S39]; store exposure/control and call last-touch metrics descriptive."
+    ],
+    "limits": "No audited longitudinal evidence was found that one shared runtime safely improves both engineering and GTM, that the proposed sample thresholds predict later value, or that HubSpot/Google features deliver claimed ROI. Prior repository studies are validated syntheses, not independent audits of this codebase. GTM conversion and attribution are lagged/confounded; activity counts are inadequate [S28]."
+  },
+  "actors_and_authority": {
+    "shared_control_plane": [
+      "runtime scheduler/ledger identity: may create runs, leases and immutable events; no domain side effects",
+      "artifact service: content-address, encrypt, retain and authorize; cannot reinterpret data",
+      "policy decision point: evaluates signed project policy; cannot change it",
+      "evaluator identity: read evidence and emit signed verdict; cannot propose or promote",
+      "release/promoter identity: promotes exact digests only after approvals; cannot author candidates"
+    ],
+    "engineering_domain": [
+      "planner/coder may propose issue/branch/PR artifacts",
+      "clean verifier may test an exact commit",
+      "repository owner/security/release approvers own intent, exceptions, merge and production authority"
+    ],
+    "gtm_domain": [
+      "research/content/campaign agents may create internal drafts and proposed CRM patches in sandbox",
+      "data steward owns lawful basis, field mapping, retention/deletion and subject-right routing",
+      "brand/claims owner approves tone, trademarks, substantiation and disclosures",
+      "campaign owner owns audience, spend, experiment and stop decision",
+      "CRM owner approves schema/dedupe/writeback",
+      "legal/privacy approver decides jurisdiction-sensitive use",
+      "publisher/operator alone holds external-send, ad-launch and production-CRM credentials"
+    ],
+    "separation": "Use distinct repository installations, stores, encryption keys, quotas, audit streams and service identities. Sender authority never crosses repositories. The receiver validates schema/digest, classifies data, maps local IDs and applies its own policy. Agents never approve their own artifacts, evaluators, credentials, policies or promotion. [S8,S10-S14]"
+  },
+  "complete_state_catalog": {
+    "runtime_states": [
+      "DRAFT",
+      "VALIDATING",
+      "READY",
+      "QUEUED",
+      "CLAIMED",
+      "RUNNING",
+      "WAITING_INPUT",
+      "WAITING_APPROVAL",
+      "WAITING_DEPENDENCY",
+      "PAUSED_BUDGET",
+      "RETRY_SCHEDULED",
+      "VERIFYING",
+      "SUCCEEDED",
+      "FAILED_RETRYABLE",
+      "FAILED_TERMINAL",
+      "CANCEL_REQUESTED",
+      "CANCELLED",
+      "STALE",
+      "SUPERSEDED",
+      "ROLLBACK_PENDING",
+      "ROLLED_BACK",
+      "ARCHIVED"
+    ],
+    "handoff_states": [
+      "PROPOSED",
+      "EXPORTED",
+      "RECEIVED_QUARANTINED",
+      "REJECTED_SCHEMA",
+      "REJECTED_POLICY",
+      "MAPPING_REQUIRED",
+      "ACCEPTED",
+      "IMPORTED",
+      "ACKNOWLEDGED",
+      "EXPIRED",
+      "REVOKED"
+    ],
+    "dogfood_and_release_states": [
+      "OFFLINE",
+      "SHADOW",
+      "ASSISTED",
+      "CANARY",
+      "GENERAL_CONSUMER_PILOT",
+      "FROZEN",
+      "ROLLED_BACK",
+      "GRADUATED"
+    ],
+    "gtm_specific_projection_states": [
+      "RESEARCH_DRAFT",
+      "CLAIMS_REVIEW",
+      "PRIVACY_REVIEW",
+      "BRAND_REVIEW",
+      "CRM_SANDBOX",
+      "EXPERIMENT_APPROVED",
+      "SCHEDULED",
+      "PUBLISHED_OR_SENT",
+      "MONITORING",
+      "SUPPRESSED_OR_RETRACTED"
+    ],
+    "rule": "Terminal does not mean immutable truth: changed inputs/policy/digests create SUPERSEDED/STALE and a new attempt, never overwrite history."
+  },
+  "transition_contract": {
+    "event_envelope": "`event_id`, `specversion`, `type`, `source_project`, `subject`, `occurred_at`, `run_id`, `attempt`, `causation_id`, `correlation_id`, `actor`, `artifact_refs`, `policy_digest`, `data_classification`, `ttl`; CloudEvents-compatible where useful [S1].",
+    "guards": "Compare-and-swap expected state/version; active fenced lease; idempotency key = project/run/transition/input-digest; exact artifact and policy digests; actor capability; budget; required approvals; data residency/classification; receiver allowlist; freshness window.",
+    "effects": "Append event and outbox atomically; side effects execute from outbox; save provider request/response IDs; read after write; emit evidence; duplicate delivery returns prior result. Webhook receipt is acknowledged quickly and reconciled against provider inventory [S9].",
+    "invalidation": "Any input, consent, audience, claim evidence, target repository head, evaluator, policy or connector-version change invalidates dependent approvals. Consent revocation/suppression blocks queued sends and starts deletion/reconciliation. Policy weakness, leak, privilege escape, rollback failure or unexplained divergence freezes the affected project and extraction/GTM graduation.",
+    "reconciliation": "Each domain adapter implements Observe/Plan/Apply/Verify. Runtime owns attempt/order, not remote truth. Unknown/manual changes are quarantined; destructive reconciliation requires named approval."
+  },
+  "artifact_contracts": {
+    "generic_envelope": {
+      "apiVersion": "factory.runtime/v1alpha1",
+      "kind": "opaque domain-qualified kind",
+      "metadata": [
+        "artifact_id",
+        "project_id",
+        "domain",
+        "schema_uri",
+        "schema_version",
+        "created_at",
+        "producer",
+        "correlation_id",
+        "classification",
+        "retention_class"
+      ],
+      "spec": [
+        "content-addressed uri",
+        "sha256 digest",
+        "media_type",
+        "size",
+        "dependencies",
+        "supersedes"
+      ],
+      "evidence": [
+        "source refs with retrieval time",
+        "transform/tool/model/config digests",
+        "approvals",
+        "evaluation refs",
+        "signature/attestation"
+      ]
+    },
+    "generic_now": [
+      "ArtifactRef/envelope and registry",
+      "Workflow/Role/Transition/Gate/PolicyRef/EvaluatorRef/ConnectorRef/SecretRef/QuotaRef types",
+      "event/outbox/lease/checkpoint/error/evidence envelopes",
+      "domain-qualified opaque kinds and URI locators",
+      "schema negotiation and N/N-1 migration hooks"
+    ],
+    "engineering_owned": [
+      "IssueSpec, Plan, Patch, Commit, PullRequest, CheckRun, TestResult, Build, Deployment, Incident, Postmortem",
+      "GitHub IDs/branches/worktrees/merge queues",
+      "test coverage, defect severity, DORA/SLO and code-risk rubrics"
+    ],
+    "gtm_owned": [
+      "MarketEvidence, ICPHypothesis, PositioningDecision, ClaimLedger, Brief, ContentAsset, AudienceSegment, ConsentRecordRef, CampaignPlan, ExperimentPlan, CreativeVariant, ApprovalPacket, PublicationReceipt, CRMChangeSet, Lead/AccountMapping, AttributionObservation",
+      "brand vocabulary, legal basis/jurisdiction, suppression/retention, channel rules, funnel stages and revenue semantics"
+    ],
+    "handoff": "Export only a signed `HandoffManifest` containing purpose, minimal artifact refs, classifications, permitted uses, expiry, sender approvals and no ambient credentials. Prefer aggregated product/release facts from engineering to GTM and validated customer feedback/experiment insights from GTM to engineering. Raw logs, secrets, unredacted PII, private source, prospect lists and model memory do not cross by default. [S5-S8,S17] Repository dispatch can wake the receiver but its permission/payload limits make it unsuitable as the evidence payload itself [S33]."
+  },
+  "conversation_and_handoffs": {
+    "conversation": "Persist decisions/questions as artifacts, not chat-only state: question ID, options, recommendation, evidence refs, owner, deadline and whether blocking. WAITING_INPUT resumes from a signed checkpoint and compact summary plus artifact refs; never rely on hidden model memory.",
+    "cross_repo_protocol": [
+      "sender proposes manifest to neutral exchange/outbox",
+      "export policy computes least-data bundle and attests digest",
+      "receiver imports into quarantine with its own identity",
+      "receiver validates schema/signature/classification/expiry, scans prompt/content, maps local concepts, and asks on ambiguity",
+      "receiver owner accepts purpose and permissions; adapter creates local artifacts",
+      "receiver sends acknowledgement/result reference; sender stores status only",
+      "revocation/consent/deletion events propagate and are reconciled; failure does not silently retry external publication"
+    ],
+    "authority_rule": "A handoff is evidence, never an instruction with inherited authority. No direct cross-repo branch, CRM, ad-account or publication write. [S7,S8,S17,S26,S27]"
+  },
+  "orchestration_and_composition": {
+    "shared": "DAG fanout/join, child-run references, quotas, deadlines, retry categories, cancellation propagation, cleanup, artifact/evidence joins and deterministic gates. Child runs receive scoped credentials and data views.",
+    "domain_owned": "Factories select roles, tools, prompt packages, artifact schemas, join semantics, risk/evaluation thresholds and side-effect adapters. Engineering may join tests across a matrix; GTM may join brand/privacy/claims approvals and experiments. The runtime must not pretend these mean the same thing.",
+    "composition_rule": "Compose factories through declared artifacts/events only. A subfactory cannot escalate permissions or relax parent policy. Cross-domain calls are asynchronous handoffs, not nested privileged calls.",
+    "budgets": "Per project/domain/provider: concurrency, tokens, compute, API rate, money, PII rows, outbound recipients and daily side effects. Exceeding any hard budget pauses rather than degrades controls."
+  },
+  "human_need_policy": {
+    "deterministic_ask_or_stop": [
+      "missing/contradictory objective, artifact schema or owner",
+      "new data class, jurisdiction, audience, channel, claim or irreversible effect",
+      "external publication/send, ad spend, price/offer, legal/medical/financial claim, personal-data export, production CRM write/delete, merge/deploy or policy/evaluator/credential change",
+      "low confidence on a material fact; unavailable required source; consent/suppression ambiguity",
+      "approval invalidated by changed digest/policy/audience",
+      "budget or retry exhausted; provider divergence; prompt-injection signal; secret/PII exposure",
+      "any request for authority outside the project's signed capability set"
+    ],
+    "probabilistic_rule": "Scores may rank or route but never waive deterministic gates. Auto-continue only when calibrated confidence exceeds a predeclared per-risk threshold and expected-loss bound, with sufficient local validation; otherwise ask. Do not reuse engineering calibration for GTM.",
+    "gtm_publication_boundary": "During GTM pilot, agents may research and draft. A named human approves exact creative/audience/channel/time/budget/claim/consent snapshot. Publisher identity verifies approval at action time. No autonomous cold outreach, social posting, ad launch, spend increase, customer promise, CRM merge/delete, or attribution-based budget reallocation. Telemetry cannot be repurposed for targeting without explicit purpose/legal review; FTC enforcement illustrates the risk [S40].",
+    "emergency": "Kill switch freezes credentials and queues. Privacy/brand/legal incident triggers suppression/retraction, evidence preservation and human incident response. [S13-S18]"
+  },
+  "factory_as_code_schema": {
+    "minimum_schema": "`apiVersion`, `kind: Factory`, `metadata{name,domain,owners}`, `spec{runtimeRange,roles,artifacts,states,transitions,workflows,policies,evaluators,connectors,budgets,retention,telemetry,handoffs}`, `lock{runtimeDigest,packageDigests,schemaDigests,toolDigests}`. Every transition declares from/to, event, guard, effect, retry/idempotency, evidence, timeout, cancellation and approval requirements.",
+    "example": {
+      "apiVersion": "factory.runtime/v1alpha1",
+      "kind": "Factory",
+      "metadata": {
+        "name": "engineering-build",
+        "domain": "engineering",
+        "owners": [
+          "team:platform"
+        ]
+      },
+      "spec": {
+        "runtimeRange": ">=1.0 <2.0",
+        "artifacts": [
+          {
+            "kind": "engineering.dev/IssueSpec@v1",
+            "schema": "./schemas/issue.json"
+          }
+        ],
+        "workflows": [
+          {
+            "name": "build",
+            "entry": "READY",
+            "terminal": [
+              "SUCCEEDED",
+              "FAILED_TERMINAL",
+              "CANCELLED"
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "name": "open-draft-pr",
+            "from": "VERIFYING",
+            "to": "WAITING_APPROVAL",
+            "guard": "policy/eng-low-risk.rego",
+            "requires": [
+              "tests:pass",
+              "artifact:digest-bound"
+            ],
+            "effect": "connector/github.openDraftPR",
+            "idempotency": "${project}:${run}:${headSha}"
+          }
+        ],
+        "budgets": {
+          "concurrency": 4
+        },
+        "handoffs": {
+          "emit": [
+            "shared/HandoffManifest@v1"
+          ]
+        }
+      },
+      "lock": {
+        "runtimeDigest": "sha256:...",
+        "packageDigests": {
+          "engineering": "sha256:..."
+        }
+      }
+    },
+    "anti_universality": "No base `WorkItem` with fields meant to cover issue, lead, campaign and incident; no shared funnel/status enum; no arbitrary plugin code in controller process. Domain packages run out of process or through capability-limited adapters. [S1-S3,S8]"
+  },
+  "end_to_end_workflows": {
+    "engineering_first": [
+      "commit schemas/policies/locks and read-only inventory",
+      "offline replay against recorded/synthetic events",
+      "self-host central repo in shadow: mirror decisions, compare to humans, no writes",
+      "assistive dogfood: draft plans/checks/PRs with human execution",
+      "bounded central-repo canary for allowlisted R0/R1 docs/tests; independent verifier and human merge",
+      "onboard 2-3 consumer engineering repos through signed bootstrap PRs and isolated App installations",
+      "measure outcomes and failure slices; graduate one capability/repo at a time"
+    ],
+    "consumer_onboarding": "Inventory permissions/data/residency; establish baseline; dry-run plan; owner approves exact manifest/runtime/domain digests; install least-privilege identity; 14-day shadow; assisted 30+ representative tasks; canary only after local acceptance. Consumer project keeps kill switch, keys, artifacts and policy override. Central team sees redacted aggregates by default, not raw repo content.",
+    "sdk_extraction": "After repeated adapters prove the seam, extract conformance kit and typed SDK from working code. Move only stable generic interfaces; leave the engineering package importing them. Back-test against central and consumer histories; support N/N-1; publish migration/rollback. Extraction itself cannot change domain behavior.",
+    "gtm_sequence": [
+      "create separate GTM repository/config/identities/store",
+      "inventory systems/data/jurisdictions/brand/claims/approvers and baseline workflow",
+      "build read-only market/CRM imports and internal evidence/ICP/positioning artifacts",
+      "draft content/campaign/CRM change sets in sandbox",
+      "run exact-digest privacy/brand/claims/CRM approvals",
+      "human publishes or sends; store receipts and provider IDs",
+      "run pre-registered holdout/experiment where possible; monitor conversions, unsubscribe/spam, complaints, corrections and data incidents",
+      "curate feedback into domain evals; propose changes through protected promotion",
+      "Enforce last-moment communication-preference/suppression checks [S35], external-ID idempotency and merge queues [S36], and sender-reputation stop conditions [S37]."
+    ],
+    "never_first": "Do not begin with autonomous external outreach, shared engineering/GTM memory, bidirectional production writes, a plugin marketplace, auto-generated legal basis, last-touch ROI optimization or cross-domain auto-promotion."
+  },
+  "self_improvement_boundary": {
+    "loop": "Collect redacted trace/evidence → human-reviewed incident/postmortem and eval-case curation → proposal in domain repo → offline replay/property/security tests → non-authoritative shadow → bounded canary → independent evaluation → named promotion or rollback. [S5,S13,S14,S29]",
+    "protected_invariants": [
+      "project/domain isolation and data classification with protected control paths and full-SHA workflow pins [S11]",
+      "credential scopes and identity separation",
+      "approval and publication/merge boundaries",
+      "artifact/event/schema compatibility",
+      "consent/suppression/retention/deletion",
+      "audit/provenance integrity",
+      "budget/kill switch",
+      "evaluator/private holdout integrity",
+      "consumer opt-in and ability to pin/rollback",
+      "no training or memory ingestion of consumer content absent explicit purpose-specific agreement"
+    ],
+    "promotion_classes": "Domain prompts/routing/checklists may canary after local evidence. Connectors, schemas and evals need independent owners. Kernel, identity, isolation, policy engine, audit, data export, retention and promotion logic are control-plane changes: cross-domain conformance, security review and human release only; never self-promoted.",
+    "consumer_protection": "Use tenant-isolated eval aggregation: submit counters/distributions and incident categories only; minimum cohort/privacy thresholds before fleet analysis; no consumer artifact copied centrally by default. Candidate promotion uses synthetic plus opt-in redacted replay, then central canary, then opt-in cohort. Any leak, cross-tenant read, evaluator tamper, unexplained regression or failed rollback freezes fleet rollout.",
+    "metric_rule": "Optimize a scorecard, not activity: outcome/quality, lead time, reviewer burden, cost, reliability, privacy/brand incidents and reversals [S28]. Do not let the proposal agent choose its own metric or holdout."
+  },
+  "validation_strategy": {
+    "schema_contract": "JSON Schema positive/negative fixtures, domain-qualified kinds, unknown-field policy, canonical hashing, signature and migration N/N-1 tests [S2,S6].",
+    "state_transition": "Model/property tests cover every state/event pair, invalid transition, duplicate/out-of-order delivery, lease expiry/fencing, retry exhaustion, cancellation at every effect boundary, stale approval, crash/replay, outbox loss, reconciliation and rollback.",
+    "isolation_security": "Two malicious synthetic tenants; assert no cross-project artifact/search/cache/telemetry/secret access. Test confused deputy, prompt/tool poisoning, SSRF, path traversal, forged manifests, replayed approval, oversized artifact, consent revocation and malicious CRM/web content [S8,S26,S27].",
+    "domain_conformance": "Kernel suite knows no Issue/PR/Lead/Campaign symbols. Engineering suite tests commits/checks/deploys. GTM suite tests consent/suppression, claims evidence, brand lint, audience snapshot, approval invalidation, publication dry-run and CRM dedupe. Connector tests use sandboxes and read-after-write.",
+    "dogfood_acceptance": "Before self-host writes: 14 consecutive shadow days, 100% duplicate replays idempotent, 100% restoration/replay drills pass, zero cross-project/unauthorized write, and all divergences classified. Before central canary: >=30 representative accepted/closed runs, exact reproduction from locked digests, reviewer evidence-usefulness >=80% on a predefined rubric, and no worse escaped-defect/severity mix than baseline. Freeze on any privilege escape, evidence tamper or failed rollback.",
+    "consumer_acceptance": "Across >=2 consumer repos with different owners/stacks and >=100 eligible tasks over >=60 days: zero critical unauthorized/cross-tenant actions, 100% rollback drills, >=99% expected event reconciliation (all remainder explained), no worse matched defect/severity/SLO, and a predeclared meaningful improvement in at least one of lead time, accepted throughput, reviewer minutes or cost without worsening the others beyond margins.",
+    "gtm_acceptance": "In read-only/sandbox plus human-publish pilot for >=2 distinct workflows/channels, >=100 artifacts and >=60 days: 100% consent/suppression and exact-digest publication gates, zero unauthorized sends/spend/PII leaks/material unsubstantiated claims, all CRM mutations reversible/deduped, brand/legal correction rate and human review time measured, holdout/experiment definitions locked before exposure, and business outcome interval reported. Volume or content count alone never graduates."
+  },
+  "implementation_recommendation": {
+    "decision": "Engineering-first, evidence-gated extraction; GTM is a separately configured consumer domain, not a feature flag in the engineering repository.",
+    "phase_0_generic_kernel_now_0_4_weeks": [
+      "Implement generic run/event/artifact/evidence envelopes; durable ledger/outbox/lease/checkpoint; project isolation; scoped identities; policy/gate/evaluator/connector ports; budgets/kill switch; schema/lock/migration; telemetry/redaction.",
+      "Implement engineering package separately: GitHub intake, plan/patch/test/PR/deploy projections, engineering risk/evals and developer metrics.",
+      "Protect control paths and build conformance/security/fault suites. No public plugin API promise."
+    ],
+    "phase_1_self_host_4_8_weeks": "Offline then 14-day shadow in central repo; assisted drafts; bounded R0/R1 canary only after dogfood_acceptance. Record baseline, denominators, rejects, reviewer minutes, cost, defects and incidents. Self-hosting proves operability, not generality.",
+    "phase_2_consumers_8_16_weeks": "Onboard 2-3 opt-in consumer engineering repos with separate installations/keys/stores, pinned versions and rollback. Central updates arrive as reviewed PRs. Collect only redacted outcome aggregates by default. Pass consumer_acceptance before broader rollout.",
+    "phase_3_extraction_gate": "Extract domain SDK/conformance kit only when: (a) at least 3 materially different workflows across central + >=2 consumer repos implement the same seam; (b) two independent adapter implementations require no kernel patch for >=2 releases/60 days; (c) >=80% of proposed SDK surface has >=2 real call sites and stable semantics; (d) compatibility/security/isolation/rollback gates pass; (e) a named maintainer owns versioning/support. Failed conditions mean refactor internally, not publish SDK.",
+    "phase_4_gtm_start_gate": "Open GTM repo only after phase 2 reliability, an executive/domain DRI and operators exist, a concrete workflow has baseline pain/value and >=100 expected annual artifacts or equivalent justified volume, data inventory/lawful-basis/retention/deletion/DSR/DPIA review is complete, brand/claims/publication and CRM ownership matrices are signed, sandbox/read-only connectors exist, success/guardrail metrics and experiment design are pre-registered, and incident/kill/retraction runbooks are drilled. Start with research/internal drafts; human publication remains.",
+    "phase_5_gtm_authority_gate": "Consider narrowly automated reversible internal CRM enrichment only after GTM acceptance and independent privacy/security audit. External sends, spend, pricing, promises, sensitive inference, deletion/merge and public publication remain human-authorized until a separate jurisdiction/channel-specific case with larger denominators and counsel approval is made.",
+    "do_not_build_now": [
+      "universal business artifact ontology",
+      "in-process arbitrary plugin host or marketplace",
+      "shared cross-domain vector memory",
+      "generic ROI/quality scalar",
+      "central consumer raw-data lake",
+      "autonomous policy/evaluator/credential change",
+      "autonomous GTM publication/outreach/spend"
+    ]
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "CloudEvents Specification v1.0.2",
+      "publisher_author": "Cloud Native Computing Foundation / CloudEvents maintainers",
+      "source_type": "versioned open standard and source repository",
+      "publication_update_date": "v1.0.2, 2022-02-05 release lineage",
+      "access_date": "2026-09-13",
+      "url": "https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md",
+      "supported_claims": [
+        "portable event identity/source/type/time/subject/data envelope",
+        "does not provide workflow durability or deduplication"
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "JSON Schema Draft 2020-12",
+      "publisher_author": "JSON Schema project",
+      "source_type": "open specification",
+      "publication_update_date": "2020-12",
+      "access_date": "2026-09-13",
+      "url": "https://json-schema.org/draft/2020-12",
+      "supported_claims": [
+        "versioned validation vocabulary for artifact and configuration contracts"
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Workflow Execution",
+      "publisher_author": "Temporal Technologies / Temporal open-source project",
+      "source_type": "official product/project documentation",
+      "publication_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.temporal.io/workflow-execution",
+      "supported_claims": [
+        "durable workflow execution, event history, retry and continuation semantics; documented feature, not an outcome audit"
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "OpenTelemetry Specification: Overview",
+      "publisher_author": "OpenTelemetry project / CNCF",
+      "source_type": "open standard documentation",
+      "publication_update_date": "continuously versioned; page date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://opentelemetry.io/docs/specs/otel/overview/",
+      "supported_claims": [
+        "portable traces, metrics and logs model"
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Handling sensitive data",
+      "publisher_author": "OpenTelemetry project / CNCF",
+      "source_type": "official open-source security guidance",
+      "publication_update_date": "living documentation; page date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://opentelemetry.io/docs/security/handling-sensitive-data/",
+      "supported_claims": [
+        "telemetry minimization, filtering, redaction and access risks"
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "SLSA Provenance v1.2",
+      "publisher_author": "SLSA project / OpenSSF",
+      "source_type": "supply-chain specification",
+      "publication_update_date": "v1.2, 2025-04",
+      "access_date": "2026-09-13",
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "supported_claims": [
+        "artifact provenance predicate, immutable inputs and builder identity concepts"
+      ]
+    },
+    {
+      "id": "S7",
+      "title": "A2A Protocol Specification 1.0",
+      "publisher_author": "A2A Project / Linux Foundation Agentic AI Foundation",
+      "source_type": "open protocol specification",
+      "publication_update_date": "v1.0 current at access",
+      "access_date": "2026-09-13",
+      "url": "https://a2a-protocol.org/latest/specification/",
+      "supported_claims": [
+        "cross-system tasks, messages, artifacts, lifecycle and authenticated discovery; interoperability surface, not business authorization"
+      ]
+    },
+    {
+      "id": "S8",
+      "title": "Security Best Practices",
+      "publisher_author": "Model Context Protocol project",
+      "source_type": "official protocol security guidance",
+      "publication_update_date": "2025-11-25 documentation snapshot",
+      "access_date": "2026-09-13",
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "supported_claims": [
+        "confused-deputy, token-passthrough, SSRF and scope-minimization risks"
+      ]
+    },
+    {
+      "id": "S9",
+      "title": "Best practices for using webhooks",
+      "publisher_author": "GitHub",
+      "source_type": "official documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks",
+      "supported_claims": [
+        "asynchronous receipt, delivery identity and recovery practices"
+      ]
+    },
+    {
+      "id": "S10",
+      "title": "Generating an installation access token for a GitHub App",
+      "publisher_author": "GitHub",
+      "source_type": "official authentication documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "supported_claims": [
+        "short-lived installation tokens and repository/permission narrowing"
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Secure use reference",
+      "publisher_author": "GitHub",
+      "source_type": "official security documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "supported_claims": [
+        "full-SHA pinning, injection defense and CODEOWNERS guidance"
+      ]
+    },
+    {
+      "id": "S12",
+      "title": "Deployments and environments",
+      "publisher_author": "GitHub",
+      "source_type": "official product documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments",
+      "supported_claims": [
+        "required reviewers, prevent-self-review and delayed secret access; availability has plan/configuration conditions"
+      ]
+    },
+    {
+      "id": "S13",
+      "title": "NIST AI 600-1: Generative Artificial Intelligence Profile",
+      "publisher_author": "Autio et al., National Institute of Standards and Technology",
+      "source_type": "government risk-management profile",
+      "publication_update_date": "2024-07-26",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "supported_claims": [
+        "pre-deployment testing, ongoing monitoring, incident response, provenance, feedback and recourse"
+      ]
+    },
+    {
+      "id": "S14",
+      "title": "NIST SP 800-218: Secure Software Development Framework Version 1.1",
+      "publisher_author": "Souppaya, Scarfone, Dodson / NIST",
+      "source_type": "government standard/guidance",
+      "publication_update_date": "2022-02",
+      "access_date": "2026-09-13",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "supported_claims": [
+        "protected change control and secure release practices"
+      ]
+    },
+    {
+      "id": "S15",
+      "title": "The CAN-SPAM Act: A Compliance Guide for Business",
+      "publisher_author": "United States Federal Trade Commission",
+      "source_type": "government regulatory guidance",
+      "publication_update_date": "living guidance; page date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business",
+      "supported_claims": [
+        "commercial email identity, opt-out and operational compliance duties"
+      ]
+    },
+    {
+      "id": "S16",
+      "title": "Disclosures 101 for Social Media Influencers",
+      "publisher_author": "United States Federal Trade Commission",
+      "source_type": "government regulatory guidance",
+      "publication_update_date": "2019-11",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers",
+      "supported_claims": [
+        "clear disclosure obligations for material relationships"
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "Regulation (EU) 2016/679 (General Data Protection Regulation), official text",
+      "publisher_author": "European Parliament and Council / EUR-Lex",
+      "source_type": "binding regulation / official legal text",
+      "publication_update_date": "2016-04-27; consolidated status should be checked per deployment",
+      "access_date": "2026-09-13",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "supported_claims": [
+        "lawfulness, purpose limitation, minimization, data-subject rights, processor controls, security, DPIA and automated-decision constraints"
+      ]
+    },
+    {
+      "id": "S18",
+      "title": "Guidelines 8/2020 on the targeting of social media users",
+      "publisher_author": "European Data Protection Board",
+      "source_type": "official regulator guidance",
+      "publication_update_date": "Version 2.0, 2021-04-13",
+      "access_date": "2026-09-13",
+      "url": "https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-82020-targeting-social-media-users_en",
+      "supported_claims": [
+        "roles, transparency, legal basis and profiling risks in social targeting"
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "Request approval to send a marketing email",
+      "publisher_author": "HubSpot",
+      "source_type": "official vendor product documentation",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://knowledge.hubspot.com/marketing-email/request-approval-to-send-a-marketing-email",
+      "supported_claims": [
+        "HubSpot documents an email approval workflow; feature availability and exact behavior require tenant validation"
+      ]
+    },
+    {
+      "id": "S20",
+      "title": "CRM associations API v4 guide",
+      "publisher_author": "HubSpot",
+      "source_type": "official vendor API documentation",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://developers.hubspot.com/docs/api-reference/crm-associations-v4/guide",
+      "supported_claims": [
+        "versioned CRM object-association read/write surface; not proof of data quality or attribution"
+      ]
+    },
+    {
+      "id": "S21",
+      "title": "About campaign experiments",
+      "publisher_author": "Google Ads Help",
+      "source_type": "official vendor product documentation",
+      "publication_update_date": "living documentation; exact date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://support.google.com/google-ads/answer/6261395",
+      "supported_claims": [
+        "controlled campaign experiment feature; product documentation is not independent causal evidence"
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_author": "Joel Becker, Nate Rush, Elizabeth Barnes, David Rein / METR",
+      "source_type": "independent randomized controlled field study/preprint report",
+      "publication_update_date": "2025-07-10; authors later flag snapshot as out of date",
+      "access_date": "2026-09-13",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "supported_claims": [
+        "16 experienced maintainers and 246 tasks; early-2025 AI made measured tasks 19% slower despite expected/perceived speedup; narrow population/tool/time scope"
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "Accelerate State of DevOps Report 2024",
+      "publisher_author": "DORA / Google Cloud and research partners",
+      "source_type": "vendor-affiliated industry empirical report",
+      "publication_update_date": "2024",
+      "access_date": "2026-09-13",
+      "url": "https://dora.dev/research/2024/dora-report/",
+      "supported_claims": [
+        "AI-use associations included positive individual outcomes but negative delivery throughput/stability associations; observational, not causal"
+      ]
+    },
+    {
+      "id": "S24",
+      "title": "AI | 2025 Stack Overflow Developer Survey",
+      "publisher_author": "Stack Overflow",
+      "source_type": "independent industry survey",
+      "publication_update_date": "2025",
+      "access_date": "2026-09-13",
+      "url": "https://survey.stackoverflow.co/2025/ai",
+      "supported_claims": [
+        "high AI interest coexists with accuracy distrust and security/privacy concern; self-report and sampling limits"
+      ]
+    },
+    {
+      "id": "S25",
+      "title": "SWE-bench-Live: Can AI Agents Resolve Real-World GitHub Issues?",
+      "publisher_author": "SWE-bench-Live authors, NeurIPS 2025",
+      "source_type": "peer-reviewed benchmark paper",
+      "publication_update_date": "2025-05-29 preprint; NeurIPS 2025",
+      "access_date": "2026-09-13",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "supported_claims": [
+        "same setup scored materially lower on fresh issues than Verified; evidence against relying on static benchmark alone"
+      ]
+    },
+    {
+      "id": "S26",
+      "title": "LLM01:2025 Prompt Injection",
+      "publisher_author": "OWASP GenAI Security Project",
+      "source_type": "independent security guidance",
+      "publication_update_date": "2025 edition",
+      "access_date": "2026-09-13",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "supported_claims": [
+        "external content can redirect an LLM; least privilege and approval reduce but do not eliminate risk"
+      ]
+    },
+    {
+      "id": "S27",
+      "title": "MCP Security Notification: Tool Poisoning Attacks and GitHub MCP Exploitation",
+      "publisher_author": "Invariant Labs",
+      "source_type": "independent security demonstration",
+      "publication_update_date": "2025-05-26",
+      "access_date": "2026-09-13",
+      "url": "https://invariantlabs.ai/blog/mcp-github-vulnerability.html",
+      "supported_claims": [
+        "demonstration that malicious public issue text plus broad tool access can exfiltrate private data; demonstration, not confirmed breach"
+      ]
+    },
+    {
+      "id": "S28",
+      "title": "The SPACE of Developer Productivity",
+      "publisher_author": "Forsgren et al., ACM Queue",
+      "source_type": "peer-reviewed/practitioner measurement framework",
+      "publication_update_date": "2021-03-06",
+      "access_date": "2026-09-13",
+      "url": "https://queue.acm.org/detail.cfm?id=3454124",
+      "supported_claims": [
+        "productivity is multidimensional and activity counts alone mislead"
+      ]
+    },
+    {
+      "id": "S29",
+      "title": "Argo Rollouts: Analysis and Progressive Delivery",
+      "publisher_author": "Argo Project / CNCF",
+      "source_type": "official open-source project documentation",
+      "publication_update_date": "current stable docs; page date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/analysis/",
+      "supported_claims": [
+        "predeclared metric analysis, pass/fail/inconclusive, pause/abort/promotion; documented mechanics, not outcome audit"
+      ]
+    },
+    {
+      "id": "S30",
+      "title": "Extension Host",
+      "publisher_author": "Microsoft / Visual Studio Code",
+      "source_type": "official product architecture documentation",
+      "publication_update_date": "page shows 2026-09-09",
+      "access_date": "2026-09-13",
+      "url": "https://code.visualstudio.com/api/advanced-topics/extension-host",
+      "supported_claims": [
+        "separate extension-host process/placement and activation events; architectural capability, not a complete sandbox guarantee"
+      ]
+    },
+    {
+      "id": "S31",
+      "title": "Extension Points",
+      "publisher_author": "Backstage project / CNCF",
+      "source_type": "official open-source architecture documentation",
+      "publication_update_date": "current stable docs; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://backstage.io/docs/backend-system/architecture/extension-points/",
+      "supported_claims": [
+        "plugin-owned narrow extension points and module failure attribution"
+      ]
+    },
+    {
+      "id": "S32",
+      "title": "OSGi Core Release 8: Framework Module Layer",
+      "publisher_author": "OSGi Alliance",
+      "source_type": "versioned industry specification",
+      "publication_update_date": "Release 8, 2020",
+      "access_date": "2026-09-13",
+      "url": "https://docs.osgi.org/specification/osgi.core/8.0.0/framework.module.html",
+      "supported_claims": [
+        "explicit package imports/exports, versions, resolution and lifecycle"
+      ]
+    },
+    {
+      "id": "S33",
+      "title": "Create a repository dispatch event",
+      "publisher_author": "GitHub",
+      "source_type": "official REST API reference",
+      "publication_update_date": "living/versioned API documentation",
+      "access_date": "2026-09-13",
+      "url": "https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event",
+      "supported_claims": [
+        "repository dispatch permissions and small payload/event constraints; suitable as wake-up, not artifact store"
+      ]
+    },
+    {
+      "id": "S34",
+      "title": "ARGUS: A Framework for Staged Static Taint Analysis of GitHub Workflows and Actions",
+      "publisher_author": "Muralee et al., USENIX Security",
+      "source_type": "independent peer-reviewed security study",
+      "publication_update_date": "2023",
+      "access_date": "2026-09-13",
+      "url": "https://www.usenix.org/conference/usenixsecurity23/presentation/muralee",
+      "supported_claims": [
+        "reported critical code-injection vulnerabilities in 4,307 workflows and 80 Actions across a large corpus; static-analysis scope/false-positive limits apply"
+      ]
+    },
+    {
+      "id": "S35",
+      "title": "Communication Preferences API guide",
+      "publisher_author": "HubSpot",
+      "source_type": "official vendor API documentation",
+      "publication_update_date": "living documentation; current URL redirects to legacy path",
+      "access_date": "2026-09-13",
+      "url": "https://developers.hubspot.com/docs/api-reference/legacy/communication-preferences/guide",
+      "supported_claims": [
+        "subscription types, subscribe/unsubscribe/opt-out and legal-basis fields; API fields do not establish legal compliance"
+      ]
+    },
+    {
+      "id": "S36",
+      "title": "Upsert Records Using sObject Collections",
+      "publisher_author": "Salesforce",
+      "source_type": "official vendor REST API documentation",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://developer.salesforce.com/docs/platform/api-rest/guide/dome-upsert.html",
+      "supported_claims": [
+        "upsert by external ID; does not solve identity accuracy or consent"
+      ]
+    },
+    {
+      "id": "S37",
+      "title": "Email sender guidelines",
+      "publisher_author": "Google Workspace / Gmail",
+      "source_type": "official ecosystem operational guidance",
+      "publication_update_date": "living documentation; date not stated",
+      "access_date": "2026-09-13",
+      "url": "https://support.google.com/a/answer/81126",
+      "supported_claims": [
+        "bulk-sender authentication, unsubscribe and Gmail spam-rate guidance; ecosystem threshold, not universal business outcome"
+      ]
+    },
+    {
+      "id": "S38",
+      "title": "Consumer Heterogeneity and Paid Search Effectiveness: A Large-Scale Field Experiment",
+      "publisher_author": "Blake, Nosko and Tadelis, Econometrica",
+      "source_type": "independent peer-reviewed field experiment",
+      "publication_update_date": "2015",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.3982/ECTA12423",
+      "supported_claims": [
+        "nonexperimental paid-search return estimates can diverge materially from experimental causal effects"
+      ]
+    },
+    {
+      "id": "S39",
+      "title": "A Comparison of Approaches to Advertising Measurement: Evidence from Big Field Experiments at Facebook",
+      "publisher_author": "Gordon et al., Marketing Science",
+      "source_type": "peer-reviewed field-experiment study",
+      "publication_update_date": "2019",
+      "access_date": "2026-09-13",
+      "url": "https://doi.org/10.1287/mksc.2018.1135",
+      "supported_claims": [
+        "common observational methods failed to recover randomized estimates in studied campaigns"
+      ]
+    },
+    {
+      "id": "S40",
+      "title": "FTC Order Will Ban Avast from Selling Browsing Data for Advertising Purposes",
+      "publisher_author": "United States Federal Trade Commission",
+      "source_type": "government enforcement announcement",
+      "publication_update_date": "2024-02-22",
+      "access_date": "2026-09-13",
+      "url": "https://www.ftc.gov/news-events/news/press-releases/2024/02/ftc-order-will-ban-avast-selling-browsing-data-advertising-purposes",
+      "supported_claims": [
+        "regulatory allegations/order demonstrate that reuse of detailed telemetry for advertising can create enforcement risk despite privacy representations"
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict": "Protocol and vendor documentation can be read as evidence that interoperability/automation is ready [S3,S7,S19-S21].",
+      "resolution": "Treat it as capability evidence only. Require local conformance, security, workflow and outcome gates; business authorization is receiver-owned."
+    },
+    {
+      "conflict": "Vendor case studies and benchmarks often imply productivity; randomized/field, survey and fresh-benchmark evidence is mixed [S22-S25].",
+      "resolution": "No roadmap gate uses benchmark score or generated volume alone. Use matched local baselines, denominators, quality/incident guardrails and reviewer cost."
+    },
+    {
+      "conflict": "A generic SDK early could reduce duplication, but its types would likely encode engineering concepts or lowest-common-denominator abstractions.",
+      "resolution": "Keep internal ports narrow and domain-qualified now; extract only after multiple real implementations stabilize the seam."
+    },
+    {
+      "conflict": "Central telemetry accelerates learning, but raw aggregation undermines consumer confidentiality and GTM privacy duties [S5,S17,S18].",
+      "resolution": "Tenant-local evidence by default; export opt-in redacted aggregates with purpose, retention and minimum-cohort controls."
+    },
+    {
+      "conflict": "Self-hosting seems strong validation, but a central repository shares the builders' stack and incentives.",
+      "resolution": "Count self-hosting as operability evidence only; require independently owned consumer repos and adversarial isolation tests before extraction."
+    },
+    {
+      "conflict": "CRM and ad platforms expose write/experiment APIs [S20,S21], while regulation and attribution uncertainty constrain safe use [S15-S18].",
+      "resolution": "Read-only/sandbox and human-publish first; separate consent, claims, brand, CRM and publication approvals; report causal uncertainty."
+    }
+  ],
+  "uncertainties": [
+    "The central repository's actual baseline volumes, defect mix, reviewer time, costs and incident history were not available; proposed numeric thresholds are decision rules to pre-register, not empirically validated universal constants.",
+    "No independent audit of the proposed runtime, tenant isolation, connectors or self-improvement loop exists.",
+    "Exact GitHub/HubSpot/Google plan availability, API behavior and documentation may change after the access date; validate in target tenants.",
+    "GTM jurisdictions, data categories, audience sources, channels, CRM schema, brand risk appetite, sales cycle and attribution model are unspecified; these can block GTM start and require counsel/data-owner decisions.",
+    "No audited evidence proves one kernel will remain economical across engineering and GTM; extraction can still be rejected after prototypes.",
+    "The handoff revocation/deletion protocol needs provider-specific feasibility testing; immutable audit evidence and deletion obligations can conflict and require minimized/tombstoned designs.",
+    "Future-dated as-of requirements depend partly on living documents and prior validated studies; stable archived snapshots were not available for every vendor page."
+  ],
+  "confidence": {
+    "overall": "moderate-high for architecture/governance decision; moderate for staged gates; low for GTM ROI and universal numeric thresholds",
+    "claim_levels": {
+      "generic_runtime_boundary": "high—supported by narrow standards plus repeated prior repository findings",
+      "engineering_specific_boundary": "high—directly follows from domain semantics and least-authority design",
+      "dogfood_and_sdk_gates": "moderate—auditable and falsifiable but thresholds are locally chosen",
+      "GTM_compliance_and_publication_boundary": "high at principle level; moderate/low for jurisdiction-specific application",
+      "GTM_business_value": "low until baseline and controlled pilot data exist",
+      "vendor_outcomes": "low—documented capability is not audited outcome"
+    }
+  },
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "evidence_and_limits",
+    "implementation_recommendation",
+    "uncertainties",
+    "confidence"
+  ]
+}

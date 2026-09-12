@@ -1,0 +1,139 @@
+{
+  "reviewer": "round-8 independent cleanup-reclaim closure auditor",
+  "scope": {
+    "mode": "final plan-only closure audit after round-7 corrections and schema-3 regeneration",
+    "specialty": "adversarial lease A11 ordering, unconfirmed quiescence, cleanup escalation/resurface/new generation, RemediationObligation signaling/revocation/recovery/closure/resource unblock, and immutable terminal parent",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-7-resolution.md",
+      "review/round-7-closure/evidence-currentness.json",
+      "review/round-7-closure/formal-transitions.json",
+      "review/round-7-closure/improvement-interleavings.json",
+      "review/round-7-closure/lease-cleanup-adversary.json",
+      "review/round-7-closure/requirements-architecture.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "severity_policy": "Only critical/high findings are reported. A finding requires a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim.",
+    "scope_limits": "No implementation, full reachable-product/model proof, fresh immutable evidence retrieval, external-source truth, or human semantic evidence review was required or inferred."
+  },
+  "contract_reproduction": [
+    {
+      "contract": "A11-before-ordinary-successor and one-unfinished-attempt exclusion",
+      "exact_text": [
+        "PLAN.md §13: ‘commit A11 `STOPPED -> CANCELLED`; (6) only in a later admission transaction create the successor attempt/lease/fence/epoch/outbox.’",
+        "PLAN.md §13: ‘No successor Attempt, Lease, fence, context, or outbox may exist before A11 commits.’",
+        "docs/state-transition-manifests.md A01: ‘ordinary reclaim predecessor must have committed A11’.",
+        "docs/state-transition-manifests.md after A24: ‘The invariant “at most one unfinished Attempt per node across all fences” is unconditional.’"
+      ],
+      "audit_result": "pass; A10, prior cleanup receipts, A11, and later A01 are ordered, and no retained-cleanup or isolation exception admits a second unfinished Attempt."
+    },
+    {
+      "contract": "Unconfirmed quiescence cannot authorize a successor",
+      "exact_text": [
+        "docs/state-transition-manifests.md §1: ‘quiescence-closed’ requires U09, a verifying closure receipt, A18, false shared-resource ownership, and settled effects.",
+        "PLAN.md §13: ‘The old Attempt stays unfinished and the node admits no successor work until exact termination is recorded, the saga closes through U09, and A18 completes.’",
+        "docs/state-transition-manifests.md §14: ‘It cannot create or authorize a successor Attempt, Lease, fence, execution context, output, business command, business effect, workspace, credential, or any alternate authority carrier.’"
+      ],
+      "audit_result": "pass; DENIED, REVIEW, ISOLATING, and REVOKED do not satisfy closure, and no alternate successor-authority path was found."
+    },
+    {
+      "contract": "Immutable terminal parent and retained-risk generations",
+      "exact_text": [
+        "PLAN.md §13: ‘Terminal Work is immutable. When retained risk resurfaces, the parent Work and terminal CleanupItem never reopen.’",
+        "docs/state-transition-manifests.md §13: ‘A signal after closure creates a new exact generation through RO02.’",
+        "docs/state-transition-manifests.md §13.1: ‘CLOSED has zero outgoing rows and is immutable.’"
+      ],
+      "audit_result": "pass; resurface is carried by the separate obligation/child, and a post-close event creates generation+1 without changing the historical parent, item, or closed generation."
+    },
+    {
+      "contract": "Remediation signals, revocation, recovery, closure, and resource blocking",
+      "exact_text": [
+        "docs/state-transition-manifests.md C11: ‘first generation absent-or-same; later distinct signals append by RO03-RO06; post-close signal creates RO02 generation’.",
+        "docs/state-transition-manifests.md §13: ‘Any trigger, review due, or revocation uses C11’.",
+        "docs/state-transition-manifests.md §13: ‘otherwise it appends the signal to that live generation without changing status’.",
+        "docs/state-transition-manifests.md RO11-RO13 separately move OPEN, IN_PROGRESS, or VERIFYING to REVOKED on revocation/expiry/denial.",
+        "docs/state-transition-manifests.md RO09: only verified closure may reach CLOSED and atomically remove bound resource blocks."
+      ],
+      "audit_result": "fail; the mandatory C11 route for a distinct live-generation revocation selects a status-preserving RO03/RO04/RO05 append, while the separate RO11/RO12/RO13 state change has no defined atomic composition or required follow-on ordering."
+    },
+    {
+      "contract": "Schema-3 status boundary",
+      "exact_text": [
+        "README.md: ‘Round 7 formal/plan corrections and schema-3 candidate-only material-graph regeneration are complete for the current PLAN and normative-manifest digests.’",
+        "material-claims.json: schema_version=`3.0.0`, supports_edges=0, refutes_edges=0, normative_manifest_headings_reviewed=28.",
+        "material-claims.json validation_scope: ‘It is not external source retrieval or semantic entailment validation.’"
+      ],
+      "audit_result": "The package digests match the current PLAN and normative manifest and it remains candidate-only. No material evidence overclaim was found. The traceability status contradiction is separately reported because it directly contradicts this current package state."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R8-CR-001",
+      "severity": "high",
+      "title": "C11 makes live-generation revocation a status-preserving append and does not define the required REVOKED transition",
+      "locations": [
+        "docs/state-transition-manifests.md:603",
+        "docs/state-transition-manifests.md:606",
+        "docs/state-transition-manifests.md:608",
+        "docs/state-transition-manifests.md:618-628",
+        "PLAN.md:329"
+      ],
+      "contract": "Every trigger, review due, or revocation must use C11. C11 says every later distinct signal on a live generation appends through RO03-RO06 without changing status. Yet RO03-RO05 cover OPEN, IN_PROGRESS, and VERIFYING only as status-preserving resurface/review-due rows; the actual revocation state changes are separate RO11-RO13 rows. No row defines an atomic append-plus-revoke result, and no contract requires or orders RO11-RO13 after C11 consumes/appends the revocation event.",
+      "adversarial_trace": [
+        "Reach IN_PROGRESS under RO07 with a live purpose-bound remediation grant and child attempt.",
+        "Receive a distinct signed revocation. Section 13 requires it to use C11.",
+        "C11’s declared live-generation route is RO04, which appends the event and leaves the obligation IN_PROGRESS.",
+        "RO12 is separately triggerable by revocation, but the manifest defines neither an atomic RO04+RO12 transaction nor a mandatory durable continuation from RO04 to RO12. A literal compiler may finish the required C11 event while the obligation remains IN_PROGRESS.",
+        "The same gap exists for OPEN via RO03 versus RO11 and VERIFYING via RO05 versus RO13; a first or post-CLOSED revocation also creates OPEN via RO01/RO02 without a defined compound transition to REVOKED."
+      ],
+      "impact": "A revoked remediation can remain in an active status, or implementations can disagree on whether and when to fence/quiesce it. Resource keys remain blocked, but unauthorized remediation activity and nondeterministic recovery behavior are possible. This fails the round-7 requirement that revocation move or mark the obligation through a legal blocking transition.",
+      "required_plan_repair": "Define exact closed compound rows, or an exact transactional/mandatory queued sequence, for revocation at absent/OPEN/IN_PROGRESS/VERIFYING. The event append and transition to REVOKED must be replay-safe and ordered before any further remediation authority or effect. State how same-event replay works after the status change, and retain RO06 only for later signals once already REVOKED."
+    },
+    {
+      "id": "R8-CR-002",
+      "severity": "high",
+      "title": "Requirements traceability still says the current round-7 graph is stale while current artifacts say regeneration is complete",
+      "locations": [
+        "review/requirements-traceability.md:104",
+        "review/requirements-traceability.md:108",
+        "review/requirements-traceability.md:121",
+        "review/requirements-traceability.md:127-131",
+        "README.md:status",
+        "review/round-7-resolution.md:scope-and-status"
+      ],
+      "contract": "R7-REQ-002 required §§6-7 and §9 to be rewritten as historical statements and to remove present-tense claims that current-byte regeneration is pending. README, round-7 resolution, traceability §§9-10, and material-claims.json now say schema-3 regeneration matches the current round-7 PLAN/manifest digests and 28 headings.",
+      "reproduction": [
+        "Read traceability §6: ‘The current round-7 formal edit makes regeneration pending again.’",
+        "Read traceability §7: ‘The current round-7 formal edit now makes its byte digests and heading set stale pending later regeneration.’",
+        "Read §9/§10 and README: they say the round-7 graph now matches current bytes and 28 headings.",
+        "Verify material-claims.json stores the current PLAN and manifest SHA-256 values shown in round-7-resolution.md. Both mutually exclusive checkout-status claims remain active in the same required authority/status artifact."
+      ],
+      "impact": "The named traceability artifact gives opposite answers about whether a blocking current-byte regeneration is complete. This is the direct unresolved R7-REQ-002 defect and can cause a reviewer or implementation gate to use the wrong readiness state.",
+      "required_plan_repair": "Rewrite traceability §§6-7 so the former round-7 staleness is explicitly historical and completed by the current regeneration. Keep only fresh immutable retrieval, human semantic review, reviewed-edge regeneration, implementation/model gates, and independent closure as pending. Recheck §§8-10 for one unambiguous current status."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "low": 0,
+    "total": 2
+  },
+  "residual_uncertainty": [
+    "This was a static plan-contract audit, not implementation validation or exhaustive reachable-product model checking.",
+    "Fresh immutable retrieval, external source validation, and human edge-level semantic review remain future blocking gates and were not treated as defects.",
+    "The remediation recovery row RO14 was not raised separately: its ‘same child’ wording could be implemented by retrying a new Attempt within a still-nonterminal MAINTENANCE child, but the plan should test that interpretation."
+  ],
+  "closure_criteria_pass": false
+}

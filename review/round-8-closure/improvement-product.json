@@ -1,0 +1,167 @@
+{
+  "reviewer": "round-8-closure-improvement-product",
+  "scope": {
+    "mode": "Independent final PLAN-only closure audit after round-7 corrections and schema-3 regeneration.",
+    "artifacts_reviewed": [
+      "PLAN.md",
+      "README.md",
+      "docs/state-transition-manifests.md",
+      "review/requirements-traceability.md",
+      "review/round-7-resolution.md",
+      "review/round-7-closure/lease-cleanup-adversary.json",
+      "review/round-7-closure/formal-transitions.json",
+      "review/round-7-closure/improvement-interleavings.json",
+      "review/round-7-closure/requirements-architecture.json",
+      "review/round-7-closure/evidence-currentness.json",
+      "research/repository-agent-operating-system/material-claims.json",
+      "research/repository-agent-operating-system/research-manifest.json",
+      "research/repository-agent-operating-system/synthesis-coverage.md",
+      "research/repository-agent-operating-system/evidence-repair.md",
+      "research/repository-agent-operating-system/evidence-index.md",
+      "research/repository-agent-operating-system/evidence-cutoff.md",
+      "research/repository-agent-operating-system/report.md",
+      "research/repository-agent-operating-system/evidence-matrix.md",
+      "review/plan-link-check.json"
+    ],
+    "specialty": "Reducer and all improvement interleavings: REMEDIATION_WAIT/cancel, rollback cleanup ownership, canary generation replacement, direct/reconstructed widening, exhaustive terminal Effect-disposition product exits, HEALTHY invariant, and final cleanup rows.",
+    "severity_rule": "Critical/high only for a direct unmet requirement, contradiction, unsafe or undefined path, or material evidence overclaim. No implementation, full reachable-product model, fresh evidence retrieval, or semantic review was required."
+  },
+  "contract_reproduction": [
+    {
+      "area": "plan_only_boundary",
+      "result": "pass",
+      "basis": "PLAN.md:3-4 and README.md status correctly state that this is a plan, not a working controller, and keep immutable re-fetch and human semantic review as future blocking gates."
+    },
+    {
+      "area": "remediation_wait_and_cancellation",
+      "result": "fail",
+      "basis": "PLAN.md:238-240 requires final rollback failure to remain REMEDIATION_WAIT/BLOCKED and final cancellation to wait for real settlement. Manifest IRB06/IRB09 and IX03/IX04 describe that path, but the closed rollback vocabulary at manifest line 660 omits REMEDIATION_WAIT, so the reducer's unknown-symbol rejection invalidates the path."
+    },
+    {
+      "area": "canary_generation_replacement",
+      "result": "pass",
+      "basis": "Manifest IR03/IR04/IR24 and the canary-generation invariant at lines 756-757, 779, and 849 require one active pair, terminal/quiescent/effect-and-rollback-settled/clean history before replacement, absent-or-same replay, and fencing of delayed historical receipts."
+    },
+    {
+      "area": "direct_and_reconstructed_widening_success",
+      "result": "pass",
+      "basis": "Manifest IR38 and IR56 separately bind direct E06 and reconstructed E17 success to the same decision, bounds, generation, and effect identity; lines 846 and 951 make them mutually exclusive and the only widening-success exits."
+    },
+    {
+      "area": "terminal_effect_product_disposition",
+      "result": "fail",
+      "basis": "The IW/IP table covers E20/E21/E24/E25/E28/E29/E37/E39, but the same Effect machine permits non-cancellation terminal FAILED_FINAL exits E09/E10/E30/E31/E33/E35. No synchronized widening or promotion row consumes those terminal outcomes."
+    },
+    {
+      "area": "healthy_control_invariant",
+      "result": "fail",
+      "basis": "PLAN.md:238 and manifest line 936 require degradation to commit first and pause/stop exposure, while active exposure/progress states require HEALTHY. IH01 changes only HEALTHY to TELEMETRY_DEGRADED, creating a tuple that the same invariant says is unreachable."
+    },
+    {
+      "area": "rollback_cleanup_ownership",
+      "result": "fail",
+      "basis": "Promotion exposed IW/IP counterparts start rollback in IP*X, but widening IW*X only says to begin required rollback without changing rollback_state or creating a saga. IR13A later requires a verified bound rollback. Manifest line 853 also says IR19/IR22 are the only synchronized rollout/rollback entry rows despite IP*X doing the same."
+    },
+    {
+      "area": "final_cleanup_rows",
+      "result": "fail",
+      "basis": "ICL01 accepts final C02 or C12 for success, but ICL02 accepts only C02 for failure. C12 remains a legal PENDING-to-CLEANED retention receipt and can be the last item for FAILED work, leaving no synchronized owner for the CLEANING-to-FAILED fold."
+    },
+    {
+      "area": "schema_3_candidate_graph",
+      "result": "pass_with_document_status_contradiction",
+      "basis": "material-claims.json schema 3.0.0 matches the current PLAN and manifest SHA-256 values, covers 25 PLAN sections and 28 manifest headings, uses only candidate/context relations, and expressly denies provenance or semantic validation. Requirements traceability lines 104 and 108 nevertheless still say the current round-7 edit makes regeneration pending/stale, contradicting lines 121 and 131, README status, and the package bytes."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R8-IMP-001",
+      "severity": "high",
+      "title": "REMEDIATION_WAIT is excluded from the reducer's closed rollback vocabulary",
+      "requirement": "PLAN.md:238-240 requires forbidden, stale, or exhausted rollback failure to enter REMEDIATION_WAIT/BLOCKED and remain nonterminal through real remediation and verification; manifest line 654 rejects unknown symbols and line 660 declares the closed rollback_state vocabulary.",
+      "evidence": [
+        "Manifest line 660 declares `rollback_state={IDLE,REQUESTED,ROLLING_BACK,VERIFYING,VERIFIED,FAILED,ROLLED_BACK}` and omits `REMEDIATION_WAIT`.",
+        "Reducer priorities at lines 672 and 678, IRB06 at line 862, IRB09 at line 867, IX03 at line 904, and the exact witness at line 943 all use `REMEDIATION_WAIT`.",
+        "Round-7 resolution claims reducer symbol closure and successful rollback-remediation witnesses, which cannot both hold under the declared closed vocabulary and unknown-symbol rejection."
+      ],
+      "impact": "IRB06 cannot commit a valid ImprovementTupleV1. Final rollback failure and cancellation during that failure therefore have no defined legal reducer path.",
+      "required_plan_correction": "Add REMEDIATION_WAIT to the authoritative rollback_state vocabulary and regenerate the symbol-closure/reachability checks and schema-3 current-byte package."
+    },
+    {
+      "id": "R8-IMP-002",
+      "severity": "high",
+      "title": "The HEALTHY invariant makes a degradation event during active exposure uncommittable",
+      "requirement": "PLAN.md:238 says control degradation commits a pause before more exposure receipts and active canary/widening/promotion progress requires HEALTHY. Manifest lines 663 and 936 reject impossible tuples and forbid active exposure states with degraded, paused, or failed control.",
+      "evidence": [
+        "IH01 at manifest line 915 changes only control health from HEALTHY to TELEMETRY_DEGRADED; it does not synchronously pause or abort rollout.",
+        "Manifest line 936 includes CANARY_RUNNING, WIDENING_EFFECT, APPROVED, PROMOTING, PROMOTED, and OBSERVING in the HEALTHY-only set and also says the degradation event commits first.",
+        "Applying IH01 in any listed state creates the exact forbidden tuple, so invariant checking must reject the event; no synchronized IH01 plus rollout-pause/abort row exists."
+      ],
+      "impact": "Loss of continuity can be rejected instead of durably recorded and fenced at the moment exposure is active, which is an unsafe control path and contradicts the claimed R7-INT-005 repair.",
+      "required_plan_correction": "Define exhaustive synchronized degradation rows that atomically record degraded health and move each active rollout/exposure state to its safe paused/aborting state, then update witnesses."
+    },
+    {
+      "id": "R8-IMP-003",
+      "severity": "high",
+      "title": "Widening and promotion omit legal direct terminal Effect failure exits",
+      "requirement": "PLAN.md:228 requires every nonterminal Effect state to have a total bounded disposition, and manifest lines 667 and 923 require every component event to have one exact legal product projection. The requested terminal-effect product audit must cover every declared terminal Effect exit, not only UNKNOWN-origin exits.",
+      "evidence": [
+        "Effect rows E09, E10, E30, E31, E33, and E35 at manifest lines 543-544 and 564-569 legally reach FAILED_FINAL without passing through E20/E21/E24/E25/E28/E29/E37/E39.",
+        "The synchronized IW/IP rows at lines 813-846 enumerate only E20, E21, E24, E25, E28, E29, E37, and E39; IR43 and IR55 cover only E34.",
+        "With rollout WIDENING_EFFECT or PROMOTING, the omitted terminal Effect can settle while rollout remains unchanged. The reducer then exposes REVIEW or MERGE_QUEUED, but no rollout-coordinate recovery/failure edge exists."
+      ],
+      "impact": "A normal pre-send, send, or retry terminal failure can strand widening or promotion in an active rollout state or permit an unauthorized-looking canonical fallback without a legal rollout transition.",
+      "required_plan_correction": "Add mutually exclusive exposure/no-exposure synchronized product exits for every reachable terminal Effect edge in WIDENING_EFFECT and PROMOTING, or formally prove and guard those edges unreachable in each context."
+    },
+    {
+      "id": "R8-IMP-004",
+      "severity": "high",
+      "title": "Exposed widening failure requires rollback but has no rollback-saga entry row",
+      "requirement": "PLAN.md:238 and manifest lines 846 and 952 require exposed widening failures to complete real rollback before cleanup, with exactly one later cleanup owner.",
+      "evidence": [
+        "Each IW*X row at manifest lines 813-843 moves WIDENING_EFFECT to CANARY_ABORTING and says `begin abort/required rollback`, but none changes rollback_state IDLE->REQUESTED or creates the rollback saga.",
+        "IR13A at line 766 later requires the bound rollback to have reached verified/rolled-back, while IRB01 can start only from REQUESTED.",
+        "Manifest line 853 says IR19 and IR22 are the only synchronized rollout/rollback entry rows. This both leaves IW*X without an entry and contradicts IP*X rows, which explicitly perform IDLE->REQUESTED."
+      ],
+      "impact": "An exposure-classified widening failure reaches CANARY_ABORTING but cannot start the rollback whose verification is required for IR13A, so abort settlement and cleanup are unreachable.",
+      "required_plan_correction": "Give every IW*X row an atomic, uniquely owned rollback IDLE->REQUESTED saga creation, or add one exact subsequent entry row and correct the exclusivity statement and witnesses."
+    },
+    {
+      "id": "R8-IMP-005",
+      "severity": "high",
+      "title": "Failure terminalization has no synchronized owner when the last CleanupItem closes through C12",
+      "requirement": "Manifest lines 926-934 require ICL01-ICL03 or IX04 to be the sole atomic owner of the last cleanup fold and terminal parent projection; generic C02/C09/C12 must not terminalize the improvement parent.",
+      "evidence": [
+        "C12 at line 604 is a legal PENDING->CLEANED transition using a legal-hold/retention receipt, and PLAN.md:415 permits verified retention receipts for cleanup.",
+        "ICL01 at line 930 explicitly accepts final C02 or C12 for success, but ICL02 at line 931 accepts only C02 for failure.",
+        "For a failure tuple whose last required item legally takes C12, the cleanup fold becomes CLEANED and the reducer's exact failure conjunction changes canonical CLEANING->FAILED, yet neither ICL02 nor another synchronized row owns that event."
+      ],
+      "impact": "A valid retained cleanup item can leave FAILED work unable to terminalize or force generic C12 to violate the single-owner rule.",
+      "required_plan_correction": "Permit C12 in ICL02 with the exact failure guards, or explicitly forbid and justify C12 for every failure cleanup manifest."
+    },
+    {
+      "id": "R8-IMP-006",
+      "severity": "high",
+      "title": "Traceability simultaneously reports the round-7 schema-3 graph as stale and current",
+      "requirement": "Round-7 R7-REQ-002 and the closure task require one accurate currentness account for the schema-3 candidate-only graph after regeneration.",
+      "evidence": [
+        "Requirements traceability lines 104 and 108 say the `current round-7 formal edit` makes regeneration pending and the byte digests/heading set stale.",
+        "The same file at lines 121 and 131 says round-7 regeneration now matches the current PLAN/manifest bytes and all 28 headings; README status and round-7 resolution say the same.",
+        "material-claims.json actually records the current PLAN SHA-256 `25f6960b...acc` and manifest SHA-256 `b1cd4933...413`, matching the current files, and limits all edges to unreviewed candidate semantics."
+      ],
+      "impact": "The authoritative traceability record gives opposite answers about whether the required regeneration gate is complete. This is a direct closure-status contradiction even though the schema-3 package itself is conservatively scoped.",
+      "required_plan_correction": "Rewrite the historical round-3/round-4 paragraphs so they describe the former round-6 graph as superseded and the round-7 regeneration as complete, without calling the current package pending or stale."
+    }
+  ],
+  "counts": {
+    "critical": 0,
+    "high": 6,
+    "total": 6
+  },
+  "residual_uncertainty": [
+    "No implementation, committed generated model, production safety proof, fresh immutable retrieval, or human semantic review was expected or treated as a closure defect.",
+    "The schema-3 graph was checked as a current-byte, candidate-only editorial package; its conservative provenance and semantic disclaimers were accepted.",
+    "These findings are direct contradictions or missing normative product rows. They do not depend on demanding a full reachable-product proof."
+  ],
+  "closure_criteria_pass": false
+}

@@ -1,0 +1,1294 @@
+{
+  "scope": {
+    "item": "Adoption maturity and build-vs-buy landscape for agent-managed self-building and self-maintaining software projects.",
+    "definitions": {
+      "largely_self_managed": "A repository workflow in which automation can accept bounded work, modify code, test it, open a change, and react to feedback; humans retain product intent, policy, exception handling, and risk-bearing approvals.",
+      "solved": "Repeatable with documented controls and bounded failure impact, not merely capable in a demo or benchmark.",
+      "experimental": "Outcome, security, or economics depend strongly on task/repository and lack stable unattended production evidence."
+    },
+    "included": [
+      "issue-to-draft-PR coding agents",
+      "interactive/CLI agents used in CI or headless jobs",
+      "dependency/security maintenance bots",
+      "hosted versus self-hosted execution",
+      "pilot design, gates, unit economics, and rollout"
+    ],
+    "excluded": [
+      "claims that one benchmark proves enterprise autonomy",
+      "fully autonomous product strategy or legal accountability",
+      "detailed ranking of every model"
+    ],
+    "time_range": "2019 through 2026-09-13, with older secure-delivery controls retained where foundational."
+  },
+  "current_state": {
+    "verified_facts": [
+      {
+        "claim": "Hosted agents can now run repository tasks in isolated cloud environments, work in parallel, reproduce configured dependencies, and return changes for review; Codex documents GitHub/GitLab plus Linear/Slack initiation and review-before-merge.",
+        "url": "https://learn.chatgpt.com/docs/cloud"
+      },
+      {
+        "claim": "GitHub's cloud agent handles bounded work such as bug fixes, incremental features, tests, docs and technical debt, but one session is confined to one repository, one branch, exactly one PR, and a documented 59-minute limit.",
+        "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent"
+      },
+      {
+        "claim": "GitHub enforces a strong default handoff: Copilot draft PRs require human review/merge; it cannot approve or merge, and Actions do not run until an authorized user approves unless administrators opt into automatic runs.",
+        "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+      },
+      {
+        "claim": "Routine dependency-update PR creation is established automation: Dependabot can raise security-update PRs, and Renovate provides a GitHub App plus a self-hosted execution option.",
+        "urls": [
+          "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates",
+          "https://docs.renovatebot.com/modules/platform/github/",
+          "https://docs.renovatebot.com/self-hosted-configuration/"
+        ]
+      },
+      {
+        "claim": "OpenHands and SWE-agent provide open-source bases for self-hosted/custom operation rather than requiring a greenfield agent implementation.",
+        "urls": [
+          "https://github.com/OpenHands/OpenHands",
+          "https://github.com/SWE-agent/SWE-agent"
+        ]
+      }
+    ],
+    "vendor_claims": [
+      {
+        "claim": "Claude Code says enterprise deployments average about $13 per developer per active day and $150-$250 per developer per month, with 90% under $30 per active day; this is Anthropic telemetry/guidance, not independent ROI evidence.",
+        "url": "https://code.claude.com/docs/en/costs"
+      },
+      {
+        "claim": "GitHub's study reported 55.8% faster completion on one constrained JavaScript HTTP-server task, plus favorable self-reported satisfaction; generalization to repository maintenance is not established.",
+        "urls": [
+          "https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/",
+          "https://arxiv.org/abs/2302.06590"
+        ]
+      }
+    ],
+    "inference": "The substrate for bounded issue-to-PR assistance is commercially available. Reliable end-to-end self-management from ambiguous roadmap through unattended production remediation is not demonstrated by the cited evidence and should not be treated as solved."
+  },
+  "representative_systems": [
+    {
+      "system": "GitHub Copilot cloud agent",
+      "status": "hosted, repository-native, production-usable for bounded single-repository PR tasks with mandatory human merge by default",
+      "selection_fit": "GitHub-centric teams that prefer integrated identity, audit, rulesets and low platform-operations burden",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent"
+    },
+    {
+      "system": "OpenAI Codex cloud/CLI",
+      "status": "hosted and local surfaces; cloud offers parallel isolated environments and review handoff",
+      "selection_fit": "teams wanting multi-entry-point task delegation or Codex CLI automation, while retaining their own policy gates",
+      "urls": [
+        "https://learn.chatgpt.com/docs/cloud",
+        "https://learn.chatgpt.com/docs/pricing"
+      ]
+    },
+    {
+      "system": "Claude Code",
+      "status": "production CLI/automation building block; token-metered API use and subscription plans",
+      "selection_fit": "interactive plus scripted agent workflows where hooks, context discipline and explicit spend limits can be operated",
+      "urls": [
+        "https://code.claude.com/docs/en/best-practices",
+        "https://code.claude.com/docs/en/costs"
+      ]
+    },
+    {
+      "system": "Devin",
+      "status": "commercial agent with individual, team and enterprise packaging; current pricing page exposes Free/Pro/Max and Teams tiers",
+      "selection_fit": "buy when managed cloud-agent UX and vendor support outweigh portability/custom-runtime needs",
+      "url": "https://devin.ai/pricing"
+    },
+    {
+      "system": "OpenHands",
+      "status": "active open-source agent/control-plane base with local, Docker, remote, cloud and enterprise choices",
+      "selection_fit": "self-host or extend when data locality, model/runtime choice, or custom orchestration justifies platform ownership",
+      "urls": [
+        "https://github.com/OpenHands/OpenHands",
+        "https://docs.openhands.dev/openhands/usage/sandboxes/docker",
+        "https://docs.openhands.dev/openhands/usage/cli/headless"
+      ]
+    },
+    {
+      "system": "SWE-agent",
+      "status": "open-source research/engineering agent optimized around issue resolution",
+      "selection_fit": "experimentation, benchmark reproduction and custom research pipelines rather than an off-the-shelf enterprise control plane",
+      "url": "https://github.com/SWE-agent/SWE-agent"
+    },
+    {
+      "system": "Dependabot / Renovate",
+      "status": "mature, narrow maintenance automation",
+      "selection_fit": "first rollout stage for dependency PRs; Renovate when scheduling/grouping/policy breadth or self-hosting is needed",
+      "urls": [
+        "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates",
+        "https://docs.renovatebot.com/modules/platform/github/",
+        "https://docs.renovatebot.com/self-hosted-configuration/"
+      ]
+    }
+  ],
+  "primary_evidence": [
+    {
+      "finding": "SWE-bench began with 2,294 real GitHub issues from 12 Python repositories; the original paper's best reported model (Claude 2) solved 1.96%, showing the 2023 baseline was far from autonomy.",
+      "classification": "peer-reviewed benchmark foundation",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2310.06770"
+      ]
+    },
+    {
+      "finding": "SWE-bench now separates original, Lite and a 500-instance Verified view and identifies runs checked by its team. This supports capability comparison, not operational ROI.",
+      "classification": "official benchmark documentation",
+      "url": "https://www.swebench.com/"
+    },
+    {
+      "finding": "SWE-Lancer contains more than 1,400 Upwork engineering and managerial tasks totaling $1 million in historical payouts, with engineering tasks from $50 fixes to $32,000 features and end-to-end tests triple-verified by experienced engineers.",
+      "classification": "research benchmark with economic framing",
+      "url": "https://arxiv.org/abs/2502.12115"
+    },
+    {
+      "finding": "GitHub documents repository/branch/PR/session bounds and an explicit human-review model rather than autonomous merge.",
+      "classification": "official product behavior",
+      "urls": [
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+      ]
+    },
+    {
+      "finding": "OpenHands documents Docker as its default/recommended local sandbox because it improves isolation and reproducibility; host mounts marked read-write can be changed by the agent.",
+      "classification": "official open-source documentation",
+      "url": "https://docs.openhands.dev/openhands/usage/sandboxes/docker"
+    },
+    {
+      "finding": "SLSA v1.2 defines supply-chain levels and provenance controls that remain applicable regardless of whether code was written by a human or agent.",
+      "classification": "open standard",
+      "url": "https://slsa.dev/spec/v1.2/"
+    },
+    {
+      "finding": "NIST SSDF 1.1 groups secure practices into preparing the organization, protecting software, producing well-secured software, and responding to vulnerabilities; agent adoption does not remove these duties.",
+      "classification": "government standard",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final"
+    }
+  ],
+  "independent_evidence": [
+    {
+      "result": "In METR's randomized early-2025 study, experienced open-source developers working in repositories they knew took 19% longer with AI; they had expected 24% speedup and afterward believed they had been sped up 20%.",
+      "limits": "Snapshot of selected early-2025 tools, developers and tasks; not a measurement of asynchronous cloud agents or all organizations.",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+    },
+    {
+      "result": "METR's February 2026 update observed raw estimates of 18% speedup for returning developers (CI from 38% speedup to 9% slowdown) and 4% for new developers (CI from 15% speedup to 9% slowdown), but called the evidence very weak because AI-preferring developers/tasks selected out and parallel-agent time was hard to measure.",
+      "limits": "Do not present the point estimates as causal fleet-wide productivity.",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/"
+    },
+    {
+      "result": "Stack Overflow's 2025 survey says 84% used or planned to use AI development tools and 51% of professional developers used them daily, yet 46% distrusted output accuracy versus 33% who trusted it; 52% did not use agents or stayed with simpler tools and 38% had no adoption plans.",
+      "limits": "Self-selected survey and perception/adoption evidence, not controlled outcome measurement.",
+      "url": "https://survey.stackoverflow.co/2025/ai"
+    },
+    {
+      "result": "DORA 2024 associated a 25% rise in AI adoption with 7.5% better documentation quality, 3.4% code quality and 3.1% review speed, while its report also found negative relationships with delivery stability and throughput.",
+      "limits": "Survey-based associations are not causal and mix tools/workflows.",
+      "urls": [
+        "https://dora.dev/research/2024/dora-report/",
+        "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report"
+      ]
+    },
+    {
+      "result": "The 55.8% completion-speed increase in the Copilot experiment conflicts with METR's early-2025 slowdown because the former used a short greenfield JavaScript task and the latter used experienced maintainers' real repository issues.",
+      "limits": "Both results are setting-specific; neither establishes ROI for unattended issue-to-production operation.",
+      "urls": [
+        "https://arxiv.org/abs/2302.06590",
+        "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+      ]
+    }
+  ],
+  "metrics": {
+    "capability": [
+      {
+        "metric": "1.96% resolved",
+        "context": "best model in original SWE-bench paper (Claude 2), a historical 2023-era baseline",
+        "url": "https://arxiv.org/abs/2310.06770"
+      },
+      {
+        "metric": "2,294 original / 500 Verified / 300 Lite instances",
+        "context": "current benchmark dataset views; leaderboards remain environment- and patch-grader-specific",
+        "url": "https://www.swebench.com/"
+      },
+      {
+        "metric": ">1,400 tasks, $1M historical payout value, $50-$32,000 engineering-task span",
+        "context": "SWE-Lancer task corpus; payout value is not money saved by a model",
+        "url": "https://arxiv.org/abs/2502.12115"
+      }
+    ],
+    "productivity": [
+      {
+        "metric": "19% slower (CI +2% to +39% time)",
+        "context": "METR early-2025 experienced maintainers in known repositories",
+        "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+      },
+      {
+        "metric": "late-2025 raw estimates: returning developers 18% faster (CI 38% faster to 9% slower); new developers 4% faster (CI 15% faster to 9% slower)",
+        "context": "METR explicitly labels this very weak evidence because of severe selection effects",
+        "url": "https://metr.org/blog/2026-02-24-uplift-update/"
+      },
+      {
+        "metric": "55.8% faster",
+        "context": "Copilot controlled experiment on one constrained HTTP-server implementation task",
+        "url": "https://arxiv.org/abs/2302.06590"
+      },
+      {
+        "metric": "DORA associations for +25% AI adoption: +7.5% documentation quality, +3.4% code quality, +3.1% review speed, but worse delivery stability/throughput",
+        "context": "cross-sectional/report association, not causal ROI",
+        "urls": [
+          "https://dora.dev/research/2024/dora-report/",
+          "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report"
+        ]
+      }
+    ],
+    "adoption_trust": [
+      {
+        "metric": "84% using/planning AI; 51% of professionals daily; 46% distrust accuracy vs 33% trust; agents not mainstream",
+        "context": "Stack Overflow 2025 survey",
+        "url": "https://survey.stackoverflow.co/2025/ai"
+      }
+    ],
+    "cost": [
+      {
+        "metric": "Anthropic-reported mean about $13/developer/active day and $150-$250/developer/month; 90% below $30/active day",
+        "context": "vendor guidance; varies with model, codebase and concurrency",
+        "url": "https://code.claude.com/docs/en/costs"
+      },
+      {
+        "metric": "Devin public packaging currently lists Pro $20/month, Max $200/month, and Teams $80/month plus $40/month per full developer seat",
+        "context": "page is mutable and quotas/API overage make sticker price incomplete",
+        "url": "https://devin.ai/pricing"
+      },
+      {
+        "metric": "GitHub and Codex publish plan/usage pricing, but normalize quotes at procurement time because models, multipliers, quotas and included limits change",
+        "context": "use current calculator/invoice data, not hard-coded study assumptions",
+        "urls": [
+          "https://github.com/features/copilot/plans",
+          "https://learn.chatgpt.com/docs/pricing"
+        ]
+      }
+    ],
+    "pilot_unit_economics_formula": "Cost per accepted change = (seat allocation + model/API tokens + sandbox/CI compute + orchestration/ops labor + human specification/review/rework labor + expected incident loss) / changes accepted and retained after 30 days. Compare with the same task classes under the pre-agent baseline; report medians and tails, not only aggregate lines of code."
+  },
+  "reference_workflow": [
+    {
+      "step": 0,
+      "name": "baseline",
+      "trigger": "before access is enabled",
+      "inputs": [
+        "4-8 weeks of task-cycle data",
+        "CI minutes/cost",
+        "review minutes",
+        "defect/revert/security findings"
+      ],
+      "state": "baseline-recorded",
+      "outputs": [
+        "task taxonomy",
+        "risk tiers",
+        "control group or staggered-rollout design"
+      ],
+      "mechanics": "Label tasks by size, ambiguity, repository familiarity, blast radius and required privileges. Do not use lines of code as the primary outcome; DORA and METR show productivity perceptions/coding speed can diverge from delivery outcomes.",
+      "urls": [
+        "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+        "https://dora.dev/research/2024/dora-report/"
+      ]
+    },
+    {
+      "step": 1,
+      "name": "narrow intake",
+      "trigger": "labeled issue, dependency alert, failed test, or approved maintenance queue item",
+      "inputs": [
+        "acceptance tests",
+        "file/repository scope",
+        "risk tier",
+        "budget",
+        "owner"
+      ],
+      "state": "queued",
+      "outputs": [
+        "immutable task record and correlation ID"
+      ],
+      "mechanics": "Start with docs/tests, deterministic dependency bumps, lint fixes and small low-blast-radius bugs. Reject ambiguous product work back to a human for clarification."
+    },
+    {
+      "step": 2,
+      "name": "authorize and provision",
+      "trigger": "policy admits task",
+      "inputs": [
+        "short-lived repo token",
+        "pinned sandbox image",
+        "allowlisted network destinations",
+        "read-only context by default"
+      ],
+      "state": "leased",
+      "outputs": [
+        "ephemeral workspace",
+        "audit record"
+      ],
+      "mechanics": "One task/branch/workspace. Keep production, package-publish and broad cloud credentials absent. GitHub's design shows feasible bounds: only write-authorized users trigger it, one branch, restricted credentials and internet firewall.",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "step": 3,
+      "name": "plan and execute",
+      "trigger": "workspace healthy",
+      "inputs": [
+        "issue/spec",
+        "repository instructions",
+        "test commands",
+        "dependency cache"
+      ],
+      "state": "running",
+      "outputs": [
+        "plan",
+        "commits/diff",
+        "test evidence",
+        "tool transcript",
+        "cost/latency"
+      ],
+      "mechanics": "Impose wall-clock, token, retry and file-change budgets. Use deterministic tools first; stop on credential request, policy violation, repeated test failure, generated-code churn or scope expansion."
+    },
+    {
+      "step": 4,
+      "name": "machine verification",
+      "trigger": "agent proposes change",
+      "inputs": [
+        "clean checkout of patch",
+        "independent CI identity"
+      ],
+      "state": "verifying",
+      "outputs": [
+        "unit/integration/property tests",
+        "lint/type/static analysis",
+        "dependency/malware/secret/license results",
+        "artifact/provenance"
+      ],
+      "mechanics": "Never treat agent self-reported tests as evidence. Re-run in a fresh environment; verify lockfiles and new dependencies. GitHub itself applies CodeQL, advisory checks and secret scanning to agent changes; SLSA provides provenance framing.",
+      "urls": [
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+        "https://slsa.dev/spec/v1.2/"
+      ]
+    },
+    {
+      "step": 5,
+      "name": "draft PR and human gate",
+      "trigger": "required machine checks pass",
+      "inputs": [
+        "minimal diff",
+        "linked issue",
+        "evidence and risk score"
+      ],
+      "state": "awaiting-review",
+      "outputs": [
+        "approve",
+        "request changes",
+        "reject/escalate"
+      ],
+      "mechanics": "Require an accountable reviewer who did not initiate/author the agent output for code with behavior or security impact. Preserve rulesets and required status checks. GitHub prevents the requester from approving and requires extra approval for non-person-attributed PRs when approvals already apply.",
+      "urls": [
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+      ]
+    },
+    {
+      "step": 6,
+      "name": "merge and progressive delivery",
+      "trigger": "human approval plus green current-head checks",
+      "inputs": [
+        "signed/traceable commit",
+        "deployment policy"
+      ],
+      "state": "canary",
+      "outputs": [
+        "artifact",
+        "deployment telemetry",
+        "rollback handle"
+      ],
+      "mechanics": "Deploy low-risk changes automatically only behind existing progressive-delivery controls. Require explicit release approval for data migrations, permissions, public API, billing, auth, safety or production-infrastructure changes."
+    },
+    {
+      "step": 7,
+      "name": "observe, rollback, learn",
+      "trigger": "post-merge/deploy events",
+      "inputs": [
+        "SLOs",
+        "errors/traces",
+        "user feedback",
+        "revert signal"
+      ],
+      "state": "accepted|reverted|incident|eval-candidate",
+      "outputs": [
+        "30-day retained-change outcome",
+        "postmortem/eval case",
+        "updated policy"
+      ],
+      "mechanics": "Rollback automatically on predeclared service thresholds, not on an LLM's unconstrained judgment. Feed failures into a versioned regression set; policy/model changes go through shadow evaluation and owner approval."
+    },
+    {
+      "step": 8,
+      "name": "expand by evidence",
+      "trigger": "pilot meets guardrails for at least two release cycles",
+      "inputs": [
+        "cost per retained change",
+        "p50/p95 cycle/review time",
+        "escape/revert/security rates",
+        "developer survey"
+      ],
+      "state": "expanded|held|rolled-back",
+      "outputs": [
+        "next risk tier/repository cohort"
+      ],
+      "mechanics": "Use staggered cohorts. Expand task classes and permissions separately so causal attribution and rollback stay possible."
+    }
+  ],
+  "integration_points": {
+    "events": [
+      "GitHub/GitLab issue labels and assignment",
+      "Dependabot/security alerts",
+      "Renovate schedules",
+      "CI failures",
+      "observability incident tickets only after deduplication and severity policy"
+    ],
+    "control_plane": [
+      "queue with idempotency key and task state",
+      "policy engine for repository/task/risk/budget",
+      "vendor agent API/CLI or self-hosted OpenHands headless worker",
+      "cancellation, timeout and retry service"
+    ],
+    "execution": [
+      "ephemeral Docker/VM sandbox",
+      "pinned toolchain/lockfile",
+      "short-lived SCM App/OIDC credentials",
+      "egress proxy/allowlist",
+      "secrets broker with task-scoped leases"
+    ],
+    "verification": [
+      "required CI checks",
+      "test coverage/diff checks",
+      "SAST/CodeQL",
+      "secret and dependency scanning",
+      "SBOM/provenance/attestation",
+      "license policy"
+    ],
+    "change_management": [
+      "draft PR",
+      "CODEOWNERS/rulesets",
+      "independent reviewer",
+      "merge queue",
+      "feature flags/canary",
+      "automatic revert"
+    ],
+    "telemetry": [
+      "prompt/task/model/tool versions",
+      "agent transcript and tool calls",
+      "token/compute/CI cost",
+      "human minutes",
+      "PR disposition",
+      "reverts/incidents and 30-day retention"
+    ],
+    "product_examples": [
+      {
+        "claim": "Codex cloud documents GitHub/GitLab, Linear and Slack initiation.",
+        "url": "https://learn.chatgpt.com/docs/cloud"
+      },
+      {
+        "claim": "Renovate can run as a GitHub App or self-hosted process.",
+        "urls": [
+          "https://docs.renovatebot.com/modules/platform/github/",
+          "https://docs.renovatebot.com/self-hosted-configuration/"
+        ]
+      },
+      {
+        "claim": "OpenHands exposes a headless CLI path for automation.",
+        "url": "https://docs.openhands.dev/openhands/usage/cli/headless"
+      }
+    ]
+  },
+  "human_gates": [
+    {
+      "gate": "intent/specification",
+      "required_when": "acceptance criteria are missing, product trade-offs exist, task crosses repositories, or proposed scope expands",
+      "decision": "clarify, split or reject"
+    },
+    {
+      "gate": "credential/tool elevation",
+      "required_when": "network, secret, MCP tool, cloud role or write scope exceeds preset profile",
+      "decision": "deny by default; approve one short-lived lease with reason"
+    },
+    {
+      "gate": "PR review",
+      "required_when": "any behavior-changing generated code; always during pilot",
+      "decision": "review diff and independently reproduced evidence; requester/agent must not be sole approver",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "gate": "high-risk release",
+      "required_when": "auth/crypto, permissions, billing, personal data, schema/destructive migration, public API, infrastructure, package publishing or safety control",
+      "decision": "domain/code owner and release owner approve; two-person rule where consequences warrant"
+    },
+    {
+      "gate": "incident remediation",
+      "required_when": "diagnosis is uncertain, rollback failed, data could be corrupted, or SLO impact is high",
+      "decision": "human incident commander owns mitigation; agent may prepare evidence or draft patch"
+    },
+    {
+      "gate": "policy/model upgrade",
+      "required_when": "agent/model/prompt/tool/sandbox image changes",
+      "decision": "shadow/replay regression set, compare costs and failures, then named owner approves"
+    }
+  ],
+  "failure_modes": [
+    {
+      "mode": "plausible but wrong patch or weak tests",
+      "type": "technical",
+      "effect": "green self-written tests mask regression",
+      "evidence": "Survey respondents distrust accuracy; real-task studies vary sharply by setting.",
+      "urls": [
+        "https://survey.stackoverflow.co/2025/ai",
+        "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+      ]
+    },
+    {
+      "mode": "prompt injection through issue, PR, dependency docs, web or tool output",
+      "type": "security",
+      "effect": "data exfiltration, malicious tool use or scope expansion",
+      "evidence": "GitHub explicitly treats hidden issue/comment content and untrusted automation events as injection risks.",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "mode": "credential or network overreach",
+      "type": "security",
+      "effect": "repository/cloud/package-registry compromise",
+      "evidence": "GitHub restricts credentials, triggerers and internet access because agents can execute generated commands.",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "mode": "supply-chain compromise",
+      "type": "security",
+      "effect": "malicious/new vulnerable dependency or untraceable artifact",
+      "evidence": "GitHub checks new dependencies and SLSA treats provenance as a distinct supply-chain control.",
+      "urls": [
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+        "https://slsa.dev/spec/v1.2/"
+      ]
+    },
+    {
+      "mode": "benchmark overfitting or contamination / leaderboard transfer error",
+      "type": "evaluation",
+      "effect": "high reported resolve rate fails on private repositories",
+      "evidence": "SWE-bench views differ by dataset and shared environment; SWE-Lancer adds different economic/managerial task types, demonstrating construct dependence.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2502.12115"
+      ]
+    },
+    {
+      "mode": "review bottleneck and automation bias",
+      "type": "organizational",
+      "effect": "agent produces more diffs than humans can understand, or reviewers rubber-stamp",
+      "evidence": "DORA's negative stability/throughput association despite local quality/review gains warns that local acceleration need not improve the delivery system.",
+      "urls": [
+        "https://dora.dev/research/2024/dora-report/",
+        "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report"
+      ]
+    },
+    {
+      "mode": "cost runaway",
+      "type": "economic",
+      "effect": "parallel sessions, retries, long context and CI consume more than labor saved",
+      "evidence": "Anthropic states cost varies widely with model, codebase, concurrency and automation, and recommends a small pilot/baseline.",
+      "url": "https://code.claude.com/docs/en/costs"
+    },
+    {
+      "mode": "vendor drift/lock-in",
+      "type": "economic/operational",
+      "effect": "pricing, quotas, model behavior or product interfaces change; stored prompts/evals fail",
+      "evidence": "Current pricing is plan/quota/model dependent across vendors.",
+      "urls": [
+        "https://github.com/features/copilot/plans",
+        "https://learn.chatgpt.com/docs/pricing",
+        "https://devin.ai/pricing"
+      ]
+    },
+    {
+      "mode": "self-hosting toil",
+      "type": "operational",
+      "effect": "team owns sandbox patching, queue reliability, observability, model routing and incident response",
+      "evidence": "OpenHands self-hosting exposes explicit Docker, network, mounting and concurrency configuration rather than eliminating operations.",
+      "urls": [
+        "https://github.com/OpenHands/OpenHands",
+        "https://docs.openhands.dev/openhands/usage/sandboxes/docker"
+      ]
+    },
+    {
+      "mode": "cross-repository or long-horizon failure",
+      "type": "technical/product",
+      "effect": "agent cannot finish architectural changes or loses context",
+      "evidence": "GitHub documents one repository, one branch, one PR and a 59-minute maximum per cloud-agent session.",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent"
+    }
+  ],
+  "controls_and_mitigations": [
+    {
+      "control": "least privilege",
+      "implementation": "SCM App installation limited by repository; per-task short-lived token; deny force-push, default branch, package publish, production, billing and identity administration; separate read context from write tools.",
+      "evidence": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "control": "sandbox and egress",
+      "implementation": "fresh non-privileged container/VM per task; no host Docker socket; read-only base; explicit writable workspace; CPU/memory/time limits; default-deny egress with package mirror allowlist. Treat a host-mounted writable path as agent-writable.",
+      "evidence": "https://docs.openhands.dev/openhands/usage/sandboxes/docker"
+    },
+    {
+      "control": "untrusted-input boundary",
+      "implementation": "do not concatenate public issues/web/tool output into privileged instructions; sanitize hidden text; tag provenance; disable high-impact tools for untrusted triggers; events from non-writers ignored by default.",
+      "evidence": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "control": "independent verification",
+      "implementation": "fresh-checkout CI under a different identity; required checks; changed-code coverage; mutation/property tests for critical logic; SAST, secret, dependency/malware and license scans.",
+      "evidence": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+    },
+    {
+      "control": "change governance",
+      "implementation": "draft PR only, protected branch/ruleset, CODEOWNERS, current-head approval, merge queue; initiator cannot be only approver; preserve auditable agent identity.",
+      "evidence": [
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+      ]
+    },
+    {
+      "control": "supply chain",
+      "implementation": "pin actions/images/dependencies, SBOM, signed provenance, artifact promotion rather than rebuild, verify lockfile deltas and new maintainers/packages.",
+      "evidence": "https://slsa.dev/spec/v1.2/"
+    },
+    {
+      "control": "budgets and circuit breakers",
+      "implementation": "max tokens/cost, wall time, retries, files and diff size; organization/repository/task budgets; cancel on repeated failure, anomalous egress, secret access or scope expansion. Claude Code exposes tracking and --max-budget-usd for API sessions.",
+      "evidence": "https://code.claude.com/docs/en/costs"
+    },
+    {
+      "control": "outcome evaluation",
+      "implementation": "private replay set sampled from accepted/reverted/incident changes; version model, agent, instructions and environment; monitor retained acceptance, defects, reverts, human minutes and cost. Keep holdout/staggered cohort because perception can be wrong.",
+      "evidence": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+    },
+    {
+      "control": "rollback/escalation",
+      "implementation": "feature flags/canary, previous artifact, reversible migrations, declared SLO thresholds, human incident commander. Never grant the remediation agent authority to erase the audit trail or redefine success."
+    }
+  ],
+  "maturity_assessment": {
+    "production_ready": [
+      {
+        "capability": "deterministic dependency update PRs, vulnerability alert-to-PR, formatting/lint, docs and narrowly specified test maintenance",
+        "conditions": "protected branches, CI/scanners, update grouping/scheduling, human exception path",
+        "evidence": [
+          "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates",
+          "https://docs.renovatebot.com/modules/platform/github/"
+        ]
+      },
+      {
+        "capability": "agent creates a bounded draft PR in one repository from a clear issue",
+        "conditions": "ephemeral sandbox, least privilege, independent CI and human merge",
+        "evidence": [
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+        ]
+      }
+    ],
+    "conditionally_useful": [
+      {
+        "capability": "small bug fixes, refactors and incremental features; parallel background task execution",
+        "conditions": "good repository tests/instructions, low blast radius, budget and owner; value must be measured locally",
+        "evidence": [
+          "https://learn.chatgpt.com/docs/cloud",
+          "https://metr.org/blog/2026-02-24-uplift-update/"
+        ]
+      },
+      {
+        "capability": "self-hosted/open agent workers",
+        "conditions": "organization already operates secure ephemeral compute and can fund platform ownership",
+        "evidence": [
+          "https://github.com/OpenHands/OpenHands",
+          "https://docs.openhands.dev/openhands/usage/sandboxes/docker"
+        ]
+      }
+    ],
+    "emerging": [
+      {
+        "capability": "automatic triage/decomposition, multi-agent coordination, cross-tool memory and incident diagnosis-to-patch",
+        "reason": "components exist, but workflow reliability, evaluation and permission composition are organization-specific; benchmark success does not cover operational handoffs",
+        "evidence": [
+          "https://www.swebench.com/",
+          "https://arxiv.org/abs/2502.12115"
+        ]
+      }
+    ],
+    "speculative": [
+      {
+        "capability": "unattended roadmap-to-production ownership, autonomous high-severity remediation, self-modifying policies/prompts with merge/deploy authority",
+        "reason": "no cited controlled evidence supports stable, accountable operation; current major product defaults retain human review and strict task bounds",
+        "evidence": [
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+          "https://metr.org/blog/2026-02-24-uplift-update/"
+        ]
+      }
+    ],
+    "bottom_line": "Adopt as constrained change automation, not as a replacement engineering organization. The mature unit is an auditable draft change behind established software-delivery controls."
+  },
+  "build_vs_buy": {
+    "buy_hosted_when": [
+      "Repository is on a supported SaaS forge and standard issue-to-PR flow dominates.",
+      "Fast pilot, vendor-managed model/runtime, integrated identity/audit and predictable support matter more than execution portability.",
+      "Sensitive code/data policy permits the vendor's deployment and retention terms."
+    ],
+    "self_host_framework_when": [
+      "Data residency, air-gap, custom models, unusual build environments or private tool integrations cannot be met by hosted products.",
+      "The organization already has Kubernetes/VM isolation, secrets brokerage, security monitoring and an on-call owner.",
+      "Sustained volume makes measured hosted variable cost exceed full internal platform cost—not merely model-token cost."
+    ],
+    "build_custom_only_for": [
+      "task admission/risk policy",
+      "domain-specific issue/spec schema",
+      "connectors and credential brokering",
+      "private eval/replay dataset",
+      "telemetry/unit-economics attribution",
+      "human approval and deployment integration"
+    ],
+    "do_not_build_first": [
+      "base coding agent loop",
+      "generic chat UI",
+      "sandbox primitive",
+      "dependency updater",
+      "source-control approval model"
+    ],
+    "choice_matrix": [
+      {
+        "option": "GitHub Copilot cloud agent",
+        "strength": "lowest integration effort on GitHub; documented security/approval defaults",
+        "tradeoff": "GitHub-only and single-repository/session limits; product/model/pricing coupling",
+        "urls": [
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+          "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+          "https://github.com/features/copilot/plans"
+        ]
+      },
+      {
+        "option": "Codex cloud/CLI or Claude Code",
+        "strength": "flexible agent surfaces and scriptability; cloud parallelism (Codex) and detailed spend controls (Claude)",
+        "tradeoff": "team still owns policy, evaluation and downstream merge/deploy controls; usage costs vary",
+        "urls": [
+          "https://learn.chatgpt.com/docs/cloud",
+          "https://learn.chatgpt.com/docs/pricing",
+          "https://code.claude.com/docs/en/costs"
+        ]
+      },
+      {
+        "option": "Devin",
+        "strength": "packaged managed experience and team/enterprise tiers",
+        "tradeoff": "evaluate quota-normalized accepted-change cost and export/audit fit; public sticker price is not total cost",
+        "url": "https://devin.ai/pricing"
+      },
+      {
+        "option": "OpenHands/SWE-agent",
+        "strength": "source access, runtime/model choice and extensibility",
+        "tradeoff": "platform engineering, sandbox security, upgrades, reliability and support shift to buyer",
+        "urls": [
+          "https://github.com/OpenHands/OpenHands",
+          "https://github.com/SWE-agent/SWE-agent",
+          "https://docs.openhands.dev/openhands/usage/sandboxes/docker"
+        ]
+      },
+      {
+        "option": "Dependabot/Renovate",
+        "strength": "narrow mature maintenance with policy-driven PRs",
+        "tradeoff": "does not solve general product coding; Renovate self-hosting adds operations",
+        "urls": [
+          "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates",
+          "https://docs.renovatebot.com/modules/platform/github/",
+          "https://docs.renovatebot.com/self-hosted-configuration/"
+        ]
+      }
+    ],
+    "economic_decision_rule": "Prefer buy for the first 3-6 month pilot. Revisit self-hosting only with measured task volume and a staffed platform owner. Compare total cost per 30-day-retained accepted change, p95 human review minutes and escaped-defect cost. Count self-hosted engineer/on-call time and hosted overages; count neither benchmark payout value nor generated lines as savings."
+  },
+  "recommended_pattern": {
+    "architecture": "Buy a hosted repository agent or narrow maintenance bot for the worker layer. Build a thin, vendor-neutral policy/evaluation wrapper around immutable task records, risk tiers, ephemeral least-privilege execution, independent CI, draft PRs, protected merge, progressive delivery and outcome telemetry. Keep an open-source worker adapter as an exit path only after the hosted pilot shows value.",
+    "rollout": [
+      {
+        "phase": "0: readiness (2-4 weeks)",
+        "actions": [
+          "inventory repos/tests/branch rules/secrets",
+          "baseline cost and flow metrics",
+          "define prohibited changes and owner matrix",
+          "construct 30-100 private replay tasks including failures"
+        ]
+      },
+      {
+        "phase": "1: shadow/read-only (2-4 weeks)",
+        "actions": [
+          "agent proposes plan/patch without write token",
+          "compare against completed human work",
+          "test sandbox, egress, logging, cancellation and budget controls"
+        ]
+      },
+      {
+        "phase": "2: draft PR, low risk (4-8 weeks)",
+        "actions": [
+          "enable docs/tests/dependency/lint and tiny bugs in 1-3 repos",
+          "100% human review",
+          "no automatic Actions for unreviewed code and no deployment authority",
+          "randomize or stagger eligible tasks where feasible"
+        ]
+      },
+      {
+        "phase": "3: bounded expansion (two or more release cycles)",
+        "actions": [
+          "add small features/refactors only if retained-acceptance and defect guardrails pass",
+          "allow automatic CI but not merge for reviewed profiles",
+          "use canary/feature flags; separate cohorts by task class"
+        ]
+      },
+      {
+        "phase": "4: selective automation",
+        "actions": [
+          "auto-merge only deterministic, reversible classes such as allowlisted patch-level dependency bumps after proven history",
+          "retain explicit human gates for behavior/security/data/production changes",
+          "quarterly vendor/model replay and exit test"
+        ]
+      }
+    ],
+    "go_no_go_metrics": [
+      "cost per accepted and 30-day-retained change",
+      "p50/p95 cycle time and human review/rework minutes",
+      "PR acceptance without material rewrite",
+      "revert/escaped-defect/security-finding rate by task class",
+      "CI and token/sandbox cost tails",
+      "policy violations, anomalous egress, secret requests and cancellation success",
+      "developer/reviewer satisfaction as a secondary—not sole—measure"
+    ],
+    "minimum_go_rule": "Expand only when the same risk tier is non-inferior on defects/security and materially improves either total cost or cycle time without increasing p95 review burden. Hold or roll back if safeguards are bypassed, incident severity rises, or savings disappear after platform/review costs.",
+    "rationale": "This pattern matches current product security defaults and reconciles conflicting productivity evidence by measuring local system outcomes rather than assuming benchmark or perception transfer.",
+    "urls": [
+      "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "https://metr.org/blog/2026-02-24-uplift-update/",
+      "https://dora.dev/research/2024/dora-report/"
+    ]
+  },
+  "open_questions": [
+    {
+      "question": "What is the causal productivity effect of late-2025/2026 agents for experienced teams on representative private repositories?",
+      "status": "unknown; METR's update has wide intervals and severe selection effects.",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/"
+    },
+    {
+      "question": "How well do public benchmark gains transfer after contamination controls, different tool budgets, hidden enterprise dependencies and long-lived maintenance?",
+      "status": "unknown; maintain a private time-split replay set.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2502.12115"
+      ]
+    },
+    {
+      "question": "What are vendor-specific retention, training, regional-processing, incident-notification, audit-export and model-change commitments on the procurement date?",
+      "status": "contract-specific and mutable; verify DPA/SLA, do not infer from feature docs."
+    },
+    {
+      "question": "At what sustained volume does self-hosting beat hosted total cost?",
+      "status": "organization-specific; requires loaded platform labor, on-call, compute, model, security/compliance and opportunity cost."
+    },
+    {
+      "question": "Can review quality remain stable when agent throughput grows?",
+      "status": "not established; measure p95 review minutes, material rewrites, reviewer disagreement and escaped defects."
+    },
+    {
+      "question": "Which changes can safely auto-merge?",
+      "status": "only empirically demonstrated, deterministic and reversible local classes; no broad evidence supports generic autonomous merge."
+    },
+    {
+      "question": "How should liability and authorship be allocated for agent-originated code, licenses, vulnerabilities and outages?",
+      "status": "jurisdiction/contract-specific; requires legal and governance review."
+    }
+  ],
+  "sources": [
+    {
+      "title": "About GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Capabilities, one-repository/one-branch/one-PR bounds, 59-minute session maximum."
+      ]
+    },
+    {
+      "title": "Risks and mitigations for GitHub Copilot cloud agent",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official security documentation",
+      "supported_claims": [
+        "Human-only merge, restricted branches/credentials, Actions approval, requester approval restriction, injection filtering, internet limits, CodeQL/dependency/secret checks and auditability."
+      ]
+    },
+    {
+      "title": "GitHub Copilot plans",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.com/features/copilot/plans",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing page",
+      "supported_claims": [
+        "Plan and usage pricing is mutable and must be normalized during procurement."
+      ]
+    },
+    {
+      "title": "Codex cloud",
+      "publisher_or_author": "OpenAI",
+      "url": "https://learn.chatgpt.com/docs/cloud",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Parallel isolated environments, environment setup, GitHub/GitLab and Linear/Slack entry points, review-before-merge workflow."
+      ]
+    },
+    {
+      "title": "Codex pricing",
+      "publisher_or_author": "OpenAI",
+      "url": "https://learn.chatgpt.com/docs/pricing",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing documentation",
+      "supported_claims": [
+        "Current plans, included usage/credits and usage-dependent pricing context."
+      ]
+    },
+    {
+      "title": "Manage costs effectively",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/costs",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation/vendor telemetry",
+      "supported_claims": [
+        "Token billing, vendor-reported enterprise cost distribution, variability, spend tracking, pilot guidance and max-budget control."
+      ]
+    },
+    {
+      "title": "Best practices for Claude Code",
+      "publisher_or_author": "Anthropic",
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Operational patterns for repository context, verification and agent use."
+      ]
+    },
+    {
+      "title": "Plans and Pricing | Devin",
+      "publisher_or_author": "Cognition/Devin",
+      "url": "https://devin.ai/pricing",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official pricing page",
+      "supported_claims": [
+        "Free/Pro/Max/Teams/Enterprise packaging and current public sticker prices."
+      ]
+    },
+    {
+      "title": "OpenHands/OpenHands repository",
+      "publisher_or_author": "OpenHands",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "publication_or_update_date": "repository snapshot accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": [
+        "Open-source agent/control-plane availability, supported local/remote/cloud execution and project activity."
+      ]
+    },
+    {
+      "title": "Docker Sandbox - OpenHands Docs",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/sandboxes/docker",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "Docker default, isolation/reproducibility rationale, writable host mounts and self-host networking/concurrency configuration."
+      ]
+    },
+    {
+      "title": "Headless Mode - OpenHands Docs",
+      "publisher_or_author": "OpenHands",
+      "url": "https://docs.openhands.dev/openhands/usage/cli/headless",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "CLI/headless automation integration."
+      ]
+    },
+    {
+      "title": "SWE-agent repository",
+      "publisher_or_author": "Princeton NLP / SWE-agent maintainers",
+      "url": "https://github.com/SWE-agent/SWE-agent",
+      "publication_or_update_date": "repository snapshot accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "source repository",
+      "supported_claims": [
+        "Open-source issue-resolution research agent and reproducible framework option."
+      ]
+    },
+    {
+      "title": "SWE-bench Leaderboards",
+      "publisher_or_author": "SWE-bench team",
+      "url": "https://www.swebench.com/",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official benchmark site",
+      "supported_claims": [
+        "Dataset sizes/views, percent-resolved definition and team-checked run labeling."
+      ]
+    },
+    {
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "publisher_or_author": "Jimenez et al.; ICLR 2024",
+      "url": "https://arxiv.org/abs/2310.06770",
+      "publication_or_update_date": "2023-10-10; revised 2024-11-11",
+      "access_date": "2026-09-13",
+      "source_type": "peer-reviewed paper/preprint",
+      "supported_claims": [
+        "Original benchmark construction and 1.96% best reported baseline."
+      ]
+    },
+    {
+      "title": "SWE-Lancer: Can Frontier LLMs Earn $1 Million from Real-World Freelance Software Engineering?",
+      "publisher_or_author": "Miserendino et al.",
+      "url": "https://arxiv.org/abs/2502.12115",
+      "publication_or_update_date": "2025-02-17",
+      "access_date": "2026-09-13",
+      "source_type": "research paper/preprint",
+      "supported_claims": [
+        ">1,400 Upwork tasks, $1M payout value, task price span, managerial tasks and triple-verified end-to-end tests."
+      ]
+    },
+    {
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "publisher_or_author": "Becker, Rush, Barnes and Rein / METR",
+      "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+      "publication_or_update_date": "2025-07-10",
+      "access_date": "2026-09-13",
+      "source_type": "independent randomized field study",
+      "supported_claims": [
+        "19% slowdown, confidence interval, expectation/perception gap, study population and limits."
+      ]
+    },
+    {
+      "title": "Measuring AI Ability to Speed Up Developer Tasks: Uplift Study Update",
+      "publisher_or_author": "METR",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update/",
+      "publication_or_update_date": "2026-02-24",
+      "access_date": "2026-09-13",
+      "source_type": "independent study update",
+      "supported_claims": [
+        "Late-2025 raw speedup estimates, wide confidence intervals, selection/concurrency caveats and very-weak-evidence judgment."
+      ]
+    },
+    {
+      "title": "2025 Stack Overflow Developer Survey: AI",
+      "publisher_or_author": "Stack Overflow",
+      "url": "https://survey.stackoverflow.co/2025/ai",
+      "publication_or_update_date": "2025",
+      "access_date": "2026-09-13",
+      "source_type": "independent industry survey",
+      "supported_claims": [
+        "AI use/plans, daily professional use, accuracy distrust/trust and non-mainstream agent adoption."
+      ]
+    },
+    {
+      "title": "Accelerate State of DevOps Report 2024",
+      "publisher_or_author": "DORA",
+      "url": "https://dora.dev/research/2024/dora-report/",
+      "publication_or_update_date": "2024",
+      "access_date": "2026-09-13",
+      "source_type": "industry research report",
+      "supported_claims": [
+        "Positive individual effects but negative delivery stability and throughput relationships; delivery-system caveat."
+      ]
+    },
+    {
+      "title": "Announcing the 2024 DORA report",
+      "publisher_or_author": "Google Cloud",
+      "url": "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report",
+      "publication_or_update_date": "2024-10-22",
+      "access_date": "2026-09-13",
+      "source_type": "first-party summary of industry research",
+      "supported_claims": [
+        "Associations between a 25% increase in AI adoption and documentation quality, code quality and review speed."
+      ]
+    },
+    {
+      "title": "Research: quantifying GitHub Copilot’s impact on developer productivity and happiness",
+      "publisher_or_author": "GitHub",
+      "url": "https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/",
+      "publication_or_update_date": "2022-09-07",
+      "access_date": "2026-09-13",
+      "source_type": "vendor-authored study summary",
+      "supported_claims": [
+        "Self-reported outcomes and vendor framing of controlled task study."
+      ]
+    },
+    {
+      "title": "The Impact of AI on Developer Productivity: Evidence from GitHub Copilot",
+      "publisher_or_author": "Peng et al.",
+      "url": "https://arxiv.org/abs/2302.06590",
+      "publication_or_update_date": "2023-02-13",
+      "access_date": "2026-09-13",
+      "source_type": "controlled experiment preprint",
+      "supported_claims": [
+        "55.8% faster completion of a constrained JavaScript HTTP-server task and experimental design."
+      ]
+    },
+    {
+      "title": "About rulesets",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Protected-branch/ruleset enforcement and required checks/approvals."
+      ]
+    },
+    {
+      "title": "SLSA specification v1.2",
+      "publisher_or_author": "OpenSSF SLSA",
+      "url": "https://slsa.dev/spec/v1.2/",
+      "publication_or_update_date": "v1.2; accessed 2026-09-13",
+      "access_date": "2026-09-13",
+      "source_type": "open standard",
+      "supported_claims": [
+        "Supply-chain levels, build provenance and artifact integrity framing."
+      ]
+    },
+    {
+      "title": "Renovate GitHub platform documentation",
+      "publisher_or_author": "Mend Renovate",
+      "url": "https://docs.renovatebot.com/modules/platform/github/",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "GitHub App/onboarding and repository integration for automated dependency PRs."
+      ]
+    },
+    {
+      "title": "Self-hosted configuration",
+      "publisher_or_author": "Mend Renovate",
+      "url": "https://docs.renovatebot.com/self-hosted-configuration/",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official open-source documentation",
+      "supported_claims": [
+        "Self-host configuration surface and operator responsibilities."
+      ]
+    },
+    {
+      "title": "About Dependabot security updates",
+      "publisher_or_author": "GitHub",
+      "url": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates",
+      "publication_or_update_date": "continuously updated / accessed snapshot",
+      "access_date": "2026-09-13",
+      "source_type": "official documentation",
+      "supported_claims": [
+        "Security alert-to-update-PR automation behavior and scope."
+      ]
+    },
+    {
+      "title": "Secure Software Development Framework (SSDF) Version 1.1, NIST SP 800-218",
+      "publisher_or_author": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "publication_or_update_date": "2022-02-03",
+      "access_date": "2026-09-13",
+      "source_type": "government standard",
+      "supported_claims": [
+        "Secure development practice groups and continuing organizational duties."
+      ]
+    }
+  ],
+  "confidence": {
+    "overall": "moderate-high for product mechanics and the bounded-adoption recommendation; moderate for market maturity; low-to-moderate for comparative ROI.",
+    "claim_level": {
+      "high": [
+        "GitHub agent limits/security defaults",
+        "OpenHands sandbox mechanics",
+        "benchmark composition",
+        "published pricing/doc behavior as captured"
+      ],
+      "moderate": [
+        "classification of bounded draft-PR automation as production-ready when controls exist",
+        "recommended incremental rollout",
+        "buy-first recommendation for teams without platform capacity"
+      ],
+      "low_to_moderate": [
+        "cross-vendor economics and productivity generalization because pricing/model behavior changes and controlled studies conflict"
+      ]
+    },
+    "reason": "The evidence base combines direct product/standard documentation with controlled and survey evidence. It lacks long-horizon, independently audited, apples-to-apples production economics across vendors."
+  },
+  "conflicts": [
+    {
+      "claims": "GitHub's experiment found 55.8% faster task completion, whereas METR's early-2025 field experiment found experienced maintainers 19% slower.",
+      "likely_explanation": "Different tasks (short greenfield HTTP server versus real issues in familiar repositories), subjects, tools, years and outcome timing. Treat both as local causal estimates, not universal productivity.",
+      "urls": [
+        "https://arxiv.org/abs/2302.06590",
+        "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+      ]
+    },
+    {
+      "claims": "METR early-2025 found slowdown; its February 2026 raw data points toward speedup.",
+      "likely_explanation": "Capabilities and use changed, but the later sample has severe selection and concurrency-measurement problems and confidence intervals include slowdown. Directional change is plausible; magnitude is unresolved.",
+      "urls": [
+        "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+        "https://metr.org/blog/2026-02-24-uplift-update/"
+      ]
+    },
+    {
+      "claims": "High AI-tool usage coexists with low trust and low agent adoption.",
+      "likely_explanation": "Autocomplete/chat use is broader and lower-risk than autonomous agents; use/plans and trust measure different constructs.",
+      "url": "https://survey.stackoverflow.co/2025/ai"
+    },
+    {
+      "claims": "DORA reports local gains in documentation/code quality/review speed but lower delivery stability/throughput.",
+      "likely_explanation": "More generated change can enlarge queues/batches and stress weak tests/review/deployment systems; local output is not end-to-end flow.",
+      "urls": [
+        "https://dora.dev/research/2024/dora-report/",
+        "https://cloud.google.com/blog/products/devops-sre/announcing-the-2024-dora-report"
+      ]
+    },
+    {
+      "claims": "Public benchmark solve rates improve while unattended enterprise autonomy remains unproven.",
+      "likely_explanation": "Benchmarks bound task, repository, environment and graders; production adds ambiguous intent, permissions, integration, review, deployment and long-term defects.",
+      "urls": [
+        "https://www.swebench.com/",
+        "https://arxiv.org/abs/2502.12115",
+        "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations"
+      ]
+    }
+  ],
+  "as_of": "2026-09-13",
+  "uncertain": [
+    "current_state: no independent census of unattended production deployments",
+    "metrics: apples-to-apples vendor total cost and retained-change ROI",
+    "maturity_assessment: cross-repository and incident-remediation reliability",
+    "build_vs_buy: contract terms and price/quotas after the as-of date",
+    "open_questions: legal liability and benchmark-to-private-repository transfer"
+  ]
+}
