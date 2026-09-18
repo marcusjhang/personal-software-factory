@@ -7,6 +7,7 @@ directly; it proposes steps the controller validates.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,8 @@ from .agents import AgentTask, Runner, build_runner
 from .schema import Factory
 from .state import GateError, WorkItem, Workflow
 from .workspace import Workspace
+
+LEASE_TTL_SECONDS = 3600
 
 
 @dataclass
@@ -25,14 +28,32 @@ class RunResult:
 
 
 class Foreman:
-    def __init__(self, factory: Factory, workflow: Workflow, runner: Runner | None = None):
+    def __init__(self, factory: Factory, workflow: Workflow, runner: Runner | None = None,
+                 durability=None):
         self.factory = factory
         self.wf = workflow
         self.runner = runner or build_runner(factory)
+        self.durability = durability  # optional Durability: lease + effect ledger
 
     def run(self, goal: str, *, work_id: str | None = None, approve: bool = True,
             repo: str | Path | None = None, use_git: bool = False, finish: bool = True) -> RunResult:
         work = self.wf.create(goal, work_id, max_attempts=self.factory.max_attempts)
+
+        # Fenced lease: only one worker may advance a serialized work item.
+        owner = f"psf-{os.getpid()}"
+        epoch = None
+        if self.durability is not None:
+            epoch = self.durability.claim(work.id, owner, ttl=LEASE_TTL_SECONDS)
+            if epoch is None:
+                raise GateError(f"{work.id} is already leased by another worker")
+        try:
+            return self._run(work, goal, approve=approve, repo=repo, use_git=use_git, finish=finish)
+        finally:
+            if self.durability is not None and epoch is not None:
+                self.durability.release(work.id, owner, epoch)
+
+    def _run(self, work: WorkItem, goal: str, *, approve: bool, repo, use_git: bool,
+             finish: bool) -> RunResult:
         work = self.wf.transition(work, "TRIAGE", actor="foreman")
 
         triage = self.runner.run(AgentTask("triage", goal))

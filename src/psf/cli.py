@@ -77,7 +77,11 @@ def cmd_validate(args) -> int:
 
 
 def cmd_improve(args) -> int:
-    r = run_improvement(args.factory, args.ledger, promote=args.promote, rollback=args.rollback)
+    cand = args.candidate
+    if cand is not None and str(cand).isdigit():
+        cand = int(cand)
+    r = run_improvement(args.factory, args.ledger, promote=args.promote, rollback=args.rollback,
+                        field=args.field, candidate=cand)
     if args.rollback:
         print("rolled back" if r.rolled_back else "nothing to roll back")
         return 0 if r.rolled_back else 1
@@ -99,7 +103,10 @@ def cmd_run(args) -> int:
         import shlex
         factory.runner_options["command"] = shlex.split(args.command)
     repo = Path.cwd() if args.git else None
-    result = Foreman(factory, wf).run(
+    from .durability import Durability
+
+    durability = Durability(Path(args.ledger).with_name("durability.db"))
+    result = Foreman(factory, wf, durability=durability).run(
         args.goal, approve=not args.no_approve, finish=args.finish,
         repo=repo, use_git=args.git,
     )
@@ -116,15 +123,31 @@ def cmd_run(args) -> int:
         return 4
 
     if getattr(args, "github", False) and work.state in ("HANDOFF", "DONE") and repo is not None:
-        from .github import available, publish_draft_pr
+        from .github import available, find_pr_for_branch, publish_draft_pr
 
         if not available():
             print("  github: `gh` not available; skipping draft PR", file=sys.stderr)
         else:
             wt = repo / ".psf" / "worktrees" / work.id
-            url, err = publish_draft_pr(wt, title=work.goal,
-                                        body=f"Work item {work.id}\nspec {work.spec_digest}")
-            print(f"  github: {url or 'draft PR failed: ' + str(err)}")
+            branch = f"psf/{work.id}"
+            key = f"{work.id}:github.pr"
+
+            def _sender():
+                url, err = publish_draft_pr(wt, title=work.goal,
+                                            body=f"Work item {work.id}\nspec {work.spec_digest}")
+                if err:
+                    raise RuntimeError(err)
+                return {"url": url}
+
+            item = durability.record_effect(work.id, "github.pr", {"branch": branch}, key=key)
+            if item.status == "UNKNOWN":
+                # reconcile by observing the remote before any resend
+                existing = find_pr_for_branch(branch)
+                item = durability.reconcile(key, lambda: {"url": existing} if existing else None)
+            if item.status != "CONFIRMED":
+                item = durability.send(key, _sender)
+            detail = item.response_digest or item.status
+            print(f"  github: draft PR {item.status} ({detail})")
     return 0 if work.state in ("DONE", "HANDOFF") else 3
 
 
@@ -293,6 +316,8 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("improve", help="governed improvement: propose -> evaluate -> canary -> human promote")
     s.add_argument("--promote", action="store_true", help="authorize promotion if the candidate is safe and better")
     s.add_argument("--rollback", action="store_true", help="restore the previous factory revision")
+    s.add_argument("--field", help="propose a specific allow-listed field (protected fields are refused)")
+    s.add_argument("--candidate", help="candidate value for --field")
     s.set_defaults(func=cmd_improve)
 
     s = sub.add_parser("audit", aliases=["doctor"], help="self-check: ledger, factory, state integrity, benchmark")
@@ -309,7 +334,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return args.func(args)
-    except (FactoryError, GateError) as e:
+    except (FactoryError, GateError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 5
 

@@ -39,6 +39,19 @@ def list_issues(repo: str | None = None, label: str = "factory") -> list[dict]:
     return json.loads(out)
 
 
+def find_pr_for_branch(branch: str, repo: str | None = None) -> str | None:
+    """Observation used to reconcile an UNKNOWN PR-create effect."""
+    cmd = ["gh", "pr", "list", "--head", branch, "--state", "all", "--json", "url,state"]
+    if repo:
+        cmd += ["--repo", repo]
+    rc, out, _ = _run(cmd, cwd=".")
+    if rc != 0 or not out:
+        return None
+    import json
+    prs = json.loads(out)
+    return prs[0]["url"] if prs else None
+
+
 def publish_draft_pr(workspace: str | Path, *, title: str, body: str,
                      base: str = "main", repo: str | None = None,
                      remote: str = "origin") -> tuple[str | None, str | None]:

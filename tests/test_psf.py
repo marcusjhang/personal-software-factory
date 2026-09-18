@@ -194,6 +194,49 @@ def test_doctor_alias_matches_audit(tmp_path):
     assert rc_audit == 0 and rc_doctor == rc_audit
 
 
+def test_foreman_lease_prevents_concurrent_run(tmp_path):
+    from psf.durability import Durability
+
+    root = _factory_dir(tmp_path)
+    log = EventLog(tmp_path / "e.db")
+    d = Durability(tmp_path / "dur.db")
+    d.claim("W-x", "other-worker", ttl=60)  # someone else holds it
+    with pytest.raises(GateError):
+        Foreman(load_factory(root), Workflow(log), durability=d).run("goal", work_id="W-x")
+
+
+def test_foreman_releases_lease_after_run(tmp_path):
+    from psf.durability import Durability
+
+    root = _factory_dir(tmp_path)
+    log = EventLog(tmp_path / "e.db")
+    d = Durability(tmp_path / "dur.db")
+    result = Foreman(load_factory(root), Workflow(log), durability=d).run("goal")
+    assert d.lease(result.work.id) is None
+
+
+def test_improve_refuses_protected_field(tmp_path):
+    from psf.improve import run_improvement
+
+    root = _factory_dir(tmp_path)
+    ledger = tmp_path / "e.db"
+    EventLog(ledger).close()
+    with pytest.raises(ValueError):
+        run_improvement(root, ledger, promote=True, field="gates.spec_approval", candidate=False)
+
+
+def test_improve_multi_candidate_picks_smallest_sufficient(tmp_path):
+    from psf.improve import run_improvement
+
+    root = _factory_dir(tmp_path)  # max_attempts: 2
+    ledger = tmp_path / "e.db"
+    EventLog(ledger).close()
+    r = run_improvement(root, ledger, promote=True)
+    assert r.promoted
+    assert r.proposal.candidate == 3  # smallest candidate that clears the eval
+    assert "max_attempts: 3" in (root / "factory.yml").read_text()
+
+
 def test_metrics_json(tmp_path, capsys):
     import json
 
