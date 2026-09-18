@@ -335,10 +335,15 @@ merge, push, or mutate the lifecycle.
 
 ## 11. Adapters
 
+**Host assumption (v1):** the factory assumes **GitHub**. There is no
+host-agnostic abstraction layer. Intake is GitHub Issues, handoff is a **draft
+Pull Request**, CI is GitHub checks, and identity is a GitHub App or the user's
+authenticated `gh` session. Other hosts are out of scope.
+
 | Adapter | v | Responsibility |
 |---|---|---|
 | Git/worktree | v0.2 | isolation, diff, branch, cleanup |
-| GitHub | v0.2 | draft PR creation, issue intake, check reads |
+| GitHub | v0.2 | issue intake; **draft PR** handoff; check reads; PR comments |
 | CI | v0.3 | run checks, read results, required-check identity |
 | Reconciler | v0.3 | compare desired vs observed remote state; preserve unknown objects |
 
