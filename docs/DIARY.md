@@ -92,3 +92,46 @@ non-trivial change to its own source through its own loop**, not just a marker.
 **Next.** M3 (protected evaluation gate) and M4 (outcome metrics), then
 packaging (`uvx`/`pipx`/Docker) so it is genuinely plug-and-play.
 
+---
+
+## 2026-09-18 — M3/M4, packaging, and the factory changed its own code
+
+**Protected evaluation (M3).** A candidate must not be able to edit the thing
+that judges it. We pinned `eval/` (task set, thresholds, manifest) by digest and
+made promotion a **non-inferiority** gate: promote only when the lower
+confidence bound on the delta is at least `-epsilon`, with a minimum sample and
+complete telemetry. A test immediately caught a real bug — the eval was reading
+the one-shot baseline column instead of the retry-budget run — which is exactly
+the kind of mistake a protected eval exists to prevent.
+
+**Outcomes (M4) + packaging.** `psf outcome` records accepted change, review
+escape, cost, and human minutes; `psf metrics` aggregates them. `Dockerfile`,
+`install.sh`, and `.dockerignore` make it installable; `uvx`/`pipx` work off the
+`psf` console script.
+
+**The deep self-build — done.** We pointed the runner at a real harness
+(Claude Code, `claude -p` in `acceptEdits` mode) and asked the factory to change
+its own source: add a `doctor` alias for the `audit` subcommand. The implement
+agent produced a correct edit to `src/psf/cli.py`. Then the **independent
+verifier blocked it** — the spec required an acceptance test and none was added.
+
+**Discovery that mattered.** The verifier's block was right, and it exposed a
+product bug: the implement agent was **never given the spec**, so it could not
+possibly satisfy acceptance criteria it never saw. Fixed: the foreman now passes
+the spec and acceptance criteria to implement. This is precisely the failure the
+factory is meant to catch — and it caught it in its own code, while building
+itself.
+
+**Human gate.** The owner reviewed the diff, added the missing test, and adopted
+the factory's edit. The work item stayed `BLOCKED`; nothing was auto-merged.
+
+**Where we are.** Self-improving (human-gated): yes — propose, protected eval,
+shadow, canary, human promote, rollback. Plug-and-play: yes — one command
+installs it, `psf init` scaffolds a repo. Dogfooding: yes — it edits its own
+source through its own loop.
+
+**Remaining.** Make `improve`'s candidate space richer than one config field;
+formalize a `psf self-build`; add a CI workflow; and keep the diary honest about
+what is proven (local, small-sample) versus claimed.
+
+
