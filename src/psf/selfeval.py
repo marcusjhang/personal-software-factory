@@ -478,13 +478,82 @@ def eval_E21(tmp: Path) -> EvalResult:
                       {"init_rc": rc_init, "run_rc": rc_run, "states": states})
 
 
+def _set_autonomy(factory_yml: Path, mode: str) -> None:
+    import yaml
+
+    raw = yaml.safe_load(factory_yml.read_text()) or {}
+    raw["mode"] = mode
+    factory_yml.write_text(yaml.safe_dump(raw, sort_keys=False))
+
+
+def eval_E23(tmp: Path) -> EvalResult:
+    """HITL mode: without approval the run stops at SPEC_REVIEW (human gate holds)."""
+    f = _write_factory(tmp / "e23", max_attempts=2)
+    _set_autonomy(f, "hitl")
+    log = EventLog(tmp / "e23.db")
+    res = Foreman(load_factory(f), Workflow(log)).run("needs approval", approve=False)
+    log.close()
+    ok = res.work.state == "SPEC_REVIEW"
+    return EvalResult("E23", "HITL requires approval", "pass" if ok else "fail",
+                      {"state": res.work.state})
+
+
+def eval_E24(tmp: Path) -> EvalResult:
+    """YOLO mode: no human approval, the run proceeds to handoff/queue."""
+    f = _write_factory(tmp / "e24", max_attempts=2)
+    _set_autonomy(f, "yolo")
+    log = EventLog(tmp / "e24.db")
+    res = Foreman(load_factory(f), Workflow(log)).run("autonomous", approve=False)
+    log.close()
+    ok = res.work.state in ("DONE", "HANDOFF") and res.verify_passed
+    return EvalResult("E24", "YOLO runs autonomously", "pass" if ok else "fail",
+                      {"state": res.work.state, "verify_passed": res.verify_passed})
+
+
+def eval_E25(tmp: Path) -> EvalResult:
+    """The mode can be switched halfway through and takes effect on the next run."""
+    f = _write_factory(tmp / "e25", max_attempts=2)
+    log = EventLog(tmp / "e25.db")
+    _set_autonomy(f, "hitl")
+    first = Foreman(load_factory(f), Workflow(log)).run("before switch", approve=False)
+    _set_autonomy(f, "yolo")  # switch midway
+    second = Foreman(load_factory(f), Workflow(log)).run("after switch", approve=False)
+    log.close()
+    ok = first.work.state == "SPEC_REVIEW" and second.work.state in ("DONE", "HANDOFF")
+    return EvalResult("E25", "switch mode midway", "pass" if ok else "fail",
+                      {"before": first.work.state, "after": second.work.state})
+
+
+def eval_E26(tmp: Path) -> EvalResult:
+    """YOLO removes human gates, not safety gates: protected fields and the eval
+    gate still hold."""
+    f = _write_factory(tmp / "e26", max_attempts=3)
+    _set_autonomy(f, "yolo")
+    ledger = tmp / "e26.db"
+    EventLog(ledger).close()
+    before = dict(load_factory(f).gates)
+    refused_protected = False
+    try:
+        run_improvement(f, ledger, promote=True, field="gates.spec_approval", candidate=False)
+    except ValueError:
+        refused_protected = True
+    # a non-improving candidate is still refused even in yolo
+    r = run_improvement(f, ledger, promote=True, field="limits.max_attempts", candidate=1)
+    gates_after = dict(load_factory(f).gates)
+    ok = refused_protected and not r.promoted and gates_after == before
+    return EvalResult("E26", "YOLO preserves safety gates", "pass" if ok else "fail",
+                      {"protected_refused": refused_protected, "non_improving_refused": not r.promoted,
+                       "gates_unchanged": gates_after == before})
+
+
 def run_self_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-selfeval-") as d:
         tmp = Path(d)
         for fn in (eval_E1, eval_E2, eval_E3, eval_E4, eval_E5, eval_E6, eval_E7, eval_E8,
                    eval_E9, eval_E10, eval_E11, eval_E12, eval_E13, eval_E14, eval_E15,
-                   eval_E16, eval_E17, eval_E18, eval_E19, eval_E20, eval_E21, eval_E22):
+                   eval_E16, eval_E17, eval_E18, eval_E19, eval_E20, eval_E21, eval_E22,
+                   eval_E23, eval_E24, eval_E25, eval_E26):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001 - an eval crashing is a failed eval

@@ -25,7 +25,9 @@ ALLOWED_TOP_KEYS = {
     "gates",
     "limits",
     "feedback",
+    "mode",
 }
+MODES = ("hitl", "yolo")
 ALLOWED_AGENT_KEYS = {"prompt", "command", "model", "description"}
 
 
@@ -54,7 +56,12 @@ class Factory:
     gates: dict[str, Any] = field(default_factory=dict)
     limits: dict[str, Any] = field(default_factory=dict)
     feedback: dict[str, Any] = field(default_factory=dict)
+    mode: str = "hitl"  # hitl = human in the loop; yolo = human out (autonomous)
     description: str = ""
+
+    @property
+    def autonomous(self) -> bool:
+        return self.mode == "yolo"
 
     @property
     def max_attempts(self) -> int:
@@ -116,6 +123,7 @@ def _build(raw: dict[str, Any], path: Path) -> Factory:
         gates=raw.get("gates") or {},
         limits=raw.get("limits") or {},
         feedback=raw.get("feedback") or {},
+        mode=raw.get("mode", "hitl"),
         description=raw.get("description", ""),
     )
 
@@ -129,6 +137,8 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
     unknown = set(raw) - ALLOWED_TOP_KEYS
     if unknown:
         errors.append(f"unknown top-level keys: {sorted(unknown)}")
+    if raw.get("mode", "hitl") not in MODES:
+        errors.append(f"mode must be one of {MODES}, got {raw.get('mode')!r}")
     if raw.get("schemaVersion") != SUPPORTED_SCHEMA:
         errors.append(
             f"schemaVersion must be '{SUPPORTED_SCHEMA}', got {raw.get('schemaVersion')!r}"

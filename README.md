@@ -103,6 +103,7 @@ psf validate                                 # compile-check the factory definit
 psf run "add CSV export to the metrics page" # run one goal through the factory
 psf status                                   # show work items + ledger state
 psf audit                                    # self health check (alias: psf doctor)
+psf mode                                     # show autonomy mode; `psf mode yolo|hitl` to switch
 psf metrics                                  # outcome signals from the ledger
 psf eval                                     # run the protected evaluation
 psf improve                                  # governed, human-gated improvement

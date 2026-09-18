@@ -21,3 +21,4 @@ limits:
 feedback:
   upstream: marcusjhang/personal-software-factory
   mode: 'off'
+mode: 'hitl'

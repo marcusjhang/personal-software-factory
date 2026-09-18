@@ -273,6 +273,26 @@ def test_init_writes_agents_md(tmp_path, monkeypatch):
     assert "psf feedback export" in (tmp_path / "AGENTS.md").read_text()
 
 
+def test_mode_toggle(tmp_path, monkeypatch, capsys):
+    import yaml
+
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["init", "--feedback", "off", "--mode", "hitl"]) == 0
+
+    def mode():
+        return yaml.safe_load((tmp_path / "factory" / "factory.yml").read_text())["mode"]
+
+    assert mode() == "hitl"
+    assert cli.main(["mode", "yolo"]) == 0
+    assert mode() == "yolo"
+    assert cli.main(["mode"]) == 0
+    assert "yolo" in capsys.readouterr().out
+    # a run in yolo mode proceeds without human approval
+    assert cli.main(["run", "--mode", "yolo", "--no-ask", "autonomous smoke"]) == 0
+
+
 def test_feedback_consent_choose_and_opt_out(tmp_path, monkeypatch, capsys):
     import yaml
 

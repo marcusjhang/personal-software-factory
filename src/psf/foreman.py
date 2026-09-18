@@ -66,10 +66,13 @@ class Foreman:
         spec = spec_res.output or {"title": goal}
         work = self.wf.record_spec(work, spec, actor="spec")
 
-        # Gate: READY requires an approval bound to the spec digest.
-        approver = "owner" if self.factory.spec_approval else "policy:auto"
-        if self.factory.spec_approval and not approve:
+        # Gate: READY requires an approval bound to the spec digest. In YOLO mode
+        # the policy auto-approves; in HITL it needs the owner (or the flag).
+        autonomous = self.factory.autonomous
+        if self.factory.spec_approval and not autonomous and not approve:
             return RunResult(work)  # durable wait in SPEC_REVIEW
+        approver = "policy:auto:yolo" if autonomous else (
+            "owner" if self.factory.spec_approval else "policy:auto")
         work = self.wf.approve_spec(work, approver=approver)
 
         ws = Workspace.create(work.id, repo=repo, use_git=use_git)

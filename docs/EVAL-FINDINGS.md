@@ -160,5 +160,34 @@ check flagged it; `make_eval_dir` and the repo's `eval/` cases now carry `source
 
 Tests: **39**.
 
+---
+
+## Round 5 — autonomy modes (HITL / YOLO)
+
+Two modes, **asked at `psf init` and at every `psf run`, switchable anytime**
+(`psf mode hitl|yolo`, or per run `--mode`):
+
+- **HITL (default, "not yolo")** — you approve the spec; you authorize promotions.
+- **YOLO (human out)** — the policy auto-approves the spec and auto-promotes
+  improvements, **but every safety gate stays**: `verify_quorum`, protected eval,
+  holdout non-inferiority, self-audit, canary, and one-command rollback.
+
+Proven by evals (part of the self-eval suite):
+
+| id | eval | result |
+|---|---|---|
+| E23 | HITL without approval stops at SPEC_REVIEW | **pass** |
+| E24 | YOLO proceeds autonomously to handoff | **pass** |
+| E25 | mode switched midway takes effect on the next run | **pass** |
+| E26 | YOLO preserves safety gates (protected fields refused; non-improving candidate refused) | **pass** |
+
+| run | self-eval | governance | audit |
+|---|---|---|---|
+| A | **26/26 pass** | **8/8 pass** | green |
+| B | **26/26 pass** | **8/8 pass** | green |
+
+Tests: **40**.
+
+
 
 

@@ -23,6 +23,7 @@ FACTORY_YML = """schemaVersion: psf/v1
 name: default
 description: Default personal software factory.
 runner: mock
+mode: "{mode}"          # hitl = human in the loop; yolo = human out (autonomous)
 agents:
   triage:    { prompt: agents/triage.md }
   spec:      { prompt: agents/spec.md }
@@ -36,7 +37,7 @@ limits:
   max_attempts: 2
 feedback:
   upstream: {upstream}
-  mode: "{mode}"          # off | hint | auto; change anytime with `psf feedback opt-out|opt-in`
+  mode: "{fb_mode}"          # off | hint | auto; change anytime with `psf feedback opt-out|opt-in`
 """
 
 AGENTS_MD = """# AGENTS.md — how agents should use this repository
@@ -123,19 +124,32 @@ def cmd_init(args) -> int:
 
     # Feedback consent is chosen at install time and changeable anytime.
     upstream = args.upstream or "marcusjhang/personal-software-factory"
-    mode = args.feedback
-    if mode is None:
+    fb_mode = args.feedback
+    if fb_mode is None:
         if sys.stdin.isatty():
             try:
                 ans = input("Share anonymous usage feedback upstream? [off/hint/auto] (hint): ").strip().lower()
             except EOFError:
                 ans = ""
-            mode = ans if ans in ("off", "hint", "auto") else "hint"
+            fb_mode = ans if ans in ("off", "hint", "auto") else "hint"
         else:
-            mode = "hint"
+            fb_mode = "hint"
+
+    # Autonomy mode is chosen at install and switchable anytime (`psf mode`).
+    mode = args.mode
+    if mode is None:
+        if sys.stdin.isatty():
+            try:
+                ans = input("Autonomy mode? [hitl = you approve; yolo = autonomous] (hitl): ").strip().lower()
+            except EOFError:
+                ans = ""
+            mode = ans if ans in ("hitl", "yolo") else "hitl"
+        else:
+            mode = "hitl"
 
     (root / "agents").mkdir(parents=True, exist_ok=True)
-    (root / "factory.yml").write_text(FACTORY_YML.replace("{upstream}", upstream).replace("{mode}", mode))
+    (root / "factory.yml").write_text(
+        FACTORY_YML.replace("{upstream}", upstream).replace("{fb_mode}", fb_mode).replace("{mode}", mode))
     for role, prompt in PROMPTS.items():
         (root / "agents" / f"{role}.md").write_text(prompt + "\n")
     (root / "AGENTS.md").write_text(AGENTS_MD)
@@ -144,7 +158,8 @@ def cmd_init(args) -> int:
         root_agents.write_text(AGENTS_MD)
     Path(".psf").mkdir(exist_ok=True)
     print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md)")
-    print(f"feedback: mode={mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
+    print(f"autonomy: mode={mode}  (switch anytime: `psf mode hitl|yolo`)")
+    print(f"feedback: mode={fb_mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
     print("next: psf validate && psf run \"<your goal>\"")
     return 0
 
@@ -160,10 +175,13 @@ def cmd_validate(args) -> int:
 
 
 def cmd_improve(args) -> int:
+    factory = load_factory(args.factory)
+    # YOLO mode promotes automatically (still eval/audit/canary gated); HITL needs --promote.
+    promote = args.promote or (factory.autonomous and not args.rollback)
     cand = args.candidate
     if cand is not None and str(cand).isdigit():
         cand = int(cand)
-    r = run_improvement(args.factory, args.ledger, promote=args.promote, rollback=args.rollback,
+    r = run_improvement(args.factory, args.ledger, promote=promote, rollback=args.rollback,
                         field=args.field, candidate=cand)
     if args.rollback:
         print("rolled back" if r.rolled_back else "nothing to roll back")
@@ -181,6 +199,33 @@ def cmd_improve(args) -> int:
     return 10  # recommendation made, awaiting human authorization
 
 
+def _set_mode(mode: str, factory_path: str = "factory") -> Path:
+    if mode not in ("hitl", "yolo"):
+        raise ValueError("mode must be hitl or yolo")
+    import yaml
+
+    p = Path(factory_path)
+    p = p / "factory.yml" if p.is_dir() else p
+    raw = yaml.safe_load(p.read_text()) or {}
+    raw["mode"] = mode
+    # yolo/hitl are not YAML booleans, but quote for safety/consistency
+    text = yaml.safe_dump(raw, sort_keys=False)
+    import re
+    text = re.sub(r"(?m)^(mode:\s*)(hitl|yolo)\s*$", r"\1'\2'", text)
+    p.write_text(text)
+    return p
+
+
+def cmd_mode(args) -> int:
+    if args.value:
+        _set_mode(args.value, args.factory)
+        print(f"autonomy mode set to {args.value}  (hitl = you approve; yolo = autonomous)")
+        return 0
+    f = load_factory(args.factory)
+    print(f"autonomy mode: {f.mode}")
+    return 0
+
+
 def cmd_run(args) -> int:
     factory, log, wf = _load(args)
     if getattr(args, "runner", None):
@@ -188,6 +233,19 @@ def cmd_run(args) -> int:
     if getattr(args, "command", None):
         import shlex
         factory.runner_options["command"] = shlex.split(args.command)
+
+    # Autonomy mode: flag > interactive prompt (each run) > factory default.
+    mode = getattr(args, "mode", None) or factory.mode
+    if getattr(args, "mode", None) is None and sys.stdin.isatty() and not getattr(args, "no_ask", False):
+        try:
+            ans = input(f"Autonomy mode? [hitl/yolo] ({factory.mode}): ").strip().lower()
+        except EOFError:
+            ans = ""
+        if ans in ("hitl", "yolo"):
+            mode = ans
+    factory.mode = mode
+    log.append("ModeSelected", {"mode": mode, "surface": "run"}, actor="owner")
+
     repo = Path.cwd() if args.git else None
     from .durability import Durability
 
@@ -494,6 +552,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--feedback", choices=["off", "hint", "auto"],
                    help="feedback consent at install time (default: ask, else hint)")
     s.add_argument("--upstream", help="upstream repo for feedback (owner/repo)")
+    s.add_argument("--mode", choices=["hitl", "yolo"],
+                   help="autonomy at install time (default: ask, else hitl)")
     s.set_defaults(func=cmd_init)
 
     s = sub.add_parser("validate", help="compile-check the factory definition")
@@ -507,7 +567,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--runner", choices=["mock", "subprocess"], help="override the factory runner")
     s.add_argument("--command", help="command for the subprocess runner (shell-split)")
     s.add_argument("--github", action="store_true", help="publish the handoff as a draft GitHub PR (needs gh)")
+    s.add_argument("--mode", choices=["hitl", "yolo"], help="autonomy for this run (overrides the factory default)")
+    s.add_argument("--no-ask", action="store_true", help="do not prompt for the mode")
     s.set_defaults(func=cmd_run)
+
+    s = sub.add_parser("mode", help="show or set autonomy mode (hitl | yolo); switchable anytime")
+    s.add_argument("value", nargs="?", choices=["hitl", "yolo"])
+    s.set_defaults(func=cmd_mode)
 
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")
