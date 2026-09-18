@@ -192,3 +192,28 @@ def test_doctor_alias_matches_audit(tmp_path):
     rc_audit = main(["--factory", str(root), "--ledger", ledger, "audit", "--fast"])
     rc_doctor = main(["--factory", str(root), "--ledger", ledger, "doctor", "--fast"])
     assert rc_audit == 0 and rc_doctor == rc_audit
+
+
+def test_metrics_json(tmp_path, capsys):
+    import json
+
+    from psf.cli import main
+
+    root = _factory_dir(tmp_path)
+    ledger = tmp_path / "e.db"
+    log = EventLog(ledger)
+    work = Foreman(load_factory(root), Workflow(log)).run("do a thing").work
+    log.append("OutcomeRecorded", {"accepted": True, "review_escape": False,
+                                   "cost_usd": 1.5, "human_minutes": 3},
+               work_id=work.id, actor="owner")
+    log.close()
+
+    rc = main(["--factory", str(root), "--ledger", str(ledger), "metrics", "--json"])
+    assert rc == 0
+    m = json.loads(capsys.readouterr().out)
+    assert m["work_items"] == 1
+    assert m["states"] == {"DONE": 1}
+    assert m["attempts"] == 1 and m["retries"] == 0 and m["blocked"] == 0
+    assert m["outcomes"] == {"accepted": 1, "review_escape": 0, "cost_usd": 1.5, "human_minutes": 3.0}
+    assert m["chain"]["ok"] is True
+    assert m["events"] > 0

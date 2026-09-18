@@ -134,4 +134,28 @@ source through its own loop.
 formalize a `psf self-build`; add a CI workflow; and keep the diary honest about
 what is proven (local, small-sample) versus claimed.
 
+---
+
+## 2026-09-18 — The loop closed: a clean, verified self-build
+
+**Second self-build, and this one closed the loop.** After the first attempt
+taught us to hand the spec to the implement agent, we ran the factory again on
+its own source — this time asking for `--json` support on `psf metrics` *and a
+test*. The Claude implement agent changed `src/psf/cli.py` and `tests/test_psf.py`;
+the independent verifier ran the suite (we granted the harness Bash) and passed
+it; the work item reached `DONE` on the **first attempt**; 25/25 tests were green
+in the worktree. As owner, I reviewed the diff (good), adopted it, and threw away
+the agent's stray `uv.lock`.
+
+**What this proves.** The pipeline is not a demo: a real harness proposed a real
+change, an independent verifier checked it, the gates held, and a human merged.
+Two rounds ago the verifier blocked a change for missing a test; now the same
+pipeline produces a change that passes. That delta is the factory working.
+
+**What it does not prove.** One small change, one harness, small samples, local
+runs. Self-improvement is still human-gated and limited to a narrow candidate
+space. Honest claim: *the mechanism is real and dogfooded*; the *effect size* is
+unmeasured.
+
+
 

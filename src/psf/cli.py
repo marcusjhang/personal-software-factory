@@ -172,10 +172,6 @@ def cmd_metrics(args) -> int:
         if w.state == "BLOCKED":
             blocked += 1
     ok, msg = log.verify_chain()
-    print(f"work items: {sum(states.values())}")
-    for s in sorted(states):
-        print(f"  {s:12} {states[s]}")
-    print(f"attempts: {attempts}  retries: {retries}  blocked: {blocked}")
     # outcome signals (M4)
     accepted = escapes = 0
     cost = minutes = 0.0
@@ -185,6 +181,23 @@ def cmd_metrics(args) -> int:
             escapes += int(bool(e.payload.get("review_escape")))
             cost += float(e.payload.get("cost_usd", 0) or 0)
             minutes += float(e.payload.get("human_minutes", 0) or 0)
+    if args.json:
+        print(json.dumps({
+            "work_items": sum(states.values()),
+            "states": {s: states[s] for s in sorted(states)},
+            "attempts": attempts, "retries": retries, "blocked": blocked,
+            "outcomes": {
+                "accepted": accepted, "review_escape": escapes,
+                "cost_usd": cost, "human_minutes": minutes,
+            },
+            "events": log.count(),
+            "chain": {"ok": ok, "message": msg},
+        }, indent=2))
+        return 0 if ok else 4
+    print(f"work items: {sum(states.values())}")
+    for s in sorted(states):
+        print(f"  {s:12} {states[s]}")
+    print(f"attempts: {attempts}  retries: {retries}  blocked: {blocked}")
     print(f"outcomes: accepted {accepted}  review-escape {escapes}  cost ${cost:.2f}  human {minutes:.0f} min")
     print(f"events: {log.count()}  chain: {msg}")
     return 0 if ok else 4
@@ -253,6 +266,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_status)
 
     s = sub.add_parser("metrics", help="outcome signals from the ledger")
+    s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_metrics)
 
     s = sub.add_parser("eval", help="run the protected evaluation (M3)")
