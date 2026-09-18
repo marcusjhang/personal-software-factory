@@ -58,3 +58,37 @@ diff/PR.
 **Next.** M1 (GitHub draft-PR handoff), M2 (leases/fencing/outbox), then
 M3 evaluation gates, M4 outcome metrics, and packaging so `uvx <pkg>` gives
 anyone their own factory.
+
+---
+
+## 2026-09-18 — M2 landed, and the factory built itself
+
+**Built M2 from research, not vibes.** Leases carry a monotonic epoch used as a
+fencing token; renew/release are epoch-conditional so a zombie worker cannot
+write. Effects are recorded as an intent before sending, and a failure between
+send and settle lands in `UNKNOWN`, which is reconciled by observing the target
+— never blind-retried. Idempotency keys reject same-key/different-bytes. Retry
+classes (transient/correctable/terminal/policy) drive capped exponential backoff
+with full jitter. Eight tests pin the classic races.
+
+**GitHub assumed.** We cut the host-agnostic abstraction. Intake is issues,
+handoff is a draft PR, identity is `gh`/GitHub App. The adapter is written; it
+only runs when the operator passes `--github`, because it is the one place PSF
+performs an external write.
+
+**Dogfood — it built itself.** We ran the factory on its own repository, in a
+git worktree, with a subprocess agent: goal → triage → spec → approval → build →
+independent verify → review → handoff. Result: work item `W-7df7e359`, branch
+`psf/W-7df7e359` with a real diff, 46 ledger events, chain verified, `DONE`.
+Then we removed the demo worktree.
+
+**Discovery — dogfooding is still shallow.** The "agent" was a script that
+writes a marker file. That proves the *process* (isolation, gates, ledger,
+handoff) but not that the factory can implement a real feature unaided. Closing
+that gap is exactly what the runner adapter is for: point `command` at a real
+harness. Recorded as a goal revision: **the factory must eventually make a
+non-trivial change to its own source through its own loop**, not just a marker.
+
+**Next.** M3 (protected evaluation gate) and M4 (outcome metrics), then
+packaging (`uvx`/`pipx`/Docker) so it is genuinely plug-and-play.
+

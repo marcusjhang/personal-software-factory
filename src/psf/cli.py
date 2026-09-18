@@ -93,6 +93,11 @@ def cmd_improve(args) -> int:
 
 def cmd_run(args) -> int:
     factory, log, wf = _load(args)
+    if getattr(args, "runner", None):
+        factory.runner = args.runner
+    if getattr(args, "command", None):
+        import shlex
+        factory.runner_options["command"] = shlex.split(args.command)
     repo = Path.cwd() if args.git else None
     result = Foreman(factory, wf).run(
         args.goal, approve=not args.no_approve, finish=args.finish,
@@ -109,6 +114,17 @@ def cmd_run(args) -> int:
     print(f"  ledger: {log.count()} events, chain {msg}")
     if not ok:
         return 4
+
+    if getattr(args, "github", False) and work.state in ("HANDOFF", "DONE") and repo is not None:
+        from .github import available, publish_draft_pr
+
+        if not available():
+            print("  github: `gh` not available; skipping draft PR", file=sys.stderr)
+        else:
+            wt = repo / ".psf" / "worktrees" / work.id
+            url, err = publish_draft_pr(wt, title=work.goal,
+                                        body=f"Work item {work.id}\nspec {work.spec_digest}")
+            print(f"  github: {url or 'draft PR failed: ' + str(err)}")
     return 0 if work.state in ("DONE", "HANDOFF") else 3
 
 
@@ -197,6 +213,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--no-approve", action="store_true", help="stop at SPEC_REVIEW and wait")
     s.add_argument("--finish", action="store_true", default=True)
     s.add_argument("--git", action="store_true", help="isolate work in a git worktree and keep it as the handoff branch")
+    s.add_argument("--runner", choices=["mock", "subprocess"], help="override the factory runner")
+    s.add_argument("--command", help="command for the subprocess runner (shell-split)")
+    s.add_argument("--github", action="store_true", help="publish the handoff as a draft GitHub PR (needs gh)")
     s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("status", help="show work items")

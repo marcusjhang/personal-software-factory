@@ -12,3 +12,7 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — Added `psf metrics`; wired the audit as a promotion gate (health must be green to promote). `9431981`.
 - 09-18 — Ran a research pass (Postgres locking, Kleppmann fencing, outbox, Temporal, Stripe idempotency, AWS jitter) to design M2.
 - 09-18 — Wrote `LOGBOOK.md` and `docs/DIARY.md`; began M2 durability (leases/fencing, outbox, idempotency, retry classification).
+- 09-18 — Implemented M2 durability from a research pass (Postgres locking, Kleppmann fencing, outbox, Temporal, Stripe, AWS jitter): atomic lease claim with monotonic epoch, fenced renew/release, transactional outbox, `UNKNOWN` reconciled-not-retried, idempotency same-key/different-bytes rejection, retry classification + full-jitter backoff. 8 durability tests. `a1abe0f`.
+- 09-18 — Adopted **GitHub as the assumed host**; added `src/psf/github.py` (issue intake, push + draft-PR handoff) and `psf run --runner/--command/--github`.
+- 09-18 — **Dogfooded a self-build**: ran the factory on this repository in a git worktree via the subprocess agent; produced branch `psf/W-7df7e359` with a real diff, 46 ledger events, chain verified, `DONE`. Demo worktree cleaned up after review.
+
