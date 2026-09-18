@@ -126,4 +126,39 @@ adversarial feedback · E20 sequential validity · E21 cold start on a new proje
   promotion, one-command rollback, opt-in feedback.
 - See [READY.md](./READY.md) for the honest "what's proven / not" page.
 
+---
+
+## Round 4 — eval governance (G1..G8)
+
+The eval suite can now grow safely as the factory is used. Plan:
+[EVAL-GOVERNANCE.md](./EVAL-GOVERNANCE.md). Implementation: `src/psf/evalgov.py`
+(lifecycle) over `src/psf/evalkit.py` (shared harness — the self-eval and
+governance suites share one implementation, no duplicated logic).
+
+Lifecycle: **capture → candidate → approve → optimization set → rotate → holdout
+→ retire (quarantine)**. Commands: `psf evals add|approve|rotate|retire|status`
+and `psf eval-gov`.
+
+| id | rule | eval |
+|---|---|---|
+| G1 | provenance required for every case | **pass** |
+| G2 | approval requires a principal different from the author | **pass** |
+| G3 | protected custody — the system can't edit `eval/`; digests pinned | **pass** |
+| G4 | no leakage (a case can't embed a patch/solution); holdout never auto-updated | **pass** |
+| G5 | rotation moves cases into the holdout and stays disjoint | **pass** |
+| G6 | retirement is quarantine (never delete; reason required) | **pass** |
+| G7 | expiry/review for stale cases | **pass** |
+| G8 | tier isolation (no duplicates/overlap across tiers) | **pass** |
+
+**New finding F7 — seeded cases lacked provenance (G1), fixed.** G5's integrity
+check flagged it; `make_eval_dir` and the repo's `eval/` cases now carry `source`.
+
+| run | self-eval | governance | audit |
+|---|---|---|---|
+| A | **22/22 pass** | **8/8 pass** | green |
+| B | **22/22 pass** | **8/8 pass** | green |
+
+Tests: **39**.
+
+
 

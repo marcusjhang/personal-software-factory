@@ -20,11 +20,11 @@ Every result carries evidence. Failures become issues to verify and fix.
 from __future__ import annotations
 
 import tempfile
-from dataclasses import dataclass, field
 from pathlib import Path
 
 from .audit import run_audit
 from .bench import BenchTask, run_benchmark, stretch_tasks
+from .evalkit import EvalResult, make_factory
 from .events import EventLog
 from .evaluation import candidate_touches_protected, load_holdout, load_tasks, manifest_digest, run_eval
 from .foreman import Foreman
@@ -46,35 +46,9 @@ HOLDOUT_TASKS = [
 def _holdout() -> list[BenchTask]:
     return load_holdout("eval") or HOLDOUT_TASKS
 
-FACTORY_TEMPLATE = """schemaVersion: psf/v1
-name: evalself
-runner: mock
-agents:
-{agents}
-gates:
-  spec_approval: true
-limits:
-  max_attempts: {max_attempts}
-"""
 
-
-def _write_factory(root: Path, *, max_attempts: int = 2) -> Path:
-    root.mkdir(parents=True, exist_ok=True)
-    (root / "agents").mkdir(exist_ok=True)
-    for r in ("triage", "spec", "implement", "verify", "review"):
-        (root / "agents" / f"{r}.md").write_text("p")
-    agents = "".join(f"  {r}: {{ prompt: agents/{r}.md }}\n"
-                     for r in ("triage", "spec", "implement", "verify", "review"))
-    (root / "factory.yml").write_text(FACTORY_TEMPLATE.format(agents=agents, max_attempts=max_attempts))
-    return root / "factory.yml"
-
-
-@dataclass
-class EvalResult:
-    id: str
-    name: str
-    status: str  # pass | fail
-    detail: dict = field(default_factory=dict)
+# shared harness helper (no duplicate implementation)
+_write_factory = make_factory
 
 
 def _protected_snapshot(path: str = "eval") -> dict:

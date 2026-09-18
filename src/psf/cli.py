@@ -297,6 +297,47 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_evals(args) -> int:
+    from .evalgov import (add_candidate, approve_candidate, integrity, retire_case,
+                          rotate_holdout, status as gov_status)
+
+    d = args.eval_dir
+    if args.action == "add":
+        p = add_candidate(d, case_id=args.case_id, goal=args.goal,
+                          solves_on_attempt=args.solves_on_attempt, source=args.source,
+                          owner=args.owner)
+        print(f"candidate added to {p} (provenance {args.source})")
+    elif args.action == "approve":
+        case = approve_candidate(d, args.case_id, approver=args.approver, author=args.author)
+        print(f"approved {case['id']} by {args.approver} (author {args.author})")
+    elif args.action == "rotate":
+        out = rotate_holdout(d, n=args.n, approver=args.approver, author=args.author)
+        print(f"rotated: {out}")
+    elif args.action == "retire":
+        case = retire_case(d, args.case_id, reason=args.reason, approver=args.approver, author=args.author)
+        print(f"retired {case['id']}: {case['reason']}")
+    else:  # status
+        print(json.dumps({"status": gov_status(d), "integrity": integrity(d)}, indent=2))
+    return 0
+
+
+def cmd_eval_gov(args) -> int:
+    from .evalgov import run_governance_eval
+
+    rep = run_governance_eval()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for e in rep["evals"]:
+            print(f"[{'PASS' if e['status'] == 'pass' else 'FAIL'}] {e['id']:5} {e['name']}")
+        print(f"governance evals: {rep['passed']}/{rep['total']} passed")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    return 0 if rep["failed"] == 0 else 1
+
+
 def cmd_eval_self(args) -> int:
     from .selfeval import run_self_eval
 
@@ -485,6 +526,25 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_self)
+
+    s = sub.add_parser("eval-gov", help="run the eval-governance eval suite (G1..G8)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_gov)
+
+    s = sub.add_parser("evals", help="govern the eval suite: add / approve / rotate / retire / status")
+    s.add_argument("action", choices=["add", "approve", "rotate", "retire", "status"])
+    s.add_argument("--eval-dir", default="eval")
+    s.add_argument("--case-id")
+    s.add_argument("--goal")
+    s.add_argument("--solves-on-attempt", type=int, default=1)
+    s.add_argument("--source", help="provenance: finding id / issue / spec")
+    s.add_argument("--owner", default="owner")
+    s.add_argument("--approver", default="owner")
+    s.add_argument("--author", default="system")
+    s.add_argument("--n", type=int, default=1, help="cases to rotate into the holdout")
+    s.add_argument("--reason", default="")
+    s.set_defaults(func=cmd_evals)
 
     s = sub.add_parser("eval-suite", help="run the process + verifier eval suite (see docs/EVAL-PLAN.md)")
     s.add_argument("--seeds", type=int, default=5)
