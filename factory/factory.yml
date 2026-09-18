@@ -3,12 +3,17 @@ name: default
 description: Default personal software factory.
 runner: mock
 agents:
-  triage:    { prompt: agents/triage.md }
-  spec:      { prompt: agents/spec.md }
-  implement: { prompt: agents/implement.md }
-  verify:    { prompt: agents/verify.md }
-  review:    { prompt: agents/review.md }
+  triage:
+    prompt: agents/triage.md
+  spec:
+    prompt: agents/spec.md
+  implement:
+    prompt: agents/implement.md
+  verify:
+    prompt: agents/verify.md
+  review:
+    prompt: agents/review.md
 gates:
   spec_approval: true
 limits:
-  max_attempts: 2
+  max_attempts: 3

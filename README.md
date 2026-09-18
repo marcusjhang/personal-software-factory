@@ -21,8 +21,9 @@ you own the model.
 - [PLAN.md](./PLAN.md) — the finalised product plan
 - [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — the full technical specification
 
-> Status: **specification**. This repo is the plan and tech spec for the product.
-> No implementation ships from here yet.
+> Status: **working implementation.** The factory runs, dogfoods itself, and is
+> self-improving (human-gated). 32 tests, green `psf audit`. See
+> [LOGBOOK.md](./LOGBOOK.md) and [docs/DIARY.md](./docs/DIARY.md).
 
 ---
 
@@ -55,6 +56,38 @@ your-repo/
     └── work/                 # isolated workspaces
 ```
 
+## Diagram
+
+![Personal Software Factory structure](./docs/images/factory-structure.png)
+
+Live, editable version: **[Excalidraw scene](https://app.excalidraw.com/s/919s34P0y0E/ABFyJp9mOpq)**.
+
+```mermaid
+flowchart LR
+  Owner([Owner: goal + approvals]) --> CLI[psf CLI]
+  Factory[factory.yml<br/>factory-as-code] --> Compiler[Compiler]
+  Compiler --> Controller[Controller<br/>sole state authority]
+  Controller <--> Ledger[(Ledger<br/>append-only, hash-chained)]
+  Controller --> Gates[Gates · scheduler · budget · retries]
+  Controller --> Foreman[Foreman]
+  Foreman --> Triage --> Spec --> Build --> Verify --> Review --> Handoff[Handoff / draft PR]
+  Build --> WS[Isolated git worktree]
+  WS --> Runner[Runner — BYO model]
+  Verify -. independent .-> Controller
+  Handoff --> Owner
+
+  subgraph IMP [Governed improvement — human-gated]
+    direction LR
+    Signals --> Proposal --> Eval[Protected eval] --> Shadow --> Canary --> Promote[Human promote / rollback]
+  end
+  Promote --> Factory
+
+  subgraph FB [Consumer feedback loop]
+    direction LR
+    Consumer[(Consumer .psf ledger)] --> Export[psf feedback export] --> Issue[GitHub issue] --> Ingest[psf feedback ingest] --> ReportSignals[psf feedback report] --> Signals
+  end
+```
+
 ## Quickstart
 
 ```bash
@@ -68,6 +101,18 @@ psf init                                     # scaffold factory/ + .psf/
 psf validate                                 # compile-check the factory definition
 psf run "add CSV export to the metrics page" # run one goal through the factory
 psf status                                   # show work items + ledger state
+psf audit                                    # self health check (alias: psf doctor)
+psf metrics                                  # outcome signals from the ledger
+psf eval                                     # run the protected evaluation
+psf improve                                  # governed, human-gated improvement
+psf feedback export                          # privacy-filtered usage envelope
+```
+
+Bring a real model:
+
+```bash
+psf run --git --runner subprocess \
+  --command "python3 scripts/psf_agent_claude.py" "your goal here"
 ```
 
 ## The factory loop
@@ -103,8 +148,10 @@ deploys on its own.
   replacement for Git, GitHub, CI, or branch protection.
 - Not a claim of unattended production readiness.
 
-See [PLAN.md](./PLAN.md) for scope and milestones and
-[docs/TECH-SPEC.md](./docs/TECH-SPEC.md) for the implementation contract.
+- [PLAN.md](./PLAN.md) — scope and milestones
+- [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — implementation contract
+- [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
+- [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries
 
 ## License
 

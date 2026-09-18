@@ -22,6 +22,8 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — **Durability wired in (#1):** the foreman now takes a fenced lease per work item and refuses if held; the GitHub draft-PR is an idempotent outbox effect (reconcile-before-retry). 28/28 tests.
 - 09-18 — **Improvement widened (#2):** multi-candidate search over an allow-list (`limits.max_attempts`; protected fields refused), best candidate chosen by offline eval then eval/audit/canary-gated. 30/30 tests.
 - 09-18 — **Consumer feedback loop:** `psf feedback export|ingest|report`, privacy-filtered digests-only envelopes, GitHub issue template, `docs/FEEDBACK.md`. 32/32 tests. Pushed.
+- 09-18 — README gained the diagram (Mermaid + rendered PNG in `docs/images/` + Excalidraw link); Excalidraw scene extended with the consumer feedback loop. Ran protected evals; `psf improve --promote` raised `limits.max_attempts` 2→3 through the gated loop (audit green, eval PROMOTE, human-authorized). Re-eval at the new baseline is non-inferior.
+
 
 
 
