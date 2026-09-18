@@ -21,7 +21,10 @@ def emit(ok, output=None, summary=""):
 
 def ask(prompt, cwd):
     p = subprocess.run(
-        ["claude", "-p", prompt, "--permission-mode", "acceptEdits", "--output-format", "text"],
+        ["claude", "-p", prompt,
+         "--permission-mode", "acceptEdits",
+         "--allowedTools", "Bash", "Edit", "Write", "Read", "Glob", "Grep",
+         "--output-format", "text"],
         cwd=cwd, capture_output=True, text=True, timeout=TIMEOUT,
     )
     return p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip()
