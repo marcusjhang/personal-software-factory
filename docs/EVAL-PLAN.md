@@ -124,3 +124,6 @@ re-eval.**
 - `psf eval-suite` — runs the process + verifier suites, writes a JSON report.
 - `docs/EVAL-REPORT.md` — the run's results, validated findings, and actions.
 - Findings that pass validation → factory self-builds (dogfood) → re-eval.
+
+> Evaluating self-improvement itself (does the factory get better, safely?) is a
+> separate program: see [EVAL-PLAN-SELF-IMPROVING.md](./EVAL-PLAN-SELF-IMPROVING.md).

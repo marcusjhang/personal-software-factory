@@ -150,6 +150,9 @@ deploys on its own.
 
 - [PLAN.md](./PLAN.md) — scope and milestones
 - [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — implementation contract
+- [docs/EVAL-PLAN.md](./docs/EVAL-PLAN.md) — how we evaluate the factory
+- [docs/EVAL-PLAN-SELF-IMPROVING.md](./docs/EVAL-PLAN-SELF-IMPROVING.md) — how we evaluate self-improvement
+- [docs/EVAL-REPORT.md](./docs/EVAL-REPORT.md) — eval results and validated findings
 - [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
 - [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries
 
