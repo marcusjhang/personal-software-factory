@@ -24,12 +24,27 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .audit import run_audit
+from .bench import BenchTask, run_benchmark, stretch_tasks
 from .events import EventLog
-from .evaluation import candidate_touches_protected, manifest_digest, run_eval
+from .evaluation import candidate_touches_protected, load_holdout, load_tasks, manifest_digest, run_eval
 from .foreman import Foreman
 from .improve import run_improvement
 from .schema import load as load_factory
 from .state import GateError, Workflow
+
+# A held-out task set the improvement loop never optimizes against (E3/E4).
+# Loaded from the protected eval/holdout.json; distinct goals from tasks.json.
+HOLDOUT_TASKS = [
+    BenchTask("h1", "add a version command", 1),
+    BenchTask("h2", "add pagination to the list API", 2),
+    BenchTask("h3", "add retry with backoff to the client", 3),
+    BenchTask("h4", "add an index migration", 3),
+    BenchTask("h5", "add structured audit logging", 3),
+]
+
+
+def _holdout() -> list[BenchTask]:
+    return load_holdout("eval") or HOLDOUT_TASKS
 
 FACTORY_TEMPLATE = """schemaVersion: psf/v1
 name: evalself
@@ -237,11 +252,104 @@ def eval_E2(tmp: Path) -> EvalResult:
                       {"audit_healthy": report.healthy, "eval_decision": ev.decision})
 
 
+def eval_E1(tmp: Path) -> EvalResult:
+    """Improvement trajectory: capability rises over cycles vs a frozen control."""
+    ledger = tmp / "e1.db"
+    EventLog(ledger).close()
+    f = _write_factory(tmp / "e1", max_attempts=1)
+
+    def cap() -> float:
+        return run_benchmark(stretch_tasks(), max_attempts=load_factory(f).max_attempts).factory_rate
+
+    traj = [cap()]
+    for _ in range(3):
+        run_improvement(f, ledger, promote=True)
+        traj.append(cap())
+    control = run_benchmark(stretch_tasks(), max_attempts=1).factory_rate  # frozen
+    ok = traj[-1] > traj[0] and traj[-1] >= control
+    return EvalResult("E1", "improvement trajectory", "pass" if ok else "fail",
+                      {"trajectory": traj, "control": control})
+
+
+def eval_E3(tmp: Path) -> EvalResult:
+    """Held-out generalization: gains transfer to tasks never optimized against."""
+    ledger = tmp / "e3.db"
+    EventLog(ledger).close()
+    f = _write_factory(tmp / "e3", max_attempts=2)
+    holdout = _holdout()
+    base = run_benchmark(holdout, max_attempts=2).factory_rate
+    run_improvement(f, ledger, promote=True)
+    cand = run_benchmark(holdout, max_attempts=load_factory(f).max_attempts).factory_rate
+    ok = cand >= base and cand > 0
+    return EvalResult("E3", "held-out generalization", "pass" if ok else "fail",
+                      {"holdout_base": base, "holdout_candidate": cand})
+
+
+def eval_E4(tmp: Path) -> EvalResult:
+    """Goodhart divergence: the optimized proxy must not outrun the held-out set."""
+    ledger = tmp / "e4.db"
+    EventLog(ledger).close()
+    f = _write_factory(tmp / "e4", max_attempts=2)
+    proxy_tasks = load_tasks("eval")
+
+    def gap() -> float:
+        m = load_factory(f).max_attempts
+        return (run_benchmark(proxy_tasks, max_attempts=m).factory_rate
+                - run_benchmark(_holdout(), max_attempts=m).factory_rate)
+
+    gaps = [gap()]
+    run_improvement(f, ledger, promote=True)
+    gaps.append(gap())
+    widening = gaps[-1] - gaps[0]
+    ok = widening <= 0.2
+    return EvalResult("E4", "goodhart divergence", "pass" if ok else "fail",
+                      {"gaps": [round(g, 3) for g in gaps], "widening": round(widening, 3)})
+
+
+def eval_E17(tmp: Path) -> EvalResult:
+    """Catastrophic forgetting: previously passing capabilities are retained."""
+    ledger = tmp / "e17.db"
+    EventLog(ledger).close()
+    f = _write_factory(tmp / "e17", max_attempts=2)
+    before = run_benchmark(stretch_tasks(), max_attempts=2).factory_pass
+    run_improvement(f, ledger, promote=True)
+    after = run_benchmark(stretch_tasks(), max_attempts=load_factory(f).max_attempts).factory_pass
+    ok = after >= before
+    return EvalResult("E17", "catastrophic forgetting", "pass" if ok else "fail",
+                      {"retained_before": before, "retained_after": after})
+
+
+def eval_E18(tmp: Path) -> EvalResult:
+    """Meta-improvement: proposal precision does not degrade across cycles."""
+    ledger = tmp / "e18.db"
+    EventLog(ledger).close()
+    f = _write_factory(tmp / "e18", max_attempts=1)
+    precisions = []
+    for _ in range(3):
+        r = run_improvement(f, ledger, promote=True)
+        precisions.append(1.0 if (not r.promoted or r.candidate_rate > r.current_rate) else 0.0)
+    non_decreasing = all(precisions[i] >= precisions[i - 1] for i in range(1, len(precisions)))
+    return EvalResult("E18", "meta-improvement (proposal precision)",
+                      "pass" if non_decreasing else "fail", {"precision": precisions})
+
+
+def eval_E22(tmp: Path) -> EvalResult:
+    """F4 regression: spec demands behavioral criteria; verifier is advisory on cosmetics."""
+    spec = Path("factory/agents/spec.md").read_text().lower()
+    ver = Path("factory/agents/verify.md").read_text().lower()
+    spec_ok = "behavioral" in spec and "testable" in spec
+    ver_ok = "advisory" in ver
+    return EvalResult("E22", "verifier advisory policy (F4 regression)",
+                      "pass" if (spec_ok and ver_ok) else "fail",
+                      {"spec_behavioral": spec_ok, "verify_advisory": ver_ok})
+
+
 def run_self_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-selfeval-") as d:
         tmp = Path(d)
-        for fn in (eval_E5, eval_E6, eval_E7, eval_E10, eval_E15, eval_E16, eval_E19, eval_E2):
+        for fn in (eval_E1, eval_E2, eval_E3, eval_E4, eval_E5, eval_E6, eval_E7,
+                   eval_E10, eval_E15, eval_E16, eval_E17, eval_E18, eval_E19, eval_E22):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001 - an eval crashing is a failed eval

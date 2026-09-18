@@ -1,0 +1,10 @@
+{
+  "note": "PROTECTED holdout. Genuinely distinct goals from tasks.json; never optimized against; the Goodhart tripwire. Candidates may not edit this file.",
+  "tasks": [
+    { "id": "h1", "goal": "add a version command", "solves_on_attempt": 1 },
+    { "id": "h2", "goal": "add pagination to the list API", "solves_on_attempt": 2 },
+    { "id": "h3", "goal": "add retry with backoff to the client", "solves_on_attempt": 3 },
+    { "id": "h4", "goal": "add an index migration", "solves_on_attempt": 3 },
+    { "id": "h5", "goal": "add structured audit logging", "solves_on_attempt": 3 }
+  ]
+}

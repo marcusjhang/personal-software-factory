@@ -48,6 +48,10 @@ class EvalRecord:
     task_set_digest: str
     decision: str
     reasons: list[str]
+    holdout_baseline: float | None = None
+    holdout_candidate: float | None = None
+    holdout_delta: float | None = None
+    holdout_ci_low: float | None = None
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> dict:
@@ -69,6 +73,15 @@ def manifest_digest(eval_dir: str | Path) -> str:
 
 def load_tasks(eval_dir: str | Path) -> list[BenchTask]:
     data = json.loads((Path(eval_dir) / "tasks.json").read_text())
+    return [BenchTask(t["id"], t["goal"], int(t.get("solves_on_attempt", 1))) for t in data["tasks"]]
+
+
+def load_holdout(eval_dir: str | Path) -> list[BenchTask]:
+    """Protected holdout: never optimized against; the Goodhart tripwire."""
+    p = Path(eval_dir) / "holdout.json"
+    if not p.exists():
+        return []
+    data = json.loads(p.read_text())
     return [BenchTask(t["id"], t["goal"], int(t.get("solves_on_attempt", 1))) for t in data["tasks"]]
 
 
@@ -112,6 +125,20 @@ def run_eval(eval_dir: str | Path, *, baseline_attempts: int, candidate_attempts
     n_min = int(thresholds.get("n_min", 3))
     telemetry_complete = True  # local deterministic run; no lost signal
 
+    # Goodhart guard: the candidate must also hold up on a protected holdout that
+    # the improvement loop never optimizes against.
+    holdout = load_holdout(eval_dir)
+    hb = hc = hdelta = hci = None
+    if holdout:
+        hb_r = run_benchmark(tasks=holdout, max_attempts=baseline_attempts)
+        hc_r = run_benchmark(tasks=holdout, max_attempts=candidate_attempts)
+        hb_by = {d["task"]: int(d["factory"]) for d in hb_r.details}
+        hc_by = {d["task"]: int(d["factory"]) for d in hc_r.details}
+        hdeltas = [float(hc_by[h.name]) - float(hb_by[h.name]) for h in holdout]
+        hb, hc = hb_r.factory_rate, hc_r.factory_rate
+        hdelta = hc - hb
+        hci = _bootstrap_ci_low(hdeltas, seed=seed)
+
     reasons: list[str] = []
     if not deltas:
         reasons.append("no scored tasks")
@@ -121,6 +148,8 @@ def run_eval(eval_dir: str | Path, *, baseline_attempts: int, candidate_attempts
         reasons.append("telemetry incomplete")
     if deltas and ci_low < -margin:
         reasons.append(f"non-inferiority failed: ci_low {ci_low:.3f} < -{margin}")
+    if hci is not None and hci < -margin:
+        reasons.append(f"holdout non-inferiority failed: ci_low {hci:.3f} < -{margin}")
 
     decision = "PROMOTE" if not reasons else "REJECT"
     return EvalRecord(
@@ -135,4 +164,5 @@ def run_eval(eval_dir: str | Path, *, baseline_attempts: int, candidate_attempts
         eval_manifest_digest=manifest_digest(eval_dir),
         task_set_digest=digest_bytes((eval_dir / "tasks.json").read_bytes()),
         decision=decision, reasons=reasons,
+        holdout_baseline=hb, holdout_candidate=hc, holdout_delta=hdelta, holdout_ci_low=hci,
     )

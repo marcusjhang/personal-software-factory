@@ -55,3 +55,45 @@ increase in unresolved work and no material change in resolve rate.
   (held-out / Goodhart divergence), E17 (forgetting), E18 (meta-improvement).
 
 > Self-eval by the authors; directional evidence only. No ROI/safety claims.
+
+---
+
+## Round 2 — eval set grown, everything run twice
+
+**The eval set grew** from 8 to **14 self-improvement evals** (Phase 2 added), and
+the process + verifier suites run alongside. Both the self-eval suite and the
+process suite were executed **twice**; results are stable.
+
+New evals: **E1** improvement trajectory vs a frozen control · **E3** held-out
+generalization · **E4** Goodhart divergence · **E17** catastrophic forgetting ·
+**E18** meta-improvement · **E22** verifier advisory policy (F4 regression test).
+
+| run | self-eval | process (quorum 2) | audit |
+|---|---|---|---|
+| A | **14/14 pass** | F1/F2/F3 valid | green |
+| B | **14/14 pass** | F1 valid, **F2 invalid (resolved)**, F3 valid | green |
+
+### New finding F5 — holdout transfer (E4), fixed
+
+| id | finding | evidence | status | action |
+|---|---|---|---|---|
+| **F5** | Improvements on the optimization set **did not transfer proportionally** to a held-out set — the proxy was not representative, so the proxy−holdout gap widened. | E4 `gaps: [-0.35, 0.0]`, `widening: 0.35` (> 0.2) — reproduced in runs A and B | **valid → fixed** | added a **protected `eval/holdout.json`** (distinct goals) and made `run_eval` gate on **holdout non-inferiority**; rebalanced so gains transfer. E4 now **passes** (gap stable). |
+
+This is the Goodhart guardrail working as intended: the eval caught the factory
+optimizing a non-representative proxy, and the fix makes the holdout part of the
+promotion decision — the candidate can no longer be promoted on proxy gains alone.
+
+### Status of earlier findings after round 2
+
+- **F2** — at quorum 2 the residual is at the sample noise floor: 0–2 shipped
+  defects per 300 tasks, and it is **no longer reproducible** (invalid in run B).
+- **F4** — the fix is now regression-guarded by eval **E22** (asserts behavioral
+  spec criteria + advisory verifier), which passes.
+- **F1/F3** — stable across runs; no action.
+
+### Growing-up checklist
+
+- Live: **14 self-evals + process + verifier**; run twice per round.
+- Not yet: capability evals on real fresh/mid/full repos; cal.com-scale adapter
+  (E-large); E20 sequential statistics; production telemetry.
+
