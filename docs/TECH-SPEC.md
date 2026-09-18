@@ -81,7 +81,7 @@ daemon mode is a later milestone.
 | `runner` | enum | no | `mock` \| `subprocess`. Default `mock`. |
 | `runnerOptions` | mapping | no | Runner-specific (e.g. `command`, `timeout`). |
 | `agents` | mapping | yes | Role → agent spec. |
-| `gates` | mapping | no | Gate policy (e.g. `spec_approval: true`). |
+| `gates` | mapping | no | Gate policy: `spec_approval: true`; `verify_quorum: 1\|2` (default 1) — independent verifications per build, all must pass to reach REVIEW. |
 | `limits` | mapping | no | `max_attempts`, `max_minutes`, `max_cost`. |
 
 Unknown top-level keys are rejected.

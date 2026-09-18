@@ -64,6 +64,11 @@ class Factory:
     def spec_approval(self) -> bool:
         return bool(self.gates.get("spec_approval", True))
 
+    @property
+    def verify_quorum(self) -> int:
+        """Independent verifications per build; all must pass to reach REVIEW."""
+        return int(self.gates.get("verify_quorum", 1))
+
     def agent(self, role: str) -> AgentSpec:
         if role not in self.agents:
             raise FactoryError(f"factory '{self.name}' has no agent role '{role}'")
@@ -157,6 +162,11 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
     gates = raw.get("gates") or {}
     if "spec_approval" in gates and not isinstance(gates["spec_approval"], bool):
         errors.append("gates.spec_approval must be a boolean")
+    if "verify_quorum" in gates:
+        quorum = gates["verify_quorum"]
+        # bool is an int subclass; ``true`` must not pass as 1.
+        if not isinstance(quorum, int) or isinstance(quorum, bool) or quorum not in (1, 2):
+            errors.append("gates.verify_quorum must be an integer, 1 or 2")
 
     feedback = raw.get("feedback") or {}
     if not isinstance(feedback, dict):

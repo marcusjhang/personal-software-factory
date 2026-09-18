@@ -157,5 +157,44 @@ runs. Self-improvement is still human-gated and limited to a narrow candidate
 space. Honest claim: *the mechanism is real and dogfooded*; the *effect size* is
 unmeasured.
 
+---
+
+## 2026-09-18 — Evals, and the loop that closes them
+
+**We planned before running.** `docs/EVAL-PLAN.md` predeclares hypotheses
+(H1–H4), metrics, denominators, and validity checks. That matters: an eval you
+can retune after seeing results is not an eval.
+
+**The suite found a bug in itself.** Our verifier model had the catch probability
+inverted — the first run reported a 20% catch rate where the model said 90%. We
+fixed the model before drawing conclusions. First lesson: evaluate the evaluator.
+
+**Then it found something non-obvious.** Independent verification cut shipped
+defects dramatically versus a one-shot baseline (F1), but **retries did not
+reduce shipped defects** (F3) — every retry is another chance for the verifier to
+miss and ship. And a single verifier leaves a residual `1-q` defect rate (F2).
+That last one is exactly the kind of counterintuitive result you only get by
+running.
+
+**We validated before acting.** F2 reproduced across seeds and denominators
+before we touched anything. Findings that don't reproduce don't count.
+
+**We fixed F2 with the factory itself.** Added `gates.verify_quorum` (double
+verification) — *built by the factory*, not by hand. The factory's verifier then
+blocked the change **on brittle wording the spec agent itself invented**
+(exact error-string, unrequested ledger field). The code was correct; the
+specification was pedantic. The owner adjudicated and adopted.
+
+**The result.** Re-running the eval: **shipped defects 17 → 1**, F2 resolved. And
+the block produced a new, real finding **F4**: the spec agent over-specifies
+acceptance criteria, causing false-negative verification. That is now the next
+thing to fix.
+
+**Why this is the point.** The factory's own weakness was discovered by its own
+eval, described as a finding, validated, fixed by the factory, and re-measured.
+The loop works on itself. It is still slow, human-gated, and small-sample — but it
+is a loop.
+
+
 
 

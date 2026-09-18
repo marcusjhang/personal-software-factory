@@ -23,6 +23,9 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — **Improvement widened (#2):** multi-candidate search over an allow-list (`limits.max_attempts`; protected fields refused), best candidate chosen by offline eval then eval/audit/canary-gated. 30/30 tests.
 - 09-18 — **Consumer feedback loop:** `psf feedback export|ingest|report`, privacy-filtered digests-only envelopes, GitHub issue template, `docs/FEEDBACK.md`. 32/32 tests. Pushed.
 - 09-18 — README gained the diagram (Mermaid + rendered PNG in `docs/images/` + Excalidraw link); Excalidraw scene extended with the consumer feedback loop. Ran protected evals; `psf improve --promote` raised `limits.max_attempts` 2→3 through the gated loop (audit green, eval PROMOTE, human-authorized). Re-eval at the new baseline is non-inferior.
+- 09-18 — **Eval plan + suite.** `docs/EVAL-PLAN.md`, `psf eval-suite` (process + verifier suites, Wilson CIs, findings with reproducibility), `docs/reports/`. Fixed an inverted verifier probability (my model bug). Findings F1–F3 validated across seeds.
+- 09-18 — **Feedback→improvement round trip.** Validated F2 (single verifier ships residual defects). Implemented `gates.verify_quorum` **with the factory itself** (Claude harness); verifier blocked on brittle spec wording, owner adjudicated and adopted. Re-ran the eval: **shipped defects 17 → 1**, F2 resolved. New finding **F4**: the spec agent writes brittle acceptance criteria causing false-negative verification. See `docs/EVAL-REPORT.md`.
+
 
 
 

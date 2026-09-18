@@ -12,13 +12,14 @@ from psf.schema import Factory, load as load_factory, validate
 from psf.state import GateError, Workflow
 
 
-def make_factory(tmp_path: Path, *, spec_approval=False, max_attempts=2) -> Factory:
+def make_factory(tmp_path: Path, *, spec_approval=False, max_attempts=2, verify_quorum=1) -> Factory:
     (tmp_path / "agents").mkdir(exist_ok=True)
     for role in ("triage", "spec", "implement", "verify", "review"):
         (tmp_path / "agents" / f"{role}.md").write_text("prompt")
     return Factory(
         name="t", schema_version="psf/v1", path=tmp_path / "factory.yml",
-        runner="mock", gates={"spec_approval": spec_approval}, limits={"max_attempts": max_attempts},
+        runner="mock", gates={"spec_approval": spec_approval, "verify_quorum": verify_quorum},
+        limits={"max_attempts": max_attempts},
     )
 
 
@@ -98,6 +99,59 @@ def test_foreman_retries_then_blocks(tmp_path):
     result = Foreman(factory, Workflow(log), ScriptedRunner(tasks)).run("never solves")
     assert result.work.state == "BLOCKED"
     assert result.work.attempts == 2
+
+
+class CountingVerifyRunner(MockRunner):
+    """Mock runner that counts verify calls and fails the chosen (1-based) ones."""
+
+    def __init__(self, fail_on: set[int] = frozenset()):
+        self.fail_on = set(fail_on)
+        self.verify_calls = 0
+
+    def run(self, task: AgentTask) -> AgentResult:
+        if task.role != "verify":
+            return super().run(task)
+        self.verify_calls += 1
+        if self.verify_calls in self.fail_on:
+            return AgentResult(False, {"passed": False, "findings": [f"verify #{self.verify_calls} failed"]})
+        return super().run(task)
+
+
+def test_verify_quorum(tmp_path):
+    (tmp_path / "agents").mkdir()
+    for r in ("triage", "spec", "implement", "verify", "review"):
+        (tmp_path / "agents" / f"{r}.md").write_text("p")
+    base = {"schemaVersion": "psf/v1", "name": "x",
+            "agents": {r: {"prompt": f"agents/{r}.md"} for r in
+                       ("triage", "spec", "implement", "verify", "review")}}
+    # schema: only the integers 1 and 2 are accepted
+    for ok in (1, 2):
+        assert validate({**base, "gates": {"verify_quorum": ok}}, base_dir=tmp_path) == []
+    for bad in (0, 3, "2", 2.0, True):
+        errs = validate({**base, "gates": {"verify_quorum": bad}}, base_dir=tmp_path)
+        assert any("gates.verify_quorum" in e for e in errs), bad
+    # model: default is 1
+    assert make_factory(tmp_path).verify_quorum == 1
+    assert Factory(name="t", schema_version="psf/v1", path=tmp_path / "f.yml").verify_quorum == 1
+
+    # foreman: quorum 2 runs the verifier twice per build and needs both to pass
+    factory = make_factory(tmp_path, verify_quorum=2, max_attempts=2)
+    runner = CountingVerifyRunner()
+    result = Foreman(factory, Workflow(EventLog(tmp_path / "ok.db")), runner).run("g")
+    assert result.work.state == "DONE" and result.work.attempts == 1
+    assert runner.verify_calls == 2
+
+    # one failing verification out of two blocks REVIEW and triggers a retry
+    runner = CountingVerifyRunner(fail_on={2})
+    result = Foreman(factory, Workflow(EventLog(tmp_path / "retry.db")), runner).run("g")
+    assert result.work.state == "DONE" and result.work.attempts == 2
+    assert runner.verify_calls == 4
+    assert "VERIFY->BUILD" in result.work.transitions
+
+    # quorum 1 is unchanged: a single verification per build
+    runner = CountingVerifyRunner()
+    Foreman(make_factory(tmp_path, verify_quorum=1), Workflow(EventLog(tmp_path / "one.db")), runner).run("g")
+    assert runner.verify_calls == 1
 
 
 def test_benchmark_factory_beats_or_equals_baseline():

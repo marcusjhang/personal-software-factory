@@ -85,10 +85,15 @@ class Foreman:
                 ))
                 work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
                                             summary=build.summary, actor="implement")
-                verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
-                                                   context={"spec": work.spec}))
-                passed = bool(verify.output.get("passed", verify.ok))
-                findings = list(verify.output.get("findings", []) or [])
+                # Quorum: run the independent verifier N times; every run must pass.
+                passed, findings = True, []
+                for _ in range(self.factory.verify_quorum):
+                    verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
+                                                       context={"spec": work.spec}))
+                    passed = passed and bool(verify.output.get("passed", verify.ok))
+                    for f in verify.output.get("findings", []) or []:
+                        if f not in findings:
+                            findings.append(f)
                 work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
                 if work.state == "REVIEW":
                     break

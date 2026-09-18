@@ -293,6 +293,31 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_eval_suite(args) -> int:
+    from .evalsuite import run_suite
+
+    rep = run_suite(seeds=args.seeds, per_tier=args.per_tier, q=args.q, verify_quorum=args.verify_quorum)
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+        return 0
+    print(f"{'tier':7} {'att':>4} {'base ok':>8} {'base def':>9} {'resolved':>9} "
+          f"{'shipped def':>12} {'unres':>6} {'attempts':>9}")
+    for tier, t in rep["process"]["tiers"].items():
+        print(f"{tier:7} {t['attempted']:>4} {t['baseline_success']:>8} {t['baseline_defects']:>9} "
+              f"{t['resolved']:>9} {t['shipped_defects']:>12} {t['unresolved']:>6} {t['avg_attempts']:>9}")
+    v = rep["verifier"]
+    print(f"verifier: TP {v['tp_rate']:.0%} ({v['true_positive']}/{v['n_bad']}, ci {v['tp_ci']})  "
+          f"FP {v['fp_rate']:.0%} ({v['false_positive']}/{v['n_good']})")
+    print("findings:")
+    for f in rep["findings"]:
+        print(f"  [{f['status']:8}] {f['id']} ({f['severity']}) {f['claim']}")
+    if args.out:
+        print(f"wrote {args.out}")
+    return 0
+
+
 def cmd_eval(args) -> int:
     from .evaluation import run_eval
 
@@ -429,6 +454,15 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("eval", help="run the protected evaluation (M3)")
     s.add_argument("--candidate", type=int, help="candidate max_attempts (default: current+1)")
     s.set_defaults(func=cmd_eval)
+
+    s = sub.add_parser("eval-suite", help="run the process + verifier eval suite (see docs/EVAL-PLAN.md)")
+    s.add_argument("--seeds", type=int, default=5)
+    s.add_argument("--per-tier", type=int, default=20)
+    s.add_argument("--q", type=float, default=0.9, help="verifier detection probability")
+    s.add_argument("--verify-quorum", type=int, default=1, help="independent verifications per build")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_suite)
 
     s = sub.add_parser("outcome", help="record an outcome for a work item (M4)")
     s.add_argument("work_id")
