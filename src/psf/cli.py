@@ -34,8 +34,8 @@ gates:
 limits:
   max_attempts: 2
 feedback:
-  upstream: marcusjhang/personal-software-factory
-  publish: false
+  upstream: {upstream}
+  mode: "{mode}"          # off | hint | auto; change anytime with `psf feedback opt-out|opt-in`
 """
 
 AGENTS_MD = """# AGENTS.md — how agents should use this repository
@@ -66,13 +66,36 @@ Do **not** put secrets, customer data, or raw source in a feedback envelope.
 """
 
 
-def _upstream(args) -> tuple[str | None, bool]:
+def _feedback_cfg(args) -> tuple[str | None, str]:
     try:
         factory = load_factory(args.factory)
     except FactoryError:
-        return None, False
+        return None, "hint"
     fb = getattr(factory, "feedback", {}) or {}
-    return fb.get("upstream"), bool(fb.get("publish", False))
+    mode = fb.get("mode") or ("auto" if fb.get("publish") else "hint")
+    return fb.get("upstream"), mode
+
+
+def _set_feedback(*, mode: str | None = None, upstream: str | None = None,
+                  factory_path: str = "factory") -> Path:
+    import re
+
+    import yaml
+
+    p = Path(factory_path)
+    p = p / "factory.yml" if p.is_dir() else p
+    raw = yaml.safe_load(p.read_text()) or {}
+    fb = raw.setdefault("feedback", {})
+    if mode is not None:
+        fb["mode"] = mode
+        fb.pop("publish", None)
+    if upstream is not None:
+        fb["upstream"] = upstream
+    text = yaml.safe_dump(raw, sort_keys=False)
+    # YAML 1.1 parses bare `off`/`on` as booleans; keep mode a string.
+    text = re.sub(r"(?m)^(\s*mode:\s*)(off|on|hint|auto)\s*$", r"\1'\2'", text)
+    p.write_text(text)
+    return p
 
 
 PROMPTS = {
@@ -96,8 +119,22 @@ def cmd_init(args) -> int:
     if root.exists() and any(root.iterdir()) and not args.force:
         print(f"refusing to overwrite existing {root} (use --force)", file=sys.stderr)
         return 2
+
+    # Feedback consent is chosen at install time and changeable anytime.
+    upstream = args.upstream or "marcusjhang/personal-software-factory"
+    mode = args.feedback
+    if mode is None:
+        if sys.stdin.isatty():
+            try:
+                ans = input("Share anonymous usage feedback upstream? [off/hint/auto] (hint): ").strip().lower()
+            except EOFError:
+                ans = ""
+            mode = ans if ans in ("off", "hint", "auto") else "hint"
+        else:
+            mode = "hint"
+
     (root / "agents").mkdir(parents=True, exist_ok=True)
-    (root / "factory.yml").write_text(FACTORY_YML)
+    (root / "factory.yml").write_text(FACTORY_YML.replace("{upstream}", upstream).replace("{mode}", mode))
     for role, prompt in PROMPTS.items():
         (root / "agents" / f"{role}.md").write_text(prompt + "\n")
     (root / "AGENTS.md").write_text(AGENTS_MD)
@@ -106,7 +143,7 @@ def cmd_init(args) -> int:
         root_agents.write_text(AGENTS_MD)
     Path(".psf").mkdir(exist_ok=True)
     print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md)")
-    print("agents are told (via AGENTS.md) to run the loop and send feedback upstream")
+    print(f"feedback: mode={mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
     print("next: psf validate && psf run \"<your goal>\"")
     return 0
 
@@ -214,9 +251,27 @@ def cmd_status(args) -> int:
 def cmd_feedback(args) -> int:
     from .feedback import export, ingest, publish_issue, report
 
+    if args.action == "opt-out":
+        _set_feedback(mode="off", factory_path=args.factory)
+        print("feedback: OFF — nothing will be sent; re-enable with `psf feedback opt-in`")
+        return 0
+    if args.action == "opt-in":
+        mode = "auto" if getattr(args, "auto", False) else "hint"
+        _set_feedback(mode=mode, factory_path=args.factory)
+        upstream, _ = _feedback_cfg(args)
+        print(f"feedback: {mode.upper()} (upstream={upstream or '(unset)'})")
+        return 0
+    if args.action == "status":
+        upstream, mode = _feedback_cfg(args)
+        print(f"feedback: mode={mode} upstream={upstream or '(unset)'}")
+        return 0
+
     if args.action == "export":
-        upstream, publish = _upstream(args)
-        target = args.github or (upstream if publish else None)
+        upstream, mode = _feedback_cfg(args)
+        if mode == "off":
+            print("feedback is OFF — `psf feedback opt-in` to enable (nothing was sent)")
+            return 0
+        target = args.github or (upstream if mode == "auto" else None)
         path = export(args.factory, args.ledger, out=args.out, repo=target)
         print(f"wrote {path}")
         if target:
@@ -226,7 +281,7 @@ def cmd_feedback(args) -> int:
             print(url or f"issue create failed: {err}")
         elif upstream:
             print(f"hint: send this upstream with `psf feedback export --github {upstream}`")
-            print("      (set feedback.publish: true in factory/factory.yml to make this the default)")
+            print("      (`psf feedback opt-in --auto` to publish by default; `psf feedback opt-out` to disable)")
     elif args.action == "ingest":
         if not args.path:
             print("error: ingest needs a file or directory", file=sys.stderr)
@@ -344,6 +399,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("init", help="scaffold factory/ and .psf/")
     s.add_argument("--force", action="store_true")
+    s.add_argument("--feedback", choices=["off", "hint", "auto"],
+                   help="feedback consent at install time (default: ask, else hint)")
+    s.add_argument("--upstream", help="upstream repo for feedback (owner/repo)")
     s.set_defaults(func=cmd_init)
 
     s = sub.add_parser("validate", help="compile-check the factory definition")
@@ -380,11 +438,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--minutes", type=float, default=0.0, help="human minutes spent")
     s.set_defaults(func=cmd_outcome)
 
-    s = sub.add_parser("feedback", help="consumer feedback loop (export / ingest / report)")
-    s.add_argument("action", choices=["export", "ingest", "report"])
+    s = sub.add_parser("feedback", help="consumer feedback loop (export / ingest / report / opt-out / opt-in / status)")
+    s.add_argument("action", choices=["export", "ingest", "report", "opt-out", "opt-in", "status"])
     s.add_argument("path", nargs="?", help="for ingest: an export file or directory")
     s.add_argument("--out", help="for export: output file")
     s.add_argument("--github", help="for export: file the envelope as an issue in this repo")
+    s.add_argument("--auto", action="store_true", help="for opt-in: publish automatically")
     s.set_defaults(func=cmd_feedback)
 
     s = sub.add_parser("log", help="print the ledger")

@@ -86,22 +86,41 @@ coding agents read automatically. `psf init` now writes one:
 - `AGENTS.md` at the repo root (and `factory/AGENTS.md`) stating the loop and the
   feedback step.
 
-The target lives in `factory/factory.yml`:
+The target and consent live in `factory/factory.yml`:
 
 ```yaml
 feedback:
   upstream: marcusjhang/personal-software-factory
-  publish: false      # set true to publish on every export
+  mode: hint     # off | hint | auto
 ```
 
-- `publish: false` (default): `psf feedback export` writes locally and prints the
-  exact command to send it upstream.
-- `publish: true`: `psf feedback export` publishes to `upstream` automatically.
-- `--github <repo>` always overrides the target.
+- `off` — **opted out**. `psf feedback export` sends nothing.
+- `hint` — default. Writes the envelope locally and prints the exact command.
+- `auto` — publishes to `upstream` automatically (still only counts/digests).
+
+**Choose it at install time**, interactively or with flags:
+
+```bash
+psf init                                  # asks: off / hint / auto
+psf init --feedback off                   # never send
+psf init --feedback auto --upstream you/repo
+```
+
+**Change it anytime during use:**
+
+```bash
+psf feedback status      # show current mode + upstream
+psf feedback opt-out     # stop sending, immediately
+psf feedback opt-in      # back to hint
+psf feedback opt-in --auto
+```
+
+`--github <repo>` always overrides the target for a single export, even in
+`hint` mode; it is ignored when opted out (`off`).
 
 So a consuming agent, reading `AGENTS.md`, will run the loop and then
-`psf feedback export --github <upstream>`, which becomes an issue labeled
-`factory-feedback` in this repo.
+`psf feedback export` — which only publishes if the human chose `auto` (or runs
+the explicit command). Consent is chosen up front and revocable at any time.
 
 ## Privacy and trust
 

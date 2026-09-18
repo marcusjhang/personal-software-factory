@@ -166,4 +166,6 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
             errors.append("feedback.upstream must be a string (owner/repo)")
         if "publish" in feedback and not isinstance(feedback["publish"], bool):
             errors.append("feedback.publish must be a boolean")
+        if "mode" in feedback and feedback["mode"] not in ("off", "hint", "auto"):
+            errors.append("feedback.mode must be one of: off, hint, auto")
     return errors

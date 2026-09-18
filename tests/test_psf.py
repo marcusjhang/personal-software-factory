@@ -219,6 +219,30 @@ def test_init_writes_agents_md(tmp_path, monkeypatch):
     assert "psf feedback export" in (tmp_path / "AGENTS.md").read_text()
 
 
+def test_feedback_consent_choose_and_opt_out(tmp_path, monkeypatch, capsys):
+    import yaml
+
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+
+    def mode_now():
+        return yaml.safe_load((tmp_path / "factory" / "factory.yml").read_text())["feedback"]["mode"]
+
+    assert cli.main(["init", "--feedback", "off"]) == 0
+    assert mode_now() == "off"
+    # exporting while opted out sends nothing
+    cli.main(["--factory", "factory", "--ledger", ".psf/factory.db", "feedback", "export"])
+    assert "feedback is OFF" in capsys.readouterr().out
+    # opt in (auto), then back out anytime
+    assert cli.main(["feedback", "opt-in", "--auto"]) == 0
+    assert mode_now() == "auto"
+    assert cli.main(["feedback", "status"]) == 0
+    assert "mode=auto" in capsys.readouterr().out
+    assert cli.main(["feedback", "opt-out"]) == 0
+    assert mode_now() == "off"
+
+
 def test_foreman_lease_prevents_concurrent_run(tmp_path):
     from psf.durability import Durability
 
