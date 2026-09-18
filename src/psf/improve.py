@@ -132,7 +132,13 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
     safe = candidate.factory_pass == candidate.total and canary.factory_pass == canary.total
     promoted = False
     if promote:
-        if improves and safe:
+        from .audit import run_audit
+        health = run_audit(factory_path, ledger_path)
+        notes.append(f"health: audit {'green' if health.healthy else 'RED'}")
+        if not health.healthy:
+            notes.append("promotion refused: self-audit is not green")
+            log.append("ImprovementRejected", {"reason": "audit_red"}, actor="owner")
+        elif improves and safe:
             _apply(factory_path, prop)
             log.append("ImprovementPromoted", {"field": prop.field, "candidate": prop.candidate}, actor="owner")
             promoted = True

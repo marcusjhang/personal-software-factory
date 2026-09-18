@@ -124,6 +124,26 @@ def cmd_status(args) -> int:
     return 0
 
 
+def cmd_metrics(args) -> int:
+    _, log, wf = _load(args)
+    states: dict[str, int] = {}
+    attempts = retries = blocked = 0
+    for wid in log.work_ids():
+        w = wf.fold(wid)
+        states[w.state] = states.get(w.state, 0) + 1
+        attempts += w.attempts
+        retries += max(0, w.attempts - 1)
+        if w.state == "BLOCKED":
+            blocked += 1
+    ok, msg = log.verify_chain()
+    print(f"work items: {sum(states.values())}")
+    for s in sorted(states):
+        print(f"  {s:12} {states[s]}")
+    print(f"attempts: {attempts}  retries: {retries}  blocked: {blocked}")
+    print(f"events: {log.count()}  chain: {msg}")
+    return 0 if ok else 4
+
+
 def cmd_log(args) -> int:
     _, log, _ = _load(args)
     events = log.for_work(args.work_id) if args.work_id else log.all()
@@ -182,6 +202,9 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")
     s.set_defaults(func=cmd_status)
+
+    s = sub.add_parser("metrics", help="outcome signals from the ledger")
+    s.set_defaults(func=cmd_metrics)
 
     s = sub.add_parser("log", help="print the ledger")
     s.add_argument("work_id", nargs="?")
