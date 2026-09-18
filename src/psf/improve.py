@@ -131,13 +131,30 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
     improves = candidate.factory_rate > current.factory_rate
     safe = candidate.factory_pass == candidate.total and canary.factory_pass == canary.total
     promoted = False
+    eval_ok = None
     if promote:
         from .audit import run_audit
         health = run_audit(factory_path, ledger_path)
         notes.append(f"health: audit {'green' if health.healthy else 'RED'}")
+
+        from .evaluation import run_eval
+        eval_dir = Path("eval")
+        if eval_dir.exists():
+            ev = run_eval(eval_dir, baseline_attempts=int(prop.current),
+                          candidate_attempts=int(prop.candidate))
+            log.append("EvalCompleted", {"record": ev.to_dict()}, actor=action)
+            eval_ok = ev.decision == "PROMOTE"
+            notes.append(f"protected eval: {ev.decision} (delta {ev.delta:+.0%}, ci_low {ev.ci_low:+.2f})")
+        else:
+            notes.append("protected eval: none (eval/ missing) — refusing")
+            eval_ok = False
+
         if not health.healthy:
             notes.append("promotion refused: self-audit is not green")
             log.append("ImprovementRejected", {"reason": "audit_red"}, actor="owner")
+        elif not eval_ok:
+            notes.append("promotion refused: protected evaluation did not pass")
+            log.append("ImprovementRejected", {"reason": "eval_failed"}, actor="owner")
         elif improves and safe:
             _apply(factory_path, prop)
             log.append("ImprovementPromoted", {"field": prop.field, "candidate": prop.candidate}, actor="owner")

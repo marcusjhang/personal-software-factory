@@ -1,0 +1,10 @@
+{
+  "note": "PROTECTED evaluation task set. Candidates may not edit this file.",
+  "tasks": [
+    { "id": "e1", "goal": "add a health endpoint", "solves_on_attempt": 1 },
+    { "id": "e2", "goal": "add CSV export", "solves_on_attempt": 2 },
+    { "id": "e3", "goal": "add a database migration", "solves_on_attempt": 3 },
+    { "id": "e4", "goal": "refactor the auth flow", "solves_on_attempt": 3 },
+    { "id": "e5", "goal": "add rate limiting", "solves_on_attempt": 3 }
+  ]
+}

@@ -140,6 +140,26 @@ def cmd_status(args) -> int:
     return 0
 
 
+def cmd_eval(args) -> int:
+    from .evaluation import run_eval
+
+    factory, _, _ = _load(args)
+    candidate = args.candidate or (factory.max_attempts + 1)
+    ev = run_eval("eval", baseline_attempts=factory.max_attempts, candidate_attempts=candidate)
+    print(json.dumps(ev.to_dict(), indent=2))
+    return 0 if ev.decision == "PROMOTE" else 1
+
+
+def cmd_outcome(args) -> int:
+    _, log, _ = _load(args)
+    log.append("OutcomeRecorded", {
+        "accepted": args.accepted, "review_escape": args.escape,
+        "cost_usd": args.cost, "human_minutes": args.minutes,
+    }, work_id=args.work_id, actor="owner")
+    print(f"recorded outcome for {args.work_id}")
+    return 0
+
+
 def cmd_metrics(args) -> int:
     _, log, wf = _load(args)
     states: dict[str, int] = {}
@@ -156,6 +176,16 @@ def cmd_metrics(args) -> int:
     for s in sorted(states):
         print(f"  {s:12} {states[s]}")
     print(f"attempts: {attempts}  retries: {retries}  blocked: {blocked}")
+    # outcome signals (M4)
+    accepted = escapes = 0
+    cost = minutes = 0.0
+    for e in log.all():
+        if e.type == "OutcomeRecorded":
+            accepted += int(bool(e.payload.get("accepted")))
+            escapes += int(bool(e.payload.get("review_escape")))
+            cost += float(e.payload.get("cost_usd", 0) or 0)
+            minutes += float(e.payload.get("human_minutes", 0) or 0)
+    print(f"outcomes: accepted {accepted}  review-escape {escapes}  cost ${cost:.2f}  human {minutes:.0f} min")
     print(f"events: {log.count()}  chain: {msg}")
     return 0 if ok else 4
 
@@ -224,6 +254,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("metrics", help="outcome signals from the ledger")
     s.set_defaults(func=cmd_metrics)
+
+    s = sub.add_parser("eval", help="run the protected evaluation (M3)")
+    s.add_argument("--candidate", type=int, help="candidate max_attempts (default: current+1)")
+    s.set_defaults(func=cmd_eval)
+
+    s = sub.add_parser("outcome", help="record an outcome for a work item (M4)")
+    s.add_argument("work_id")
+    s.add_argument("--accepted", action="store_true")
+    s.add_argument("--escape", action="store_true", help="review escaped a defect")
+    s.add_argument("--cost", type=float, default=0.0)
+    s.add_argument("--minutes", type=float, default=0.0, help="human minutes spent")
+    s.set_defaults(func=cmd_outcome)
 
     s = sub.add_parser("log", help="print the ledger")
     s.add_argument("work_id", nargs="?")

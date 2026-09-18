@@ -1,0 +1,6 @@
+{
+  "note": "PROTECTED thresholds. Predeclared before any run. Candidates may not edit this file.",
+  "metric": "pass_rate",
+  "epsilon": 0.0,
+  "n_min": 3
+}
