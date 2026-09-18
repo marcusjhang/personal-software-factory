@@ -131,6 +131,9 @@ def cmd_run(args) -> int:
 def cmd_status(args) -> int:
     _, log, wf = _load(args)
     ids = [args.work_id] if args.work_id else log.work_ids()
+    if args.json:
+        print(json.dumps([wf.fold(wid).to_dict() for wid in ids], indent=2))
+        return 0
     if not ids:
         print("no work items")
         return 0
@@ -263,6 +266,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")
+    s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_status)
 
     s = sub.add_parser("metrics", help="outcome signals from the ledger")

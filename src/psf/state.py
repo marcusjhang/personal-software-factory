@@ -63,6 +63,7 @@ class WorkItem:
             "id": self.id, "goal": self.goal, "state": self.state,
             "spec_digest": self.spec_digest, "approval_digest": self.approval_digest,
             "artifact_digest": self.artifact_digest, "attempts": self.attempts,
+            "max_attempts": self.max_attempts,
             "verification": self.verification, "review": self.review,
             "transitions": self.transitions,
         }

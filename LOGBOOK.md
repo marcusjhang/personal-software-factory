@@ -18,6 +18,8 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — M3 **protected evaluation**: digest-pinned `eval/` (tasks + thresholds + manifest), non-inferiority gate (`ci_low >= -epsilon`, `n_scored >= n_min`, telemetry complete), wired as a promotion gate alongside the audit. M4 **outcome capture** (`psf outcome`, metrics) and **packaging** (Dockerfile, install.sh, .dockerignore). Test caught a real eval bug (read the one-shot baseline column); fixed. `223740a`, `694ba0a`.
 - 09-18 — **Deep self-build with a real harness.** Pointed the runner at Claude Code (`scripts/psf_agent_claude.py`). The factory edited its own source (`src/psf/cli.py`, adding a `doctor` alias). The independent verifier **blocked** it for a missing acceptance test. Discovery: *implement was never given the spec*, so it could not satisfy acceptance — fixed in the foreman. Owner completed the test; the factory's edit was adopted. `cd3c497`.
 - 09-18 — **Self-build #2 — end-to-end success.** With the foreman fix and Bash enabled for the harness, the factory (Claude runner) made a real change to its own source: added `--json` to `psf metrics` plus a test. Independent verification passed, work item `DONE` on the **first attempt**, 25/25 tests in the worktree. Owner reviewed and adopted the diff (discarding the agent's stray `uv.lock`). Pushed to GitHub (`main`). `999539a`.
+- 09-18 — **Self-build #3.** Factory (Claude runner) added `--json` to `psf status` plus a test; `DONE` first attempt; 26/26 tests. Owner adopted and pushed. `6583820`.
+
 
 
 

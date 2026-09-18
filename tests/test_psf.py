@@ -217,3 +217,36 @@ def test_metrics_json(tmp_path, capsys):
     assert m["outcomes"] == {"accepted": 1, "review_escape": 0, "cost_usd": 1.5, "human_minutes": 3.0}
     assert m["chain"]["ok"] is True
     assert m["events"] > 0
+
+
+def test_status_json(tmp_path, capsys):
+    import json
+
+    from psf.cli import main
+
+    root = _factory_dir(tmp_path)
+    ledger = tmp_path / "e.db"
+    base = ["--factory", str(root), "--ledger", str(ledger)]
+
+    # empty ledger still emits valid JSON
+    assert main(base + ["status", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == []
+
+    log = EventLog(ledger)
+    work = Foreman(load_factory(root), Workflow(log)).run("do a thing").work
+    log.close()
+
+    rc = main(base + ["status", "--json"])
+    assert rc == 0
+    items = json.loads(capsys.readouterr().out)
+    assert len(items) == 1
+    item = items[0]
+    assert item["id"] == work.id
+    assert item["goal"] == "do a thing"
+    assert item["state"] == "DONE"
+    assert item["attempts"] == 1 and item["max_attempts"] == 2
+    assert item["spec_digest"] == work.spec_digest
+
+    # filtering by work id returns just that item
+    assert main(base + ["status", work.id, "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == items
