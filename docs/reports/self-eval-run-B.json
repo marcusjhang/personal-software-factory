@@ -1,7 +1,7 @@
 {
-  "passed": 14,
+  "passed": 22,
   "failed": 0,
-  "total": 14,
+  "total": 22,
   "evals": [
     {
       "id": "E1",
@@ -89,6 +89,27 @@
       }
     },
     {
+      "id": "E8",
+      "name": "feedback validity",
+      "status": "pass",
+      "detail": {
+        "ingested": 1,
+        "malformed_rejected": true,
+        "no_leak": true,
+        "report_envelopes": 1
+      }
+    },
+    {
+      "id": "E9",
+      "name": "autonomy / human burden",
+      "status": "pass",
+      "detail": {
+        "promotions": 1,
+        "human_actions": 1,
+        "interventions_per_promotion": 1.0
+      }
+    },
+    {
       "id": "E10",
       "name": "rollback drill",
       "status": "pass",
@@ -98,6 +119,58 @@
         "rolled_back": true,
         "restored": true,
         "eval_after": "PROMOTE"
+      }
+    },
+    {
+      "id": "E11",
+      "name": "stability (no oscillation)",
+      "status": "pass",
+      "detail": {
+        "sequence": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "flips": 0,
+        "monotonic": true
+      }
+    },
+    {
+      "id": "E12",
+      "name": "transfer across tiers",
+      "status": "pass",
+      "detail": {
+        "before": {
+          "easy": 1.0,
+          "hard": 0.0
+        },
+        "after": {
+          "easy": 1.0,
+          "hard": 1.0
+        }
+      }
+    },
+    {
+      "id": "E13",
+      "name": "cost bound (candidates per cycle)",
+      "status": "pass",
+      "detail": {
+        "candidates_evaluated": 3
+      }
+    },
+    {
+      "id": "E14",
+      "name": "adversarial feedback",
+      "status": "pass",
+      "detail": {
+        "weakened": false,
+        "gates_before": {
+          "spec_approval": true
+        },
+        "gates_after": {
+          "spec_approval": true
+        }
       }
     },
     {
@@ -160,6 +233,28 @@
           "health: audit green",
           "protected eval: REJECT (delta -80%, ci_low -1.00)",
           "promotion refused: protected evaluation did not pass"
+        ]
+      }
+    },
+    {
+      "id": "E20",
+      "name": "sequential validity",
+      "status": "pass",
+      "detail": {
+        "reproducible": true,
+        "thresholds_frozen": true,
+        "decision": "PROMOTE"
+      }
+    },
+    {
+      "id": "E21",
+      "name": "cold start (new project)",
+      "status": "pass",
+      "detail": {
+        "init_rc": 0,
+        "run_rc": 0,
+        "states": [
+          "DONE"
         ]
       }
     },

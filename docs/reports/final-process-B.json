@@ -1,0 +1,118 @@
+{
+  "process": {
+    "config": {
+      "seeds": 7,
+      "per_tier": 20,
+      "q": 0.9,
+      "max_attempts": 2,
+      "verify_quorum": 2
+    },
+    "tiers": {
+      "fresh": {
+        "tier": "fresh",
+        "attempted": 140,
+        "baseline_success": 105,
+        "baseline_defects": 35,
+        "resolved": 127,
+        "shipped_defects": 0,
+        "unresolved": 13,
+        "avg_attempts": 1.27,
+        "resolve_ci": [
+          0.8476081068224142,
+          0.9449303521491212
+        ],
+        "defect_ci": [
+          0.0,
+          0.02670715564899167
+        ]
+      },
+      "mid": {
+        "tier": "mid",
+        "attempted": 140,
+        "baseline_success": 85,
+        "baseline_defects": 55,
+        "resolved": 109,
+        "shipped_defects": 2,
+        "unresolved": 31,
+        "avg_attempts": 1.43,
+        "resolve_ci": [
+          0.7028702383154202,
+          0.8393929178229989
+        ],
+        "defect_ci": [
+          0.003926358459994088,
+          0.05058916417045497
+        ]
+      },
+      "full": {
+        "tier": "full",
+        "attempted": 140,
+        "baseline_success": 57,
+        "baseline_defects": 83,
+        "resolved": 98,
+        "shipped_defects": 0,
+        "unresolved": 42,
+        "avg_attempts": 1.54,
+        "resolve_ci": [
+          0.6195783879114252,
+          0.7697387498289782
+        ],
+        "defect_ci": [
+          0.0,
+          0.02670715564899167
+        ]
+      }
+    }
+  },
+  "verifier": {
+    "n_bad": 20,
+    "n_good": 20,
+    "true_positive": 16,
+    "false_positive": 0,
+    "tp_rate": 0.8,
+    "tp_ci": [
+      0.5839782779742402,
+      0.9193436467288001
+    ],
+    "fp_rate": 0.0
+  },
+  "projection": {
+    "double_verify_miss_rate": 0.009999999999999995
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "claim": "independent verification reduces shipped defects vs a one-shot baseline",
+      "evidence": {
+        "baseline_defects": 173,
+        "factory_shipped_defects": 2
+      },
+      "reproducible": true,
+      "status": "valid",
+      "severity": "high"
+    },
+    {
+      "id": "F2",
+      "claim": "a single independent verifier still ships residual defects (miss rate 1-q)",
+      "evidence": {
+        "shipped_defects": 2,
+        "q": null,
+        "reproduced_shipped_defects": 1
+      },
+      "reproducible": true,
+      "status": "valid",
+      "severity": "high"
+    },
+    {
+      "id": "F3",
+      "claim": "bounded retries reduce unresolved work but not shipped defects",
+      "evidence": {
+        "unresolved": 86,
+        "shipped_defects": 2
+      },
+      "reproducible": true,
+      "status": "valid",
+      "severity": "medium"
+    }
+  ]
+}

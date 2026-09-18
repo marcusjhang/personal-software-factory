@@ -48,6 +48,7 @@ class ImprovementResult:
     promoted: bool
     rolled_back: bool
     notes: list[str] = dc_field(default_factory=list)
+    actionable: bool = False  # an improving, safe candidate exists -> human should decide
 
 
 def _get(raw: dict, dotted: str):
@@ -159,7 +160,10 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
 
     improves = best_report.factory_rate > current.factory_rate
     safe = best_report.factory_pass == best_report.total and canary.factory_pass == canary.total
+    actionable = improves and safe
     promoted = False
+    if not actionable and not promote:
+        notes.append("no improving candidate — no human action needed")
     if promote:
         from .audit import run_audit
         from .evaluation import run_eval
@@ -196,4 +200,4 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
 
     log.close()
     return ImprovementResult(best_prop, current.factory_rate, best_report.factory_rate,
-                             canary.factory_rate, promoted, False, notes)
+                             canary.factory_rate, promoted, False, notes, actionable)

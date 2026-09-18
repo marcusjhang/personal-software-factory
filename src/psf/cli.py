@@ -175,6 +175,9 @@ def cmd_improve(args) -> int:
     if r.promoted:
         print("status: PROMOTED — the factory improved itself with human authorization")
         return 0
+    if not r.actionable:
+        print("status: no actionable improvement — no human action needed")
+        return 0
     return 10  # recommendation made, awaiting human authorization
 
 

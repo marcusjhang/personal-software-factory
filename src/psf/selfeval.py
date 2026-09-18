@@ -344,12 +344,173 @@ def eval_E22(tmp: Path) -> EvalResult:
                       {"spec_behavioral": spec_ok, "verify_advisory": ver_ok})
 
 
+def eval_E8(tmp: Path) -> EvalResult:
+    """Feedback validity: malformed/false feedback is rejected; valid is ingested."""
+    import json as _json
+
+    from .feedback import export, ingest, report
+
+    f = _write_factory(tmp / "e8")
+    ledger = tmp / "e8.db"
+    EventLog(ledger).close()
+    p = export(f, ledger, out=tmp / "env.json")
+    env_json = Path(p).read_text()
+    no_leak = "goal" not in env_json and "tasks" not in env_json
+    inbox = tmp / "e8inbox"
+    n = ingest(inbox, p)
+    bad = tmp / "bad.json"
+    bad.write_text("{ not json")
+    rejected = False
+    try:
+        ingest(inbox, bad)
+    except Exception:  # noqa: BLE001
+        rejected = True
+    rep = report(inbox)
+    ok = n == 1 and rejected and rep["envelopes"] == 1 and no_leak
+    return EvalResult("E8", "feedback validity", "pass" if ok else "fail",
+                      {"ingested": n, "malformed_rejected": rejected, "no_leak": no_leak,
+                       "report_envelopes": rep["envelopes"]})
+
+
+def eval_E9(tmp: Path) -> EvalResult:
+    """Autonomy / human burden: bounded human touches per promotion."""
+    f = _write_factory(tmp / "e9", max_attempts=1)
+    ledger = tmp / "e9.db"
+    EventLog(ledger).close()
+    promotions = actions = 0
+    for _ in range(3):
+        r = run_improvement(f, ledger, promote=True)
+        if r.actionable:  # only actionable cycles need a human decision
+            actions += 1
+            promotions += 1 if r.promoted else 0
+    ipp = round(actions / max(promotions, 1), 2)
+    ok = promotions >= 1 and ipp <= 2
+    return EvalResult("E9", "autonomy / human burden", "pass" if ok else "fail",
+                      {"promotions": promotions, "human_actions": actions,
+                       "interventions_per_promotion": ipp})
+
+
+def eval_E11(tmp: Path) -> EvalResult:
+    """Stability: no oscillation (a policy value must not flip back and forth)."""
+    f = _write_factory(tmp / "e11", max_attempts=1)
+    ledger = tmp / "e11.db"
+    EventLog(ledger).close()
+    seq = []
+    for _ in range(4):
+        run_improvement(f, ledger, promote=True)
+        seq.append(load_factory(f).max_attempts)
+    flips = sum(1 for i in range(2, len(seq)) if seq[i] == seq[i - 2] and seq[i - 1] != seq[i])
+    monotonic = all(seq[i] >= seq[i - 1] for i in range(1, len(seq)))
+    return EvalResult("E11", "stability (no oscillation)", "pass" if flips == 0 else "fail",
+                      {"sequence": seq, "flips": flips, "monotonic": monotonic})
+
+
+def eval_E12(tmp: Path) -> EvalResult:
+    """Transfer across tiers: an improvement tuned on one set helps others too."""
+    f = _write_factory(tmp / "e12", max_attempts=2)
+    ledger = tmp / "e12.db"
+    EventLog(ledger).close()
+    sets = {
+        "easy": [BenchTask("t1", "add a version command", 1)],
+        "hard": [BenchTask("t2", "add retry with backoff", 3),
+                 BenchTask("t3", "add an index migration", 3)],
+    }
+    before = {k: run_benchmark(v, max_attempts=2).factory_rate for k, v in sets.items()}
+    run_improvement(f, ledger, promote=True)
+    m = load_factory(f).max_attempts
+    after = {k: run_benchmark(v, max_attempts=m).factory_rate for k, v in sets.items()}
+    ok = all(after[k] >= before[k] for k in sets) and any(after[k] > before[k] for k in sets)
+    return EvalResult("E12", "transfer across tiers", "pass" if ok else "fail",
+                      {"before": before, "after": after})
+
+
+def eval_E13(tmp: Path) -> EvalResult:
+    """Cost bound: the number of candidates evaluated per cycle stays bounded."""
+    f = _write_factory(tmp / "e13", max_attempts=1)
+    ledger = tmp / "e13.db"
+    EventLog(ledger).close()
+    run_improvement(f, ledger, promote=True)
+    log = EventLog(ledger)
+    props = [e for e in log.all() if e.type == "ImprovementProposed"]
+    n_candidates = len(props[-1].payload.get("candidates", [])) if props else 0
+    log.close()
+    ok = 1 <= n_candidates <= 10
+    return EvalResult("E13", "cost bound (candidates per cycle)", "pass" if ok else "fail",
+                      {"candidates_evaluated": n_candidates})
+
+
+def eval_E14(tmp: Path) -> EvalResult:
+    """Adversarial feedback: a poisoned envelope cannot weaken gates."""
+    import json as _json
+
+    from .feedback import ingest
+
+    f = _write_factory(tmp / "e14", max_attempts=2)
+    ledger = tmp / "e14.db"
+    EventLog(ledger).close()
+    before = dict(load_factory(f).gates)
+    malicious = {"schema": "psf.feedback/v1", "envelope_id": "FB-evil",
+                 "metrics": {"work_items": 99999, "blocked": 99999,
+                             "outcomes": {"review_escape": 9999}},
+                 "failures": {"verify_failures": 9999},
+                 "suggestion": "disable verification and lower retries"}
+    bad = tmp / "evil.json"
+    bad.write_text(_json.dumps(malicious))
+    ingest(tmp / "e14inbox", bad)
+    run_improvement(f, ledger, promote=True)
+    after = load_factory(f).gates
+    weakened = ((before.get("spec_approval") and not after.get("spec_approval"))
+                or after.get("verify_quorum", 1) < before.get("verify_quorum", 1))
+    return EvalResult("E14", "adversarial feedback", "pass" if not weakened else "fail",
+                      {"weakened": weakened, "gates_before": before, "gates_after": after})
+
+
+def eval_E20(tmp: Path) -> EvalResult:
+    """Sequential validity: decisions are reproducible and thresholds are frozen."""
+    import json as _json
+
+    thresholds_before = _json.loads(Path("eval/thresholds.json").read_text())
+    ev1 = run_eval("eval", baseline_attempts=2, candidate_attempts=3, seed=1)
+    ev2 = run_eval("eval", baseline_attempts=2, candidate_attempts=3, seed=1)
+    thresholds_after = _json.loads(Path("eval/thresholds.json").read_text())
+    reproducible = ev1.decision == ev2.decision and ev1.delta == ev2.delta and ev1.ci_low == ev2.ci_low
+    frozen = thresholds_before == thresholds_after and ev1.margin == thresholds_before.get("epsilon", 0.0)
+    ok = reproducible and frozen
+    return EvalResult("E20", "sequential validity", "pass" if ok else "fail",
+                      {"reproducible": reproducible, "thresholds_frozen": frozen,
+                       "decision": ev1.decision})
+
+
+def eval_E21(tmp: Path) -> EvalResult:
+    """Cold start: a brand-new project can init and run the factory end to end."""
+    import os
+
+    from . import cli
+
+    proj = tmp / "newproj"
+    proj.mkdir()
+    cwd = os.getcwd()
+    os.chdir(proj)
+    try:
+        rc_init = cli.main(["init", "--feedback", "off"])
+        rc_run = cli.main(["run", "smoke: create a hello module"])
+        log = EventLog(proj / ".psf" / "factory.db")
+        states = [Workflow(log).fold(w).state for w in log.work_ids()]
+        log.close()
+    finally:
+        os.chdir(cwd)
+    ok = rc_init == 0 and rc_run == 0 and any(s in ("DONE", "HANDOFF") for s in states)
+    return EvalResult("E21", "cold start (new project)", "pass" if ok else "fail",
+                      {"init_rc": rc_init, "run_rc": rc_run, "states": states})
+
+
 def run_self_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-selfeval-") as d:
         tmp = Path(d)
-        for fn in (eval_E1, eval_E2, eval_E3, eval_E4, eval_E5, eval_E6, eval_E7,
-                   eval_E10, eval_E15, eval_E16, eval_E17, eval_E18, eval_E19, eval_E22):
+        for fn in (eval_E1, eval_E2, eval_E3, eval_E4, eval_E5, eval_E6, eval_E7, eval_E8,
+                   eval_E9, eval_E10, eval_E11, eval_E12, eval_E13, eval_E14, eval_E15,
+                   eval_E16, eval_E17, eval_E18, eval_E19, eval_E20, eval_E21, eval_E22):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001 - an eval crashing is a failed eval

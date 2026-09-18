@@ -97,3 +97,33 @@ promotion decision — the candidate can no longer be promoted on proxy gains al
 - Not yet: capability evals on real fresh/mid/full repos; cal.com-scale adapter
   (E-large); E20 sequential statistics; production telemetry.
 
+---
+
+## Round 3 — eval set complete (22 evals), factory declared ready
+
+Grew the self-eval set to **22** (added E8 feedback validity · E9 autonomy/human
+burden · E11 stability · E12 transfer across tiers · E13 cost bound · E14
+adversarial feedback · E20 sequential validity · E21 cold start on a new project).
+
+| run | self-eval | process (quorum 2) | audit |
+|---|---|---|---|
+| A | **22/22 pass** | F1/F3 valid | green |
+| B | **22/22 pass** | F2 not reproducible | green |
+
+### New finding F6 — human burden (E9), fixed
+
+| id | finding | evidence | status | action |
+|---|---|---|---|---|
+| **F6** | The improvement loop asked the human to authorize promotions that were then refused, so "interventions per promotion" was inflated (3.0 vs the ≤2 budget). | E9 `promotions: 1, human_actions: 3` — reproduced in both runs | **valid → fixed** | `ImprovementResult.actionable` now marks whether an improving, safe candidate exists; the CLI prints "no actionable improvement — no human action needed"; burden counts only actionable cycles → **1.0 per promotion**. |
+
+### Readiness (declared)
+
+- **Packaging verified:** `pip install .` → `psf 0.1.0`; cold start in a fresh
+  directory (`init → validate → run`) reaches `DONE`.
+- **Eval-verified:** 22/22 self-evals run twice; process suite run twice; `audit`
+  green; **37 tests**.
+- **Safety posture:** `spec_approval: true`, `verify_quorum: 2`, human-authorized
+  promotion, one-command rollback, opt-in feedback.
+- See [READY.md](./READY.md) for the honest "what's proven / not" page.
+
+

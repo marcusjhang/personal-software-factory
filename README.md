@@ -21,9 +21,10 @@ you own the model.
 - [PLAN.md](./PLAN.md) — the finalised product plan
 - [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — the full technical specification
 
-> Status: **working implementation.** The factory runs, dogfoods itself, and is
-> self-improving (human-gated). 32 tests, green `psf audit`. See
-> [LOGBOOK.md](./LOGBOOK.md) and [docs/DIARY.md](./docs/DIARY.md).
+> Status: **working implementation, ready to use.** 37 tests, `psf audit` green,
+> `psf eval-self` 22/22 (run twice). See [docs/READY.md](./docs/READY.md) for the
+> honest "what's proven / what's not" page, [LOGBOOK.md](./LOGBOOK.md) and
+> [docs/DIARY.md](./docs/DIARY.md).
 
 ---
 
@@ -149,6 +150,7 @@ deploys on its own.
 - Not a claim of unattended production readiness.
 
 - [PLAN.md](./PLAN.md) — scope and milestones
+- [docs/READY.md](./docs/READY.md) — ready-to-use guide + what's proven / not
 - [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — implementation contract
 - [docs/EVAL-PLAN.md](./docs/EVAL-PLAN.md) — how we evaluate the factory
 - [docs/EVAL-PLAN-SELF-IMPROVING.md](./docs/EVAL-PLAN-SELF-IMPROVING.md) — how we evaluate self-improvement
