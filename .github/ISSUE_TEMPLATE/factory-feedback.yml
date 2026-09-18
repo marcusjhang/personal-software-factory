@@ -1,0 +1,25 @@
+name: Factory feedback
+description: Share a privacy-filtered usage envelope from a project that uses the personal software factory.
+title: "[factory-feedback] "
+labels: ["factory-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use `psf feedback export` to produce this envelope. It contains **counts,
+        digests, and versions only** — no source code, prompts, or secrets.
+  - type: textarea
+    id: envelope
+    attributes:
+      label: Envelope
+      description: Paste the JSON from `psf feedback export`, inside the code fence.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Repository (optional)
+      description: Leave blank to stay anonymous.
+    validations:
+      required: false

@@ -166,6 +166,28 @@ def cmd_status(args) -> int:
     return 0
 
 
+def cmd_feedback(args) -> int:
+    from .feedback import export, ingest, publish_issue, report
+
+    if args.action == "export":
+        path = export(args.factory, args.ledger, out=args.out, repo=args.github)
+        print(f"wrote {path}")
+        if args.github:
+            import json as _json
+            env = _json.loads(Path(path).read_text())
+            url, err = publish_issue(args.github, env)
+            print(url or f"issue create failed: {err}")
+    elif args.action == "ingest":
+        if not args.path:
+            print("error: ingest needs a file or directory", file=sys.stderr)
+            return 2
+        n = ingest(".psf/feedback/inbox", args.path)
+        print(f"ingested {n} envelope(s)")
+    else:  # report
+        print(json.dumps(report(".psf/feedback/inbox"), indent=2))
+    return 0
+
+
 def cmd_eval(args) -> int:
     from .evaluation import run_eval
 
@@ -307,6 +329,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--cost", type=float, default=0.0)
     s.add_argument("--minutes", type=float, default=0.0, help="human minutes spent")
     s.set_defaults(func=cmd_outcome)
+
+    s = sub.add_parser("feedback", help="consumer feedback loop (export / ingest / report)")
+    s.add_argument("action", choices=["export", "ingest", "report"])
+    s.add_argument("path", nargs="?", help="for ingest: an export file or directory")
+    s.add_argument("--out", help="for export: output file")
+    s.add_argument("--github", help="for export: file the envelope as an issue in this repo")
+    s.set_defaults(func=cmd_feedback)
 
     s = sub.add_parser("log", help="print the ledger")
     s.add_argument("work_id", nargs="?")

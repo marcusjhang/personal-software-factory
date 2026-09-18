@@ -19,6 +19,10 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — **Deep self-build with a real harness.** Pointed the runner at Claude Code (`scripts/psf_agent_claude.py`). The factory edited its own source (`src/psf/cli.py`, adding a `doctor` alias). The independent verifier **blocked** it for a missing acceptance test. Discovery: *implement was never given the spec*, so it could not satisfy acceptance — fixed in the foreman. Owner completed the test; the factory's edit was adopted. `cd3c497`.
 - 09-18 — **Self-build #2 — end-to-end success.** With the foreman fix and Bash enabled for the harness, the factory (Claude runner) made a real change to its own source: added `--json` to `psf metrics` plus a test. Independent verification passed, work item `DONE` on the **first attempt**, 25/25 tests in the worktree. Owner reviewed and adopted the diff (discarding the agent's stray `uv.lock`). Pushed to GitHub (`main`). `999539a`.
 - 09-18 — **Self-build #3.** Factory (Claude runner) added `--json` to `psf status` plus a test; `DONE` first attempt; 26/26 tests. Owner adopted and pushed. `6583820`.
+- 09-18 — **Durability wired in (#1):** the foreman now takes a fenced lease per work item and refuses if held; the GitHub draft-PR is an idempotent outbox effect (reconcile-before-retry). 28/28 tests.
+- 09-18 — **Improvement widened (#2):** multi-candidate search over an allow-list (`limits.max_attempts`; protected fields refused), best candidate chosen by offline eval then eval/audit/canary-gated. 30/30 tests.
+- 09-18 — **Consumer feedback loop:** `psf feedback export|ingest|report`, privacy-filtered digests-only envelopes, GitHub issue template, `docs/FEEDBACK.md`. 32/32 tests. Pushed.
+
 
 
 
