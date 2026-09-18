@@ -32,8 +32,7 @@ class Foreman:
 
     def run(self, goal: str, *, work_id: str | None = None, approve: bool = True,
             repo: str | Path | None = None, use_git: bool = False, finish: bool = True) -> RunResult:
-        work = self.wf.create(goal, work_id)
-        work.max_attempts = self.factory.max_attempts
+        work = self.wf.create(goal, work_id, max_attempts=self.factory.max_attempts)
         work = self.wf.transition(work, "TRIAGE", actor="foreman")
 
         triage = self.runner.run(AgentTask("triage", goal))

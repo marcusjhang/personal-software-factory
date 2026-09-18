@@ -8,7 +8,7 @@ from psf.bench import BenchTask, ScriptedRunner, run_benchmark
 from psf.canonical import digest
 from psf.events import EventLog
 from psf.foreman import Foreman
-from psf.schema import Factory, validate
+from psf.schema import Factory, load as load_factory, validate
 from psf.state import GateError, Workflow
 
 
@@ -129,3 +129,56 @@ def test_workspace_git_isolation(tmp_path):
     assert "b.txt" in ws.diff()
     ws.cleanup()
     assert not ws.path.exists()
+
+
+def _factory_dir(tmp_path):
+    root = tmp_path / "factory"
+    (root / "agents").mkdir(parents=True)
+    (root / "factory.yml").write_text(
+        "schemaVersion: psf/v1\nname: t\nrunner: mock\n"
+        "agents:\n" + "".join(f"  {r}: {{ prompt: agents/{r}.md }}\n"
+                              for r in ("triage", "spec", "implement", "verify", "review")) +
+        "gates:\n  spec_approval: true\nlimits:\n  max_attempts: 2\n"
+    )
+    for r in ("triage", "spec", "implement", "verify", "review"):
+        (root / "agents" / f"{r}.md").write_text("p")
+    return root
+
+
+def test_audit_healthy(tmp_path):
+    from psf.audit import run_audit
+
+    root = _factory_dir(tmp_path)
+    log = EventLog(tmp_path / "e.db")
+    Foreman(load_factory(root), Workflow(log)).run("do a thing")
+    log.close()
+    report = run_audit(root, tmp_path / "e.db")
+    assert report.healthy, [c for c in report.checks if c.status == "fail"]
+
+
+def test_audit_detects_tamper(tmp_path):
+    from psf.audit import run_audit
+
+    root = _factory_dir(tmp_path)
+    log = EventLog(tmp_path / "e.db")
+    log.append("WorkCreated", {"goal": "g", "max_attempts": 2}, work_id="W1")
+    log.conn.execute("UPDATE events SET payload='{\"goal\":\"hacked\"}' WHERE seq=1")
+    log.conn.commit()
+    log.close()
+    report = run_audit(root, tmp_path / "e.db", include_bench=False)
+    assert not report.healthy
+
+
+def test_improve_promotes_and_rolls_back(tmp_path):
+    from psf.improve import run_improvement
+
+    root = _factory_dir(tmp_path)
+    ledger = tmp_path / "e.db"
+    EventLog(ledger).close()
+    result = run_improvement(root, ledger, promote=True)
+    assert result.promoted
+    yml = (root / "factory.yml").read_text()
+    assert "max_attempts: 3" in yml
+    back = run_improvement(root, ledger, rollback=True)
+    assert back.rolled_back
+    assert "max_attempts: 2" in (root / "factory.yml").read_text()

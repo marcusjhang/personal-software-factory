@@ -8,9 +8,11 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .audit import FAIL, WARN, run_audit
 from .bench import run_benchmark
 from .events import EventLog
 from .foreman import Foreman
+from .improve import run_improvement
 from .schema import FactoryError, load as load_factory
 from .state import GateError, Workflow
 
@@ -74,6 +76,21 @@ def cmd_validate(args) -> int:
     return 0
 
 
+def cmd_improve(args) -> int:
+    r = run_improvement(args.factory, args.ledger, promote=args.promote, rollback=args.rollback)
+    if args.rollback:
+        print("rolled back" if r.rolled_back else "nothing to roll back")
+        return 0 if r.rolled_back else 1
+    p = r.proposal
+    print(f"proposal: {p.field} {p.current} -> {p.candidate}  ({p.reason})")
+    for n in r.notes:
+        print(f"  {n}")
+    if r.promoted:
+        print("status: PROMOTED — the factory improved itself with human authorization")
+        return 0
+    return 10  # recommendation made, awaiting human authorization
+
+
 def cmd_run(args) -> int:
     factory, log, wf = _load(args)
     repo = Path.cwd() if args.git else None
@@ -120,6 +137,17 @@ def cmd_log(args) -> int:
     return 0 if ok else 4
 
 
+def cmd_audit(args) -> int:
+    report = run_audit(args.factory, args.ledger, include_bench=not args.fast)
+    for c in report.checks:
+        mark = {"ok": "OK  ", "warn": "WARN", "fail": "FAIL"}[c.status]
+        print(f"[{mark}] {c.name:32} {c.detail}")
+    print(f"healthy: {report.healthy}")
+    if not report.healthy:
+        return 4
+    return 0
+
+
 def cmd_bench(args) -> int:
     report = run_benchmark(max_attempts=args.max_attempts)
     print(f"{'task':10} {'baseline':>9} {'factory':>8}")
@@ -159,6 +187,15 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("work_id", nargs="?")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_log)
+
+    s = sub.add_parser("improve", help="governed improvement: propose -> evaluate -> canary -> human promote")
+    s.add_argument("--promote", action="store_true", help="authorize promotion if the candidate is safe and better")
+    s.add_argument("--rollback", action="store_true", help="restore the previous factory revision")
+    s.set_defaults(func=cmd_improve)
+
+    s = sub.add_parser("audit", help="self-check: ledger, factory, state integrity, benchmark")
+    s.add_argument("--fast", action="store_true", help="skip the benchmark check")
+    s.set_defaults(func=cmd_audit)
 
     s = sub.add_parser("bench", help="run the internal benchmark")
     s.add_argument("--max-attempts", type=int, default=2)

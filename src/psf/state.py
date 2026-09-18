@@ -76,11 +76,12 @@ class Workflow:
 
     # -- creation -------------------------------------------------------------
 
-    def create(self, goal: str, work_id: str | None = None) -> WorkItem:
+    def create(self, goal: str, work_id: str | None = None, *, max_attempts: int = 2) -> WorkItem:
         work_id = work_id or f"W-{uuid.uuid4().hex[:8]}"
         if self.log.for_work(work_id):
             raise GateError(f"work item {work_id} already exists")
-        self.log.append("WorkCreated", {"goal": goal}, work_id=work_id, actor="owner")
+        self.log.append("WorkCreated", {"goal": goal, "max_attempts": max_attempts},
+                        work_id=work_id, actor="owner")
         return self.fold(work_id)
 
     # -- projection -----------------------------------------------------------
@@ -93,7 +94,7 @@ class Workflow:
         for e in events:
             p = e.payload
             if e.type == "WorkCreated":
-                work = WorkItem(id=work_id, goal=p["goal"])
+                work = WorkItem(id=work_id, goal=p["goal"], max_attempts=int(p.get("max_attempts", 2)))
             elif work is None:
                 continue
             elif e.type == "SpecProduced":

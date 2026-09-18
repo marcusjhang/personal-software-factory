@@ -105,6 +105,18 @@ def default_tasks() -> list[BenchTask]:
     ]
 
 
+def stretch_tasks() -> list[BenchTask]:
+    """Tasks that need more than the default retry budget — used to evaluate a
+    candidate improvement (does raising the budget actually help?)."""
+    return [
+        BenchTask("s-easy", "add a health endpoint", 1),
+        BenchTask("s-hard", "add CSV export", 2),
+        BenchTask("s-deep-1", "add a database migration", 3),
+        BenchTask("s-deep-2", "refactor the auth flow", 3),
+        BenchTask("s-deep-3", "add rate limiting", 3),
+    ]
+
+
 def run_benchmark(tasks: list[BenchTask] | None = None, max_attempts: int = 2) -> BenchReport:
     tasks = tasks or default_tasks()
     report = BenchReport(total=len(tasks), baseline_pass=0, factory_pass=0)
