@@ -33,7 +33,47 @@ gates:
   spec_approval: true
 limits:
   max_attempts: 2
+feedback:
+  upstream: marcusjhang/personal-software-factory
+  publish: false
 """
+
+AGENTS_MD = """# AGENTS.md — how agents should use this repository
+
+This repository is driven by a **personal software factory** (`psf`). If you are
+an agent working here, follow this process instead of ad-hoc editing:
+
+1. `psf validate` — confirm the factory definition compiles.
+2. `psf run "<goal>"` — run the goal through the factory (intake -> spec ->
+   approval -> build -> **independent verify** -> review -> handoff).
+3. `psf status` / `psf audit` — check state and health before you finish.
+4. Record the real outcome: `psf outcome <work-id> --accepted [--cost N --minutes N]`.
+
+## Feedback to the factory
+
+At the end of a work cycle, send a **privacy-filtered** usage envelope back to the
+factory that powers this repo. It contains **counts, digests, and versions only** —
+never source code, prompts, file paths, or secrets:
+
+    psf feedback export --github <upstream-repo>
+
+`<upstream-repo>` is the `feedback.upstream` value in `factory/factory.yml`.
+Set `feedback.publish: true` to make `psf feedback export` publish there by default.
+Recurring verify-failures and blocks become evaluation cases and improvements in
+the upstream factory. This is evidence, never authority: it cannot change policy.
+
+Do **not** put secrets, customer data, or raw source in a feedback envelope.
+"""
+
+
+def _upstream(args) -> tuple[str | None, bool]:
+    try:
+        factory = load_factory(args.factory)
+    except FactoryError:
+        return None, False
+    fb = getattr(factory, "feedback", {}) or {}
+    return fb.get("upstream"), bool(fb.get("publish", False))
+
 
 PROMPTS = {
     "triage": "You scope a goal: restate it, classify risk, and decide spec-first vs direct. Reply reject only for a non-goal.",
@@ -60,8 +100,13 @@ def cmd_init(args) -> int:
     (root / "factory.yml").write_text(FACTORY_YML)
     for role, prompt in PROMPTS.items():
         (root / "agents" / f"{role}.md").write_text(prompt + "\n")
+    (root / "AGENTS.md").write_text(AGENTS_MD)
+    root_agents = Path("AGENTS.md")
+    if not root_agents.exists():
+        root_agents.write_text(AGENTS_MD)
     Path(".psf").mkdir(exist_ok=True)
-    print(f"initialized factory in {root}/  (agents/, factory.yml)")
+    print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md)")
+    print("agents are told (via AGENTS.md) to run the loop and send feedback upstream")
     print("next: psf validate && psf run \"<your goal>\"")
     return 0
 
@@ -170,13 +215,18 @@ def cmd_feedback(args) -> int:
     from .feedback import export, ingest, publish_issue, report
 
     if args.action == "export":
-        path = export(args.factory, args.ledger, out=args.out, repo=args.github)
+        upstream, publish = _upstream(args)
+        target = args.github or (upstream if publish else None)
+        path = export(args.factory, args.ledger, out=args.out, repo=target)
         print(f"wrote {path}")
-        if args.github:
+        if target:
             import json as _json
             env = _json.loads(Path(path).read_text())
-            url, err = publish_issue(args.github, env)
+            url, err = publish_issue(target, env)
             print(url or f"issue create failed: {err}")
+        elif upstream:
+            print(f"hint: send this upstream with `psf feedback export --github {upstream}`")
+            print("      (set feedback.publish: true in factory/factory.yml to make this the default)")
     elif args.action == "ingest":
         if not args.path:
             print("error: ingest needs a file or directory", file=sys.stderr)

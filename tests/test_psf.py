@@ -194,6 +194,31 @@ def test_doctor_alias_matches_audit(tmp_path):
     assert rc_audit == 0 and rc_doctor == rc_audit
 
 
+def test_schema_accepts_and_validates_feedback(tmp_path):
+    from psf.schema import validate
+
+    (tmp_path / "agents").mkdir()
+    for r in ("triage", "spec", "implement", "verify", "review"):
+        (tmp_path / "agents" / f"{r}.md").write_text("p")
+    base = {"schemaVersion": "psf/v1", "name": "x",
+            "agents": {r: {"prompt": f"agents/{r}.md"} for r in
+                       ("triage", "spec", "implement", "verify", "review")}}
+    assert validate({**base, "feedback": {"upstream": "o/r", "publish": False}}, base_dir=tmp_path) == []
+    errs = validate({**base, "feedback": {"upstream": 5}}, base_dir=tmp_path)
+    assert any("feedback.upstream" in e for e in errs)
+
+
+def test_init_writes_agents_md(tmp_path, monkeypatch):
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    rc = cli.main(["init"])
+    assert rc == 0
+    assert (tmp_path / "factory" / "AGENTS.md").exists()
+    assert (tmp_path / "AGENTS.md").exists()
+    assert "psf feedback export" in (tmp_path / "AGENTS.md").read_text()
+
+
 def test_foreman_lease_prevents_concurrent_run(tmp_path):
     from psf.durability import Durability
 

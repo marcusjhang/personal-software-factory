@@ -78,6 +78,31 @@ psf improve                               # turn signals into a gated change
 - Consumer envelopes are **evidence, not authority**: they cannot promote a
   change, edit the eval, or alter policy.
 
+## Making consumer agents send it
+
+For an agent to know to send feedback, it has to be in `AGENTS.md` — the file
+coding agents read automatically. `psf init` now writes one:
+
+- `AGENTS.md` at the repo root (and `factory/AGENTS.md`) stating the loop and the
+  feedback step.
+
+The target lives in `factory/factory.yml`:
+
+```yaml
+feedback:
+  upstream: marcusjhang/personal-software-factory
+  publish: false      # set true to publish on every export
+```
+
+- `publish: false` (default): `psf feedback export` writes locally and prints the
+  exact command to send it upstream.
+- `publish: true`: `psf feedback export` publishes to `upstream` automatically.
+- `--github <repo>` always overrides the target.
+
+So a consuming agent, reading `AGENTS.md`, will run the loop and then
+`psf feedback export --github <upstream>`, which becomes an issue labeled
+`factory-feedback` in this repo.
+
 ## Privacy and trust
 
 - Opt-in at every step. `export` is local by default; `--github` publishes.

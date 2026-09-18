@@ -17,3 +17,6 @@ gates:
   spec_approval: true
 limits:
   max_attempts: 3
+feedback:
+  upstream: marcusjhang/personal-software-factory
+  publish: false

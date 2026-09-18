@@ -24,6 +24,7 @@ ALLOWED_TOP_KEYS = {
     "agents",
     "gates",
     "limits",
+    "feedback",
 }
 ALLOWED_AGENT_KEYS = {"prompt", "command", "model", "description"}
 
@@ -52,6 +53,7 @@ class Factory:
     agents: dict[str, AgentSpec] = field(default_factory=dict)
     gates: dict[str, Any] = field(default_factory=dict)
     limits: dict[str, Any] = field(default_factory=dict)
+    feedback: dict[str, Any] = field(default_factory=dict)
     description: str = ""
 
     @property
@@ -108,6 +110,7 @@ def _build(raw: dict[str, Any], path: Path) -> Factory:
         agents=agents,
         gates=raw.get("gates") or {},
         limits=raw.get("limits") or {},
+        feedback=raw.get("feedback") or {},
         description=raw.get("description", ""),
     )
 
@@ -154,4 +157,13 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
     gates = raw.get("gates") or {}
     if "spec_approval" in gates and not isinstance(gates["spec_approval"], bool):
         errors.append("gates.spec_approval must be a boolean")
+
+    feedback = raw.get("feedback") or {}
+    if not isinstance(feedback, dict):
+        errors.append("feedback must be a mapping")
+    else:
+        if "upstream" in feedback and not isinstance(feedback["upstream"], str):
+            errors.append("feedback.upstream must be a string (owner/repo)")
+        if "publish" in feedback and not isinstance(feedback["publish"], bool):
+            errors.append("feedback.publish must be a boolean")
     return errors
