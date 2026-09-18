@@ -56,8 +56,12 @@ class Foreman:
             work = self.wf.transition(work, "BUILD", actor="foreman")
             findings: list[str] = []
             while True:
-                build = self.runner.run(AgentTask("implement", goal, workspace=ws.path,
-                                                  attempt=work.attempts, feedback=findings))
+                build = self.runner.run(AgentTask(
+                    "implement", goal, workspace=ws.path, attempt=work.attempts,
+                    feedback=findings,
+                    context={"spec": work.spec,
+                             "acceptance": (work.spec or {}).get("acceptance", [])},
+                ))
                 work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
                                             summary=build.summary, actor="implement")
                 verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,

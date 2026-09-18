@@ -277,7 +277,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--rollback", action="store_true", help="restore the previous factory revision")
     s.set_defaults(func=cmd_improve)
 
-    s = sub.add_parser("audit", help="self-check: ledger, factory, state integrity, benchmark")
+    s = sub.add_parser("audit", aliases=["doctor"], help="self-check: ledger, factory, state integrity, benchmark")
     s.add_argument("--fast", action="store_true", help="skip the benchmark check")
     s.set_defaults(func=cmd_audit)
 

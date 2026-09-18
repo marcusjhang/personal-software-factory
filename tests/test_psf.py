@@ -182,3 +182,13 @@ def test_improve_promotes_and_rolls_back(tmp_path):
     back = run_improvement(root, ledger, rollback=True)
     assert back.rolled_back
     assert "max_attempts: 2" in (root / "factory.yml").read_text()
+
+
+def test_doctor_alias_matches_audit(tmp_path):
+    from psf.cli import main
+
+    root = _factory_dir(tmp_path)
+    ledger = str(tmp_path / "e.db")
+    rc_audit = main(["--factory", str(root), "--ledger", ledger, "audit", "--fast"])
+    rc_doctor = main(["--factory", str(root), "--ledger", ledger, "doctor", "--fast"])
+    assert rc_audit == 0 and rc_doctor == rc_audit
