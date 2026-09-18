@@ -25,6 +25,9 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 - 09-18 — README gained the diagram (Mermaid + rendered PNG in `docs/images/` + Excalidraw link); Excalidraw scene extended with the consumer feedback loop. Ran protected evals; `psf improve --promote` raised `limits.max_attempts` 2→3 through the gated loop (audit green, eval PROMOTE, human-authorized). Re-eval at the new baseline is non-inferior.
 - 09-18 — **Eval plan + suite.** `docs/EVAL-PLAN.md`, `psf eval-suite` (process + verifier suites, Wilson CIs, findings with reproducibility), `docs/reports/`. Fixed an inverted verifier probability (my model bug). Findings F1–F3 validated across seeds.
 - 09-18 — **Feedback→improvement round trip.** Validated F2 (single verifier ships residual defects). Implemented `gates.verify_quorum` **with the factory itself** (Claude harness); verifier blocked on brittle spec wording, owner adjudicated and adopted. Re-ran the eval: **shipped defects 17 → 1**, F2 resolved. New finding **F4**: the spec agent writes brittle acceptance criteria causing false-negative verification. See `docs/EVAL-REPORT.md`.
+- 09-18 — **Self-improvement eval suite (Phase 1).** `psf eval-self` implements E2/E5/E6/E7/E10/E15/E16/E19 (proposal precision, gate denial, evaluator poisoning, rollback drill, invariant immutability, replay determinism, canary stop, non-regression) + `docs/EVAL-PLAN-SELF-IMPROVING.md`. **8/8 passed.**
+- 09-18 — **Eval-driven fixes.** F2: enabled `verify_quorum: 2` by default (shipped defects **18 → 2** over 300 tasks, resolve rate unchanged). F4: rewrote `spec.md`/`verify.md` prompt (behavioral acceptance; cosmetic mismatches advisory) via the factory. Logged in `docs/EVAL-FINDINGS.md`; Excalidraw gained the evaluation program.
+
 
 
 

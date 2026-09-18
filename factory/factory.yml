@@ -15,6 +15,7 @@ agents:
     prompt: agents/review.md
 gates:
   spec_approval: true
+  verify_quorum: 2
 limits:
   max_attempts: 3
 feedback:

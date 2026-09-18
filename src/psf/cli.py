@@ -31,6 +31,7 @@ agents:
   review:    { prompt: agents/review.md }
 gates:
   spec_approval: true
+  verify_quorum: 2
 limits:
   max_attempts: 2
 feedback:
@@ -293,6 +294,28 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_eval_self(args) -> int:
+    from .selfeval import run_self_eval
+
+    rep = run_self_eval()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+        return 0 if rep["failed"] == 0 else 1
+    for e in rep["evals"]:
+        mark = "PASS" if e["status"] == "pass" else "FAIL"
+        print(f"[{mark}] {e['id']:5} {e['name']}")
+    print(f"self-eval: {rep['passed']}/{rep['total']} passed")
+    if rep["issues"]:
+        print("issues:")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    if args.out:
+        print(f"wrote {args.out}")
+    return 0 if rep["failed"] == 0 else 1
+
+
 def cmd_eval_suite(args) -> int:
     from .evalsuite import run_suite
 
@@ -454,6 +477,11 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("eval", help="run the protected evaluation (M3)")
     s.add_argument("--candidate", type=int, help="candidate max_attempts (default: current+1)")
     s.set_defaults(func=cmd_eval)
+
+    s = sub.add_parser("eval-self", help="run the self-improvement eval suite (E2/E5/E6/E7/E10/E15/E16/E19)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_self)
 
     s = sub.add_parser("eval-suite", help="run the process + verifier eval suite (see docs/EVAL-PLAN.md)")
     s.add_argument("--seeds", type=int, default=5)
