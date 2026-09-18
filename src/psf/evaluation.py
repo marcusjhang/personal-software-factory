@@ -100,7 +100,9 @@ def run_eval(eval_dir: str | Path, *, baseline_attempts: int, candidate_attempts
     base = run_benchmark(tasks=scored, max_attempts=baseline_attempts)
     cand = run_benchmark(tasks=scored, max_attempts=candidate_attempts)
 
-    base_by = {d["task"]: int(d["baseline"]) for d in base.details}
+    # Both runs use the full factory loop at their own retry budget, so compare
+    # the `factory` column (not the one-shot `baseline` column).
+    base_by = {d["task"]: int(d["factory"]) for d in base.details}
     cand_by = {d["task"]: int(d["factory"]) for d in cand.details}
     deltas = [float(cand_by[t.name]) - float(base_by[t.name]) for t in scored]
 
