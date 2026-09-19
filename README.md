@@ -157,6 +157,7 @@ deploys on its own.
 - [docs/EVAL-PLAN.md](./docs/EVAL-PLAN.md) — how we evaluate the factory
 - [docs/EVAL-PLAN-SELF-IMPROVING.md](./docs/EVAL-PLAN-SELF-IMPROVING.md) — how we evaluate self-improvement
 - [docs/EVAL-GOVERNANCE.md](./docs/EVAL-GOVERNANCE.md) — how the eval suite grows safely
+- [docs/PLAN-JEV.md](./docs/PLAN-JEV.md) — plan for Jev (TypeSafe) + a live supervisor
 - [docs/EVAL-REPORT.md](./docs/EVAL-REPORT.md) — eval results and validated findings
 - [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
 - [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries
