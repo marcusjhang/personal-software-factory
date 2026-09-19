@@ -118,7 +118,8 @@ class Workflow:
                     work.blocked_from = p["from"]
                 elif p["from"] == "BLOCKED":
                     work.blocked_from = None
-        assert work is not None
+        if work is None:
+            raise GateError(f"malformed event stream for {work_id}")
         return work
 
     # -- transitions ----------------------------------------------------------

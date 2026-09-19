@@ -1,11 +1,13 @@
 """Shared runner-adapter core, harness-agnostic.
 
-One implementation of the PSF runner protocol used by the Claude Code and
-opencode (DeepSeek) backends. It builds the role prompt (using the factory's
+One implementation of the PSF runner protocol used by the Claude Code, opencode
+(DeepSeek), and Codex backends. It builds the role prompt (using the factory's
 `factory/agents/*.md` text passed in the task context), invokes the harness
 non-interactively in the workspace, and returns the typed AgentResult.
 
 Harnesses are selected by name; the command construction is the only difference.
+Permissions are a single normalized profile (`safe|workspace|full`) mapped to
+each harness's flags.
 """
 
 from __future__ import annotations
@@ -59,10 +61,25 @@ def last_json(text: str):
     return None
 
 
+_SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".psf",
+              "dist", "build", ".mypy_cache", ".pytest_cache", ".rag", ".tox"}
+_MAX_FILE_BYTES = 1_000_000
+
+
 def tree_digest(ws: str):
-    files = {str(p.relative_to(ws)): hashlib.sha256(p.read_bytes()).hexdigest()
-             for p in pathlib.Path(ws).rglob("*")
-             if p.is_file() and ".git" not in p.parts}
+    """Hash the workspace tree, bounded: skips dependency/runtime dirs and large files."""
+    ws = str(ws)
+    files: dict[str, str] = {}
+    for root, dirs, names in os.walk(ws):
+        dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
+        for name in names:
+            p = pathlib.Path(root) / name
+            try:
+                if p.stat().st_size > _MAX_FILE_BYTES:
+                    continue
+                files[str(p.relative_to(ws))] = hashlib.sha256(p.read_bytes()).hexdigest()
+            except OSError:
+                continue
     return "sha256:" + hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest(), list(files)
 
 

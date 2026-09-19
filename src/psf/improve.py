@@ -131,7 +131,7 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
         if field in PROTECTED or field not in PROPOSABLE:
             log.append("ImprovementRejected", {"reason": "protected_field", "field": field}, actor=action)
             log.close()
-            raise ValueError(f"field '{field}' is protected and cannot be proposed")
+            raise ValueError(f"field '{field}' is protected and cannot be proposed")  # noqa: B904
         current = _get(yaml.safe_load(_factory_file(factory_path).read_text()), field)
         candidates = [Proposal(field, current, candidate, "operator-specified")]
     else:

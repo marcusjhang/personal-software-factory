@@ -30,8 +30,16 @@ class Workspace:
             wt_root = repo_path / ".psf" / "worktrees"
             wt_root.mkdir(parents=True, exist_ok=True)
             path = wt_root / name
+            if path.exists():
+                return cls(path, is_temp=False, branch=branch, repo=repo_path)  # reuse
+            # A stale branch from an aborted run would make `worktree add -b` fail.
+            listing = subprocess.run(["git", "branch", "--list", branch, "--format", "%(refname)"],
+                                     cwd=str(repo_path), capture_output=True, text=True)
+            if listing.stdout.strip():
+                subprocess.run(["git", "branch", "-D", branch], cwd=str(repo_path),
+                               check=False, capture_output=True, text=True)
             subprocess.run(["git", "worktree", "add", "-b", branch, str(path), base],
-                           cwd=str(repo_path), check=True, capture_output=True, text=True)
+                           cwd=str(repo_path), check=True, capture_output=True, text=True, timeout=120)
             return cls(path, is_temp=False, branch=branch, repo=repo_path)
         return cls(Path(tempfile.mkdtemp(prefix=f"psf-{name}-")), is_temp=True)
 

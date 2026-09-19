@@ -99,8 +99,15 @@ class SubprocessRunner:
         command = task.context.get("command") or self.default_command
         if not command:
             raise RuntimeError("subprocess runner has no command configured")
-        proc = subprocess.run(command, input=json.dumps(task.to_dict()),
-                              capture_output=True, text=True, timeout=self.timeout)
+        try:
+            proc = subprocess.run(command, input=json.dumps(task.to_dict()),
+                                  capture_output=True, text=True, timeout=self.timeout)
+        except FileNotFoundError:
+            return AgentResult(False, {}, summary=f"harness command not found: {command[0]}")
+        except subprocess.TimeoutExpired:
+            return AgentResult(False, {}, summary=f"harness timed out after {self.timeout}s")
+        except OSError as e:  # noqa: BLE001 - never abort the loop on a runner failure
+            return AgentResult(False, {}, summary=f"harness failed to start: {e}")
         if proc.returncode != 0:
             return AgentResult(False, {"returncode": proc.returncode}, summary=proc.stderr.strip()[:2000])
         try:

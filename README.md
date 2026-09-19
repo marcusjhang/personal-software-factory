@@ -181,6 +181,7 @@ deploys on its own.
 - [docs/PLAN-JEV.md](./docs/PLAN-JEV.md) — plan for Jev (TypeSafe) + a live supervisor
 - [docs/COMPARISON.md](./docs/COMPARISON.md) — PSF vs Warp/Factory/Copilot/OpenHands/Claude Code
 - [docs/ADAPTERS-RESEARCH.md](./docs/ADAPTERS-RESEARCH.md) — harness abstraction + permission model (ACP, Cline, Codex)
+- [docs/CODE-REVIEW.md](./docs/CODE-REVIEW.md) — whole-codebase review + fixes
 - [docs/EVAL-REPORT.md](./docs/EVAL-REPORT.md) — eval results and validated findings
 - [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
 - [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries

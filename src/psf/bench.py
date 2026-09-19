@@ -73,8 +73,11 @@ def _factory(task: BenchTask, workdir: Path, max_attempts: int) -> bool:
         runner="mock", gates={"spec_approval": False}, limits={"max_attempts": max_attempts},
     )
     log = EventLog(workdir / f"{task.name}.db")
-    result = Foreman(factory, Workflow(log), ScriptedRunner([task])).run(task.goal, finish=False)
-    return result.verify_passed
+    try:
+        result = Foreman(factory, Workflow(log), ScriptedRunner([task])).run(task.goal, finish=False)
+        return result.verify_passed
+    finally:
+        log.close()
 
 
 @dataclass

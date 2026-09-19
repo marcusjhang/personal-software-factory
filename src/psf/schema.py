@@ -182,8 +182,13 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
             errors.append(f"agent '{role}' prompt not found: {prompt}")
 
     limits = raw.get("limits") or {}
-    if "max_attempts" in limits and int(limits["max_attempts"]) < 1:
-        errors.append("limits.max_attempts must be >= 1")
+    if not isinstance(limits, dict):
+        errors.append("limits must be a mapping")
+    elif "max_attempts" in limits:
+        ma = limits["max_attempts"]
+        # bool is an int subclass; reject non-integers without crashing.
+        if not isinstance(ma, int) or isinstance(ma, bool) or ma < 1:
+            errors.append("limits.max_attempts must be an integer >= 1")
     gates = raw.get("gates") or {}
     if "spec_approval" in gates and not isinstance(gates["spec_approval"], bool):
         errors.append("gates.spec_approval must be a boolean")

@@ -22,7 +22,7 @@ def available() -> bool:
 
 
 def _run(args: list[str], cwd: str | Path) -> tuple[int, str, str]:
-    p = subprocess.run(args, cwd=str(cwd), capture_output=True, text=True)
+    p = subprocess.run(args, cwd=str(cwd), capture_output=True, text=True, timeout=180)
     return p.returncode, p.stdout.strip(), p.stderr.strip()
 
 

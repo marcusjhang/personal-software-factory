@@ -47,17 +47,20 @@ class Answer:
 
     @property
     def noul(self) -> float:
-        assert self.kind == "noul"
+        if self.kind != "noul":
+            raise TypeError(f"answer is {self.kind}, not noul")
         return float(self.value)
 
     @property
     def choice(self) -> str:
-        assert self.kind == "choice"
+        if self.kind != "choice":
+            raise TypeError(f"answer is {self.kind}, not choice")
         return str(self.value)
 
     @property
     def score(self) -> float:
-        assert self.kind == "score"
+        if self.kind != "score":
+            raise TypeError(f"answer is {self.kind}, not score")
         return float(self.value)
 
 
@@ -146,7 +149,10 @@ class JevClassifier:
         key = self.api_key or os.environ.get("TYPESAFE_API_KEY")
         if not key:
             raise RuntimeError("TYPESAFE_API_KEY is not set")
-        return TypeSafeClient(api_key=key)
+        try:
+            return TypeSafeClient(api_key=key, timeout=self.timeout)
+        except TypeError:  # older SDK without a timeout kwarg
+            return TypeSafeClient(api_key=key)
 
     @staticmethod
     def _to_sdk(q: Question):
