@@ -28,11 +28,12 @@ eval · eval-suite · eval-self · improve · feedback`.
 | Installs and runs as a package | `pip install .` → `psf --version`; cold-start in a fresh dir → `DONE` |
 | Enforced gates, digest-bound approvals, hash-chained ledger | tests + `psf audit` green |
 | Independent verification cuts shipped defects | process eval: 123 baseline defects → 18 (quorum 1) → **2** (quorum 2) / 300 tasks |
-| Self-improvement works and is safe | `psf eval-self`: **22/22**, run twice |
+| Self-improvement works and is safe | `psf eval-self`: **27/27**, `psf eval-gov`: **8/8**, run twice |
+| Works across repo sizes and domains | multi-repo eval: **20/20** (4 sizes × 5 domains); real-harness runs graded by tests |
 | Change is reversible | rollback drill (E10), invariant immutability (E15) |
 | It builds itself | three self-builds via a real harness; `verify_quorum` and prompt fixes were factory-built |
 
-Test suite: **37 tests** (`PYTHONPATH=src pytest`). Eval plans and findings:
+Test suite: **43 tests** (`PYTHONPATH=src pytest`). Eval plans and findings:
 [EVAL-PLAN](./EVAL-PLAN.md), [EVAL-PLAN-SELF-IMPROVING](./EVAL-PLAN-SELF-IMPROVING.md),
 [EVAL-FINDINGS](./EVAL-FINDINGS.md).
 
