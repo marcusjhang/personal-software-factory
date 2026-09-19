@@ -372,6 +372,23 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_eval_supervisor(args) -> int:
+    from .supveval import run_supervisor_eval
+
+    rep = run_supervisor_eval()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for e in rep["evals"]:
+            print(f"[{'PASS' if e['status'] == 'pass' else 'FAIL'}] {e['id']:4} {e['name']}")
+        print(f"supervisor evals: {rep['passed']}/{rep['total']} passed")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    return 0 if rep["failed"] == 0 else 1
+
+
 def cmd_eval_oss(args) -> int:
     from .ossbench import run_oss_task
 
@@ -679,6 +696,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_oss)
+
+    s = sub.add_parser("eval-supervisor", help="supervisor/classifier evals (S1..S8)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_supervisor)
 
     s = sub.add_parser("evals", help="govern the eval suite: add / approve / rotate / retire / status")
     s.add_argument("action", choices=["add", "approve", "rotate", "retire", "status"])

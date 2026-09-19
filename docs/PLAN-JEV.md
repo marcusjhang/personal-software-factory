@@ -1,6 +1,6 @@
 # Plan — Jev + Supervisor in the Personal Software Factory
 
-Status: **plan** (not implemented). Two goals:
+Status: **P0 + P1 implemented; P2–P4 planned.** Two goals:
 
 1. **Use Jev** (TypeSafe's System One model) as the factory's fast, typed judgment
    layer — without ever letting it become authority.
@@ -235,6 +235,28 @@ assessment loop), the bounded evidence bundle, the deterministic safety-first
 policy, and optional Codex App Server steering. **Do not** adopt its
 `state.json`/`events.jsonl` persistence (we have a hash-chained ledger), make Jev
 authority (it agrees: "Jev only assesses"), or couple the core to Codex types.
+
+## 13. Progress
+
+- **P0 — DONE.** `src/psf/classifier.py` (Noul/Choice/Score, `MockClassifier`,
+  `ErrorClassifier`, `CountingClassifier`, `JevClassifier`, `build_classifier`);
+  `src/psf/supervisor.py` (bounded+redacted evidence, questions, deterministic
+  policy, fail-closed `supervise_step`); evals **S1–S8** in `src/psf/supveval.py`
+  (`psf eval-supervisor`) — **8/8**, offline.
+- **P1 — DONE.** `JevClassifier` verified against real TypeSafe Jev
+  (`TYPESAFE_API_KEY` in env; `typesafe-sdk` in `.jev-venv`). One batched call
+  returns typed answers and drives the supervisor (`CONTINUE`). Still advisory.
+- **P2–P4 — planned.** Supervisor wired into the foreman's build loop; optional
+  Codex App Server steering; calibration harness and confidence-gated routing.
+
+Real-Jev smoke (advisory only):
+
+```
+questions: worker_stuck, work_off_track, meaningful_progress, needs_human
+answers:   0.16, 0.15, 0.77, 0.15      (one batched call)
+decision:  CONTINUE
+```
+
 
 ## 12. Deliverables / acceptance
 

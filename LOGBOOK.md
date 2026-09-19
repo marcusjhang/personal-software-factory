@@ -47,3 +47,4 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 
 
 
+- 09-18 — **Jev + supervisor (P0/P1).** `src/psf/classifier.py` (Noul/Choice/Score, Mock/Error/Counting/Jev), `src/psf/supervisor.py` (bounded+redacted evidence, safety-first deterministic policy, fail-closed), evals **S1–S8** (`psf eval-supervisor`, 8/8, offline). Verified **real Jev** via `TYPESAFE_API_KEY` + `typesafe-sdk` (`.jev-venv`): one batched call returned typed answers and drove the supervisor (CONTINUE). Full battery green: 47 tests, audit, self 27/27, gov 8/8, supervisor 8/8, process 3 findings, repos 20/20. Plan: `docs/PLAN-JEV.md`.
