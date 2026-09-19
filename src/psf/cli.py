@@ -270,6 +270,48 @@ def cmd_mode(args) -> int:
     return 0
 
 
+def _set_harness(value: str, *, model: str | None = None, permissions: str | None = None,
+                 factory_path: str = "factory") -> Path:
+    import yaml
+
+    p = Path(factory_path)
+    p = p / "factory.yml" if p.is_dir() else p
+    raw = yaml.safe_load(p.read_text()) or {}
+    raw["runner"] = "subprocess"
+    cmd = [sys.executable, "-m", f"psf.adapters.{value}"]
+    if model:
+        cmd += ["--model", model]
+    if permissions:
+        cmd += ["--permissions", permissions]
+    ro = raw.setdefault("runnerOptions", {})
+    ro["command"] = cmd
+    if permissions:
+        ro["permissions"] = permissions
+    elif "permissions" in ro:
+        del ro["permissions"]
+    p.write_text(yaml.safe_dump(raw, sort_keys=False))
+    return p
+
+
+def cmd_harness(args) -> int:
+    if args.value:
+        _set_harness(args.value, model=args.model, permissions=args.permissions, factory_path=args.factory)
+        extra = []
+        if args.model:
+            extra.append(f"model={args.model}")
+        if args.permissions:
+            extra.append(f"permissions={args.permissions}")
+        print(f"harness set to {args.value}  ({', '.join(extra) or 'defaults'})  — `psf run \"<goal>\"` will use it")
+        return 0
+    factory = load_factory(args.factory)
+    ro = factory.runner_options or {}
+    print(f"harness runner: {factory.runner}")
+    print(f"command:        {ro.get('command', '(none)')}")
+    if ro.get("permissions"):
+        print(f"permissions:    {ro['permissions']}")
+    return 0
+
+
 def cmd_run(args) -> int:
     factory, log, wf = _load(args)
     if getattr(args, "runner", None):
@@ -738,6 +780,12 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("mode", help="show or set autonomy mode (hitl | yolo); switchable anytime")
     s.add_argument("value", nargs="?", choices=["hitl", "yolo"])
     s.set_defaults(func=cmd_mode)
+
+    s = sub.add_parser("harness", help="show or pin the coding-agent harness for this repo")
+    s.add_argument("value", nargs="?", choices=["claude", "opencode", "codex"])
+    s.add_argument("--model", help="model id (e.g. deepseek/deepseek-v4-pro)")
+    s.add_argument("--permissions", choices=["safe", "workspace", "full"])
+    s.set_defaults(func=cmd_harness)
 
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")

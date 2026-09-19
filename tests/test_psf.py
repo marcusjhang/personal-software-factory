@@ -480,3 +480,19 @@ def test_fresh_repo_evals_do_not_crash(tmp_path, monkeypatch):
     cli.main(["init", "--feedback", "off", "--mode", "hitl"])
     rc = cli.main(["eval-self"])
     assert rc == 0  # all self-evals pass on a brand-new repo
+
+
+def test_harness_pin(tmp_path, monkeypatch, capsys):
+    import yaml
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    cli.main(["init", "--feedback", "off", "--mode", "hitl"])
+    assert cli.main(["harness", "opencode", "--model", "deepseek/deepseek-v4-pro", "--permissions", "safe"]) == 0
+    raw = yaml.safe_load((tmp_path / "factory" / "factory.yml").read_text())
+    assert raw["runner"] == "subprocess"
+    cmd = raw["runnerOptions"]["command"]
+    assert "psf.adapters.opencode" in " ".join(cmd) and "deepseek/deepseek-v4-pro" in cmd
+    assert raw["runnerOptions"]["permissions"] == "safe"
+    assert cli.main(["harness"]) == 0
+    assert "opencode" in capsys.readouterr().out
