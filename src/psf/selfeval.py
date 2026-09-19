@@ -558,7 +558,7 @@ def eval_E27(tmp: Path) -> EvalResult:
             if task.role == "review":
                 self.reviews += 1
                 if self.reviews == 1:
-                    return AgentResult(True, {"decision": "revise", "notes": "fix the return value"})
+                    return AgentResult(True, {"decision": "revise", "notes": "fix the return value", "blocking": True})
                 return AgentResult(True, {"decision": "approve"})
             return super().run(task)
 

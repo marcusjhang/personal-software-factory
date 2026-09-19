@@ -372,6 +372,30 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_eval_oss(args) -> int:
+    from .ossbench import run_oss_task
+
+    specs = (args.repos or "/tmp/oss/flask:change").split(",")
+    results = []
+    for spec in specs:
+        path, _, kind = spec.partition(":")
+        results.append(run_oss_task(path, kind=kind or "change", claude_script=args.claude_script))
+    rep = {"total": len(results), "resolved": sum(1 for r in results if r.get("resolved")),
+           "results": results}
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for r in results:
+            print(f"{r['repo']:10} {r['kind']:12} resolved={r.get('resolved')} "
+                  f"state={r.get('state')} attempts={r.get('attempts')} "
+                  f"stats={r.get('stats', {}).get('files')} files "
+                  f"{r.get('error') or ''}")
+        print(f"resolved {rep['resolved']}/{rep['total']}")
+    return 0 if rep["resolved"] == rep["total"] else 1
+
+
 def cmd_eval_repos(args) -> int:
     from .repobench import run_matrix
 
@@ -648,6 +672,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_repos)
+
+    s = sub.add_parser("eval-oss", help="real OSS-repo eval (localization / change)")
+    s.add_argument("--repos", help="comma list of path[:kind], e.g. /tmp/oss/flask:change")
+    s.add_argument("--claude-script", help="path to the claude runner script")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_oss)
 
     s = sub.add_parser("evals", help="govern the eval suite: add / approve / rotate / retire / status")
     s.add_argument("action", choices=["add", "approve", "rotate", "retire", "status"])

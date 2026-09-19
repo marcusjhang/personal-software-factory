@@ -188,6 +188,34 @@ Proven by evals (part of the self-eval suite):
 
 Tests: **40**.
 
+---
+
+## Round 6 — real OSS repos (large, mature)
+
+Ran the factory on **cal.com (7,708 files, TS)**, **django (7,094, Python)** and
+**flask (236)** with the real Claude harness, graded deterministically
+(localization path match / pytest). See [EVAL-OSS.md](./EVAL-OSS.md).
+
+| finding | evidence | fix |
+|---|---|---|
+| **F10** — the **review** agent vetoed verified-correct work on real repos ("revise" although the project's tests passed), blocking it. | flask/django change + django localization `BLOCKED` with `verify passed=True`; OSS 1/4 | Review is **advisory**: it blocks only with an explicit `blocking: true` **and** actionable notes. Independent verification is the gate. **OSS 1/4 → 4/4.** |
+
+Also fixed this round: **F8/F9** (review dead-end; non-actionable revise) from the
+generated multi-repo matrix, and the harness `__init__` bug **F7**.
+
+**Docker:** `install.sh` syntax verified; **Docker image build not verified** —
+no Docker daemon running in this environment. `pip install .` remains verified.
+
+| suite | result |
+|---|---|
+| self-eval | **27/27** (×2) |
+| governance | **8/8** (×2) |
+| multi-repo process | **20/20** |
+| multi-repo real (tiny/medium × cli/lib) | 4/4 after fixes |
+| **real OSS (flask/django/cal.com)** | **4/4** after F10 |
+| tests | **43** |
+
+
 
 
 

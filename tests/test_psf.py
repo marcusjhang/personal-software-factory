@@ -442,7 +442,7 @@ def test_always_revise_terminates_blocked(tmp_path):
     class AlwaysRevise(MockRunner):
         def run(self, task):
             if task.role == "review":
-                return AgentResult(True, {"decision": "revise", "notes": "still wrong: x"})
+                return AgentResult(True, {"decision": "revise", "notes": "still wrong: x", "blocking": True})
             return super().run(task)
 
     f = make_factory(tmp_path, max_attempts=2)

@@ -22,8 +22,8 @@ you own the model.
 - [docs/TECH-SPEC.md](./docs/TECH-SPEC.md) — the full technical specification
 
 > Status: **working implementation, ready to use.** 43 tests, `psf audit` green,
-> `psf eval-self` 27/27 and `psf eval-gov` 8/8 (run twice), multi-repo eval 20/20
-> process. See [docs/READY.md](./docs/READY.md) for the
+> `psf eval-self` 27/27 and `psf eval-gov` 8/8 (run twice), multi-repo eval 20/20,
+> real OSS repos **4/4** (cal.com / django / flask). See [docs/READY.md](./docs/READY.md) for the
 > honest "what's proven / what's not" page, [LOGBOOK.md](./LOGBOOK.md) and
 > [docs/DIARY.md](./docs/DIARY.md).
 

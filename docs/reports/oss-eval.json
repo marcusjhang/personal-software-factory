@@ -1,0 +1,142 @@
+{
+  "total": 4,
+  "resolved": 4,
+  "results": [
+    {
+      "repo": "flask",
+      "kind": "change",
+      "symbol": null,
+      "expected": null,
+      "stats": {
+        "files": 236,
+        "top_ext": [
+          [
+            ".py",
+            83
+          ],
+          [
+            ".rst",
+            79
+          ],
+          [
+            ".html",
+            20
+          ],
+          [
+            ".txt",
+            10
+          ],
+          [
+            "",
+            7
+          ]
+        ]
+      },
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true
+    },
+    {
+      "repo": "django",
+      "kind": "localization",
+      "symbol": "AClass",
+      "expected": "django/template/base.py",
+      "stats": {
+        "files": 7094,
+        "top_ext": [
+          [
+            ".py",
+            2932
+          ],
+          [
+            ".po",
+            1274
+          ],
+          [
+            ".mo",
+            1263
+          ],
+          [
+            ".txt",
+            727
+          ],
+          [
+            ".html",
+            373
+          ]
+        ]
+      },
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true
+    },
+    {
+      "repo": "django",
+      "kind": "change",
+      "symbol": null,
+      "expected": null,
+      "stats": {
+        "files": 7094,
+        "top_ext": [
+          [
+            ".py",
+            2932
+          ],
+          [
+            ".po",
+            1274
+          ],
+          [
+            ".mo",
+            1263
+          ],
+          [
+            ".txt",
+            727
+          ],
+          [
+            ".html",
+            373
+          ]
+        ]
+      },
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true
+    },
+    {
+      "repo": "cal.com",
+      "kind": "localization",
+      "symbol": "ACCESS_CONTROL_ALLOW_ORIGIN_HEADER",
+      "expected": "apps/web/next.config.ts",
+      "stats": {
+        "files": 7708,
+        "top_ext": [
+          [
+            ".ts",
+            3880
+          ],
+          [
+            ".tsx",
+            1145
+          ],
+          [
+            ".sql",
+            601
+          ],
+          [
+            ".svg",
+            471
+          ],
+          [
+            ".md",
+            356
+          ]
+        ]
+      },
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true
+    }
+  ]
+}

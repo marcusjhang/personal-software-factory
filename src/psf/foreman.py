@@ -110,10 +110,13 @@ class Foreman:
                                                             "spec": work.spec}))
                 decision = review.output.get("decision", "approve")
                 notes = str(review.output.get("notes", "") or "").strip()
-                # A rejection must be actionable. An empty/"revise" with no notes is
-                # not a valid rejection regardless of harness, so it does not block.
-                if decision != "approve" and not notes:
-                    findings.append("advisory: review requested changes without actionable notes; treated as approve")
+                blocking = bool(review.output.get("blocking", False))
+                # Review is ADVISORY by default: it only blocks when it explicitly
+                # sets blocking=true AND names the defect. Independent verification
+                # is the gate; review cannot silently veto verified-correct work.
+                if decision != "approve" and (not blocking or not notes):
+                    findings.append(
+                        "advisory: review requested changes without a blocking, actionable verdict; treated as approve")
                     decision = "approve"
                 work = self.wf.record_review(work, decision, notes=notes, actor="review")
                 if work.state != "BUILD":

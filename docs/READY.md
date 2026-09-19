@@ -60,3 +60,6 @@ Test suite: **43 tests** (`PYTHONPATH=src pytest`). Eval plans and findings:
 - Improvement candidate space is narrow (numeric policy today); prompts/config
   are dogfooded by hand, not searched automatically.
 - SQLite only; the PostgreSQL path is planned, not built.
+- **Docker image build is not verified** (no daemon in the build environment);
+  `pip install .` and `install.sh` syntax are verified.
+- Real OSS coverage is three repos (cal.com, django, flask), one task each.
