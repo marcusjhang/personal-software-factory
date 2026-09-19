@@ -101,11 +101,13 @@ def command(harness: str, prompt: str, ws: str, model: str | None,
         raise ValueError(f"unknown permissions profile: {permissions}")
     if harness == "claude":
         if permissions == "full":
-            cmd = ["claude", "-p", prompt, "--dangerously-skip-permissions"]
+            cmd = ["claude", "-p", prompt, "--dangerously-skip-permissions",
+                   "--output-format", "json"]
         else:
             mode = "acceptEdits" if permissions == "workspace" else "default"
             tools = CLAUDE_READONLY_TOOLS if permissions == "safe" else CLAUDE_TOOLS
-            cmd = ["claude", "-p", prompt, "--permission-mode", mode, "--allowedTools", *tools]
+            cmd = ["claude", "-p", prompt, "--permission-mode", mode, "--allowedTools", *tools,
+                   "--output-format", "json"]
         if model:
             cmd += ["--model", model]
         return cmd
@@ -155,7 +157,16 @@ def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int
                 pass
     cmd = command(harness, prompt, ws, model, permissions=permissions)
     p = runner(cmd, capture_output=True, text=True, timeout=timeout, cwd=ws)
-    return ws, p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip()
+    out = (p.stdout or "").strip()
+    if harness == "claude":
+        # `--output-format json` wraps the agent's final text in {"result": ...}
+        try:
+            wrapper = json.loads(out)
+            if isinstance(wrapper, dict) and "result" in wrapper:
+                out = str(wrapper["result"]).strip()
+        except ValueError:
+            pass
+    return ws, p.returncode, out, (p.stderr or "").strip()
 
 
 def handle(task: dict, harness: str, *, model: str | None = None, timeout: int = 900,

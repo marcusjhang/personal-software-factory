@@ -128,11 +128,36 @@ def eval_A6(tmp: Path) -> EvalResult:
     return EvalResult("A6", "capability manifest", "pass" if ok else "fail", caps)
 
 
+def eval_A7(tmp: Path) -> EvalResult:
+    """Claude structured output: the {"result": ...} wrapper is unwrapped."""
+    import json
+
+    class FakeProc:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps({"type": "result", "is_error": False,
+                             "result": '{"passed": true, "findings": []}'})
+
+    (tmp / "a7ws").mkdir(parents=True, exist_ok=True)
+    task = {"role": "verify", "goal": "g", "workspace": str(tmp / "a7ws"), "context": {}}
+    _, rc, out, _ = common.run_task(task, "claude", runner=lambda *a, **k: FakeProc())
+    ok = out.strip().startswith('{"passed"')
+    return EvalResult("A7", "claude structured-output unwrap", "pass" if ok else "fail", {"out": out[:80]})
+
+
+def eval_A8(tmp: Path) -> EvalResult:
+    """Codex: prompt on stdin (last arg '-'), model optional, output file wired."""
+    c = common.command("codex", "p", "/ws", None, out_file="/tmp/o.txt")
+    ok = (c[-1] == "-" and "-o" in c and "-m" not in c  # no model -> use codex default
+          and "--skip-git-repo-check" in c)
+    return EvalResult("A8", "codex stdin/output-file + optional model", "pass" if ok else "fail", {"cmd": c})
+
+
 def run_adapter_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-adapt-") as d:
         tmp = Path(d)
-        for fn in (eval_A1, eval_A2, eval_A3, eval_A4, eval_A5, eval_A6):
+        for fn in (eval_A1, eval_A2, eval_A3, eval_A4, eval_A5, eval_A6, eval_A7, eval_A8):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

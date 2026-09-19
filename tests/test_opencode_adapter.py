@@ -47,5 +47,5 @@ def test_codex_command_uses_stdin_and_output_file():
 def test_adapter_eval_suite():
     from psf.adaptereval import run_adapter_eval
     rep = run_adapter_eval()
-    assert rep["total"] == 6
+    assert rep["total"] == 8
     assert rep["failed"] == 0, rep["issues"]
