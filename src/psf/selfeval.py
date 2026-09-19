@@ -572,6 +572,9 @@ def eval_E27(tmp: Path) -> EvalResult:
 
 
 def run_self_eval() -> dict:
+    from .evaluation import ensure_eval_dir
+
+    ensure_eval_dir("eval")  # a new repo should still have evals
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-selfeval-") as d:
         tmp = Path(d)

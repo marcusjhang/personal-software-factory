@@ -462,3 +462,21 @@ def test_empty_revise_is_not_a_blocker(tmp_path):
     f = make_factory(tmp_path, max_attempts=2)
     res = Foreman(f, Workflow(EventLog(tmp_path / "r3.db")), EmptyRevise()).run("g")
     assert res.work.state == "DONE"
+
+
+def test_init_scaffolds_eval(tmp_path, monkeypatch):
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["init", "--feedback", "off", "--mode", "hitl"]) == 0
+    assert (tmp_path / "eval" / "tasks.json").exists()
+    assert (tmp_path / "eval" / "holdout.json").exists()
+
+
+def test_fresh_repo_evals_do_not_crash(tmp_path, monkeypatch):
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    cli.main(["init", "--feedback", "off", "--mode", "hitl"])
+    rc = cli.main(["eval-self"])
+    assert rc == 0  # all self-evals pass on a brand-new repo

@@ -181,7 +181,10 @@ def cmd_init(args) -> int:
     if not root_agents.exists():
         root_agents.write_text(AGENTS_MD)
     Path(".psf").mkdir(exist_ok=True)
-    print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md)")
+    from .evaluation import ensure_eval_dir
+
+    ensure_eval_dir("eval")
+    print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md, eval/)")
     print(f"autonomy: mode={mode}  (switch anytime: `psf mode hitl|yolo`)")
     print(f"feedback: mode={fb_mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
     print("next: psf validate && psf run \"<your goal>\"")

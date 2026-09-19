@@ -26,6 +26,31 @@ from .canonical import digest, digest_bytes
 
 PROTECTED_PREFIX = "eval/"
 
+STARTER_TASKS = [
+    {"id": "t1", "goal": "add a health endpoint", "solves_on_attempt": 1, "source": "seed"},
+    {"id": "t2", "goal": "add CSV export", "solves_on_attempt": 2, "source": "seed"},
+    {"id": "t3", "goal": "add a database migration", "solves_on_attempt": 3, "source": "seed"},
+]
+STARTER_HOLDOUT = [
+    {"id": "h1", "goal": "add a version command", "solves_on_attempt": 1, "source": "seed"},
+    {"id": "h2", "goal": "add pagination", "solves_on_attempt": 2, "source": "seed"},
+    {"id": "h3", "goal": "add retry with backoff", "solves_on_attempt": 3, "source": "seed"},
+]
+
+
+def ensure_eval_dir(eval_dir: str | Path = "eval") -> Path:
+    """Scaffold a starter protected eval/ if absent, so evals work on a new repo.
+
+    Idempotent: existing tasks/holdout are never overwritten.
+    """
+    from .evalkit import make_eval_dir
+
+    d = Path(eval_dir)
+    if (d / "tasks.json").exists():
+        return d
+    return make_eval_dir(d.parent if d.name == "eval" else d, tasks=STARTER_TASKS, holdout=STARTER_HOLDOUT)
+
+
 
 @dataclass
 class EvalRecord:
