@@ -20,6 +20,7 @@ import sys
 DEFAULT_MODEL = {
     "claude": "sonnet",
     "opencode": "deepseek/deepseek-flash",
+    "codex": None,  # use the codex default model
 }
 
 # Tools the Claude harness may use (edits + running tests), no network surprises.
@@ -78,7 +79,8 @@ def build_prompt(task: dict) -> str:
     return "\n\n".join(parts)
 
 
-def command(harness: str, prompt: str, ws: str, model: str | None) -> list[str]:
+def command(harness: str, prompt: str, ws: str, model: str | None,
+            out_file: str | None = None) -> list[str]:
     if harness == "claude":
         cmd = ["claude", "-p", prompt, "--permission-mode", "acceptEdits",
                "--allowedTools", *CLAUDE_TOOLS]
@@ -88,13 +90,41 @@ def command(harness: str, prompt: str, ws: str, model: str | None) -> list[str]:
     if harness == "opencode":
         return ["opencode", "run", "--dir", ws, "--auto",
                 "--model", model or DEFAULT_MODEL["opencode"], prompt]
+    if harness == "codex":
+        cmd = ["codex", "exec", "--cd", ws, "--skip-git-repo-check",
+               "--sandbox", "workspace-write"]
+        if model:
+            cmd += ["-m", model]
+        if out_file:
+            cmd += ["-o", out_file]
+        cmd += ["-"]  # prompt is read from stdin (last)
+        return cmd
     raise ValueError(f"unknown harness: {harness}")
 
 
 def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int = 900,
              runner=subprocess.run):
     ws = task.get("workspace") or os.getcwd()
-    cmd = command(harness, build_prompt(task), ws, model)
+    prompt = build_prompt(task)
+    if harness == "codex":
+        # codex reads the prompt from stdin and can write its last message to a file
+        import tempfile
+        fd, out_file = tempfile.mkstemp(prefix="psf-codex-", suffix=".txt")
+        os.close(fd)
+        try:
+            cmd = command(harness, prompt, ws, model, out_file=out_file)
+            p = runner(cmd, input=prompt, capture_output=True, text=True, timeout=timeout, cwd=ws)
+            try:
+                out = pathlib.Path(out_file).read_text().strip()
+            except OSError:
+                out = ""
+            return ws, p.returncode, out or (p.stdout or "").strip(), (p.stderr or "").strip()
+        finally:
+            try:
+                os.unlink(out_file)
+            except OSError:
+                pass
+    cmd = command(harness, prompt, ws, model)
     p = runner(cmd, capture_output=True, text=True, timeout=timeout, cwd=ws)
     return ws, p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip()
 

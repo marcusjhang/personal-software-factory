@@ -35,3 +35,17 @@ def test_unknown_harness_rejected():
 def test_adapter_modules_import():
     from psf.adapters import claude, opencode  # noqa: F401
     assert hasattr(claude, "main_cli") and hasattr(opencode, "main_cli")
+
+
+def test_codex_command_uses_stdin_and_output_file():
+    c = common.command("codex", "p", "/ws", "gpt-5-codex", out_file="/tmp/o.txt")
+    assert c[:2] == ["codex", "exec"]
+    assert "--skip-git-repo-check" in c and "--sandbox" in c
+    assert "-o" in c and "-m" in c and c[-1] == "-"  # prompt from stdin
+
+
+def test_adapter_eval_suite():
+    from psf.adaptereval import run_adapter_eval
+    rep = run_adapter_eval()
+    assert rep["total"] == 4
+    assert rep["failed"] == 0, rep["issues"]

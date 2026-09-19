@@ -119,6 +119,9 @@ psf run --git --harness claude "your goal here"
 
 # opencode + DeepSeek (any opencode model)
 psf run --git --harness opencode --model deepseek/deepseek-v4-pro "your goal here"
+
+# Codex CLI
+psf run --git --harness codex "your goal here"
 ```
 
 Equivalent lower-level form (BYO command):

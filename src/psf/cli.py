@@ -429,6 +429,23 @@ def cmd_calibrate(args) -> int:
     return 0
 
 
+def cmd_eval_adapters(args) -> int:
+    from .adaptereval import run_adapter_eval
+
+    rep = run_adapter_eval()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for e in rep["evals"]:
+            print(f"[{'PASS' if e['status'] == 'pass' else 'FAIL'}] {e['id']:4} {e['name']}")
+        print(f"adapter evals: {rep['passed']}/{rep['total']} passed")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    return 0 if rep["failed"] == 0 else 1
+
+
 def cmd_eval_supervisor(args) -> int:
     from .supveval import run_supervisor_eval
 
@@ -710,7 +727,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--no-ask", action="store_true", help="do not prompt for the mode")
     s.add_argument("--classifier", choices=["mock", "jev"], help="advisory classifier provider")
     s.add_argument("--supervise", action="store_true", help="enable the advisory supervisor for this run")
-    s.add_argument("--harness", choices=["claude", "opencode"], help="coding-agent harness (sets the subprocess runner)")
+    s.add_argument("--harness", choices=["claude", "opencode", "codex"], help="coding-agent harness (sets the subprocess runner)")
     s.add_argument("--model", help="model id for the harness (e.g. deepseek/deepseek-v4-pro)")
     s.set_defaults(func=cmd_run)
 
@@ -757,6 +774,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_oss)
+
+    s = sub.add_parser("eval-adapters", help="harness-adapter conformance evals (A1..A4)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_adapters)
 
     s = sub.add_parser("eval-supervisor", help="supervisor/classifier evals (S1..S8)")
     s.add_argument("--json", action="store_true")
