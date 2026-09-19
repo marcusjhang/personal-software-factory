@@ -496,3 +496,33 @@ def test_harness_pin(tmp_path, monkeypatch, capsys):
     assert raw["runnerOptions"]["permissions"] == "safe"
     assert cli.main(["harness"]) == 0
     assert "opencode" in capsys.readouterr().out
+
+
+def test_cancel_and_unblock_commands(tmp_path, monkeypatch, capsys):
+    from psf import cli
+
+    monkeypatch.chdir(tmp_path)
+    cli.main(["init", "--feedback", "off", "--mode", "hitl"])
+    # create a work item sitting in SPEC_REVIEW (no-approve), then cancel it
+    cli.main(["run", "--no-approve", "--no-ask", "hold"])
+    wid = cli.main.__self__ if False else None
+    import psf.cli as c
+    _, log, wf = c._load(type("A", (), {"factory": "factory", "ledger": ".psf/factory.db"})())
+    ids = log.work_ids()
+    assert ids
+    rc = cli.main(["cancel", ids[0], "--reason", "no longer needed"])
+    assert rc == 0
+    assert wf.fold(ids[0]).state == "CANCELLED"
+    # unblock path: create + block + unblock
+    w = wf.create("blocked one")
+    w = wf.transition(w, "TRIAGE")
+    w = wf.transition(w, "SPEC")
+    w = wf.transition(w, "BLOCKED", reason="wait")
+    rc = cli.main(["unblock", w.id])
+    assert rc == 0 and wf.fold(w.id).state == "SPEC"
+
+
+def test_guardrail_eval_suite():
+    from psf.guardeval import run_guardrail_eval
+    rep = run_guardrail_eval()
+    assert rep["total"] == 6 and rep["failed"] == 0, rep["issues"]

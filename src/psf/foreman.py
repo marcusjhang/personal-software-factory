@@ -8,6 +8,9 @@ directly; it proposes steps the controller validates.
 from __future__ import annotations
 
 import os
+import shlex
+import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -89,6 +92,8 @@ class Foreman:
         work = self.wf.approve_spec(work, approver=approver)
 
         ws = Workspace.create(work.id, repo=repo, use_git=use_git)
+        started = time.monotonic()
+        budget = self.factory.max_minutes
         try:
             work = self.wf.transition(work, "BUILD", actor="foreman")
             findings: list[str] = []
@@ -96,6 +101,11 @@ class Foreman:
             # requests changes loops back into build until it is approved or the
             # retry budget is exhausted (BLOCKED).
             while True:
+                if budget and (time.monotonic() - started) > budget * 60:
+                    findings.append(f"advisory: wall-clock budget {budget:g} min exceeded")
+                    work = self.wf.transition(work, "BLOCKED", actor="foreman",
+                                              reason="budget:max_minutes")
+                    break
                 while True:
                     build = self.runner.run(AgentTask(
                         "implement", goal, workspace=ws.path, attempt=work.attempts,
@@ -115,6 +125,12 @@ class Foreman:
                         for f in verify.output.get("findings", []) or []:
                             if f not in findings:
                                 findings.append(f)
+                    # Deterministic gate: run the project's own check (e.g. tests).
+                    if self.factory.verify_command:
+                        ok_cmd, out = self._run_verify_command(ws)
+                        passed = passed and ok_cmd
+                        if not ok_cmd:
+                            findings.append(f"verify_command failed: {out[-300:]}")
                     work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
                     if work.state == "BUILD" and self.classifier is not None:
                         work, findings = self._supervise(work, goal, ws, findings)
@@ -152,6 +168,18 @@ class Foreman:
         return RunResult(work, diff=diff,
                          verify_passed=bool(work.verification and work.verification.get("passed")),
                          findings=findings)
+
+    def _run_verify_command(self, ws: Workspace) -> tuple[bool, str]:
+        """Run the deterministic project check (e.g. `pytest -q`) in the workspace."""
+        cmd = self.factory.verify_command
+        if not cmd:
+            return True, ""
+        try:
+            p = subprocess.run(shlex.split(cmd), cwd=str(ws.path),
+                               capture_output=True, text=True, timeout=600)
+        except (OSError, subprocess.SubprocessError) as e:
+            return False, f"verify_command error: {e}"
+        return p.returncode == 0, ((p.stdout or "") + (p.stderr or "")).strip()
 
     def _supervise(self, work: WorkItem, goal: str, ws: Workspace, findings: list[str]) -> tuple[WorkItem, list[str]]:
         """Consult the advisory supervisor before a retry; record and act on it."""

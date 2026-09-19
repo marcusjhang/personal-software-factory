@@ -69,7 +69,7 @@ never source code, prompts, file paths, or secrets:
     psf feedback export --github <upstream-repo>
 
 `<upstream-repo>` is the `feedback.upstream` value in `factory/factory.yml`.
-Set `feedback.publish: true` to make `psf feedback export` publish there by default.
+Set `feedback.mode: auto` to make `psf feedback export` publish there by default.
 Recurring verify-failures and blocks become evaluation cases and improvements in
 the upstream factory. This is evidence, never authority: it cannot change policy.
 
@@ -401,6 +401,42 @@ def cmd_run(args) -> int:
             detail = item.response_digest or item.status
             print(f"  github: draft PR {item.status} ({detail})")
     return 0 if work.state in ("DONE", "HANDOFF") else 3
+
+
+def cmd_cancel(args) -> int:
+    _, log, wf = _load(args)
+    w = wf.fold(args.work_id)
+    w = wf.transition(w, "CANCELLED", actor="owner", reason=args.reason or "cancelled by owner")
+    print(f"{w.id}  {w.state}")
+    return 0
+
+
+def cmd_unblock(args) -> int:
+    _, log, wf = _load(args)
+    w = wf.fold(args.work_id)
+    if w.state != "BLOCKED" or not w.blocked_from:
+        print(f"{w.id} is {w.state}, not BLOCKED", file=sys.stderr)
+        return 2
+    w = wf.transition(w, w.blocked_from, actor="owner", reason="unblocked by owner")
+    print(f"{w.id}  {w.state}")
+    return 0
+
+
+def cmd_eval_guardrails(args) -> int:
+    from .guardeval import run_guardrail_eval
+
+    rep = run_guardrail_eval()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for e in rep["evals"]:
+            print(f"[{'PASS' if e['status'] == 'pass' else 'FAIL'}] {e['id']:4} {e['name']}")
+        print(f"guardrail evals: {rep['passed']}/{rep['total']} passed")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    return 0 if rep["failed"] == 0 else 1
 
 
 def cmd_status(args) -> int:
@@ -787,6 +823,20 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--permissions", choices=["safe", "workspace", "full"])
     s.set_defaults(func=cmd_harness)
 
+    s = sub.add_parser("cancel", help="cancel a work item")
+    s.add_argument("work_id")
+    s.add_argument("--reason", default="")
+    s.set_defaults(func=cmd_cancel)
+
+    s = sub.add_parser("unblock", help="return a BLOCKED work item to its saved state")
+    s.add_argument("work_id")
+    s.set_defaults(func=cmd_unblock)
+
+    s = sub.add_parser("eval-guardrails", help="guardrail evals (H1..H6)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_guardrails)
+
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")
     s.add_argument("--json", action="store_true")
@@ -800,7 +850,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--candidate", type=int, help="candidate max_attempts (default: current+1)")
     s.set_defaults(func=cmd_eval)
 
-    s = sub.add_parser("eval-self", help="run the self-improvement eval suite (E2/E5/E6/E7/E10/E15/E16/E19)")
+    s = sub.add_parser("eval-self", help="self-improvement eval suite (E1..E27)")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_self)
@@ -827,12 +877,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_oss)
 
-    s = sub.add_parser("eval-adapters", help="harness-adapter conformance evals (A1..A4)")
+    s = sub.add_parser("eval-adapters", help="harness-adapter conformance evals (A1..A8)")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_adapters)
 
-    s = sub.add_parser("eval-supervisor", help="supervisor/classifier evals (S1..S8)")
+    s = sub.add_parser("eval-supervisor", help="supervisor/classifier evals (S1..S13, C1..C3)")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_supervisor)

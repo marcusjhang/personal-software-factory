@@ -472,3 +472,33 @@ the writer path at that point.
 - No multi-tenant isolation in v1.0 local mode.
 - No universal workflow language or dynamic plugin execution.
 - No exactly-once claim for external effects without provider support.
+
+
+## 22. Addenda — implemented after the initial specification
+
+- **Autonomy modes.** `mode: hitl | yolo` (validated); asked at `psf init` and each
+  `psf run`, switchable with `psf mode`. YOLO auto-approves the spec and
+  auto-promotes, but keeps every safety gate (eval, holdout, audit, canary,
+  rollback).
+- **Harness adapters.** One protocol (JSON task on stdin → JSON result on stdout),
+  one shared core `psf.adapters.common`, backends `claude` / `opencode` / `codex`,
+  installed as `psf-agent-*`. `psf run --harness <h> [--model M]`; `psf harness`
+  pins a repo's harness. Adapters use the factory's `agents/*.md` prompts.
+- **Normalized permissions.** `safe | workspace | full` mapped to each harness's
+  flags; `capabilities(harness)` advertises sandbox/approvals/steering/streaming/acp.
+- **Advisory classifier / supervisor (Jev).** `factory.yml classifier:` selects
+  `mock | jev`; the supervisor may `STEER/RETRY/STOP/ESCALATE` on bounded, redacted
+  evidence, records ledger events, and can never `FINISH` (verification does).
+- **Deterministic verify gate.** `gates.verify_command` runs the project's check
+  (e.g. `pytest -q`) in the worktree and must pass alongside the LLM verifier.
+- **Budgets.** `limits.max_minutes` and `limits.max_usd` are validated;
+  `max_minutes` is enforced in the build loop (exhaustion → `BLOCKED`).
+- **Cancel / unblock.** `psf cancel <id>` and `psf unblock <id>` (unblock returns
+  only to the saved prior state).
+- **Guardrails & evals.** See `docs/GUARDRAILS.md`. `psf audit` runs the guardrail
+  and adapter suites on every health check; `psf improve` requires a green audit.
+  Suites: self `E1–E27`, governance `G1–G8`, supervisor `S1–S13/C1–C3`, adapters
+  `A1–A8`, guardrails `H1–H6`.
+- **Ledger single-writer (known limit).** `EventLog.append` is a non-atomic
+  read-modify-write; it is safe for single-process local use but must be serialized
+  (`BEGIN IMMEDIATE`) or replaced by PostgreSQL before concurrent writers.

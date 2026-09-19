@@ -242,3 +242,27 @@ ledger events, an optional steering hook, and a calibration module.
 evidence, Jev returned `CONTINUE` for failing attempts; the deterministic budget
 still `BLOCKED` (advisory-only held, no harm). Fix path: calibration + richer
 evidence, never granting Jev authority.
+
+
+---
+
+## Round 8 — guardrails, budgets, and the OCR review loop
+
+Closed the gaps from the sufficiency audit and proved the guardrails are *used*:
+
+- **Deterministic verify gate** (`gates.verify_command`) — a failing project check
+  blocks the item (`H4`).
+- **Budgets** — `limits.max_minutes`/`max_usd` validated; `max_minutes` enforced
+  (`H5`).
+- **Cancel / unblock** commands (`H6`).
+- **Guardrail evals H1–H6**, including *mutation* checks (inject an illegal
+  transition / unapproved READY / ledger tamper and assert detection) — evals are
+  demonstrated sensitive, not merely asserted.
+- **Wired into health**: `psf audit` runs `guardrails.suite` (6/6) and
+  `adapters.suite` (8/8); `psf improve` requires a green audit.
+- **OCR review loop**: `docs/CODE-REVIEW-ROUNDS.md` — round 1, **0 open P1**
+  (stop rule ≤2 met).
+
+| run | tests | audit | self | gov | supervisor | adapters | guardrails | repos |
+|---|---|---|---|---|---|---|---|---|
+| — | **62** | green | 27/27 | 8/8 | 16/16 | 8/8 | **6/6** | 20/20 |

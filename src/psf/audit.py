@@ -119,4 +119,16 @@ def run_audit(factory_path: str | Path = "factory", ledger_path: str | Path = ".
                        f"baseline {r.baseline_rate:.0%} -> factory {r.factory_rate:.0%} ({r.factory_pass}/{r.total})")
         except Exception as e:  # noqa: BLE001 - audit must never crash the caller
             report.add("benchmark.non_regression", FAIL, f"benchmark error: {e}")
+
+        # Guardrails and harness adapters are part of health: run their suites.
+        from .adaptereval import run_adapter_eval
+        from .guardeval import run_guardrail_eval
+
+        for name, suite in (("guardrails.suite", run_guardrail_eval),
+                            ("adapters.suite", run_adapter_eval)):
+            try:
+                r = suite()
+                report.add(name, OK if r["failed"] == 0 else FAIL, f"{r['passed']}/{r['total']} passed")
+            except Exception as e:  # noqa: BLE001
+                report.add(name, FAIL, f"suite error: {e}")
     return report

@@ -90,6 +90,22 @@ class Factory:
         """Independent verifications per build; all must pass to reach REVIEW."""
         return int(self.gates.get("verify_quorum", 1))
 
+    @property
+    def verify_command(self) -> str | None:
+        """Optional deterministic check run in the workspace (e.g. `pytest -q`)."""
+        cmd = self.gates.get("verify_command")
+        return str(cmd) if cmd else None
+
+    @property
+    def max_minutes(self) -> float | None:
+        m = self.limits.get("max_minutes")
+        return float(m) if m else None
+
+    @property
+    def max_usd(self) -> float | None:
+        m = self.limits.get("max_usd")
+        return float(m) if m else None
+
     def agent(self, role: str) -> AgentSpec:
         if role not in self.agents:
             raise FactoryError(f"factory '{self.name}' has no agent role '{role}'")
@@ -189,9 +205,18 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
         # bool is an int subclass; reject non-integers without crashing.
         if not isinstance(ma, int) or isinstance(ma, bool) or ma < 1:
             errors.append("limits.max_attempts must be an integer >= 1")
+    for budget in ("max_minutes", "max_usd"):
+        if budget in limits:
+            val = limits[budget]
+            if not isinstance(val, (int, float)) or isinstance(val, bool) or val <= 0:
+                errors.append(f"limits.{budget} must be a number > 0")
     gates = raw.get("gates") or {}
+    if not isinstance(gates, dict):
+        errors.append("gates must be a mapping")
     if "spec_approval" in gates and not isinstance(gates["spec_approval"], bool):
         errors.append("gates.spec_approval must be a boolean")
+    if "verify_command" in gates and not isinstance(gates["verify_command"], str):
+        errors.append("gates.verify_command must be a string")
     if "verify_quorum" in gates:
         quorum = gates["verify_quorum"]
         # bool is an int subclass; ``true`` must not pass as 1.

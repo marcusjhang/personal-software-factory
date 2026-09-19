@@ -182,6 +182,8 @@ deploys on its own.
 - [docs/COMPARISON.md](./docs/COMPARISON.md) — PSF vs Warp/Factory/Copilot/OpenHands/Claude Code
 - [docs/ADAPTERS-RESEARCH.md](./docs/ADAPTERS-RESEARCH.md) — harness abstraction + permission model (ACP, Cline, Codex)
 - [docs/CODE-REVIEW.md](./docs/CODE-REVIEW.md) — whole-codebase review + fixes
+- [docs/CODE-REVIEW-ROUNDS.md](./docs/CODE-REVIEW-ROUNDS.md) — OCR review loop + dispositions
+- [docs/GUARDRAILS.md](./docs/GUARDRAILS.md) — guardrail → proof matrix
 - [docs/EVAL-REPORT.md](./docs/EVAL-REPORT.md) — eval results and validated findings
 - [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
 - [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries
