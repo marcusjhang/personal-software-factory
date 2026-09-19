@@ -1,0 +1,506 @@
+{
+  "real": false,
+  "total": 20,
+  "resolved": 20,
+  "resolve_rate": 1.0,
+  "by_size": {
+    "tiny": {
+      "total": 5,
+      "resolved": 5
+    },
+    "small": {
+      "total": 5,
+      "resolved": 5
+    },
+    "medium": {
+      "total": 5,
+      "resolved": 5
+    },
+    "large": {
+      "total": 5,
+      "resolved": 5
+    }
+  },
+  "repos": [
+    {
+      "repo": "tiny-cli",
+      "size": "tiny",
+      "domain": "cli",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "tiny-api",
+      "size": "tiny",
+      "domain": "api",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "tiny-etl",
+      "size": "tiny",
+      "domain": "etl",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "tiny-lib",
+      "size": "tiny",
+      "domain": "lib",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "tiny-script",
+      "size": "tiny",
+      "domain": "script",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "small-cli",
+      "size": "small",
+      "domain": "cli",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "small-api",
+      "size": "small",
+      "domain": "api",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "small-etl",
+      "size": "small",
+      "domain": "etl",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "small-lib",
+      "size": "small",
+      "domain": "lib",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "small-script",
+      "size": "small",
+      "domain": "script",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-cli",
+      "size": "medium",
+      "domain": "cli",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-api",
+      "size": "medium",
+      "domain": "api",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-etl",
+      "size": "medium",
+      "domain": "etl",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-lib",
+      "size": "medium",
+      "domain": "lib",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-script",
+      "size": "medium",
+      "domain": "script",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "large-cli",
+      "size": "large",
+      "domain": "cli",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "large-api",
+      "size": "large",
+      "domain": "api",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "large-etl",
+      "size": "large",
+      "domain": "etl",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "large-lib",
+      "size": "large",
+      "domain": "lib",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "large-script",
+      "size": "large",
+      "domain": "script",
+      "real": false,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    }
+  ]
+}

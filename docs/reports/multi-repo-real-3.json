@@ -1,0 +1,114 @@
+{
+  "real": true,
+  "total": 4,
+  "resolved": 3,
+  "resolve_rate": 0.75,
+  "by_size": {
+    "tiny": {
+      "total": 2,
+      "resolved": 1
+    },
+    "medium": {
+      "total": 2,
+      "resolved": 2
+    }
+  },
+  "repos": [
+    {
+      "repo": "tiny-cli",
+      "size": "tiny",
+      "domain": "cli",
+      "real": true,
+      "state": "BLOCKED",
+      "attempts": 2,
+      "resolved": false,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "tiny-lib",
+      "size": "tiny",
+      "domain": "lib",
+      "real": true,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-cli",
+      "size": "medium",
+      "domain": "cli",
+      "real": true,
+      "state": "HANDOFF",
+      "attempts": 1,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    },
+    {
+      "repo": "medium-lib",
+      "size": "medium",
+      "domain": "lib",
+      "real": true,
+      "state": "HANDOFF",
+      "attempts": 2,
+      "resolved": true,
+      "eval_status": {
+        "optimization": 2,
+        "holdout": 0,
+        "candidate": 0,
+        "retired": 0
+      },
+      "eval_integrity": [],
+      "improve": {
+        "promoted": false,
+        "actionable": true,
+        "notes": [
+          "candidates: 3, 4, 5",
+          "offline: current 40% -> candidate 100%"
+        ]
+      }
+    }
+  ]
+}

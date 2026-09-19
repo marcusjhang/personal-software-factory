@@ -416,3 +416,49 @@ def test_status_json(tmp_path, capsys):
     # filtering by work id returns just that item
     assert main(base + ["status", work.id, "--json"]) == 0
     assert json.loads(capsys.readouterr().out) == items
+
+
+def test_review_revise_loops_back_to_build(tmp_path):
+    from psf.agents import AgentResult
+
+    class ReviseOnce(MockRunner):
+        def __init__(self):
+            self.reviews = 0
+
+        def run(self, task):
+            if task.role == "review":
+                self.reviews += 1
+                return AgentResult(True, {"decision": "revise" if self.reviews == 1 else "approve"})
+            return super().run(task)
+
+    f = make_factory(tmp_path, max_attempts=3)
+    res = Foreman(f, Workflow(EventLog(tmp_path / "r1.db")), ReviseOnce()).run("g")
+    assert res.work.state == "DONE"
+
+
+def test_always_revise_terminates_blocked(tmp_path):
+    from psf.agents import AgentResult
+
+    class AlwaysRevise(MockRunner):
+        def run(self, task):
+            if task.role == "review":
+                return AgentResult(True, {"decision": "revise", "notes": "still wrong: x"})
+            return super().run(task)
+
+    f = make_factory(tmp_path, max_attempts=2)
+    res = Foreman(f, Workflow(EventLog(tmp_path / "r2.db")), AlwaysRevise()).run("g", finish=False)
+    assert res.work.state == "BLOCKED"
+
+
+def test_empty_revise_is_not_a_blocker(tmp_path):
+    from psf.agents import AgentResult
+
+    class EmptyRevise(MockRunner):
+        def run(self, task):
+            if task.role == "review":
+                return AgentResult(True, {"decision": "revise", "notes": ""})
+            return super().run(task)
+
+    f = make_factory(tmp_path, max_attempts=2)
+    res = Foreman(f, Workflow(EventLog(tmp_path / "r3.db")), EmptyRevise()).run("g")
+    assert res.work.state == "DONE"

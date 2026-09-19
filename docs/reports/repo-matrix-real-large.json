@@ -1,0 +1,25 @@
+{
+  "total": 1,
+  "resolved": 1,
+  "resolve_rate": 1.0,
+  "by_size": {
+    "large": {
+      "total": 1,
+      "resolved": 1
+    }
+  },
+  "repos": [
+    {
+      "repo": "large-etl",
+      "size": "large",
+      "domain": "etl",
+      "mode": "real",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true,
+      "error": null,
+      "findings": []
+    }
+  ]
+}

@@ -102,10 +102,27 @@ def _set_feedback(*, mode: str | None = None, upstream: str | None = None,
 
 PROMPTS = {
     "triage": "You scope a goal: restate it, classify risk, and decide spec-first vs direct. Reply reject only for a non-goal.",
-    "spec": "You write a typed spec: title, desired behavior, non-goals, and acceptance criteria that a verifier can check.",
+    "spec": (
+        "You write a typed spec: title, desired behavior, non-goals, and acceptance criteria that a verifier can check.\n\n"
+        "Acceptance criteria must be behavioral and testable:\n"
+        "- Each criterion states an observable outcome: given input X, the system does Y (succeeds, rejects, returns, persists, a test passes). A verifier must be able to run it.\n"
+        "- Do not quote exact error, log, or message wording.\n"
+        "- Do not require internal fields, names, or structure the goal did not ask for.\n"
+        "- Do not require particular test cases, test names, or coverage counts. Ask that the project's tests pass; do not dictate which cases they contain.\n"
+        "- If a criterion cannot be stated behaviorally, drop it or record it as a non-goal."
+    ),
     "implement": "You make the smallest change that satisfies the spec in the given workspace. Report an artifact digest.",
-    "verify": "You independently reproduce and check the change against the frozen spec. You are not the implementer. Return pass/fail and findings.",
-    "review": "You assess quality, risk, and fit. Approve or send back with specific notes.",
+    "verify": (
+        "You independently reproduce and check the change against the frozen spec. You are not the implementer. Return pass/fail and findings.\n\n"
+        "Fail only on behavioral or acceptance failures: an acceptance criterion is not met, a test fails, the change does not do what the spec says, or it breaks existing behavior.\n\n"
+        "Cosmetic wording and incidental internal differences are advisory, never failures: exact error/log/message text, naming, formatting, file layout, and internal fields the spec did not require. Report them as findings prefixed \"advisory:\" and still pass.\n\n"
+        "Test-coverage completeness (which specific cases exist) is advisory unless the goal explicitly required those cases. If the tests pass and the behavior is correct, pass."
+    ),
+    "review": (
+        "You assess quality, risk, and fit against the spec. Approve or request changes.\n\n"
+        "Approve when the acceptance criteria are met and the project's tests pass. Do not request changes for style, naming, test-coverage preferences, or hypothetical improvements.\n\n"
+        "If you request changes, you MUST give concrete notes naming the defect and the fix. Never revise without actionable notes; if you cannot name a real defect, approve."
+    ),
 }
 
 
@@ -355,6 +372,30 @@ def cmd_feedback(args) -> int:
     return 0
 
 
+def cmd_eval_repos(args) -> int:
+    from .repobench import run_matrix
+
+    rep = run_matrix(
+        sizes=args.sizes.split(",") if args.sizes else None,
+        domains=args.domains.split(",") if args.domains else None,
+        mode=args.mode, root=args.root, claude_script=args.claude_script,
+    )
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+        return 0 if rep["resolve_rate"] == 1.0 else 1
+    print(f"mode={args.mode}  repos={rep['total']}  resolved={rep['resolved']} "
+          f"({rep['resolve_rate']:.0%})")
+    print("by size:", {k: f"{v['resolved']}/{v['total']}" for k, v in rep["by_size"].items()})
+    for r in rep["repos"]:
+        if not r["resolved"]:
+            print(f"  UNRESOLVED {r['repo']}  state={r['state']} attempts={r['attempts']}")
+    if args.out:
+        print(f"wrote {args.out}")
+    return 0 if rep["resolve_rate"] == 1.0 else 1
+
+
 def cmd_evals(args) -> int:
     from .evalgov import (add_candidate, approve_candidate, integrity, retire_case,
                           rotate_holdout, status as gov_status)
@@ -597,6 +638,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_gov)
+
+    s = sub.add_parser("eval-repos", help="multi-repo capability eval (sizes x domains)")
+    s.add_argument("--mode", choices=["process", "real"], default="process")
+    s.add_argument("--sizes", help="comma list: tiny,small,medium,large")
+    s.add_argument("--domains", help="comma list: cli,api,etl,lib,script")
+    s.add_argument("--claude-script", help="path to the claude runner script (real mode)")
+    s.add_argument("--root", help="root dir to build repos under")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_repos)
 
     s = sub.add_parser("evals", help="govern the eval suite: add / approve / rotate / retire / status")
     s.add_argument("action", choices=["add", "approve", "rotate", "retire", "status"])

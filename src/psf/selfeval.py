@@ -546,6 +546,31 @@ def eval_E26(tmp: Path) -> EvalResult:
                        "gates_unchanged": gates_after == before})
 
 
+def eval_E27(tmp: Path) -> EvalResult:
+    """A review that requests changes loops back to build and completes."""
+    from .agents import AgentResult, AgentTask, MockRunner
+
+    class ReviseOnce(MockRunner):
+        def __init__(self):
+            self.reviews = 0
+
+        def run(self, task: AgentTask) -> AgentResult:
+            if task.role == "review":
+                self.reviews += 1
+                if self.reviews == 1:
+                    return AgentResult(True, {"decision": "revise", "notes": "fix the return value"})
+                return AgentResult(True, {"decision": "approve"})
+            return super().run(task)
+
+    f = _write_factory(tmp / "e27", max_attempts=3)
+    log = EventLog(tmp / "e27.db")
+    res = Foreman(load_factory(f), Workflow(log), ReviseOnce()).run("needs a revision")
+    log.close()
+    ok = res.work.state == "DONE"
+    return EvalResult("E27", "review revise loops back to build", "pass" if ok else "fail",
+                      {"state": res.work.state})
+
+
 def run_self_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-selfeval-") as d:
@@ -553,7 +578,7 @@ def run_self_eval() -> dict:
         for fn in (eval_E1, eval_E2, eval_E3, eval_E4, eval_E5, eval_E6, eval_E7, eval_E8,
                    eval_E9, eval_E10, eval_E11, eval_E12, eval_E13, eval_E14, eval_E15,
                    eval_E16, eval_E17, eval_E18, eval_E19, eval_E20, eval_E21, eval_E22,
-                   eval_E23, eval_E24, eval_E25, eval_E26):
+                   eval_E23, eval_E24, eval_E25, eval_E26, eval_E27):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001 - an eval crashing is a failed eval

@@ -79,42 +79,54 @@ class Foreman:
         try:
             work = self.wf.transition(work, "BUILD", actor="foreman")
             findings: list[str] = []
+            # One delivery cycle: build -> verify (quorum) -> review. A review that
+            # requests changes loops back into build until it is approved or the
+            # retry budget is exhausted (BLOCKED).
             while True:
-                build = self.runner.run(AgentTask(
-                    "implement", goal, workspace=ws.path, attempt=work.attempts,
-                    feedback=findings,
-                    context={"spec": work.spec,
-                             "acceptance": (work.spec or {}).get("acceptance", [])},
-                ))
-                work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
-                                            summary=build.summary, actor="implement")
-                # Quorum: run the independent verifier N times; every run must pass.
-                passed, findings = True, []
-                for _ in range(self.factory.verify_quorum):
-                    verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
-                                                       context={"spec": work.spec}))
-                    passed = passed and bool(verify.output.get("passed", verify.ok))
-                    for f in verify.output.get("findings", []) or []:
-                        if f not in findings:
-                            findings.append(f)
-                work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
-                if work.state == "REVIEW":
+                while True:
+                    build = self.runner.run(AgentTask(
+                        "implement", goal, workspace=ws.path, attempt=work.attempts,
+                        feedback=findings,
+                        context={"spec": work.spec,
+                                 "acceptance": (work.spec or {}).get("acceptance", [])},
+                    ))
+                    work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
+                                                summary=build.summary, actor="implement")
+                    passed, findings = True, []
+                    for _ in range(self.factory.verify_quorum):
+                        verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
+                                                           context={"spec": work.spec}))
+                        passed = passed and bool(verify.output.get("passed", verify.ok))
+                        for f in verify.output.get("findings", []) or []:
+                            if f not in findings:
+                                findings.append(f)
+                    work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
+                    if work.state != "BUILD":
+                        break  # REVIEW (verified) or BLOCKED (budget)
+                if work.state != "REVIEW":
                     break
+                review = self.runner.run(AgentTask("review", goal,
+                                                   context={"artifact": work.artifact_digest,
+                                                            "spec": work.spec}))
+                decision = review.output.get("decision", "approve")
+                notes = str(review.output.get("notes", "") or "").strip()
+                # A rejection must be actionable. An empty/"revise" with no notes is
+                # not a valid rejection regardless of harness, so it does not block.
+                if decision != "approve" and not notes:
+                    findings.append("advisory: review requested changes without actionable notes; treated as approve")
+                    decision = "approve"
+                work = self.wf.record_review(work, decision, notes=notes, actor="review")
                 if work.state != "BUILD":
-                    break  # BLOCKED: retry budget exhausted
+                    break  # HANDOFF (approved) or BLOCKED (budget after revise)
             diff = ws.diff()
         finally:
             if not use_git:
                 ws.cleanup()
 
-        if work.state == "REVIEW":
-            review = self.runner.run(AgentTask("review", goal, context={"artifact": work.artifact_digest}))
-            decision = review.output.get("decision", "approve")
-            work = self.wf.record_review(work, decision, actor="review")
-            if work.state == "HANDOFF":
-                self.wf.log.append("HandoffProduced", {"diff": diff[:16000]}, actor="foreman", work_id=work.id)
-                if finish:
-                    work = self.wf.finish(work)
+        if work.state == "HANDOFF":
+            self.wf.log.append("HandoffProduced", {"diff": diff[:16000]}, actor="foreman", work_id=work.id)
+            if finish:
+                work = self.wf.finish(work)
 
         return RunResult(work, diff=diff,
                          verify_passed=bool(work.verification and work.verification.get("passed")),

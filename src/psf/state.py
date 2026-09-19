@@ -197,7 +197,10 @@ class Workflow:
     def record_review(self, work: WorkItem, decision: str, *, notes: str = "", actor: str) -> WorkItem:
         self.log.append("ReviewCompleted", {"decision": decision, "notes": notes}, actor=actor, work_id=work.id)
         work = self.fold(work.id)
-        to = "HANDOFF" if decision == "approve" else "BUILD"
+        if decision == "approve":
+            to = "HANDOFF"
+        else:
+            to = "BUILD" if work.attempts < work.max_attempts else "BLOCKED"
         return self.transition(work, to, actor=actor, reason="review")
 
     def finish(self, work: WorkItem, *, actor: str = "owner") -> WorkItem:

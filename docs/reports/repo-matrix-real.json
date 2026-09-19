@@ -1,0 +1,37 @@
+{
+  "total": 2,
+  "resolved": 1,
+  "resolve_rate": 0.5,
+  "by_size": {
+    "small": {
+      "total": 1,
+      "resolved": 1
+    },
+    "large": {
+      "total": 1,
+      "resolved": 0
+    }
+  },
+  "repos": [
+    {
+      "repo": "small-etl",
+      "size": "small",
+      "domain": "etl",
+      "mode": "real",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-etl",
+      "size": "large",
+      "domain": "etl",
+      "mode": "real",
+      "state": "BUILD",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": false
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "total": 20,
+  "resolved": 20,
+  "resolve_rate": 1.0,
+  "by_size": {
+    "tiny": {
+      "total": 5,
+      "resolved": 5
+    },
+    "small": {
+      "total": 5,
+      "resolved": 5
+    },
+    "medium": {
+      "total": 5,
+      "resolved": 5
+    },
+    "large": {
+      "total": 5,
+      "resolved": 5
+    }
+  },
+  "repos": [
+    {
+      "repo": "tiny-cli",
+      "size": "tiny",
+      "domain": "cli",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "tiny-api",
+      "size": "tiny",
+      "domain": "api",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "tiny-etl",
+      "size": "tiny",
+      "domain": "etl",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "tiny-lib",
+      "size": "tiny",
+      "domain": "lib",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "tiny-script",
+      "size": "tiny",
+      "domain": "script",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "small-cli",
+      "size": "small",
+      "domain": "cli",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "small-api",
+      "size": "small",
+      "domain": "api",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "small-etl",
+      "size": "small",
+      "domain": "etl",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "small-lib",
+      "size": "small",
+      "domain": "lib",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "small-script",
+      "size": "small",
+      "domain": "script",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "medium-cli",
+      "size": "medium",
+      "domain": "cli",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "medium-api",
+      "size": "medium",
+      "domain": "api",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "medium-etl",
+      "size": "medium",
+      "domain": "etl",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "medium-lib",
+      "size": "medium",
+      "domain": "lib",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "medium-script",
+      "size": "medium",
+      "domain": "script",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-cli",
+      "size": "large",
+      "domain": "cli",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-api",
+      "size": "large",
+      "domain": "api",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-etl",
+      "size": "large",
+      "domain": "etl",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-lib",
+      "size": "large",
+      "domain": "lib",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    },
+    {
+      "repo": "large-script",
+      "size": "large",
+      "domain": "script",
+      "mode": "process",
+      "state": "HANDOFF",
+      "attempts": 1,
+      "verify_passed": true,
+      "resolved": true
+    }
+  ]
+}
