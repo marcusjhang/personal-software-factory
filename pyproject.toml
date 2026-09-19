@@ -13,6 +13,9 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 psf = "psf.cli:main"
+personal-software-factory = "psf.cli:main"
+psf-agent-claude = "psf.adapters.claude:main_cli"
+psf-agent-opencode = "psf.adapters.opencode:main_cli"
 
 [build-system]
 requires = ["hatchling"]

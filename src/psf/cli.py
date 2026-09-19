@@ -295,6 +295,16 @@ def cmd_run(args) -> int:
         factory.classifier["provider"] = args.classifier
     if getattr(args, "supervise", False):
         factory.classifier.setdefault("supervisor", {})["enabled"] = True
+
+    # Harness override: `--harness claude|opencode [--model M]` -> subprocess runner.
+    harness = getattr(args, "harness", None)
+    if harness:
+        factory.runner = "subprocess"
+        cmd = [sys.executable, "-m", f"psf.adapters.{harness}"]
+        if getattr(args, "model", None):
+            cmd += ["--model", args.model]
+        factory.runner_options["command"] = cmd
+
     from .classifier import build_classifier
 
     classifier = build_classifier(factory.classifier) if factory.supervisor_enabled else None
@@ -700,6 +710,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--no-ask", action="store_true", help="do not prompt for the mode")
     s.add_argument("--classifier", choices=["mock", "jev"], help="advisory classifier provider")
     s.add_argument("--supervise", action="store_true", help="enable the advisory supervisor for this run")
+    s.add_argument("--harness", choices=["claude", "opencode"], help="coding-agent harness (sets the subprocess runner)")
+    s.add_argument("--model", help="model id for the harness (e.g. deepseek/deepseek-v4-pro)")
     s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("mode", help="show or set autonomy mode (hitl | yolo); switchable anytime")

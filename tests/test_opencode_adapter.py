@@ -1,23 +1,37 @@
-import importlib.util
-from pathlib import Path
-
-_SPEC = importlib.util.spec_from_file_location(
-    "psf_agent_opencode", Path(__file__).resolve().parents[1] / "scripts" / "psf_agent_opencode.py")
-mod = importlib.util.module_from_spec(_SPEC)
-_SPEC.loader.exec_module(mod)
+from psf.adapters import common
 
 
 def test_last_json():
-    assert mod.last_json('noise\n{"a": 1}') == {"a": 1}
-    assert mod.last_json("nothing") is None
+    assert common.last_json('noise\n{"a": 1}') == {"a": 1}
+    assert common.last_json("nothing") is None
 
 
 def test_build_prompt_uses_factory_prompt():
-    p = mod.build_prompt({"role": "verify", "goal": "g",
-                          "context": {"prompt": "CUSTOM VERIFY POLICY", "spec": {"title": "t"}}})
+    p = common.build_prompt({"role": "verify", "goal": "g",
+                             "context": {"prompt": "CUSTOM VERIFY POLICY", "spec": {"title": "t"}}})
     assert "CUSTOM VERIFY POLICY" in p and "passed" in p and "Goal: g" in p
 
 
 def test_implement_prompt_asks_for_summary():
-    p = mod.build_prompt({"role": "implement", "goal": "g", "context": {}})
+    p = common.build_prompt({"role": "implement", "goal": "g", "context": {}})
     assert "SUMMARY:" in p and "IMPLEMENT" in p
+
+
+def test_command_claude_and_opencode():
+    c = common.command("claude", "do x", "/ws", "sonnet")
+    assert c[0] == "claude" and "-p" in c and "acceptEdits" in c and c[-2:] == ["--model", "sonnet"]
+    o = common.command("opencode", "do x", "/ws", "deepseek/deepseek-v4-pro")
+    assert o[:3] == ["opencode", "run", "--dir"] and "deepseek/deepseek-v4-pro" in o and "--auto" in o
+
+
+def test_unknown_harness_rejected():
+    try:
+        common.command("nope", "x", "/ws", None)
+        assert False
+    except ValueError:
+        pass
+
+
+def test_adapter_modules_import():
+    from psf.adapters import claude, opencode  # noqa: F401
+    assert hasattr(claude, "main_cli") and hasattr(opencode, "main_cli")

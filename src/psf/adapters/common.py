@@ -1,0 +1,134 @@
+"""Shared runner-adapter core, harness-agnostic.
+
+One implementation of the PSF runner protocol used by the Claude Code and
+opencode (DeepSeek) backends. It builds the role prompt (using the factory's
+`factory/agents/*.md` text passed in the task context), invokes the harness
+non-interactively in the workspace, and returns the typed AgentResult.
+
+Harnesses are selected by name; the command construction is the only difference.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import pathlib
+import subprocess
+import sys
+
+DEFAULT_MODEL = {
+    "claude": "sonnet",
+    "opencode": "deepseek/deepseek-flash",
+}
+
+# Tools the Claude harness may use (edits + running tests), no network surprises.
+CLAUDE_TOOLS = ["Bash", "Edit", "Write", "Read", "Glob", "Grep"]
+
+
+def emit(ok, output=None, summary=""):
+    print(json.dumps({"ok": ok, "output": output or {}, "summary": summary}))
+    sys.exit(0)
+
+
+def last_json(text: str):
+    for line in reversed(text.splitlines()):
+        line = line.strip()
+        if line.startswith("{") and line.endswith("}"):
+            try:
+                return json.loads(line)
+            except ValueError:
+                continue
+    return None
+
+
+def tree_digest(ws: str):
+    files = {str(p.relative_to(ws)): hashlib.sha256(p.read_bytes()).hexdigest()
+             for p in pathlib.Path(ws).rglob("*")
+             if p.is_file() and ".git" not in p.parts}
+    return "sha256:" + hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest(), list(files)
+
+
+def build_prompt(task: dict) -> str:
+    """Compose the role prompt: factory prompt (if provided) + goal + context."""
+    role = task["role"]
+    goal = task["goal"]
+    ctx = task.get("context") or {}
+    base = (ctx.get("prompt") or "").strip() or f"You are the {role.upper()} agent in a software factory."
+    parts = [base, f"Goal: {goal}"]
+    if ctx.get("spec"):
+        parts.append("Spec: " + json.dumps(ctx["spec"])[:2000])
+    if ctx.get("acceptance"):
+        parts.append("Acceptance: " + json.dumps(ctx["acceptance"])[:1500])
+    if task.get("feedback"):
+        parts.append("Prior feedback: " + "; ".join(map(str, task["feedback"]))[:1500])
+    if role == "triage":
+        parts.append('End with exactly one JSON line: {"decision":"spec"} (or "reject").')
+    elif role == "spec":
+        parts.append('End with exactly one JSON line: {"title": "...", "body": "...", "acceptance": ["..."]}.')
+    elif role == "verify":
+        parts.append('Inspect the current directory and end with exactly one JSON line: '
+                     '{"passed": true|false, "findings": ["..."]}.')
+    elif role == "review":
+        parts.append('End with exactly one JSON line: '
+                     '{"decision":"approve"|"revise", "notes":"...", "blocking": true|false}.')
+    elif role == "implement":
+        parts.append("Make the smallest correct change in the current directory. Do not commit. "
+                     "End with a line: SUMMARY: <one sentence>.")
+    return "\n\n".join(parts)
+
+
+def command(harness: str, prompt: str, ws: str, model: str | None) -> list[str]:
+    if harness == "claude":
+        cmd = ["claude", "-p", prompt, "--permission-mode", "acceptEdits",
+               "--allowedTools", *CLAUDE_TOOLS]
+        if model:
+            cmd += ["--model", model]
+        return cmd
+    if harness == "opencode":
+        return ["opencode", "run", "--dir", ws, "--auto",
+                "--model", model or DEFAULT_MODEL["opencode"], prompt]
+    raise ValueError(f"unknown harness: {harness}")
+
+
+def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int = 900,
+             runner=subprocess.run):
+    ws = task.get("workspace") or os.getcwd()
+    cmd = command(harness, build_prompt(task), ws, model)
+    p = runner(cmd, capture_output=True, text=True, timeout=timeout, cwd=ws)
+    return ws, p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip()
+
+
+def handle(task: dict, harness: str, *, model: str | None = None, timeout: int = 900) -> None:
+    role = task["role"]
+    ws, rc, out, err = run_task(task, harness, model=model, timeout=timeout)
+    if role == "implement":
+        digest, files = tree_digest(ws)
+        emit(rc == 0, {"artifact_digest": digest, "files": files},
+             out.strip().splitlines()[-1] if out.strip() else err[-200:])
+    data = last_json(out)
+    if role == "triage":
+        emit(True, data or {"decision": "spec"}, out[-200:])
+    if role == "spec":
+        emit(True, data or {"title": task["goal"], "body": out[:500], "acceptance": []}, out[-200:])
+    if role == "verify":
+        passed = bool((data or {}).get("passed"))
+        emit(passed, {"passed": passed, "findings": (data or {}).get("findings", [])}, out[-200:])
+    if role == "review":
+        emit(True, data or {"decision": "approve"}, out[-200:])
+    emit(False, {}, f"unknown role {role}")
+
+
+def main(harness: str, argv: list[str] | None = None) -> None:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    model = None
+    timeout = int(os.environ.get("PSF_TIMEOUT", "900"))
+    for i, a in enumerate(argv):
+        if a in ("--model", "-m") and i + 1 < len(argv):
+            model = argv[i + 1]
+        if a == "--timeout" and i + 1 < len(argv):
+            timeout = int(argv[i + 1])
+    if model is None:
+        model = os.environ.get("PSF_MODEL") or None
+    task = json.load(sys.stdin)
+    handle(task, harness, model=model, timeout=timeout)

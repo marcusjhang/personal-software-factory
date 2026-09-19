@@ -111,20 +111,26 @@ psf improve                                  # governed, human-gated improvement
 psf feedback export                          # privacy-filtered usage envelope
 ```
 
-Bring a real model:
+Bring a real model — pick a harness with one flag (installed adapters):
 
 ```bash
-# Claude Code
-psf run --git --runner subprocess \
-  --command "python3 scripts/psf_agent_claude.py" "your goal here"
+# Claude Code (default model: sonnet)
+psf run --git --harness claude "your goal here"
 
 # opencode + DeepSeek (any opencode model)
-PSF_OPENCODE_MODEL=deepseek/deepseek-v4-pro psf run --git --runner subprocess \
-  --command "python3 scripts/psf_agent_opencode.py" "your goal here"
+psf run --git --harness opencode --model deepseek/deepseek-v4-pro "your goal here"
 ```
 
-The adapters use your `factory/agents/*.md` prompts (passed per role), so editing
-those changes how the agents behave.
+Equivalent lower-level form (BYO command):
+
+```bash
+psf run --git --runner subprocess --command "psf-agent-claude" "your goal"
+psf run --git --runner subprocess --command "psf-agent-opencode --model deepseek/deepseek-v4-pro" "your goal"
+```
+
+Both adapters share one implementation (`psf.adapters.common`) and use your
+`factory/agents/*.md` prompts (passed per role), so editing those changes how the
+agents behave. Pin a harness per repo via `factory.yml` `runnerOptions.command`.
 
 ## The factory loop
 
