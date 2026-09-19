@@ -5,7 +5,7 @@ from psf.supveval import run_supervisor_eval
 
 def test_supervisor_eval_suite():
     rep = run_supervisor_eval()
-    assert rep["total"] == 8
+    assert rep["total"] == 16
     assert rep["failed"] == 0, rep["issues"]
 
 

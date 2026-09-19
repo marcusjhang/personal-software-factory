@@ -38,6 +38,13 @@ limits:
 feedback:
   upstream: {upstream}
   mode: "{fb_mode}"          # off | hint | auto; change anytime with `psf feedback opt-out|opt-in`
+classifier:
+  provider: "mock"          # mock | jev (TypeSafe). Advisory only.
+  supervisor:
+    enabled: false           # opt-in: watch a worker and steer/stop/retry
+    thresholds: {needs_human: 0.80, off_track: 0.80, stuck: 0.80, progress: 0.40}
+    max_steers: 1
+    max_retries: 1
 """
 
 AGENTS_MD = """# AGENTS.md — how agents should use this repository
@@ -263,11 +270,20 @@ def cmd_run(args) -> int:
     factory.mode = mode
     log.append("ModeSelected", {"mode": mode, "surface": "run"}, actor="owner")
 
+    # Classifier / supervisor overrides (advisory only).
+    if getattr(args, "classifier", None):
+        factory.classifier["provider"] = args.classifier
+    if getattr(args, "supervise", False):
+        factory.classifier.setdefault("supervisor", {})["enabled"] = True
+    from .classifier import build_classifier
+
+    classifier = build_classifier(factory.classifier) if factory.supervisor_enabled else None
+
     repo = Path.cwd() if args.git else None
     from .durability import Durability
 
     durability = Durability(Path(args.ledger).with_name("durability.db"))
-    result = Foreman(factory, wf, durability=durability).run(
+    result = Foreman(factory, wf, durability=durability, classifier=classifier).run(
         args.goal, approve=not args.no_approve, finish=args.finish,
         repo=repo, use_git=args.git,
     )
@@ -369,6 +385,17 @@ def cmd_feedback(args) -> int:
         print(f"ingested {n} envelope(s)")
     else:  # report
         print(json.dumps(report(".psf/feedback/inbox"), indent=2))
+    return 0
+
+
+def cmd_calibrate(args) -> int:
+    from .calibrate import records_from_ledger, reliability, sweep
+
+    _, log, _ = _load(args)
+    recs = records_from_ledger(log, question=args.question)
+    rep = {"question": args.question, "n": len(recs), "sweep": sweep(recs),
+           "reliability": reliability(recs)}
+    print(json.dumps(rep, indent=2))
     return 0
 
 
@@ -651,6 +678,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--github", action="store_true", help="publish the handoff as a draft GitHub PR (needs gh)")
     s.add_argument("--mode", choices=["hitl", "yolo"], help="autonomy for this run (overrides the factory default)")
     s.add_argument("--no-ask", action="store_true", help="do not prompt for the mode")
+    s.add_argument("--classifier", choices=["mock", "jev"], help="advisory classifier provider")
+    s.add_argument("--supervise", action="store_true", help="enable the advisory supervisor for this run")
     s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("mode", help="show or set autonomy mode (hitl | yolo); switchable anytime")
@@ -701,6 +730,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_supervisor)
+
+    s = sub.add_parser("calibrate", help="calibrate classifier thresholds from recorded outcomes")
+    s.add_argument("--question", default="worker_stuck")
+    s.set_defaults(func=cmd_calibrate)
 
     s = sub.add_parser("evals", help="govern the eval suite: add / approve / rotate / retire / status")
     s.add_argument("action", choices=["add", "approve", "rotate", "retire", "status"])

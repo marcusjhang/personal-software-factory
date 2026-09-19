@@ -12,8 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .agents import AgentTask, Runner, build_runner
+from .classifier import Classifier, build_classifier
 from .schema import Factory
 from .state import GateError, WorkItem, Workflow
+from .supervisor import SupervisorState, evidence_bundle, supervise_step
 from .workspace import Workspace
 
 LEASE_TTL_SECONDS = 3600
@@ -29,11 +31,15 @@ class RunResult:
 
 class Foreman:
     def __init__(self, factory: Factory, workflow: Workflow, runner: Runner | None = None,
-                 durability=None):
+                 durability=None, classifier: Classifier | None = None):
         self.factory = factory
         self.wf = workflow
         self.runner = runner or build_runner(factory)
         self.durability = durability  # optional Durability: lease + effect ledger
+        self.classifier = classifier
+        if self.classifier is None and factory.supervisor_enabled:
+            self.classifier = build_classifier(factory.classifier)
+        self._sup_state: SupervisorState | None = None
 
     def run(self, goal: str, *, work_id: str | None = None, approve: bool = True,
             repo: str | Path | None = None, use_git: bool = False, finish: bool = True) -> RunResult:
@@ -101,8 +107,10 @@ class Foreman:
                             if f not in findings:
                                 findings.append(f)
                     work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
+                    if work.state == "BUILD" and self.classifier is not None:
+                        work, findings = self._supervise(work, goal, ws, findings)
                     if work.state != "BUILD":
-                        break  # REVIEW (verified) or BLOCKED (budget)
+                        break  # REVIEW (verified) or BLOCKED (budget/supervisor)
                 if work.state != "REVIEW":
                     break
                 review = self.runner.run(AgentTask("review", goal,
@@ -134,3 +142,43 @@ class Foreman:
         return RunResult(work, diff=diff,
                          verify_passed=bool(work.verification and work.verification.get("passed")),
                          findings=findings)
+
+    def _supervise(self, work: WorkItem, goal: str, ws: Workspace, findings: list[str]) -> tuple[WorkItem, list[str]]:
+        """Consult the advisory supervisor before a retry; record and act on it."""
+        cfg = self.factory.supervisor_config
+        if self._sup_state is None:
+            self._sup_state = SupervisorState(
+                max_steers=int(cfg.get("max_steers", 1)),
+                max_retries=int(cfg.get("max_retries", 1)),
+            )
+        st = self._sup_state
+        evidence = evidence_bundle(goal=goal, status=work.state, diff=ws.diff(),
+                                   output_tail="; ".join(findings)[:2000],
+                                   events=[f"attempt {work.attempts}"])
+        d = supervise_step(self.classifier, evidence, st, cfg.get("thresholds"))
+        self.wf.log.append(
+            "SupervisorAssessed",
+            {"action": d.action, "reason": d.reason,
+             "answers": {k: getattr(v, "value", None) for k, v in (d.answers or {}).items()}},
+            actor="supervisor", work_id=work.id)
+        if d.action == "STEER":
+            st.steers += 1
+            st.last_action = "STEER"
+            msg = f"supervisor: steer ({d.reason}) — address the verification findings"
+            findings = findings + [msg]
+            # optional live steering: a runner may support mid-run guidance
+            if hasattr(self.runner, "steer"):
+                try:
+                    self.runner.steer(msg)  # type: ignore[attr-defined]
+                except Exception:  # noqa: BLE001 - steering is best-effort, advisory
+                    pass
+            self.wf.log.append("WorkerSteered", {"steers": st.steers}, actor="supervisor", work_id=work.id)
+        elif d.action == "RETRY":
+            st.retries += 1
+            st.last_action = "RETRY"
+            self.wf.log.append("WorkerRetried", {"retries": st.retries}, actor="supervisor", work_id=work.id)
+        elif d.action in ("STOP", "ESCALATE"):
+            self.wf.log.append("WorkerStopped" if d.action == "STOP" else "Escalated",
+                               {"reason": d.reason}, actor="supervisor", work_id=work.id)
+            work = self.wf.transition(work, "BLOCKED", actor="supervisor", reason=f"supervisor:{d.reason}")
+        return work, findings

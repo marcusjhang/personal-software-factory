@@ -246,8 +246,18 @@ authority (it agrees: "Jev only assesses"), or couple the core to Codex types.
 - **P1 — DONE.** `JevClassifier` verified against real TypeSafe Jev
   (`TYPESAFE_API_KEY` in env; `typesafe-sdk` in `.jev-venv`). One batched call
   returns typed answers and drives the supervisor (`CONTINUE`). Still advisory.
-- **P2–P4 — planned.** Supervisor wired into the foreman's build loop; optional
-  Codex App Server steering; calibration harness and confidence-gated routing.
+- **P2 — DONE.** Supervisor wired into the foreman build loop (`_supervise`):
+  on a retry it assembles bounded evidence, asks the classifier, records
+  `SupervisorAssessed`, and acts — `STEER` (guidance into the next attempt),
+  `RETRY`, `STOP`/`ESCALATE` → `BLOCKED`. Enabled per factory/`--supervise`.
+- **P3 — DONE as an interface.** Steering is delivered as guidance into the next
+  attempt, plus an optional `runner.steer(msg)` hook for live mid-run transports
+  (a Codex App Server adapter is the documented future transport; the core stays
+  transport-agnostic).
+- **P4 — DONE.** `src/psf/calibrate.py` + `psf calibrate` (threshold sweep,
+  reliability/ECE, records derived from the ledger).
+- **Evals:** **S1–S13 + C1–C3 (16/16)** offline via Mock; real Jev exercised
+  through the foreman.
 
 Real-Jev smoke (advisory only):
 
@@ -256,6 +266,11 @@ questions: worker_stuck, work_off_track, meaningful_progress, needs_human
 answers:   0.16, 0.15, 0.77, 0.15      (one batched call)
 decision:  CONTINUE
 ```
+
+**F11 (finding):** with shallow evidence, real Jev judged failing attempts as
+`CONTINUE` (did not flag stuck). The deterministic retry budget still blocked the
+item — *advisory-only held*. Calibration (P4) plus richer evidence is the fix,
+not letting Jev decide.
 
 
 ## 12. Deliverables / acceptance

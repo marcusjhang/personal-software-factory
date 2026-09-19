@@ -219,3 +219,26 @@ no Docker daemon running in this environment. `pip install .` remains verified.
 
 
 
+
+---
+
+## Round 7 — Jev + supervisor (P0–P4)
+
+Implemented the Jev (TypeSafe) advisory layer end to end (plan: `docs/PLAN-JEV.md`):
+classifier interface (`mock`/`jev`), the supervisor wired into the foreman with
+ledger events, an optional steering hook, and a calibration module.
+
+| eval | result |
+|---|---|
+| S1–S13 (advisory-only, stuck detection, bounded/no-oscillation, uncertainty, fail-closed, privacy, cost, integration, steering, disabled-default, no-self-finish, cost bound) | **13/13** |
+| C1–C3 (threshold sweep, reliability/ECE, records-from-ledger) | **3/3** |
+| Real Jev through the foreman | verified (advisory) |
+
+| run | self | gov | supervisor | process | repos | tests |
+|---|---|---|---|---|---|---|
+| — | 27/27 | 8/8 | **16/16** | 3 findings | 20/20 | **47** |
+
+**F11 — real Jev under-flagged failures on shallow evidence.** With limited
+evidence, Jev returned `CONTINUE` for failing attempts; the deterministic budget
+still `BLOCKED` (advisory-only held, no harm). Fix path: calibration + richer
+evidence, never granting Jev authority.

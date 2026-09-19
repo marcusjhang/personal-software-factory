@@ -26,6 +26,7 @@ ALLOWED_TOP_KEYS = {
     "limits",
     "feedback",
     "mode",
+    "classifier",
 }
 MODES = ("hitl", "yolo")
 ALLOWED_AGENT_KEYS = {"prompt", "command", "model", "description"}
@@ -57,11 +58,24 @@ class Factory:
     limits: dict[str, Any] = field(default_factory=dict)
     feedback: dict[str, Any] = field(default_factory=dict)
     mode: str = "hitl"  # hitl = human in the loop; yolo = human out (autonomous)
+    classifier: dict[str, Any] = field(default_factory=dict)
     description: str = ""
 
     @property
     def autonomous(self) -> bool:
         return self.mode == "yolo"
+
+    @property
+    def classifier_provider(self) -> str:
+        return self.classifier.get("provider", "mock")
+
+    @property
+    def supervisor_enabled(self) -> bool:
+        return bool((self.classifier.get("supervisor") or {}).get("enabled", False))
+
+    @property
+    def supervisor_config(self) -> dict[str, Any]:
+        return self.classifier.get("supervisor") or {}
 
     @property
     def max_attempts(self) -> int:
@@ -124,6 +138,7 @@ def _build(raw: dict[str, Any], path: Path) -> Factory:
         limits=raw.get("limits") or {},
         feedback=raw.get("feedback") or {},
         mode=raw.get("mode", "hitl"),
+        classifier=raw.get("classifier") or {},
         description=raw.get("description", ""),
     )
 
@@ -188,4 +203,20 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
             errors.append("feedback.publish must be a boolean")
         if "mode" in feedback and feedback["mode"] not in ("off", "hint", "auto"):
             errors.append("feedback.mode must be one of: off, hint, auto")
+
+    classifier = raw.get("classifier") or {}
+    if not isinstance(classifier, dict):
+        errors.append("classifier must be a mapping")
+    else:
+        if "provider" in classifier and classifier["provider"] not in ("mock", "jev"):
+            errors.append("classifier.provider must be one of: mock, jev")
+        sup = classifier.get("supervisor") or {}
+        if not isinstance(sup, dict):
+            errors.append("classifier.supervisor must be a mapping")
+        else:
+            if "enabled" in sup and not isinstance(sup["enabled"], bool):
+                errors.append("classifier.supervisor.enabled must be a boolean")
+            th = sup.get("thresholds") or {}
+            if not isinstance(th, dict) or any(not isinstance(v, (int, float)) for v in th.values()):
+                errors.append("classifier.supervisor.thresholds must be a mapping of numbers")
     return errors
