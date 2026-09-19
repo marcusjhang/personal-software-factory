@@ -58,17 +58,24 @@ class Foreman:
             if self.durability is not None and epoch is not None:
                 self.durability.release(work.id, owner, epoch)
 
+    def _role_prompt(self, role: str) -> str:
+        try:
+            return self.factory.agent(role).prompt or ""
+        except Exception:  # noqa: BLE001 - optional; factories may omit roles
+            return ""
+
     def _run(self, work: WorkItem, goal: str, *, approve: bool, repo, use_git: bool,
              finish: bool) -> RunResult:
         work = self.wf.transition(work, "TRIAGE", actor="foreman")
 
-        triage = self.runner.run(AgentTask("triage", goal))
+        triage = self.runner.run(AgentTask("triage", goal,
+                                           context={"prompt": self._role_prompt("triage")}))
         if not triage.ok or triage.output.get("decision") == "reject":
             work = self.wf.transition(work, "REJECTED", actor="foreman", reason="triage rejected")
             return RunResult(work)
 
         work = self.wf.transition(work, "SPEC", actor="foreman")
-        spec_res = self.runner.run(AgentTask("spec", goal))
+        spec_res = self.runner.run(AgentTask("spec", goal, context={"prompt": self._role_prompt("spec")}))
         spec = spec_res.output or {"title": goal}
         work = self.wf.record_spec(work, spec, actor="spec")
 
@@ -94,14 +101,16 @@ class Foreman:
                         "implement", goal, workspace=ws.path, attempt=work.attempts,
                         feedback=findings,
                         context={"spec": work.spec,
-                                 "acceptance": (work.spec or {}).get("acceptance", [])},
+                                 "acceptance": (work.spec or {}).get("acceptance", []),
+                                 "prompt": self._role_prompt("implement")},
                     ))
                     work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
                                                 summary=build.summary, actor="implement")
                     passed, findings = True, []
                     for _ in range(self.factory.verify_quorum):
                         verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
-                                                           context={"spec": work.spec}))
+                                                           context={"spec": work.spec,
+                                                                    "prompt": self._role_prompt("verify")}))
                         passed = passed and bool(verify.output.get("passed", verify.ok))
                         for f in verify.output.get("findings", []) or []:
                             if f not in findings:
@@ -115,7 +124,8 @@ class Foreman:
                     break
                 review = self.runner.run(AgentTask("review", goal,
                                                    context={"artifact": work.artifact_digest,
-                                                            "spec": work.spec}))
+                                                            "spec": work.spec,
+                                                            "prompt": self._role_prompt("review")}))
                 decision = review.output.get("decision", "approve")
                 notes = str(review.output.get("notes", "") or "").strip()
                 blocking = bool(review.output.get("blocking", False))

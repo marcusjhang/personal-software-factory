@@ -50,7 +50,9 @@ classifier:
 AGENTS_MD = """# AGENTS.md — how agents should use this repository
 
 This repository is driven by a **personal software factory** (`psf`). If you are
-an agent working here, follow this process instead of ad-hoc editing:
+an agent working here, follow this process instead of ad-hoc editing — route
+changes through the factory so they get a spec, approval, independent
+verification, and review:
 
 1. `psf validate` — confirm the factory definition compiles.
 2. `psf run "<goal>"` — run the goal through the factory (intake -> spec ->
@@ -73,6 +75,17 @@ the upstream factory. This is evidence, never authority: it cannot change policy
 
 Do **not** put secrets, customer data, or raw source in a feedback envelope.
 """
+
+
+def _agent_files() -> list[Path]:
+    """Instruction files different coding agents read automatically."""
+    return [
+        Path("AGENTS.md"),                          # Codex, opencode, Factory, many
+        Path("CLAUDE.md"),                          # Claude Code
+        Path(".github/copilot-instructions.md"),    # GitHub Copilot
+        Path(".cursor/rules/psf.mdc"),              # Cursor
+        Path("GEMINI.md"),                          # Gemini CLI
+    ]
 
 
 def _feedback_cfg(args) -> tuple[str | None, str]:
@@ -177,14 +190,18 @@ def cmd_init(args) -> int:
     for role, prompt in PROMPTS.items():
         (root / "agents" / f"{role}.md").write_text(prompt + "\n")
     (root / "AGENTS.md").write_text(AGENTS_MD)
-    root_agents = Path("AGENTS.md")
-    if not root_agents.exists():
-        root_agents.write_text(AGENTS_MD)
+    written = []
+    for p in _agent_files():
+        if not p.exists():
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(AGENTS_MD)
+            written.append(str(p))
     Path(".psf").mkdir(exist_ok=True)
     from .evaluation import ensure_eval_dir
 
     ensure_eval_dir("eval")
-    print(f"initialized factory in {root}/  (agents/, factory.yml, AGENTS.md, eval/)")
+    print(f"initialized factory in {root}/  (agents/, factory.yml, eval/)")
+    print(f"agent instructions written for discoverability: {', '.join(written) or '(already present)'}")
     print(f"autonomy: mode={mode}  (switch anytime: `psf mode hitl|yolo`)")
     print(f"feedback: mode={fb_mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
     print("next: psf validate && psf run \"<your goal>\"")

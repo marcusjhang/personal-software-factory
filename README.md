@@ -114,9 +114,17 @@ psf feedback export                          # privacy-filtered usage envelope
 Bring a real model:
 
 ```bash
+# Claude Code
 psf run --git --runner subprocess \
   --command "python3 scripts/psf_agent_claude.py" "your goal here"
+
+# opencode + DeepSeek (any opencode model)
+PSF_OPENCODE_MODEL=deepseek/deepseek-v4-pro psf run --git --runner subprocess \
+  --command "python3 scripts/psf_agent_opencode.py" "your goal here"
 ```
+
+The adapters use your `factory/agents/*.md` prompts (passed per role), so editing
+those changes how the agents behave.
 
 ## The factory loop
 
