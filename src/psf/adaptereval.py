@@ -100,11 +100,39 @@ def eval_A4(tmp: Path) -> EvalResult:
                       {"prompt_used": "FACTORY SPEC POLICY" in p, "unknown_rejected": rejected})
 
 
+def eval_A5(tmp: Path) -> EvalResult:
+    """One normalized permission profile maps consistently across harnesses."""
+    cl_safe = common.command("claude", "p", "/ws", None, permissions="safe")
+    cl_full = common.command("claude", "p", "/ws", None, permissions="full")
+    cx_safe = common.command("codex", "p", "/ws", None, permissions="safe")
+    cx_full = common.command("codex", "p", "/ws", None, permissions="full")
+    op_safe = common.command("opencode", "p", "/ws", None, permissions="safe")
+    op_ws = common.command("opencode", "p", "/ws", None, permissions="workspace")
+    bad = False
+    try:
+        common.command("codex", "p", "/ws", None, permissions="nope")
+    except ValueError:
+        bad = True
+    ok = ("default" in cl_safe and "--dangerously-skip-permissions" in cl_full
+          and "read-only" in cx_safe and "--dangerously-bypass-approvals-and-sandbox" in cx_full
+          and "--auto" not in op_safe and "--auto" in op_ws and bad)
+    return EvalResult("A5", "permission profile mapping", "pass" if ok else "fail",
+                      {"claude_safe": cl_safe[3:6], "codex_safe": cx_safe[-3:], "op_safe_auto": "--auto" in op_safe})
+
+
+def eval_A6(tmp: Path) -> EvalResult:
+    """Capability manifest advertises what each harness supports."""
+    caps = {h: common.capabilities(h) for h in ("claude", "opencode", "codex")}
+    ok = (caps["opencode"].get("acp") is True and "sandbox" in caps["codex"]
+          and caps["claude"].get("approvals") == "prompt")
+    return EvalResult("A6", "capability manifest", "pass" if ok else "fail", caps)
+
+
 def run_adapter_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-adapt-") as d:
         tmp = Path(d)
-        for fn in (eval_A1, eval_A2, eval_A3, eval_A4):
+        for fn in (eval_A1, eval_A2, eval_A3, eval_A4, eval_A5, eval_A6):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

@@ -122,6 +122,10 @@ psf run --git --harness opencode --model deepseek/deepseek-v4-pro "your goal her
 
 # Codex CLI
 psf run --git --harness codex "your goal here"
+
+# one normalized autonomy profile maps to each harness's flags:
+psf run --git --harness opencode --permissions safe "goal"     # read-only intent
+psf run --git --harness codex --permissions full "goal"        # bypass approvals (dangerous)
 ```
 
 Equivalent lower-level form (BYO command):
@@ -176,6 +180,7 @@ deploys on its own.
 - [docs/EVAL-GOVERNANCE.md](./docs/EVAL-GOVERNANCE.md) — how the eval suite grows safely
 - [docs/PLAN-JEV.md](./docs/PLAN-JEV.md) — plan for Jev (TypeSafe) + a live supervisor
 - [docs/COMPARISON.md](./docs/COMPARISON.md) — PSF vs Warp/Factory/Copilot/OpenHands/Claude Code
+- [docs/ADAPTERS-RESEARCH.md](./docs/ADAPTERS-RESEARCH.md) — harness abstraction + permission model (ACP, Cline, Codex)
 - [docs/EVAL-REPORT.md](./docs/EVAL-REPORT.md) — eval results and validated findings
 - [docs/FEEDBACK.md](./docs/FEEDBACK.md) — feeding usage from other projects back in
 - [LOGBOOK.md](./LOGBOOK.md) — chronological action log  ·  [docs/DIARY.md](./docs/DIARY.md) — reasoning and discoveries

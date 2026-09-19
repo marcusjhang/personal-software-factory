@@ -303,6 +303,9 @@ def cmd_run(args) -> int:
         cmd = [sys.executable, "-m", f"psf.adapters.{harness}"]
         if getattr(args, "model", None):
             cmd += ["--model", args.model]
+        perms = getattr(args, "permissions", None) or (factory.runner_options.get("permissions"))
+        if perms:
+            cmd += ["--permissions", perms]
         factory.runner_options["command"] = cmd
 
     from .classifier import build_classifier
@@ -729,6 +732,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--supervise", action="store_true", help="enable the advisory supervisor for this run")
     s.add_argument("--harness", choices=["claude", "opencode", "codex"], help="coding-agent harness (sets the subprocess runner)")
     s.add_argument("--model", help="model id for the harness (e.g. deepseek/deepseek-v4-pro)")
+    s.add_argument("--permissions", choices=["safe", "workspace", "full"], help="normalized autonomy profile for the harness")
     s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("mode", help="show or set autonomy mode (hitl | yolo); switchable anytime")

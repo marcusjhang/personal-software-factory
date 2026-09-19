@@ -25,6 +25,22 @@ DEFAULT_MODEL = {
 
 # Tools the Claude harness may use (edits + running tests), no network surprises.
 CLAUDE_TOOLS = ["Bash", "Edit", "Write", "Read", "Glob", "Grep"]
+CLAUDE_READONLY_TOOLS = ["Read", "Glob", "Grep"]
+
+PROFILES = ("safe", "workspace", "full")
+
+
+def capabilities(harness: str) -> dict:
+    """Advertised harness capabilities (mirrors ACP `initialize` negotiation)."""
+    return {
+        "claude": {"sandbox": "permission-modes", "approvals": "prompt",
+                   "steering": False, "streaming": False, "acp": False},
+        "opencode": {"sandbox": "none", "approvals": "auto",
+                     "steering": False, "streaming": False, "acp": True},
+        "codex": {"sandbox": "read-only|workspace-write|danger-full-access",
+                  "approvals": "approve-for-me|bypass", "steering": False,
+                  "streaming": True, "acp": False},
+    }.get(harness, {})
 
 
 def emit(ok, output=None, summary=""):
@@ -80,19 +96,32 @@ def build_prompt(task: dict) -> str:
 
 
 def command(harness: str, prompt: str, ws: str, model: str | None,
-            out_file: str | None = None) -> list[str]:
+            out_file: str | None = None, permissions: str = "workspace") -> list[str]:
+    if permissions not in PROFILES:
+        raise ValueError(f"unknown permissions profile: {permissions}")
     if harness == "claude":
-        cmd = ["claude", "-p", prompt, "--permission-mode", "acceptEdits",
-               "--allowedTools", *CLAUDE_TOOLS]
+        if permissions == "full":
+            cmd = ["claude", "-p", prompt, "--dangerously-skip-permissions"]
+        else:
+            mode = "acceptEdits" if permissions == "workspace" else "default"
+            tools = CLAUDE_READONLY_TOOLS if permissions == "safe" else CLAUDE_TOOLS
+            cmd = ["claude", "-p", prompt, "--permission-mode", mode, "--allowedTools", *tools]
         if model:
             cmd += ["--model", model]
         return cmd
     if harness == "opencode":
-        return ["opencode", "run", "--dir", ws, "--auto",
-                "--model", model or DEFAULT_MODEL["opencode"], prompt]
+        cmd = ["opencode", "run", "--dir", ws]
+        if permissions in ("workspace", "full"):
+            cmd += ["--auto"]
+        cmd += ["--model", model or DEFAULT_MODEL["opencode"], prompt]
+        return cmd
     if harness == "codex":
-        cmd = ["codex", "exec", "--cd", ws, "--skip-git-repo-check",
-               "--sandbox", "workspace-write"]
+        if permissions == "full":
+            cmd = ["codex", "exec", "--cd", ws, "--skip-git-repo-check",
+                   "--dangerously-bypass-approvals-and-sandbox"]
+        else:
+            sandbox = "read-only" if permissions == "safe" else "workspace-write"
+            cmd = ["codex", "exec", "--cd", ws, "--skip-git-repo-check", "--sandbox", sandbox]
         if model:
             cmd += ["-m", model]
         if out_file:
@@ -103,7 +132,7 @@ def command(harness: str, prompt: str, ws: str, model: str | None,
 
 
 def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int = 900,
-             runner=subprocess.run):
+             permissions: str = "workspace", runner=subprocess.run):
     ws = task.get("workspace") or os.getcwd()
     prompt = build_prompt(task)
     if harness == "codex":
@@ -112,7 +141,7 @@ def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int
         fd, out_file = tempfile.mkstemp(prefix="psf-codex-", suffix=".txt")
         os.close(fd)
         try:
-            cmd = command(harness, prompt, ws, model, out_file=out_file)
+            cmd = command(harness, prompt, ws, model, out_file=out_file, permissions=permissions)
             p = runner(cmd, input=prompt, capture_output=True, text=True, timeout=timeout, cwd=ws)
             try:
                 out = pathlib.Path(out_file).read_text().strip()
@@ -124,14 +153,15 @@ def run_task(task: dict, harness: str, *, model: str | None = None, timeout: int
                 os.unlink(out_file)
             except OSError:
                 pass
-    cmd = command(harness, prompt, ws, model)
+    cmd = command(harness, prompt, ws, model, permissions=permissions)
     p = runner(cmd, capture_output=True, text=True, timeout=timeout, cwd=ws)
     return ws, p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip()
 
 
-def handle(task: dict, harness: str, *, model: str | None = None, timeout: int = 900) -> None:
+def handle(task: dict, harness: str, *, model: str | None = None, timeout: int = 900,
+           permissions: str = "workspace") -> None:
     role = task["role"]
-    ws, rc, out, err = run_task(task, harness, model=model, timeout=timeout)
+    ws, rc, out, err = run_task(task, harness, model=model, timeout=timeout, permissions=permissions)
     if role == "implement":
         digest, files = tree_digest(ws)
         emit(rc == 0, {"artifact_digest": digest, "files": files},
@@ -152,13 +182,16 @@ def handle(task: dict, harness: str, *, model: str | None = None, timeout: int =
 def main(harness: str, argv: list[str] | None = None) -> None:
     argv = list(sys.argv[1:] if argv is None else argv)
     model = None
+    permissions = os.environ.get("PSF_PERMISSIONS", "workspace")
     timeout = int(os.environ.get("PSF_TIMEOUT", "900"))
     for i, a in enumerate(argv):
         if a in ("--model", "-m") and i + 1 < len(argv):
             model = argv[i + 1]
         if a == "--timeout" and i + 1 < len(argv):
             timeout = int(argv[i + 1])
+        if a == "--permissions" and i + 1 < len(argv):
+            permissions = argv[i + 1]
     if model is None:
         model = os.environ.get("PSF_MODEL") or None
     task = json.load(sys.stdin)
-    handle(task, harness, model=model, timeout=timeout)
+    handle(task, harness, model=model, timeout=timeout, permissions=permissions)
