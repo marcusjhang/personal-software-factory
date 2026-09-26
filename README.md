@@ -139,6 +139,13 @@ Both adapters share one implementation (`psf.adapters.common`) and use your
 `factory/agents/*.md` prompts (passed per role), so editing those changes how the
 agents behave. Pin a harness per repo via `factory.yml` `runnerOptions.command`.
 
+## Handoff and continuity
+
+`factory/` + `psf.lock.json` are tracked; `.psf/` (ledger, worktrees, leases) is
+local state, so a clone gets the process but not the run history. In-flight work is
+handed off as a `psf/<work-id>` branch / draft PR, not via the ledger. See
+[docs/HANDOFF.md](./docs/HANDOFF.md).
+
 ## Updating the factory
 
 Your `factory/` is repo-native; `psf` never rewrites it silently. Updates are an

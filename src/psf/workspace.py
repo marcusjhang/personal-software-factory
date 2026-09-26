@@ -13,6 +13,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+_SKIP_COPY = (".git", ".psf", "node_modules", ".venv", "venv", "__pycache__",
+              "dist", "build", ".mypy_cache", ".pytest_cache", ".tox", ".rag")
+
 
 class Workspace:
     def __init__(self, path: Path, *, is_temp: bool, branch: str | None = None, repo: Path | None = None):
@@ -23,7 +26,7 @@ class Workspace:
 
     @classmethod
     def create(cls, name: str, *, repo: str | Path | None = None, use_git: bool = False,
-               base: str = "HEAD") -> "Workspace":
+               base: str = "HEAD", seed_from: str | Path | None = None) -> "Workspace":
         if use_git and repo is not None:
             repo_path = Path(repo).resolve()
             branch = f"psf/{name}"
@@ -41,7 +44,16 @@ class Workspace:
             subprocess.run(["git", "worktree", "add", "-b", branch, str(path), base],
                            cwd=str(repo_path), check=True, capture_output=True, text=True, timeout=120)
             return cls(path, is_temp=False, branch=branch, repo=repo_path)
-        return cls(Path(tempfile.mkdtemp(prefix=f"psf-{name}-")), is_temp=True)
+        path = Path(tempfile.mkdtemp(prefix=f"psf-{name}-"))
+        # A deterministic gate (e.g. `pytest`) needs the project present. With a
+        # temp workspace (no --git), seed a copy of the repo so project-file
+        # commands have something to run against — this is the no-git quickstart.
+        if seed_from is not None:
+            src = Path(seed_from).resolve()
+            if src.is_dir():
+                shutil.copytree(src, path, dirs_exist_ok=True,
+                                ignore=shutil.ignore_patterns(*_SKIP_COPY))
+        return cls(path, is_temp=True)
 
     def diff(self) -> str:
         """Return a unified diff of the workspace (git) or a listing (temp)."""

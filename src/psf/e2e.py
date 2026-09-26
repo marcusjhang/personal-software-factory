@@ -339,12 +339,33 @@ def eval_X13(tmp: Path) -> EvalResult:
                        "bootstrapped": bootstrapped})
 
 
+def eval_X14(tmp: Path) -> EvalResult:
+    """verify_command works WITHOUT --git: the temp workspace is seeded from the repo (#7)."""
+    import yaml
+
+    d = _repo(tmp, "x14")
+    with _in(d):
+        _run_cli(["init", "--feedback", "off", "--mode", "yolo"])
+        (d / "seed_marker.txt").write_text("present\n")           # a project file
+        yml = d / "factory" / "factory.yml"
+        raw = yaml.safe_load(yml.read_text())
+        raw.setdefault("gates", {})["verify_command"] = (
+            "python3 -c \"import pathlib,sys; sys.exit(0 if pathlib.Path('seed_marker.txt').exists() else 1)\"")
+        raw["gates"]["verify_quorum"] = 1
+        yml.write_text(yaml.safe_dump(raw, sort_keys=False))
+        rc = _run_cli(["run", "--no-ask", "--mode", "yolo", "make a small change"])  # no --git
+        states, _ = _states(d)
+    ok = rc == 0 and states == ["DONE"]
+    return EvalResult("X14", "verify_command without --git (seeded workspace)",
+                      "pass" if ok else "fail", {"rc": rc, "states": states})
+
+
 def run_e2e() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-e2e-") as d:
         tmp = Path(d)
         for fn in (eval_X1, eval_X2, eval_X3, eval_X4, eval_X5, eval_X6, eval_X7,
-                   eval_X8, eval_X9, eval_X10, eval_X11, eval_X12, eval_X13):
+                   eval_X8, eval_X9, eval_X10, eval_X11, eval_X12, eval_X13, eval_X14):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

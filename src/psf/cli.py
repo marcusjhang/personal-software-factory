@@ -283,7 +283,7 @@ def cmd_run(args) -> int:
 
     classifier = build_classifier(factory.classifier) if factory.supervisor_enabled else None
 
-    repo = Path.cwd() if args.git else None
+    repo = Path.cwd()
     from .durability import Durability
 
     durability = Durability(Path(args.ledger).with_name("durability.db"))

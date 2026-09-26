@@ -176,10 +176,11 @@ class Workflow:
     def request_spec_changes(self, work: WorkItem, *, actor: str, reason: str = "") -> WorkItem:
         return self.transition(work, "SPEC", actor=actor, reason=reason or "changes requested")
 
-    def record_build(self, work: WorkItem, artifact_digest: str, *, summary: str = "", actor: str) -> WorkItem:
+    def record_build(self, work: WorkItem, artifact_digest: str, *, summary: str = "",
+                     ok: bool = True, actor: str) -> WorkItem:
         self.log.append(
             "BuildCompleted",
-            {"artifact_digest": artifact_digest, "summary": summary},
+            {"artifact_digest": artifact_digest, "summary": summary, "ok": ok},
             actor=actor, work_id=work.id,
         )
         return self.transition(self.fold(work.id), "VERIFY", actor=actor, reason="build complete")

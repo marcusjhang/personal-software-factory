@@ -192,7 +192,7 @@ def handle(task: dict, harness: str, *, model: str | None = None, timeout: int =
     ws, rc, out, err = run_task(task, harness, model=model, timeout=timeout, permissions=permissions)
     if role == "implement":
         digest, files = tree_digest(ws)
-        emit(rc == 0, {"artifact_digest": digest, "files": files},
+        emit(rc == 0, {"artifact_digest": digest, "files": files, "returncode": rc},
              out.strip().splitlines()[-1] if out.strip() else err[-200:])
     # Fail closed: a harness that exited non-zero is an infrastructure failure, not
     # an agent verdict. Never let it masquerade as a passing triage/spec/verify/review.

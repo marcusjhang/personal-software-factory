@@ -177,12 +177,52 @@ def eval_H11(tmp: Path) -> EvalResult:
                       {"first": first, "second": second})
 
 
+def eval_H12(tmp: Path) -> EvalResult:
+    """Advisory-only verify findings must NOT fail the work item (#10)."""
+    from .agents import AgentResult, AgentTask
+
+    factory, log = _mk(tmp, "h12", gates={"spec_approval": False, "verify_quorum": 1})
+
+    class AdvisoryOnly(MockRunner):
+        def run(self, task: AgentTask) -> AgentResult:
+            if task.role == "verify":
+                return AgentResult(False, {"passed": False,
+                                           "findings": ["advisory: naming could be nicer"]})
+            return super().run(task)
+
+    res = Foreman(factory, Workflow(log), AdvisoryOnly()).run("g", finish=False)
+    ok = res.work.state in ("REVIEW", "HANDOFF", "DONE") and res.verify_passed
+    log.close()
+    return EvalResult("H12", "advisory-only verify does not block", "pass" if ok else "fail",
+                      {"state": res.work.state, "verify_passed": res.verify_passed})
+
+
+def eval_H13(tmp: Path) -> EvalResult:
+    """A non-advisory verify failure still blocks (the H12 coercion is scoped)."""
+    from .agents import AgentResult, AgentTask
+
+    factory, log = _mk(tmp, "h13", gates={"spec_approval": False, "verify_quorum": 1})
+
+    class RealFailure(MockRunner):
+        def run(self, task: AgentTask) -> AgentResult:
+            if task.role == "verify":
+                return AgentResult(False, {"passed": False,
+                                           "findings": ["acceptance criterion not met"]})
+            return super().run(task)
+
+    res = Foreman(factory, Workflow(log), RealFailure()).run("g", finish=False)
+    ok = res.work.state == "BLOCKED"
+    log.close()
+    return EvalResult("H13", "non-advisory verify failure blocks", "pass" if ok else "fail",
+                      {"state": res.work.state})
+
+
 def run_guardrail_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-guard-") as d:
         tmp = Path(d)
         for fn in (eval_H1, eval_H2, eval_H3, eval_H4, eval_H5, eval_H6,
-                   eval_H7, eval_H8, eval_H9, eval_H10, eval_H11):
+                   eval_H7, eval_H8, eval_H9, eval_H10, eval_H11, eval_H12, eval_H13):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

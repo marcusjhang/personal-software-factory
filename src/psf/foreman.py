@@ -90,7 +90,8 @@ class Foreman:
             "owner" if self.factory.spec_approval else "policy:auto")
         work = self.wf.approve_spec(work, approver=approver)
 
-        ws = Workspace.create(work.id, repo=repo, use_git=use_git)
+        seed = repo if (repo is not None and not use_git and self.factory.verify_commands) else None
+        ws = Workspace.create(work.id, repo=repo, use_git=use_git, seed_from=seed)
         started = time.monotonic()
         budget = self.factory.max_minutes
         try:
@@ -117,14 +118,25 @@ class Foreman:
                                  "prompt": self._role_prompt("implement")},
                     ))
                     work = self.wf.record_build(work, build.output.get("artifact_digest", ""),
-                                                summary=build.summary, actor="implement")
+                                                summary=build.summary, actor="implement",
+                                                ok=build.ok)
                     passed, findings = True, []
                     for _ in range(self.factory.verify_quorum):
                         verify = self.runner.run(AgentTask("verify", goal, workspace=ws.path,
                                                            context={"spec": work.spec,
                                                                     "prompt": self._role_prompt("verify")}))
-                        passed = passed and bool(verify.output.get("passed", verify.ok))
-                        for f in verify.output.get("findings", []) or []:
+                        vpassed = bool(verify.output.get("passed", verify.ok))
+                        vfindings = [str(f) for f in (verify.output.get("findings", []) or [])]
+                        # Policy: advisory findings never fail a verification (the
+                        # verifier prompt says the same). Don't let the model's bare
+                        # boolean bounce verified work on cosmetics alone.
+                        if not vpassed and vfindings and all(
+                                f.lower().startswith("advisory") for f in vfindings):
+                            vpassed = True
+                            vfindings.append("advisory: verifier returned fail on advisory-only "
+                                             "findings; treated as pass")
+                        passed = passed and vpassed
+                        for f in vfindings:
                             if f not in findings:
                                 findings.append(f)
                     # Deterministic gate(s): run the project's own check(s) (e.g. tests).
