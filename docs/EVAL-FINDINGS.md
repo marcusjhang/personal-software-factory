@@ -285,3 +285,18 @@ non-runnable artifact (`review_escape`). Closed/added:
 
 Planned (not built): per-criterion runtime **evidence** requirement (R2) and
 spec **assumed-vs-observed** labeling (R7).
+
+
+---
+
+## Round 10 — end-to-end coverage per SDLC point
+
+Added `psf eval-e2e` (X1–X8): each stage boundary exercised **through the CLI** in a
+throwaway git repo — init→build→verify→review→handoff (X1), approval wait→READY (X2),
+YOLO autonomy (X3), cancel/unblock (X4), feedback export (X5), eval governance (X6),
+self-improvement promote/rollback (X7), health check (X8). **8/8**, 64 tests.
+
+| suite | result |
+|---|---|
+| e2e X1–X8 | 8/8 |
+| unit tests | 64 |

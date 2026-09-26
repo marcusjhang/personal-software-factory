@@ -422,6 +422,23 @@ def cmd_unblock(args) -> int:
     return 0
 
 
+def cmd_eval_e2e(args) -> int:
+    from .e2e import run_e2e
+
+    rep = run_e2e()
+    if args.out:
+        Path(args.out).write_text(json.dumps(rep, indent=2) + "\n")
+    if args.json:
+        print(json.dumps(rep, indent=2))
+    else:
+        for e in rep["evals"]:
+            print(f"[{'PASS' if e['status'] == 'pass' else 'FAIL'}] {e['id']:4} {e['name']}")
+        print(f"e2e evals: {rep['passed']}/{rep['total']} passed")
+        for i in rep["issues"]:
+            print(f"  - {i['id']} {i['name']}: {i['detail']}")
+    return 0 if rep["failed"] == 0 else 1
+
+
 def cmd_eval_guardrails(args) -> int:
     from .guardeval import run_guardrail_eval
 
@@ -835,10 +852,15 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("work_id")
     s.set_defaults(func=cmd_unblock)
 
-    s = sub.add_parser("eval-guardrails", help="guardrail evals (H1..H6)")
+    s = sub.add_parser("eval-guardrails", help="guardrail evals (H1..H11)")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_guardrails)
+
+    s = sub.add_parser("eval-e2e", help="end-to-end tests per SDLC stage (X1..X8)")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--out", help="write the JSON report to this path")
+    s.set_defaults(func=cmd_eval_e2e)
 
     s = sub.add_parser("status", help="show work items")
     s.add_argument("work_id", nargs="?")

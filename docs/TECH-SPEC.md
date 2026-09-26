@@ -505,7 +505,7 @@ the writer path at that point.
 - **Guardrails & evals.** See `docs/GUARDRAILS.md`. `psf audit` runs the guardrail
   and adapter suites on every health check; `psf improve` requires a green audit.
   Suites: self `E1–E27`, governance `G1–G8`, supervisor `S1–S13/C1–C3`, adapters
-  `A1–A8`, guardrails `H1–H6`.
+  `A1–A8`, guardrails `H1–H11`, end-to-end `X1–X8` (`psf eval-e2e`).
 - **Ledger single-writer (known limit).** `EventLog.append` is a non-atomic
   read-modify-write; it is safe for single-process local use but must be serialized
   (`BEGIN IMMEDIATE`) or replaced by PostgreSQL before concurrent writers.

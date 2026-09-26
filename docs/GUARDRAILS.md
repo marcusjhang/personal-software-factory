@@ -57,6 +57,7 @@ refuses to promote unless the audit is green.
 | supervisor/classifier | `psf eval-supervisor` | 16 (S1–S13, C1–C3) |
 | harness adapters | `psf eval-adapters` | 8 (A1–A8) |
 | guardrails | `psf eval-guardrails` | 11 (H1–H11) |
+| **end-to-end** | `psf eval-e2e` | 8 (X1–X8, one per SDLC stage boundary, via the CLI) |
 | process | `psf eval-suite` | stochastic |
 | multi-repo | `psf eval-repos` | 20 repos |
-| unit tests | `pytest` | 63 |
+| unit tests | `pytest` | 64 |
