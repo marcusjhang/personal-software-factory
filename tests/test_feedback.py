@@ -40,3 +40,30 @@ def test_export_ingest_report_roundtrip(tmp_path):
     r = report(tmp_path / "inbox")
     assert r["envelopes"] == 1
     assert "totals" in r and "suggestions" in r
+
+
+def test_export_reports_failure_nonzero(tmp_path, monkeypatch):
+    from psf import cli, feedback
+    from psf.events import EventLog
+
+    root = tmp_path / "factory"
+    (root / "agents").mkdir(parents=True)
+    (root / "factory.yml").write_text(
+        "schemaVersion: psf/v1\nname: t\nrunner: mock\nagents:\n"
+        + "".join(f"  {r}: {{ prompt: agents/{r}.md }}\n"
+                  for r in ("triage", "spec", "implement", "verify", "review"))
+        + "gates: {}\nlimits:\n  max_attempts: 2\n")
+    for r in ("triage", "spec", "implement", "verify", "review"):
+        (root / "agents" / f"{r}.md").write_text("p")
+    ledger = tmp_path / "e.db"
+    EventLog(ledger).close()
+
+    monkeypatch.setattr(feedback, "publish_issue", lambda repo, env: (None, "label missing"))
+    rc = cli.main(["--factory", str(root), "--ledger", str(ledger),
+                   "feedback", "export", "--github", "owner/repo"])
+    assert rc == 1  # filing failed -> non-zero, never silent success
+
+    monkeypatch.setattr(feedback, "publish_issue", lambda repo, env: ("https://github.com/o/r/issues/2", None))
+    rc = cli.main(["--factory", str(root), "--ledger", str(ledger),
+                   "feedback", "export", "--github", "owner/repo"])
+    assert rc == 0

@@ -110,10 +110,26 @@ def export(factory_path: str | Path, ledger_path: str | Path, *, out: str | Path
     return dest
 
 
-def publish_issue(repo: str, envelope: dict[str, Any]) -> tuple[str | None, str | None]:
-    """File the envelope as an issue in the main repo (uses gh)."""
+def ensure_label(repo: str, label: str = "factory-feedback") -> None:
+    """Best-effort: make sure the intake label exists upstream."""
     import subprocess
 
+    subprocess.run(
+        ["gh", "label", "create", label, "--repo", repo, "--force",
+         "--color", "1d76db", "--description", "Consumer factory feedback envelope"],
+        capture_output=True, text=True,
+    )
+
+
+def publish_issue(repo: str, envelope: dict[str, Any]) -> tuple[str | None, str | None]:
+    """File the envelope as an issue in the main repo (uses gh).
+
+    Ensures the intake label exists first, and returns ``(url, error)``; the
+    caller must treat a missing URL as a failure (never report silent success).
+    """
+    import subprocess
+
+    ensure_label(repo)
     body = ("Automated feedback envelope from a consumer repository.\n"
             f"_{envelope.get('note', NOTE)}_\n\n"
             "```json\n" + json.dumps(envelope, indent=2) + "\n```\n")
@@ -123,9 +139,10 @@ def publish_issue(repo: str, envelope: dict[str, Any]) -> tuple[str | None, str 
          "--body", body],
         capture_output=True, text=True,
     )
-    if p.returncode != 0:
-        return None, p.stderr.strip()
-    return p.stdout.strip(), None
+    url = p.stdout.strip().splitlines()[-1] if p.stdout.strip() else ""
+    if p.returncode != 0 or not url.startswith("http"):
+        return None, (p.stderr.strip() or "no issue URL returned")
+    return url, None
 
 
 def ingest(inbox: str | Path, item: str | Path) -> int:

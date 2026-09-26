@@ -489,12 +489,19 @@ the writer path at that point.
 - **Advisory classifier / supervisor (Jev).** `factory.yml classifier:` selects
   `mock | jev`; the supervisor may `STEER/RETRY/STOP/ESCALATE` on bounded, redacted
   evidence, records ledger events, and can never `FINISH` (verification does).
-- **Deterministic verify gate.** `gates.verify_command` runs the project's check
-  (e.g. `pytest -q`) in the worktree and must pass alongside the LLM verifier.
+- **Deterministic verify gate.** `gates.verify_command` (a string **or a list** of
+  commands, run in order) runs the project's check(s) in the worktree and must pass
+  alongside the LLM verifier. The factory also appends **advisories**: the command
+  passes on the pristine baseline (may be vacuous), the change touches an integration
+  the verifier cannot reach, or added logic is referenced only from tests (dead under
+  test). A command whose failure is masked by `python -O` is detectable.
 - **Budgets.** `limits.max_minutes` and `limits.max_usd` are validated;
   `max_minutes` is enforced in the build loop (exhaustion → `BLOCKED`).
 - **Cancel / unblock.** `psf cancel <id>` and `psf unblock <id>` (unblock returns
   only to the saved prior state).
+- **Feedback never fails silently.** `psf feedback export --github` creates the
+  `factory-feedback` label if missing, verifies the created issue URL, and exits
+  non-zero when filing fails.
 - **Guardrails & evals.** See `docs/GUARDRAILS.md`. `psf audit` runs the guardrail
   and adapter suites on every health check; `psf improve` requires a green audit.
   Suites: self `E1–E27`, governance `G1–G8`, supervisor `S1–S13/C1–C3`, adapters

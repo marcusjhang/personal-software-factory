@@ -91,10 +91,14 @@ class Factory:
         return int(self.gates.get("verify_quorum", 1))
 
     @property
-    def verify_command(self) -> str | None:
-        """Optional deterministic check run in the workspace (e.g. `pytest -q`)."""
-        cmd = self.gates.get("verify_command")
-        return str(cmd) if cmd else None
+    def verify_commands(self) -> list[str]:
+        """Deterministic check(s) run in the workspace (e.g. `pytest -q`). One or many."""
+        v = self.gates.get("verify_command")
+        if not v:
+            return []
+        if isinstance(v, str):
+            return [v]
+        return [str(x) for x in v]
 
     @property
     def max_minutes(self) -> float | None:
@@ -215,8 +219,9 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
         errors.append("gates must be a mapping")
     if "spec_approval" in gates and not isinstance(gates["spec_approval"], bool):
         errors.append("gates.spec_approval must be a boolean")
-    if "verify_command" in gates and not isinstance(gates["verify_command"], str):
-        errors.append("gates.verify_command must be a string")
+    vc = gates.get("verify_command")
+    if vc is not None and not (isinstance(vc, str) or (isinstance(vc, list) and all(isinstance(x, str) for x in vc))):
+        errors.append("gates.verify_command must be a string or a list of strings")
     if "verify_quorum" in gates:
         quorum = gates["verify_quorum"]
         # bool is an int subclass; ``true`` must not pass as 1.

@@ -110,11 +110,79 @@ def eval_H6(tmp: Path) -> EvalResult:
                       {"blocked": blocked.state, "back": back.state})
 
 
+def eval_H7(tmp: Path) -> EvalResult:
+    """Gate must bite: a command that passes on the baseline is vacuous (R1)."""
+    from . import verifygate
+
+    base = tmp / "h7base"
+    base.mkdir(parents=True)
+    broken = tmp / "h7broken"
+    broken.mkdir(parents=True)
+    vacuous = verifygate.command_is_vacuous(base, "true")
+    biting = verifygate.command_is_vacuous(base, "test -f artifact")
+    rc, _ = verifygate.run(broken, "test -f artifact")
+    ok = vacuous and not biting and rc != 0
+    return EvalResult("H7", "gate-must-bite (vacuous detector)", "pass" if ok else "fail",
+                      {"vacuous_true_on_baseline": vacuous, "real_check_bites": not biting})
+
+
+def eval_H8(tmp: Path) -> EvalResult:
+    """Integration change with a shape-only verify command is flagged (R3)."""
+    from . import verifygate
+
+    diff = ("+++ b/app.py\n+import requests\n+def go():\n"
+            "+    requests.get('http://api')\n")
+    warns = verifygate.verify_reachability(diff, ["uv run server.py --self-check"], has_env=False)
+    ok = any("integration" in w for w in warns) and any(".env" in w for w in warns)
+    return EvalResult("H8", "integration reachability warning", "pass" if ok else "fail", {"warns": warns})
+
+
+def eval_H9(tmp: Path) -> EvalResult:
+    """Logic referenced only from tests is flagged (R4)."""
+    from . import verifygate
+
+    diff = ("+++ b/app.py\n+def turn_machine():\n+    return 1\n"
+            "+++ b/tests/test_app.py\n+from app import turn_machine\n+def test_tm():\n+    assert turn_machine() == 1\n")
+    hits = verifygate.dead_logic_under_test(diff)
+    ok = any("turn_machine" in h for h in hits)
+    return EvalResult("H9", "dead logic under test flagged", "pass" if ok else "fail", {"hits": hits})
+
+
+def eval_H10(tmp: Path) -> EvalResult:
+    """A check whose failure is masked by `python -O` is detected (R6)."""
+    from . import verifygate
+
+    ws = tmp / "h10"
+    ws.mkdir(parents=True)
+    (ws / "check.py").write_text("assert False, 'should fail'\n")
+    ok = verifygate.failure_masked_by_optimize(ws, "python3 check.py")
+    return EvalResult("H10", "assert-masked gate detected", "pass" if ok else "fail", {})
+
+
+def eval_H11(tmp: Path) -> EvalResult:
+    """Lifecycle: a second run must not inherit state from the first (R5)."""
+    from . import verifygate
+
+    ws = tmp / "h11"
+    ws.mkdir(parents=True)
+    (ws / "life.py").write_text(
+        "import sys, pathlib\n"
+        "s = pathlib.Path('state')\n"
+        "if s.exists():\n    sys.exit(3)\n"
+        "s.write_text('x')\n")
+    first, _ = verifygate.run(ws, "python3 life.py")
+    second, _ = verifygate.run(ws, "python3 life.py")
+    ok = first == 0 and second != 0
+    return EvalResult("H11", "second-run state leak caught", "pass" if ok else "fail",
+                      {"first": first, "second": second})
+
+
 def run_guardrail_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-guard-") as d:
         tmp = Path(d)
-        for fn in (eval_H1, eval_H2, eval_H3, eval_H4, eval_H5, eval_H6):
+        for fn in (eval_H1, eval_H2, eval_H3, eval_H4, eval_H5, eval_H6,
+                   eval_H7, eval_H8, eval_H9, eval_H10, eval_H11):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

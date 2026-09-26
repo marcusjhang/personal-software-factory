@@ -484,7 +484,10 @@ def cmd_feedback(args) -> int:
             import json as _json
             env = _json.loads(Path(path).read_text())
             url, err = publish_issue(target, env)
-            print(url or f"issue create failed: {err}")
+            if not url:
+                print(f"feedback: issue create failed: {err}", file=sys.stderr)
+                return 1  # never report silent success
+            print(f"feedback: filed {url}")
         elif upstream:
             print(f"hint: send this upstream with `psf feedback export --github {upstream}`")
             print("      (`psf feedback opt-in --auto` to publish by default; `psf feedback opt-out` to disable)")

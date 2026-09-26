@@ -13,7 +13,7 @@ refuses to promote unless the audit is green.
 | 2 | Closed transition table; illegal transitions refused | `state.TRANSITIONS` + `_check_guard` | `H1`, `test_illegal_transition_and_ready_gate` |
 | 3 | `READY` requires a digest-bound approval | `_check_guard` compares `approval_digest == spec_digest` | `H2`, `E6` |
 | 4 | Independent verification, quorum (default 2) | `foreman` verify loop `factory.verify_quorum` | `E2`, process eval (defects 18→2) |
-| 5 | Deterministic project check | `gates.verify_command` run in the worktree | `H4` |
+| 5 | Deterministic project check(s) | `gates.verify_command` (string or list) run in the worktree | `H4`, `H11` |
 | 6 | Bounded retries | `limits.max_attempts`; exhaustion → `BLOCKED` | `test_foreman_retries_then_blocks` |
 | 7 | Wall-clock / cost budget | `limits.max_minutes` enforced in the build loop | `H5` |
 | 8 | Cancel and unblock | `psf cancel` / `psf unblock`; unblock only to saved state | `H6` |
@@ -31,6 +31,11 @@ refuses to promote unless the audit is green.
 | 20 | Harness capability manifest | `adapters.common.capabilities` | `A6` |
 | 21 | Feedback privacy | counts/digests only, opt-in, revocable | `E8`, `E14` |
 | 22 | Runtime errors fail closed, don't abort the run | `SubprocessRunner` catches missing-binary/timeout/OSError | `test` + code review H1 |
+| 24 | Gate must bite (not vacuous) | `verifygate.command_is_vacuous` advisory | `H7` |
+| 25 | Integration reachability | `verifygate.verify_reachability` advisory | `H8` |
+| 26 | No dead logic under test | `verifygate.dead_logic_under_test` advisory | `H9` |
+| 27 | Not assert-masked | `verifygate.failure_masked_by_optimize` | `H10` |
+| 28 | Feedback never fails silently | `feedback.publish_issue` returns URL/err; CLI exits non-zero | test + `H` |
 | 23 | Single-writer ledger | documented: SQLite append is not serialized (single-process by design; PostgreSQL planned) | reviewed/accepted (M3) |
 
 ## How they are *used* (not just present)
@@ -51,7 +56,7 @@ refuses to promote unless the audit is green.
 | eval governance | `psf eval-gov` | 8 (G1–G8) |
 | supervisor/classifier | `psf eval-supervisor` | 16 (S1–S13, C1–C3) |
 | harness adapters | `psf eval-adapters` | 8 (A1–A8) |
-| guardrails | `psf eval-guardrails` | 6 (H1–H6) |
+| guardrails | `psf eval-guardrails` | 11 (H1–H11) |
 | process | `psf eval-suite` | stochastic |
 | multi-repo | `psf eval-repos` | 20 repos |
-| unit tests | `pytest` | 62 |
+| unit tests | `pytest` | 63 |

@@ -19,6 +19,7 @@ from .classifier import Classifier, build_classifier
 from .schema import Factory
 from .state import GateError, WorkItem, Workflow
 from .supervisor import SupervisorState, evidence_bundle, supervise_step
+from . import verifygate
 from .workspace import Workspace
 
 LEASE_TTL_SECONDS = 3600
@@ -97,6 +98,9 @@ class Foreman:
         try:
             work = self.wf.transition(work, "BUILD", actor="foreman")
             findings: list[str] = []
+            cmds = self.factory.verify_commands
+            if cmds and any(verifygate.command_is_vacuous(ws.path, c) for c in cmds):
+                findings.append("advisory: verify_command passes on the pristine baseline — it may not verify this change (R1)")
             # One delivery cycle: build -> verify (quorum) -> review. A review that
             # requests changes loops back into build until it is approved or the
             # retry budget is exhausted (BLOCKED).
@@ -125,12 +129,18 @@ class Foreman:
                         for f in verify.output.get("findings", []) or []:
                             if f not in findings:
                                 findings.append(f)
-                    # Deterministic gate: run the project's own check (e.g. tests).
-                    if self.factory.verify_command:
-                        ok_cmd, out = self._run_verify_command(ws)
+                    # Deterministic gate(s): run the project's own check(s) (e.g. tests).
+                    for cmd in cmds:
+                        rc, out = verifygate.run(ws.path, cmd)
+                        ok_cmd = rc == 0
                         passed = passed and ok_cmd
                         if not ok_cmd:
-                            findings.append(f"verify_command failed: {out[-300:]}")
+                            findings.append(f"verify_command failed ({cmd}): {out[-300:]}")
+                    # Gate reachability: integration changes need a connecting check (R3).
+                    diff_now = ws.diff()
+                    findings += ["advisory: " + w for w in verifygate.verify_reachability(
+                        diff_now, cmds, has_env=any((ws.path / f).exists() for f in (".env", "env", "credentials.json")))]
+                    findings += ["advisory: " + d for d in verifygate.dead_logic_under_test(diff_now)]
                     work = self.wf.record_verification(work, passed, findings=findings, actor="verify")
                     if work.state == "BUILD" and self.classifier is not None:
                         work, findings = self._supervise(work, goal, ws, findings)

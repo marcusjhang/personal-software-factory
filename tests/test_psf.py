@@ -525,4 +525,4 @@ def test_cancel_and_unblock_commands(tmp_path, monkeypatch, capsys):
 def test_guardrail_eval_suite():
     from psf.guardeval import run_guardrail_eval
     rep = run_guardrail_eval()
-    assert rep["total"] == 6 and rep["failed"] == 0, rep["issues"]
+    assert rep["total"] == 11 and rep["failed"] == 0, rep["issues"]

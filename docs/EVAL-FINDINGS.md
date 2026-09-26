@@ -266,3 +266,22 @@ Closed the gaps from the sufficiency audit and proved the guardrails are *used*:
 | run | tests | audit | self | gov | supervisor | adapters | guardrails | repos |
 |---|---|---|---|---|---|---|---|---|
 | — | **62** | green | 27/27 | 8/8 | 16/16 | 8/8 | **6/6** | 20/20 |
+
+
+---
+
+## Round 9 — consumer feedback (static gates vs runtime reality)
+
+A consumer run (`live-translate-diarize-poc`) passed every gate yet shipped a
+non-runnable artifact (`review_escape`). Closed/added:
+
+- `gates.verify_command` accepts a **list** (lifecycle / second-run checks).
+- Basline-vacuity advisory + `H7`; integration **reachability** advisory + `H8`;
+  **dead-logic-under-test** advisory + `H9`; **assert-masked** detector + `H10`;
+  **second-run state leak** `H11`.
+- **Feedback loop**: `export --github` no longer fails silently (ensures label,
+  verifies URL, exits non-zero); test added.
+- Guardrail suite grew to **11** (H1–H11); `psf audit` runs it; tests **63**.
+
+Planned (not built): per-criterion runtime **evidence** requirement (R2) and
+spec **assumed-vs-observed** labeling (R7).
