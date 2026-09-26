@@ -51,7 +51,7 @@ class Workspace:
         if seed_from is not None:
             src = Path(seed_from).resolve()
             if src.is_dir():
-                shutil.copytree(src, path, dirs_exist_ok=True,
+                shutil.copytree(src, path, dirs_exist_ok=True, symlinks=True,
                                 ignore=shutil.ignore_patterns(*_SKIP_COPY))
         return cls(path, is_temp=True)
 

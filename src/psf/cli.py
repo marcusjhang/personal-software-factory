@@ -303,7 +303,7 @@ def cmd_run(args) -> int:
     if not ok:
         return 4
 
-    if getattr(args, "github", False) and work.state in ("HANDOFF", "DONE") and repo is not None:
+    if getattr(args, "github", False) and work.state in ("HANDOFF", "DONE") and args.git:
         from .github import available, find_pr_for_branch, publish_draft_pr
 
         if not available():

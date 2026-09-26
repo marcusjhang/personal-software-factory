@@ -378,3 +378,33 @@ Widened the review to the adapter core and intake paths.
 Also retained from the engine pass (U1/U2 highs, U3–U5 mediums). After:
 pytest **71**, adapters **9/9**, all suites green, bench 43%→100%, OSS live 5/5,
 live opencode e2e resolved, `psf audit` healthy.
+
+
+---
+
+## Round 14 — consumer issues verified and fixed; OCR loop clean
+
+Processed the open feedback issues (workflow captured in
+`.claude/skills/feedback-ingestion/SKILL.md`): each claim verified against HEAD,
+valid ones fixed with a regression test, then an OCR high-severity loop.
+
+| issue | claim | verdict | fix |
+|---|---|---|---|
+| #7 (high) | `verify_command` can never pass without `--git` (empty temp workspace) | **valid** | temp workspace is seeded from the repo when a `verify_command` is set; **X14**. Self-contained checks (`false`) still behave (H4). |
+| #10.1 (high) | verifier returns `passed:false` with only `advisory:` findings, bouncing valid work | **valid** | advisory-only failures treated as pass; non-advisory still blocks — **H12/H13**. |
+| #10.2 (high) | empty `artifact_digest` on opencode, not diagnosable | **valid** | implement result records `returncode`; `BuildCompleted` records `ok`. |
+| #10.3 (low) | handoff/continuity undocumented | **valid** | `docs/HANDOFF.md` + README link. |
+| #8 (high) | `feedback export --github` fails silently when label missing | **already fixed** (81aae01); `test_export_reports_failure_nonzero` | — |
+| #2–6, #9, #11 | metric envelopes only | consumed via `psf feedback ingest --issues` + `report` | — |
+
+`psf improve` on the aggregated signal proposed raising `max_attempts`, but the
+protected eval showed **no improvement** (100% → 100%) — confirming #7 was a
+deterministic gate bug, not a retry-budget problem.
+
+OCR loop on the fix commit: pass 1 found one introduced regression (`repo` became
+always-set, so `--github` without `--git` would publish a non-existent worktree)
+and one hardening (`copytree` should not follow symlinks). Both fixed; pass 2
+clean — **no verified highs remain.**
+
+After: pytest green, guardrails **13/13**, e2e **14/14**, adapters 9/9, all suites
+green, bench 43%→100%, OSS live 5/5, `psf audit` healthy.
