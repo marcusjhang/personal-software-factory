@@ -159,6 +159,40 @@ def ingest(inbox: str | Path, item: str | Path) -> int:
     return n
 
 
+def parse_envelope(text: str) -> dict[str, Any] | None:
+    """Extract a feedback envelope from a fenced ```json block in issue text."""
+    import re
+
+    m = re.search(r"```json\s*(\{.*?\})\s*```", text or "", re.S)
+    if not m:
+        return None
+    try:
+        env = json.loads(m.group(1))
+    except ValueError:
+        return None
+    return env if isinstance(env, dict) and env.get("schema") == SCHEMA else None
+
+
+def ingest_issues(inbox: str | Path, *, repo: str | None = None,
+                  label: str = "factory-feedback") -> int:
+    """Intake path: read `factory-feedback` issues and ingest their envelopes.
+
+    This is the GitHub half of the transfer — a consumer files an issue, the
+    main repo reads it here and the envelopes land in the inbox for `report`.
+    """
+    from .github import list_issues
+
+    inbox = Path(inbox)
+    inbox.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for issue in list_issues(repo=repo, label=label):
+        env = parse_envelope(issue.get("body") or "")
+        if env:
+            (inbox / f"{env['envelope_id']}.json").write_text(json.dumps(env, indent=2) + "\n")
+            n += 1
+    return n
+
+
 def report(inbox: str | Path) -> dict[str, Any]:
     """Aggregate ingested envelopes into signals the improvement loop can use."""
     inbox = Path(inbox)

@@ -403,6 +403,20 @@ def cmd_run(args) -> int:
     return 0 if work.state in ("DONE", "HANDOFF") else 3
 
 
+def cmd_eval_e2e_live(args) -> int:
+    from .e2elive import run_live, run_live_suite
+
+    if args.all:
+        rep = run_live_suite([("opencode", args.model or "deepseek/deepseek-flash"),
+                              ("claude", None)])
+    else:
+        rep = run_live(args.harness or "opencode", model=args.model, github_repo=args.github_repo)
+    print(json.dumps(rep, indent=2))
+    if isinstance(rep, dict) and "results" in rep:
+        return 0 if rep["resolved"] == rep["total"] else 1
+    return 0 if rep.get("resolved") else 1
+
+
 def cmd_cancel(args) -> int:
     _, log, wf = _load(args)
     w = wf.fold(args.work_id)
@@ -472,7 +486,7 @@ def cmd_status(args) -> int:
 
 
 def cmd_feedback(args) -> int:
-    from .feedback import export, ingest, publish_issue, report
+    from .feedback import export, ingest, ingest_issues, publish_issue, report
 
     if args.action == "opt-out":
         _set_feedback(mode="off", factory_path=args.factory)
@@ -509,11 +523,21 @@ def cmd_feedback(args) -> int:
             print(f"hint: send this upstream with `psf feedback export --github {upstream}`")
             print("      (`psf feedback opt-in --auto` to publish by default; `psf feedback opt-out` to disable)")
     elif args.action == "ingest":
-        if not args.path:
-            print("error: ingest needs a file or directory", file=sys.stderr)
+        if args.issues:
+            upstream, _ = _feedback_cfg(args)
+            repo = args.github or upstream
+            if not repo:
+                print("error: ingest --issues needs --github <owner/repo> or feedback.upstream",
+                      file=sys.stderr)
+                return 2
+            n = ingest_issues(".psf/feedback/inbox", repo=repo)
+            print(f"ingested {n} envelope(s) from factory-feedback issues in {repo}")
+        elif args.path:
+            n = ingest(".psf/feedback/inbox", args.path)
+            print(f"ingested {n} envelope(s)")
+        else:
+            print("error: ingest needs a file/dir, or --issues --github <repo>", file=sys.stderr)
             return 2
-        n = ingest(".psf/feedback/inbox", args.path)
-        print(f"ingested {n} envelope(s)")
     else:  # report
         print(json.dumps(report(".psf/feedback/inbox"), indent=2))
     return 0
@@ -567,6 +591,8 @@ def cmd_eval_supervisor(args) -> int:
 def cmd_eval_oss(args) -> int:
     from .ossbench import run_oss_task
 
+    if args.claude_script:
+        args.claude_script = str(Path(args.claude_script).resolve())
     specs = (args.repos or "/tmp/oss/flask:change").split(",")
     results = []
     for spec in specs:
@@ -590,6 +616,9 @@ def cmd_eval_oss(args) -> int:
 
 def cmd_eval_repos(args) -> int:
     from .repobench import run_matrix
+
+    if args.claude_script:
+        args.claude_script = str(Path(args.claude_script).resolve())
 
     rep = run_matrix(
         sizes=args.sizes.split(",") if args.sizes else None,
@@ -857,6 +886,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_guardrails)
 
+    s = sub.add_parser("eval-e2e-live", help="live e2e: full loop through a real harness")
+    s.add_argument("--harness", choices=["opencode", "claude", "codex"], default="opencode")
+    s.add_argument("--model", help="model id (e.g. deepseek/deepseek-v4-pro)")
+    s.add_argument("--github-repo", help="scratch repo to open a draft PR against")
+    s.add_argument("--all", action="store_true", help="run opencode/DeepSeek and Claude")
+    s.set_defaults(func=cmd_eval_e2e_live)
+
     s = sub.add_parser("eval-e2e", help="end-to-end tests per SDLC stage (X1..X8)")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
@@ -885,11 +921,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_gov)
 
+    _claude_default = "scripts/psf_agent_claude.py"
     s = sub.add_parser("eval-repos", help="multi-repo capability eval (sizes x domains)")
     s.add_argument("--mode", choices=["process", "real"], default="process")
     s.add_argument("--sizes", help="comma list: tiny,small,medium,large")
     s.add_argument("--domains", help="comma list: cli,api,etl,lib,script")
-    s.add_argument("--claude-script", help="path to the claude runner script (real mode)")
+    s.add_argument("--claude-script", default=_claude_default,
+                   help="path to the claude runner script (real mode)")
     s.add_argument("--root", help="root dir to build repos under")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
@@ -897,7 +935,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("eval-oss", help="real OSS-repo eval (localization / change)")
     s.add_argument("--repos", help="comma list of path[:kind], e.g. /tmp/oss/flask:change")
-    s.add_argument("--claude-script", help="path to the claude runner script")
+    s.add_argument("--claude-script", default=_claude_default,
+                   help="path to the claude runner script")
     s.add_argument("--json", action="store_true")
     s.add_argument("--out", help="write the JSON report to this path")
     s.set_defaults(func=cmd_eval_oss)
@@ -951,7 +990,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("action", choices=["export", "ingest", "report", "opt-out", "opt-in", "status"])
     s.add_argument("path", nargs="?", help="for ingest: an export file or directory")
     s.add_argument("--out", help="for export: output file")
-    s.add_argument("--github", help="for export: file the envelope as an issue in this repo")
+    s.add_argument("--github", help="for export: file the envelope as an issue; for ingest: read issues from this repo")
+    s.add_argument("--issues", action="store_true",
+                   help="for ingest: pull envelopes from factory-feedback issues (requires --github or feedback.upstream)")
     s.add_argument("--auto", action="store_true", help="for opt-in: publish automatically")
     s.set_defaults(func=cmd_feedback)
 

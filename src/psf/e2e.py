@@ -190,11 +190,103 @@ def eval_X8(tmp: Path) -> EvalResult:
     return EvalResult("X8", "psf audit (health) on fresh repo", "pass" if ok else "fail", {"rc": rc})
 
 
+def eval_X9(tmp: Path) -> EvalResult:
+    """Feedback transfer, offline: consumer export -> ingest -> report.
+
+    Proves a consumer's usage signal reaches the main repo's inbox and is
+    aggregated, and that the envelope carries counts/digests only (no goals,
+    paths, or source).
+    """
+    from .feedback import ingest, report
+
+    consumer = _repo(tmp, "x9c")
+    main = _repo(tmp, "x9m")
+    goal = "SENTINEL_GOAL_add_gizmo"
+    with _in(consumer):
+        _run_cli(["init", "--feedback", "hint", "--mode", "yolo"])
+        _run_cli(["run", "--no-ask", "--mode", "yolo", goal])
+        rc = _run_cli(["feedback", "export", "--out", str(consumer / "export.json")])
+        env_text = (consumer / "export.json").read_text()
+    n = ingest(main / ".psf" / "feedback" / "inbox", consumer / "export.json")
+    rep = report(main / ".psf" / "feedback" / "inbox")
+    leaked = goal in env_text
+    ok = (rc == 0 and n == 1 and rep["envelopes"] == 1
+          and rep["totals"]["work_items"] >= 1 and not leaked)
+    return EvalResult("X9", "feedback: consumer export -> ingest -> report",
+                      "pass" if ok else "fail",
+                      {"ingested": n, "envelopes": rep["envelopes"],
+                       "work_items": rep["totals"]["work_items"], "leaked_goal": leaked})
+
+
+def eval_X10(tmp: Path) -> EvalResult:
+    """Feedback intake from GitHub issues (deterministic, no network).
+
+    A `factory-feedback` issue body carries the envelope in a ```json fence;
+    `ingest_issues` extracts it into the inbox and it shows up in the report.
+    """
+    from . import github
+    from .feedback import build_envelope, ingest_issues, report
+
+    main = _repo(tmp, "x10m")
+    with _in(main):
+        _run_cli(["init", "--feedback", "off"])
+    env = build_envelope(main / "factory", main / ".psf" / "factory.db", repo="acme/app")
+    env["metrics"]["work_items"] = 5
+    env["metrics"]["blocked"] = 2
+    body = ("Automated feedback envelope\n\n```json\n"
+            + __import__("json").dumps(env, indent=2) + "\n```\n")
+    issue = {"number": 7, "title": "feedback", "body": body,
+             "labels": [{"name": "factory-feedback"}]}
+    old = github.list_issues
+    github.list_issues = lambda *a, **k: [issue]
+    try:
+        n = ingest_issues(main / ".psf" / "feedback" / "inbox", repo="acme/app")
+    finally:
+        github.list_issues = old
+    rep = report(main / ".psf" / "feedback" / "inbox")
+    ok = n == 1 and rep["envelopes"] == 1 and rep["totals"]["blocked"] == 2
+    return EvalResult("X10", "feedback: ingest factory-feedback issues",
+                      "pass" if ok else "fail",
+                      {"ingested": n, "blocked": rep["totals"]["blocked"]})
+
+
+def eval_X11(tmp: Path) -> EvalResult:
+    """Feedback transfer, live: file a real issue and read it back.
+
+    Gated on PSF_FEEDBACK_LIVE_REPO to avoid touching a repo in normal runs;
+    on success the transient issue is closed again.
+    """
+    repo = os.environ.get("PSF_FEEDBACK_LIVE_REPO")
+    if not repo:
+        return EvalResult("X11", "feedback: live GitHub round-trip", "pass",
+                          {"skipped": "set PSF_FEEDBACK_LIVE_REPO=owner/repo"})
+    from .feedback import build_envelope, ingest_issues, publish_issue, report
+
+    main = _repo(tmp, "x11m")
+    with _in(main):
+        _run_cli(["init", "--feedback", "off"])
+    env = build_envelope(main / "factory", main / ".psf" / "factory.db", repo=repo)
+    url, err = publish_issue(repo, env)
+    if not url:
+        return EvalResult("X11", "feedback: live GitHub round-trip", "fail", {"error": err})
+    try:
+        n = ingest_issues(main / ".psf" / "feedback" / "inbox", repo=repo)
+        rep = report(main / ".psf" / "feedback" / "inbox")
+    finally:
+        num = url.rstrip("/").split("/")[-1]
+        subprocess.run(["gh", "issue", "close", num, "-R", repo, "-c", "e2e"],
+                       capture_output=True, check=False)
+    ok = n >= 1 and rep["envelopes"] >= 1
+    return EvalResult("X11", "feedback: live GitHub round-trip", "pass" if ok else "fail",
+                      {"url": url, "ingested": n})
+
+
 def run_e2e() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-e2e-") as d:
         tmp = Path(d)
-        for fn in (eval_X1, eval_X2, eval_X3, eval_X4, eval_X5, eval_X6, eval_X7, eval_X8):
+        for fn in (eval_X1, eval_X2, eval_X3, eval_X4, eval_X5, eval_X6, eval_X7,
+                   eval_X8, eval_X9, eval_X10, eval_X11):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

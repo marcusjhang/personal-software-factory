@@ -61,11 +61,16 @@ psf feedback export --github you/personal-software-factory   # files an issue th
 In the main repo:
 
 ```bash
-gh issue list --label factory-feedback    # or: psf feedback ingest <file-or-dir>
-psf feedback ingest ./incoming/           # collect envelopes into .psf/feedback/inbox
-psf feedback report                       # aggregate + suggestions
-psf improve                               # turn signals into a gated change
+psf feedback ingest --issues                 # pull every factory-feedback issue (feedback.upstream)
+psf feedback ingest --issues --github owner/repo   # ...from a specific repo
+psf feedback ingest ./incoming/              # or collect envelopes from files/a directory
+psf feedback report                          # aggregate + suggestions
+psf improve                                  # turn signals into a gated change
 ```
+
+`--issues` reads each `factory-feedback` issue, extracts the envelope from its
+```json fence, and drops it in `.psf/feedback/inbox/` — so a consumer's
+`export --github` and your `ingest --issues` are the two halves of one round-trip.
 
 ## How signals become improvements
 

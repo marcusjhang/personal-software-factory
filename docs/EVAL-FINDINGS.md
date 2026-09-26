@@ -300,3 +300,37 @@ self-improvement promote/rollback (X7), health check (X8). **8/8**, 64 tests.
 |---|---|
 | e2e X1–X8 | 8/8 |
 | unit tests | 64 |
+
+
+---
+
+## Round 11 — live harness runs found real defects; feedback intake e2e
+
+Running the loop through the **real** harnesses (opencode/DeepSeek, Claude) — not the
+mock — exposed three defects the mock could never surface, plus closed the feedback
+intake half. All fixed; suites below re-run green.
+
+| id | sev | finding (found by) | disposition |
+|---|---|---|---|
+| L1 | high | Adapter subprocesses (`python -m psf.adapters.*`) **could not import `psf`** when the workspace cwd differs from the factory repo (relative `PYTHONPATH`) — every remote task failed, surfacing as a triage `REJECTED`. | **fixed**: `SubprocessRunner` now puts the package root on the child's `PYTHONPATH`. |
+| L2 | high | `psf eval-oss` / `eval-repos` defaulted `--claude-script` to **None**, so the harness command was `python3 None` → all tasks rejected with `stats=N files, REJECTED`. | **fixed**: sane default + absolute resolution. |
+| L3 | high | `eval-oss` was **BLOCKED** even when the deterministic checker passed: the model reviewer vetoed code it cannot run, looping back until the budget drained. | **fixed**: OSS harness treats triage/spec/review deterministically; the checker is the gate. |
+| F1 | — | Feedback **intake from GitHub** did not exist — envelopes could only be ingested manually from files. | **built + tested**: `psf feedback ingest --issues [--github R]`, `feedback.ingest_issues`, `parse_envelope`. |
+
+Live harness results after fixes: opencode/DeepSeek full loop **resolved** (worktree
+tests pass, `DONE`); Claude triage/spec/implement/review confirmed working. **OSS eval
+5/5** (flask + django localization, flask + django + cal.com change), each `HANDOFF`
+in 1 attempt.
+
+### Feedback transfer is now proven end-to-end
+
+| suite | result |
+|---|---|
+| e2e X1–X8 (lifecycle) | 8/8 |
+| e2e X9 (export → ingest → report, offline) | pass |
+| e2e X10 (ingest `factory-feedback` issues) | pass |
+| e2e X11 (live GitHub round-trip) | gated on `PSF_FEEDBACK_LIVE_REPO` |
+| unit tests | 75 |
+
+X9 asserts the envelope carries **counts/digests only** (a sentinel goal string never
+appears in it) and that the main repo's report aggregates the consumer's work items.

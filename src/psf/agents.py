@@ -9,6 +9,7 @@ authority; it consumes only the typed result and enforces the gate.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import tempfile
 from dataclasses import dataclass, field
@@ -91,9 +92,23 @@ class SubprocessRunner:
     ``AgentResult`` (``{ok, output, summary}``) from stdout's last line.
     """
 
-    def __init__(self, default_command: list[str] | None = None, timeout: int = 900):
+    def __init__(self, default_command: list[str] | None = None, timeout: int = 900,
+                 env: dict[str, str] | None = None):
         self.default_command = default_command
         self.timeout = timeout
+        # Ensure the child can import the psf package (adapter commands run with
+        # their cwd set to the workspace, where a relative PYTHONPATH won't resolve).
+        child_env = {**os.environ, **(env or {})}
+        try:
+            import psf
+
+            root = str(Path(psf.__file__).resolve().parent.parent)
+            pp = child_env.get("PYTHONPATH", "")
+            if root not in pp.split(os.pathsep):
+                child_env["PYTHONPATH"] = root + (os.pathsep + pp if pp else "")
+        except Exception:  # noqa: BLE001
+            pass
+        self.env = child_env
 
     def run(self, task: AgentTask) -> AgentResult:
         command = task.context.get("command") or self.default_command
@@ -101,7 +116,8 @@ class SubprocessRunner:
             raise RuntimeError("subprocess runner has no command configured")
         try:
             proc = subprocess.run(command, input=json.dumps(task.to_dict()),
-                                  capture_output=True, text=True, timeout=self.timeout)
+                                  capture_output=True, text=True, timeout=self.timeout,
+                                  env=self.env)
         except FileNotFoundError:
             return AgentResult(False, {}, summary=f"harness command not found: {command[0]}")
         except subprocess.TimeoutExpired:
