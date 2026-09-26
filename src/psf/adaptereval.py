@@ -153,11 +153,39 @@ def eval_A8(tmp: Path) -> EvalResult:
     return EvalResult("A8", "codex stdin/output-file + optional model", "pass" if ok else "fail", {"cmd": c})
 
 
+def eval_A9(tmp: Path) -> EvalResult:
+    """A non-zero harness exit fails closed, not reported as an agent verdict."""
+    import io
+    import json
+    from contextlib import redirect_stdout
+
+    ws = tmp / "a9ws"
+    ws.mkdir(parents=True, exist_ok=True)
+    orig = common.run_task
+    # A crashed harness that still printed a plausible JSON line.
+    common.run_task = lambda *a, **k: (str(ws), 1, '{"decision":"spec","passed":true}', "boom")
+    results = {}
+    try:
+        for role in ("triage", "spec", "verify", "review"):
+            task = {"role": role, "goal": "g", "workspace": str(ws), "context": {}}
+            buf = io.StringIO()
+            try:
+                with redirect_stdout(buf):
+                    common.handle(task, "claude", model=None)
+            except SystemExit:
+                pass
+            results[role] = json.loads(buf.getvalue().strip().splitlines()[-1])["ok"]
+    finally:
+        common.run_task = orig
+    ok = not any(results.values())
+    return EvalResult("A9", "non-zero harness exit fails closed", "pass" if ok else "fail", results)
+
+
 def run_adapter_eval() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-adapt-") as d:
         tmp = Path(d)
-        for fn in (eval_A1, eval_A2, eval_A3, eval_A4, eval_A5, eval_A6, eval_A7, eval_A8):
+        for fn in (eval_A1, eval_A2, eval_A3, eval_A4, eval_A5, eval_A6, eval_A7, eval_A8, eval_A9):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

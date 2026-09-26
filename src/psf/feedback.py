@@ -23,7 +23,9 @@ Flow:
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import time
 import uuid
 from pathlib import Path
@@ -36,6 +38,19 @@ from .state import Workflow
 
 SCHEMA = "psf.feedback/v1"
 NOTE = "counts, digests, and versions only; no source, prompts, or secrets"
+_SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+
+
+def envelope_filename(env: dict[str, Any]) -> str:
+    """A safe inbox filename for an envelope.
+
+    ``envelope_id`` arrives from a fetched issue, i.e. it is untrusted: never
+    let it traverse out of the inbox. Fall back to a content digest.
+    """
+    eid = str(env.get("envelope_id") or "")
+    if not _SAFE_ID.match(eid) or ".." in eid:
+        eid = "FB-" + hashlib.sha256(json.dumps(env, sort_keys=True).encode()).hexdigest()[:8]
+    return f"{eid}.json"
 
 
 def factory_digest(factory_path: str | Path) -> str:
@@ -149,7 +164,7 @@ def ingest(inbox: str | Path, item: str | Path) -> int:
     n = 0
     for f in files:
         env = json.loads(f.read_text())
-        (inbox / f"{env.get('envelope_id', f.stem)}.json").write_text(json.dumps(env, indent=2) + "\n")
+        (inbox / envelope_filename(env)).write_text(json.dumps(env, indent=2) + "\n")
         n += 1
     return n
 
@@ -182,9 +197,8 @@ def ingest_issues(inbox: str | Path, *, repo: str | None = None,
     n = 0
     for issue in list_issues(repo=repo, label=label):
         env = parse_envelope(issue.get("body") or "")
-        eid = env.get("envelope_id") if env else None
-        if env and eid:
-            (inbox / f"{eid}.json").write_text(json.dumps(env, indent=2) + "\n")
+        if env:
+            (inbox / envelope_filename(env)).write_text(json.dumps(env, indent=2) + "\n")
             n += 1
     return n
 

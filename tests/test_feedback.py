@@ -67,3 +67,24 @@ def test_export_reports_failure_nonzero(tmp_path, monkeypatch):
     rc = cli.main(["--factory", str(root), "--ledger", str(ledger),
                    "feedback", "export", "--github", "owner/repo"])
     assert rc == 0
+
+
+def test_ingest_issues_neutralizes_path_traversal(tmp_path, monkeypatch):
+    """A malicious envelope_id in an issue body must not escape the inbox."""
+    from psf import feedback, github
+
+    wf = tmp_path / "factory"
+    (wf / "agents").mkdir(parents=True)
+    (wf / "factory.yml").write_text("schemaVersion: psf/v1\nname: t\n")
+    env = {"schema": "psf.feedback/v1", "envelope_id": "../../PWNED",
+           "metrics": {"work_items": 1}, "failures": {"verify_failures": 0}}
+    body = "```json\n" + json.dumps(env) + "\n```"
+    monkeypatch.setattr(github, "list_issues",
+                        lambda *a, **k: [{"number": 1, "body": body}])
+    inbox = tmp_path / "inbox"
+    n = feedback.ingest_issues(inbox, repo="acme/app")
+    assert n == 1
+    assert not (tmp_path / "PWNED").exists()
+    assert not (tmp_path.parent / "PWNED").exists()
+    files = list(inbox.glob("*.json"))
+    assert len(files) == 1 and ".." not in files[0].name

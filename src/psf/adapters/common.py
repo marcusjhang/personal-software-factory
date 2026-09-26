@@ -194,6 +194,10 @@ def handle(task: dict, harness: str, *, model: str | None = None, timeout: int =
         digest, files = tree_digest(ws)
         emit(rc == 0, {"artifact_digest": digest, "files": files},
              out.strip().splitlines()[-1] if out.strip() else err[-200:])
+    # Fail closed: a harness that exited non-zero is an infrastructure failure, not
+    # an agent verdict. Never let it masquerade as a passing triage/spec/verify/review.
+    if rc != 0:
+        emit(False, {"returncode": rc}, (err.strip() or out.strip() or f"harness exited {rc}")[-400:])
     data = last_json(out)
     if role == "triage":
         emit(True, data or {"decision": "spec"}, out[-200:])

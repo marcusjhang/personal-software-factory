@@ -362,3 +362,19 @@ Sweep results (no findings left open):
 After: **pytest green**, all suites green (self 27/27, gov 8/8, supervisor 16/16,
 adapters 8/8, guardrails 11/11, e2e 13/13, repos 20/20), bench 43%→100%, OSS live
 5/5, `psf audit` healthy.
+
+
+---
+
+## Round 13 — second OCR pass (files outside the engine) — high+ fixed
+
+Widened the review to the adapter core and intake paths.
+
+| id | sev | finding | disposition |
+|---|---|---|---|
+| A-rc | high | `adapters/common.handle` ignored the harness **exit code** for triage/spec/verify/review: a crashed harness (non-zero exit) that printed a plausible JSON line was taken as a passing verdict. | **fixed**: any non-zero exit now fails closed. New conformance eval **A9** proves it. |
+| F-trav | high | `psf feedback ingest --issues` used the envelope's `envelope_id` (untrusted, from an issue body) directly as a filename → **path traversal / arbitrary file write**. | **fixed**: `envelope_filename()` validates the id against a safe charset and falls back to a content digest. Regression test added. |
+
+Also retained from the engine pass (U1/U2 highs, U3–U5 mediums). After:
+pytest **71**, adapters **9/9**, all suites green, bench 43%→100%, OSS live 5/5,
+live opencode e2e resolved, `psf audit` healthy.
