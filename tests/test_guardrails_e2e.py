@@ -3,4 +3,4 @@ from psf.e2e import run_e2e
 
 def test_e2e_suite():
     rep = run_e2e()
-    assert rep["total"] >= 11 and rep["failed"] == 0, rep["issues"]
+    assert rep["total"] >= 13 and rep["failed"] == 0, rep["issues"]

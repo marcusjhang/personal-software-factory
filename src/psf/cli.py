@@ -13,80 +13,13 @@ from .bench import run_benchmark
 from .events import EventLog
 from .foreman import Foreman
 from .improve import run_improvement
+from .scaffold import (DEFAULT_UPSTREAM, Lock, digest, render_template,
+                       write_lock, write_scaffold)
 from .schema import FactoryError, load as load_factory
 from .state import GateError, Workflow
 
 DEFAULT_FACTORY = "factory"
 DEFAULT_LEDGER = ".psf/factory.db"
-
-FACTORY_YML = """schemaVersion: psf/v1
-name: default
-description: Default personal software factory.
-runner: mock
-mode: "{mode}"          # hitl = human in the loop; yolo = human out (autonomous)
-agents:
-  triage:    { prompt: agents/triage.md }
-  spec:      { prompt: agents/spec.md }
-  implement: { prompt: agents/implement.md }
-  verify:    { prompt: agents/verify.md }
-  review:    { prompt: agents/review.md }
-gates:
-  spec_approval: true
-  verify_quorum: 2
-limits:
-  max_attempts: 2
-feedback:
-  upstream: {upstream}
-  mode: "{fb_mode}"          # off | hint | auto; change anytime with `psf feedback opt-out|opt-in`
-classifier:
-  provider: "mock"          # mock | jev (TypeSafe). Advisory only.
-  supervisor:
-    enabled: false           # opt-in: watch a worker and steer/stop/retry
-    thresholds: {needs_human: 0.80, off_track: 0.80, stuck: 0.80, progress: 0.40}
-    max_steers: 1
-    max_retries: 1
-"""
-
-AGENTS_MD = """# AGENTS.md — how agents should use this repository
-
-This repository is driven by a **personal software factory** (`psf`). If you are
-an agent working here, follow this process instead of ad-hoc editing — route
-changes through the factory so they get a spec, approval, independent
-verification, and review:
-
-1. `psf validate` — confirm the factory definition compiles.
-2. `psf run "<goal>"` — run the goal through the factory (intake -> spec ->
-   approval -> build -> **independent verify** -> review -> handoff).
-3. `psf status` / `psf audit` — check state and health before you finish.
-4. Record the real outcome: `psf outcome <work-id> --accepted [--cost N --minutes N]`.
-
-## Feedback to the factory
-
-At the end of a work cycle, send a **privacy-filtered** usage envelope back to the
-factory that powers this repo. It contains **counts, digests, and versions only** —
-never source code, prompts, file paths, or secrets:
-
-    psf feedback export --github <upstream-repo>
-
-`<upstream-repo>` is the `feedback.upstream` value in `factory/factory.yml`.
-Set `feedback.mode: auto` to make `psf feedback export` publish there by default.
-Recurring verify-failures and blocks become evaluation cases and improvements in
-the upstream factory. This is evidence, never authority: it cannot change policy.
-
-Do **not** put secrets, customer data, or raw source in a feedback envelope.
-"""
-
-
-def _agent_files() -> list[Path]:
-    """Instruction files different coding agents read automatically."""
-    return [
-        Path("AGENTS.md"),                          # Codex, opencode, Factory, many
-        Path("CLAUDE.md"),                          # Claude Code
-        Path(".github/copilot-instructions.md"),    # GitHub Copilot
-        Path(".cursor/rules/psf.mdc"),              # Cursor
-        Path("GEMINI.md"),                          # Gemini CLI
-    ]
-
 
 def _feedback_cfg(args) -> tuple[str | None, str]:
     try:
@@ -118,32 +51,6 @@ def _set_feedback(*, mode: str | None = None, upstream: str | None = None,
     text = re.sub(r"(?m)^(\s*mode:\s*)(off|on|hint|auto)\s*$", r"\1'\2'", text)
     p.write_text(text)
     return p
-
-
-PROMPTS = {
-    "triage": "You scope a goal: restate it, classify risk, and decide spec-first vs direct. Reply reject only for a non-goal.",
-    "spec": (
-        "You write a typed spec: title, desired behavior, non-goals, and acceptance criteria that a verifier can check.\n\n"
-        "Acceptance criteria must be behavioral and testable:\n"
-        "- Each criterion states an observable outcome: given input X, the system does Y (succeeds, rejects, returns, persists, a test passes). A verifier must be able to run it.\n"
-        "- Do not quote exact error, log, or message wording.\n"
-        "- Do not require internal fields, names, or structure the goal did not ask for.\n"
-        "- Do not require particular test cases, test names, or coverage counts. Ask that the project's tests pass; do not dictate which cases they contain.\n"
-        "- If a criterion cannot be stated behaviorally, drop it or record it as a non-goal."
-    ),
-    "implement": "You make the smallest change that satisfies the spec in the given workspace. Report an artifact digest.",
-    "verify": (
-        "You independently reproduce and check the change against the frozen spec. You are not the implementer. Return pass/fail and findings.\n\n"
-        "Fail only on behavioral or acceptance failures: an acceptance criterion is not met, a test fails, the change does not do what the spec says, or it breaks existing behavior.\n\n"
-        "Cosmetic wording and incidental internal differences are advisory, never failures: exact error/log/message text, naming, formatting, file layout, and internal fields the spec did not require. Report them as findings prefixed \"advisory:\" and still pass.\n\n"
-        "Test-coverage completeness (which specific cases exist) is advisory unless the goal explicitly required those cases. If the tests pass and the behavior is correct, pass."
-    ),
-    "review": (
-        "You assess quality, risk, and fit against the spec. Approve or request changes.\n\n"
-        "Approve when the acceptance criteria are met and the project's tests pass. Do not request changes for style, naming, test-coverage preferences, or hypothetical improvements.\n\n"
-        "If you request changes, you MUST give concrete notes naming the defect and the fix. Never revise without actionable notes; if you cannot name a real defect, approve."
-    ),
-}
 
 
 def _load(args) -> tuple:
@@ -185,26 +92,47 @@ def cmd_init(args) -> int:
             mode = "hitl"
 
     (root / "agents").mkdir(parents=True, exist_ok=True)
-    (root / "factory.yml").write_text(
-        FACTORY_YML.replace("{upstream}", upstream).replace("{fb_mode}", fb_mode).replace("{mode}", mode))
-    for role, prompt in PROMPTS.items():
-        (root / "agents" / f"{role}.md").write_text(prompt + "\n")
-    (root / "AGENTS.md").write_text(AGENTS_MD)
-    written = []
-    for p in _agent_files():
-        if not p.exists():
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(AGENTS_MD)
-            written.append(str(p))
+    write_scaffold(root, Path("."), upstream, fb_mode, mode, force=True)
     Path(".psf").mkdir(exist_ok=True)
     from .evaluation import ensure_eval_dir
 
     ensure_eval_dir("eval")
+    # Pin the template we just installed: the base for any future `psf upgrade`.
+    files = render_template(upstream, fb_mode, mode)
+    write_lock(Path("."), Lock(revision=f"psf {__version__}",
+                               template_digest=digest(files), base=files).stamp())
     print(f"initialized factory in {root}/  (agents/, factory.yml, eval/)")
-    print(f"agent instructions written for discoverability: {', '.join(written) or '(already present)'}")
     print(f"autonomy: mode={mode}  (switch anytime: `psf mode hitl|yolo`)")
     print(f"feedback: mode={fb_mode} upstream={upstream}  (change with `psf feedback opt-out|opt-in`)")
+    print(f"template pinned: {digest(files)[:19]}…  (update later with `psf upgrade`)")
     print("next: psf validate && psf run \"<your goal>\"")
+    return 0
+
+
+def cmd_upgrade(args) -> int:
+    from .upgrade import run_upgrade
+
+    rep = run_upgrade(".", args.factory, source=args.from_dir, revision=args.to,
+                      pretend=args.pretend, check=args.check, force=args.force,
+                      verify=not args.no_verify)
+    if args.json:
+        print(json.dumps(rep.to_dict(), indent=2))
+    else:
+        verb = "would change" if (args.pretend or args.check) else ("applied" if rep.applied else "not applied")
+        print(f"upgrade {rep.revision}: {verb}  (base {rep.base_digest[:19] or '(none)'} -> target {rep.target_digest[:19]})")
+        for c in rep.changes:
+            flag = " [CONFLICT]" if c.conflict else ""
+            print(f"  {c.action:9} {c.path}{flag}")
+        for n in rep.notes:
+            print(f"  note: {n}")
+        if not rep.changes:
+            print("  up to date")
+    if args.check:
+        return 1 if rep.drifted else 0
+    if rep.conflict and not args.force:
+        return 1
+    if not rep.applied and rep.drifted and not (args.pretend or args.check):
+        return 2
     return 0
 
 
@@ -841,6 +769,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--mode", choices=["hitl", "yolo"],
                    help="autonomy at install time (default: ask, else hitl)")
     s.set_defaults(func=cmd_init)
+
+    s = sub.add_parser("upgrade", help="merge newer factory template defaults into this repo")
+    s.add_argument("--from", dest="from_dir", help="template dir (or a repo with factory/) to merge from")
+    s.add_argument("--to", help="label the applied revision (default: current)")
+    s.add_argument("--pretend", action="store_true", help="show the plan; write nothing")
+    s.add_argument("--check", action="store_true", help="exit 1 if an upgrade would change anything (CI)")
+    s.add_argument("--force", action="store_true", help="apply even if verification fails, and keep conflicts")
+    s.add_argument("--no-verify", action="store_true", help="skip validate/audit before applying")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_upgrade)
 
     s = sub.add_parser("validate", help="compile-check the factory definition")
     s.set_defaults(func=cmd_validate)

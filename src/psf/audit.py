@@ -86,6 +86,22 @@ def audit_ledger(log: EventLog, wf: Workflow) -> list[Check]:
     return checks
 
 
+def _revision_check(repo_root: Path) -> tuple[str, str, str]:
+    """Report the pinned factory revision and whether the lock is self-consistent."""
+    from .scaffold import digest, read_lock
+
+    lock = read_lock(repo_root)
+    if lock is None:
+        return ("factory.revision", WARN, "no psf.lock.json (run `psf upgrade` to pin it)")
+    if not lock.base:
+        return ("factory.revision", WARN, "lock has no template base")
+    cur = digest(lock.base)
+    if lock.template_digest != cur:
+        return ("factory.revision", WARN,
+                f"lock/base mismatch ({lock.template_digest[:19]} vs {cur[:19]})")
+    return ("factory.revision", OK, f"pinned {lock.revision} @ {cur[:19]}")
+
+
 def run_audit(factory_path: str | Path = "factory", ledger_path: str | Path = ".psf/factory.db",
               *, include_bench: bool = True) -> AuditReport:
     report = AuditReport()
@@ -99,6 +115,8 @@ def run_audit(factory_path: str | Path = "factory", ledger_path: str | Path = ".
             report.add("factory.compile", FAIL, str(e).splitlines()[0])
     else:
         report.add("factory.compile", WARN, f"no factory at {fp} (run `psf init`)")
+
+    report.add(*_revision_check(fp.parent if fp.is_dir() else Path(".")))
 
     lp = Path(ledger_path)
     if lp.exists():

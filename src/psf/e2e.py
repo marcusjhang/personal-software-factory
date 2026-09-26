@@ -281,12 +281,72 @@ def eval_X11(tmp: Path) -> EvalResult:
                       {"url": url, "ingested": n})
 
 
+def _write_template(dest: Path, files: dict[str, str]) -> None:
+    for rel, text in files.items():
+        p = dest / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+
+def eval_X12(tmp: Path) -> EvalResult:
+    """`psf upgrade`: three-way merge applies upstream changes, keeps local edits."""
+    from .scaffold import render_template
+
+    d = _repo(tmp, "x12")
+    tmpl = tmp / "x12tmpl"
+    with _in(d):
+        _run_cli(["init", "--feedback", "off", "--mode", "yolo"])
+        (d / "factory" / "agents" / "verify.md").write_text("LOCAL VERIFY EDIT\n")
+        files = render_template("marcusjhang/personal-software-factory", "off", "yolo")
+        files["agents/implement.md"] = "NEW UPSTREAM IMPLEMENT\n"
+        _write_template(tmpl, files)
+        rc = _run_cli(["upgrade", "--from", str(tmpl)])
+    impl = (d / "factory" / "agents" / "implement.md").read_text()
+    verified = (d / "factory" / "agents" / "verify.md").read_text()
+    lock = (d / "psf.lock.json").exists()
+    ok = (rc == 0 and impl.startswith("NEW UPSTREAM") and "LOCAL VERIFY EDIT" in verified
+          and lock and (d / "factory" / "factory.yml").exists())
+    return EvalResult("X12", "upgrade: merge upstream, keep local edits",
+                      "pass" if ok else "fail",
+                      {"rc": rc, "upstream_applied": impl.startswith("NEW UPSTREAM"),
+                       "local_kept": "LOCAL VERIFY EDIT" in verified, "lock": lock})
+
+
+def eval_X13(tmp: Path) -> EvalResult:
+    """`psf upgrade` safety: --pretend writes nothing; --check flags drift; bootstraps."""
+    import shutil
+
+    from .scaffold import render_template
+
+    d = _repo(tmp, "x13")
+    tmpl = tmp / "x13tmpl"
+    with _in(d):
+        _run_cli(["init", "--feedback", "off", "--mode", "yolo"])
+        files = render_template("marcusjhang/personal-software-factory", "off", "yolo")
+        files["agents/triage.md"] = "CHANGED TRIAGE\n"
+        _write_template(tmpl, files)
+        before = (d / "factory" / "agents" / "triage.md").read_text()
+        rc_pretend = _run_cli(["upgrade", "--from", str(tmpl), "--pretend"])
+        unchanged = (d / "factory" / "agents" / "triage.md").read_text() == before
+        rc_check = _run_cli(["upgrade", "--from", str(tmpl), "--check"])
+        # simulate a pre-lock repo: upgrade must bootstrap the base itself
+        (d / "psf.lock.json").unlink()
+        rc_bootstrap = _run_cli(["upgrade", "--from", str(tmpl)])
+        bootstrapped = (d / "psf.lock.json").exists()
+    ok = rc_pretend == 0 and unchanged and rc_check == 1 and rc_bootstrap == 0 and bootstrapped
+    return EvalResult("X13", "upgrade: pretend/check/bootstrap safety",
+                      "pass" if ok else "fail",
+                      {"pretend_rc": rc_pretend, "unchanged": unchanged,
+                       "check_rc": rc_check, "bootstrap_rc": rc_bootstrap,
+                       "bootstrapped": bootstrapped})
+
+
 def run_e2e() -> dict:
     evals = []
     with tempfile.TemporaryDirectory(prefix="psf-e2e-") as d:
         tmp = Path(d)
         for fn in (eval_X1, eval_X2, eval_X3, eval_X4, eval_X5, eval_X6, eval_X7,
-                   eval_X8, eval_X9, eval_X10, eval_X11):
+                   eval_X8, eval_X9, eval_X10, eval_X11, eval_X12, eval_X13):
             try:
                 evals.append(fn(tmp))
             except Exception as e:  # noqa: BLE001

@@ -139,6 +139,23 @@ Both adapters share one implementation (`psf.adapters.common`) and use your
 `factory/agents/*.md` prompts (passed per role), so editing those changes how the
 agents behave. Pin a harness per repo via `factory.yml` `runnerOptions.command`.
 
+## Updating the factory
+
+Your `factory/` is repo-native; `psf` never rewrites it silently. Updates are an
+explicit, reviewable three-way merge (like `copier update`):
+
+```bash
+psf upgrade --check      # CI: is there an update?
+psf upgrade --pretend    # show the plan, write nothing
+psf upgrade              # merge + apply; keeps your local edits
+```
+
+`psf init` pins a template snapshot (`.psf/template/`) and a lock
+(`.psf/factory.lock`); `psf upgrade` merges new defaults over your edits, runs any
+structural migrations, and only lands if `psf validate` + `psf audit` pass. The
+`psf` tool itself updates like any dependency (`pipx upgrade` / `uv tool upgrade`).
+See [docs/UPGRADE.md](./docs/UPGRADE.md).
+
 ## The factory loop
 
 | Stage | Who | Gate / output |
