@@ -7,7 +7,6 @@ against labelled outcomes before trusting thresholds. Records are
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 
 
 def sweep(records: list[dict], thresholds: tuple[float, ...] = tuple(round(0.1 * i, 1) for i in range(1, 10))) -> dict:

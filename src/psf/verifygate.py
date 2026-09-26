@@ -110,7 +110,7 @@ def dead_logic_under_test(diff: str) -> list[str]:
     added: dict[str, str] = {}
     for p in runtime_files:
         for line in files[p]:
-            m = _DEF_RE.match("+" + line if not line.startswith("+") else "+" + line)
+            m = _DEF_RE.match("+" + line)
             if m:
                 added.setdefault(m.group(1), p)
     out: list[str] = []

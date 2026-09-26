@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 from .adapters import common
-from .agents import SubprocessRunner, build_runner
+from .agents import SubprocessRunner
 from .evalkit import EvalResult, make_factory
 from .events import EventLog
 from .foreman import Foreman

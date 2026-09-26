@@ -31,3 +31,11 @@ def digest(obj: Any) -> str:
 
 def digest_bytes(data: bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
+def sha256_file(path: str | "os.PathLike[str]") -> str:
+    """Content-address a file by its bytes."""
+    import os
+
+    with open(os.fspath(path), "rb") as fh:
+        return "sha256:" + hashlib.sha256(fh.read()).hexdigest()

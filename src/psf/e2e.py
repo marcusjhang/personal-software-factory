@@ -314,8 +314,6 @@ def eval_X12(tmp: Path) -> EvalResult:
 
 def eval_X13(tmp: Path) -> EvalResult:
     """`psf upgrade` safety: --pretend writes nothing; --check flags drift; bootstraps."""
-    import shutil
-
     from .scaffold import render_template
 
     d = _repo(tmp, "x13")

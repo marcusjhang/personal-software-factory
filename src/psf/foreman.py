@@ -8,8 +8,6 @@ directly; it proposes steps the controller validates.
 from __future__ import annotations
 
 import os
-import shlex
-import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -178,18 +176,6 @@ class Foreman:
         return RunResult(work, diff=diff,
                          verify_passed=bool(work.verification and work.verification.get("passed")),
                          findings=findings)
-
-    def _run_verify_command(self, ws: Workspace) -> tuple[bool, str]:
-        """Run the deterministic project check (e.g. `pytest -q`) in the workspace."""
-        cmd = self.factory.verify_command
-        if not cmd:
-            return True, ""
-        try:
-            p = subprocess.run(shlex.split(cmd), cwd=str(ws.path),
-                               capture_output=True, text=True, timeout=600)
-        except (OSError, subprocess.SubprocessError) as e:
-            return False, f"verify_command error: {e}"
-        return p.returncode == 0, ((p.stdout or "") + (p.stderr or "")).strip()
 
     def _supervise(self, work: WorkItem, goal: str, ws: Workspace, findings: list[str]) -> tuple[WorkItem, list[str]]:
         """Consult the advisory supervisor before a retry; record and act on it."""

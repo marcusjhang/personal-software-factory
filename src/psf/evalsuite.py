@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 import random
 import tempfile
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from .agents import AgentResult, AgentTask

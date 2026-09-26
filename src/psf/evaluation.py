@@ -22,7 +22,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from .bench import BenchTask, run_benchmark
-from .canonical import digest, digest_bytes
+from .canonical import digest, digest_bytes, sha256_file
 
 PROTECTED_PREFIX = "eval/"
 
@@ -83,16 +83,12 @@ class EvalRecord:
         return asdict(self)
 
 
-def _sha_file(p: Path) -> str:
-    return "sha256:" + __import__("hashlib").sha256(p.read_bytes()).hexdigest()
-
-
 def manifest_digest(eval_dir: str | Path) -> str:
     eval_dir = Path(eval_dir)
     entries = {}
     for p in sorted(eval_dir.rglob("*")):
         if p.is_file() and p.name != "manifest.json":
-            entries[str(p.relative_to(eval_dir))] = _sha_file(p)
+            entries[str(p.relative_to(eval_dir))] = sha256_file(p)
     return digest(entries)
 
 

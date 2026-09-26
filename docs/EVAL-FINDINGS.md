@@ -334,3 +334,31 @@ in 1 attempt.
 
 X9 asserts the envelope carries **counts/digests only** (a sentinel goal string never
 appears in it) and that the main repo's report aggregates the consumer's work items.
+
+
+---
+
+## Round 12 — OCR review of the upgrade feature; duplication & dead-code sweep
+
+Reviewed `psf upgrade` and its neighbors with OCR (delegate mode), fixed findings,
+re-ran the battery. Then swept the whole `src/psf` for duplication and dead logic.
+
+| id | sev | finding | disposition |
+|---|---|---|---|
+| U1 | high | A failed post-merge verification left the merge **written** (reported "not applied" while the tree changed), so a broken factory could ship. | **fixed**: `_restore()` rolls files back on verification failure. |
+| U2 | high | `--from` a **partial** template dir made absent files look like upstream deletions and silently **deleted** consumer files. | **fixed**: `template_from` requires a complete template. |
+| U3 | medium | `psf improve --rollback` loaded `factory.yml` first, so it failed exactly when the factory was broken — the recovery path. | **fixed**: rollback no longer loads the factory. |
+| U4 | medium | `feedback` hard-coded `psf_version: "0.1.0"` instead of the real version. | **fixed**: uses `__version__`. |
+| U5 | low | `ingest_issues` KeyError on an envelope without `envelope_id`; `github` `json.loads` unguarded. | **fixed**: guarded. |
+
+Sweep results (no findings left open):
+- **Template duplication removed** — `factory.yml`/prompts/`AGENTS.md` now live only
+  in `scaffold.py`; `cli.py` no longer re-declares them.
+- **Helper duplication removed** — two `_sha_file` copies → `canonical.sha256_file`;
+  four factory-path resolutions → `scaffold.factory_file`.
+- **Dead code removed** — `Foreman._run_verify_command` (+ its only imports
+  `shlex`/`subprocess`), `repobench.grow_evals_per_repo`, and several unused imports.
+
+After: **pytest green**, all suites green (self 27/27, gov 8/8, supervisor 16/16,
+adapters 8/8, guardrails 11/11, e2e 13/13, repos 20/20), bench 43%→100%, OSS live
+5/5, `psf audit` healthy.

@@ -19,15 +19,12 @@ its outcome, under the governance rules (provenance + separate approval).
 
 from __future__ import annotations
 
-import json
-import os
 import subprocess
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .events import EventLog
-from .evalkit import make_eval_dir
 from .foreman import Foreman
 from .schema import Factory
 from .state import Workflow
@@ -119,7 +116,7 @@ class RepoRealRunner:
         self.timeout = timeout
 
     def run(self, task):
-        from .agents import AgentResult, AgentTask
+        from .agents import AgentResult
         from .agents import SubprocessRunner
         if task.role == "implement":
             sub = SubprocessRunner(default_command=["python3", self.script], timeout=self.timeout)
@@ -202,22 +199,3 @@ def run_matrix(*, sizes: list[str] | None = None, domains: list[str] | None = No
             subprocess.run(["git", "worktree", "prune"], cwd=str(repo),
                            capture_output=True, text=True)
     return result.to_dict()
-
-
-def grow_evals_per_repo(eval_dir: str | Path, *, domain: str, size: str, source: str,
-                        approver: str = "owner", author: str = "system") -> dict:
-    """Per-repo eval growth: add a case for this repo's task, then approve it."""
-    from .evalgov import add_candidate, approve_candidate, integrity, status
-
-    d = Path(eval_dir)
-    if not (d / "tasks.json").exists():
-        make_eval_dir(d.parent, tasks=[{"id": "seed", "goal": "keep tests green",
-                                        "solves_on_attempt": 1}])
-    cid = f"{size}-{domain}"
-    try:
-        add_candidate(d, case_id=cid, goal=task_goal(size, domain), solves_on_attempt=2,
-                      source=source, owner=author)
-        approve_candidate(d, cid, approver=approver, author=author)
-    except ValueError:
-        pass  # already present
-    return {"status": status(d), "integrity": integrity(d)}

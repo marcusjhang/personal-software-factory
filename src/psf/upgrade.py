@@ -1,9 +1,10 @@
 """`psf upgrade` — reconcile a repo's factory with a newer template.
 
-The model is Copier's: keep a *pristine base* (``.psf/template``) of what was
-installed, then three-way merge it against the repo's current files (ours) and a
-newer template (theirs). Local edits survive; real clashes surface as conflict
-markers; added/removed template files are handled by the usual three-way rules.
+The model is Copier's: keep a *pristine base* (``psf.lock.json``'s ``base``) of
+what was installed, then three-way merge it against the repo's current files
+(ours) and a newer template (theirs). Local edits survive; real clashes surface
+as conflict markers; added/removed template files follow the usual three-way
+rules. A failed post-merge verification rolls the files back.
 
 Structural changes that text cannot express are applied afterward as migrations
 (``psf.migrations``). Nothing is written under ``--pretend``/``--check``, and the
@@ -132,7 +133,11 @@ def _consumer_settings(factory_dir: Path) -> tuple[str, str, str]:
 
 
 def template_from(path: str | Path) -> tuple[dict[str, str], str]:
-    """Load a target template from a dir (template root, or a repo's factory/)."""
+    """Load a target template from a dir (template root, or a repo's factory/).
+
+    A template must be complete: a partial directory would make absent files look
+    like upstream deletions and silently delete the consumer's files.
+    """
     p = Path(path)
     if (p / "factory.yml").exists():
         files = read_template(p)
@@ -140,6 +145,10 @@ def template_from(path: str | Path) -> tuple[dict[str, str], str]:
         files = read_template(p / "factory")
     else:
         raise FileNotFoundError(f"no factory.yml (or factory/factory.yml) under {p}")
+    required = set(render_template("owner/repo", "off", "hitl"))
+    missing = sorted(required - set(files))
+    if missing:
+        raise ValueError(f"incomplete template under {p}: missing {missing}")
     return files, digest(files)
 
 
@@ -204,7 +213,8 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
     if verify and not force:
         err = _verify(factory_dir)
         if err:
-            rep.notes.append(f"NOT applied: verification failed — {err}")
+            _restore(factory_dir, ours, {c.path for c, _ in merged})
+            rep.notes.append(f"rolled back: verification failed — {err}")
             return rep
 
     # Advance the base only when the merge is conflict-free; otherwise keep the
@@ -214,6 +224,17 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
                                migrations=applied, base=new_base).stamp())
     rep.applied = True
     return rep
+
+
+def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> None:
+    """Undo a merge: put back the original files and remove anything we added."""
+    for rel in set(before) | touched:
+        p = factory_dir / rel
+        if rel in before:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(before[rel])
+        elif p.exists():
+            p.unlink()
 
 
 def _verify(factory_dir: Path) -> str | None:

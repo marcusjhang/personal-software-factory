@@ -13,8 +13,8 @@ from .bench import run_benchmark
 from .events import EventLog
 from .foreman import Foreman
 from .improve import run_improvement
-from .scaffold import (DEFAULT_UPSTREAM, Lock, digest, render_template,
-                       write_lock, write_scaffold)
+from .scaffold import (DEFAULT_UPSTREAM, Lock, digest, factory_file,
+                       render_template, write_lock, write_scaffold)
 from .schema import FactoryError, load as load_factory
 from .state import GateError, Workflow
 
@@ -37,8 +37,7 @@ def _set_feedback(*, mode: str | None = None, upstream: str | None = None,
 
     import yaml
 
-    p = Path(factory_path)
-    p = p / "factory.yml" if p.is_dir() else p
+    p = factory_file(factory_path)
     raw = yaml.safe_load(p.read_text()) or {}
     fb = raw.setdefault("feedback", {})
     if mode is not None:
@@ -67,7 +66,7 @@ def cmd_init(args) -> int:
         return 2
 
     # Feedback consent is chosen at install time and changeable anytime.
-    upstream = args.upstream or "marcusjhang/personal-software-factory"
+    upstream = args.upstream or DEFAULT_UPSTREAM
     fb_mode = args.feedback
     if fb_mode is None:
         if sys.stdin.isatty():
@@ -112,9 +111,13 @@ def cmd_init(args) -> int:
 def cmd_upgrade(args) -> int:
     from .upgrade import run_upgrade
 
-    rep = run_upgrade(".", args.factory, source=args.from_dir, revision=args.to,
-                      pretend=args.pretend, check=args.check, force=args.force,
-                      verify=not args.no_verify)
+    try:
+        rep = run_upgrade(".", args.factory, source=args.from_dir, revision=args.to,
+                          pretend=args.pretend, check=args.check, force=args.force,
+                          verify=not args.no_verify)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"upgrade: {e}", file=sys.stderr)
+        return 2
     if args.json:
         print(json.dumps(rep.to_dict(), indent=2))
     else:
@@ -176,8 +179,7 @@ def _set_mode(mode: str, factory_path: str = "factory") -> Path:
         raise ValueError("mode must be hitl or yolo")
     import yaml
 
-    p = Path(factory_path)
-    p = p / "factory.yml" if p.is_dir() else p
+    p = factory_file(factory_path)
     raw = yaml.safe_load(p.read_text()) or {}
     raw["mode"] = mode
     # yolo/hitl are not YAML booleans, but quote for safety/consistency
@@ -202,8 +204,7 @@ def _set_harness(value: str, *, model: str | None = None, permissions: str | Non
                  factory_path: str = "factory") -> Path:
     import yaml
 
-    p = Path(factory_path)
-    p = p / "factory.yml" if p.is_dir() else p
+    p = factory_file(factory_path)
     raw = yaml.safe_load(p.read_text()) or {}
     raw["runner"] = "subprocess"
     cmd = [sys.executable, "-m", f"psf.adapters.{value}"]

@@ -22,6 +22,7 @@ import yaml
 
 from .bench import run_benchmark, stretch_tasks
 from .events import EventLog
+from .scaffold import factory_file
 from .schema import Factory, load as load_factory
 from .state import Workflow
 
@@ -60,11 +61,6 @@ def _get(raw: dict, dotted: str):
     return node
 
 
-def _factory_file(factory_path: str | Path) -> Path:
-    p = Path(factory_path)
-    return p / "factory.yml" if p.is_dir() else p
-
-
 def propose_candidates(factory: Factory, log: EventLog) -> list[Proposal]:
     """Derive a small grid of candidate changes from observed signals."""
     wf = Workflow(log)
@@ -86,9 +82,7 @@ def _evaluate(max_attempts: int):
 def _apply(factory_path: Path, proposal: Proposal) -> Path:
     if proposal.field in PROTECTED or proposal.field not in PROPOSABLE:
         raise ValueError(f"field '{proposal.field}' is protected and cannot be proposed")
-    factory_path = Path(factory_path)
-    if factory_path.is_dir():
-        factory_path = factory_path / "factory.yml"
+    factory_path = factory_file(factory_path)
     backup = factory_path.with_suffix(".yml.bak")
     shutil.copy2(factory_path, backup)
     raw = yaml.safe_load(factory_path.read_text()) or {}
@@ -102,9 +96,7 @@ def _apply(factory_path: Path, proposal: Proposal) -> Path:
 
 
 def _rollback(factory_path: Path) -> bool:
-    factory_path = Path(factory_path)
-    if factory_path.is_dir():
-        factory_path = factory_path / "factory.yml"
+    factory_path = factory_file(factory_path)
     backup = factory_path.with_suffix(".yml.bak")
     if not backup.exists():
         return False
@@ -117,22 +109,25 @@ def run_improvement(factory_path: str | Path, ledger_path: str | Path, *,
                     promote: bool = False, rollback: bool = False,
                     field: str | None = None, candidate: object | None = None) -> ImprovementResult:
     log = EventLog(ledger_path)
-    factory = load_factory(factory_path)
     action = "improvement"
 
     if rollback:
+        # Do not load the factory first: rollback is the recovery path and must
+        # work even when the current factory.yml is broken.
         done = _rollback(factory_path)
         log.append("ImprovementRolledBack", {"ok": done}, actor=action)
         log.close()
         return ImprovementResult(Proposal("", None, None, "rollback"), 0, 0, 0, False, done,
                                  ["rolled back" if done else "no backup to roll back to"])
 
+    factory = load_factory(factory_path)
+
     if field:
         if field in PROTECTED or field not in PROPOSABLE:
             log.append("ImprovementRejected", {"reason": "protected_field", "field": field}, actor=action)
             log.close()
             raise ValueError(f"field '{field}' is protected and cannot be proposed")  # noqa: B904
-        current = _get(yaml.safe_load(_factory_file(factory_path).read_text()), field)
+        current = _get(yaml.safe_load(factory_file(factory_path).read_text()), field)
         candidates = [Proposal(field, current, candidate, "operator-specified")]
     else:
         candidates = propose_candidates(factory, log)

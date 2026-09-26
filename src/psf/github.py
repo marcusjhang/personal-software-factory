@@ -36,7 +36,10 @@ def list_issues(repo: str | None = None, label: str = "factory") -> list[dict]:
     if rc != 0 or not out:
         return []
     import json
-    return json.loads(out)
+    try:
+        return json.loads(out)
+    except ValueError:
+        return []
 
 
 def find_pr_for_branch(branch: str, repo: str | None = None) -> str | None:
@@ -48,7 +51,10 @@ def find_pr_for_branch(branch: str, repo: str | None = None) -> str | None:
     if rc != 0 or not out:
         return None
     import json
-    prs = json.loads(out)
+    try:
+        prs = json.loads(out)
+    except ValueError:
+        return None
     return prs[0]["url"] if prs else None
 
 

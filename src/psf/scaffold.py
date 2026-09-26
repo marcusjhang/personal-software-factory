@@ -172,6 +172,12 @@ def write_template(dest: Path, files: dict[str, str]) -> None:
         p.write_text(text)
 
 
+def factory_file(path: str | Path) -> Path:
+    """Resolve a factory path (dir or file) to its ``factory.yml``."""
+    p = Path(path)
+    return p / "factory.yml" if p.is_dir() else p
+
+
 def as_str(value: object, default: str) -> str:
     """Coerce a config value a YAML parser may have turned into a bool back to a string.
 

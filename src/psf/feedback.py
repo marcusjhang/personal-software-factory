@@ -23,36 +23,31 @@ Flow:
 
 from __future__ import annotations
 
-import hashlib
 import json
 import time
 import uuid
 from pathlib import Path
 from typing import Any
 
-from .canonical import digest
+from . import __version__
+from .canonical import digest, sha256_file
 from .events import EventLog
-from .improve import _factory_file  # reuse path resolution
 from .state import Workflow
 
 SCHEMA = "psf.feedback/v1"
 NOTE = "counts, digests, and versions only; no source, prompts, or secrets"
 
 
-def _sha_file(p: Path) -> str:
-    return "sha256:" + hashlib.sha256(p.read_bytes()).hexdigest()
-
-
 def factory_digest(factory_path: str | Path) -> str:
     p = Path(factory_path)
     root = p.parent if p.is_file() else p
-    entries = {str(f.relative_to(root)): _sha_file(f)
+    entries = {str(f.relative_to(root)): sha256_file(f)
                for f in sorted(root.rglob("*")) if f.is_file()}
     return digest(entries)
 
 
 def build_envelope(factory_path: str | Path, ledger_path: str | Path,
-                   *, repo: str | None = None, psf_version: str = "0.1.0") -> dict[str, Any]:
+                   *, repo: str | None = None, psf_version: str | None = None) -> dict[str, Any]:
     log = EventLog(ledger_path)
     wf = Workflow(log)
     states: dict[str, int] = {}
@@ -82,7 +77,7 @@ def build_envelope(factory_path: str | Path, ledger_path: str | Path,
         "schema": SCHEMA,
         "envelope_id": f"FB-{uuid.uuid4().hex[:8]}",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "psf_version": psf_version,
+        "psf_version": psf_version or __version__,
         "factory_digest": factory_digest(factory_path),
         "eval_manifest_digest": json.loads(eval_manifest.read_text()).get("manifest_digest")
         if eval_manifest.exists() else None,
@@ -187,8 +182,9 @@ def ingest_issues(inbox: str | Path, *, repo: str | None = None,
     n = 0
     for issue in list_issues(repo=repo, label=label):
         env = parse_envelope(issue.get("body") or "")
-        if env:
-            (inbox / f"{env['envelope_id']}.json").write_text(json.dumps(env, indent=2) + "\n")
+        eid = env.get("envelope_id") if env else None
+        if env and eid:
+            (inbox / f"{eid}.json").write_text(json.dumps(env, indent=2) + "\n")
             n += 1
     return n
 
