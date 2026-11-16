@@ -103,3 +103,11 @@ Round 1: 7 findings, 0 verified high+. F1 (medium: a non-string `source` crashed
 publishing could skip an unpublished envelope) fixed: `--if-changed` now requires `--local`. F3 and F4 (low: the source id depended on cwd and was a
 guessable path hash) fixed: random id in `.psf/source-id`. F6 (low) fixed. F7 (style) fixed. F5 (low: a spoofed envelope can hide another
 repo's signals) accepted, because feedback is evidence and never authority.
+
+### Pre-merge review for 0.2.2 (upgrade fixes), independent reviewers
+
+| session | range | round result | notes |
+|---|---|---|---|
+| R-0a2fd23c | 5efc4b7..4d58e47 | 6 findings, **3 verified high → CONTINUE** | R1–R3 (high) and R4 (medium) all came from a new insert-only auto-merge that could silently lose or override user config (separator mis-parse, duplicate YAML keys, blank-line base, unchecked git rc). **Resolver removed**: conflicts stay with a human. R5 (medium, `--resolved` could re-create the skip bug) fixed. R6 (low, CRLF, pre-existing) accepted |
+| R-378237e8 | 5efc4b7..de30810 | 2 findings, 0 verified high → DONE | S1 (medium) fixed: the rollback note says how to resolve. S2 (low, read-only probe of the lock's own keys) accepted |
+| (self) | de30810..final | 0 findings → DONE | message-only change for S1 |
