@@ -179,6 +179,23 @@ See [docs/UPGRADE.md](./docs/UPGRADE.md).
 Failure loops back to Build within a bounded retry budget. Nothing merges or
 deploys on its own.
 
+### Code review loop (end of every feature)
+
+Correctness gates alone miss duplication, dead code, weak error handling and
+complexity. `psf review` adds an OCR delegate-mode loop (the `ocr` CLI, no LLM key): review, verify each
+finding, fix every verified high/critical finding, and re-review until **at most 2** remain, with a **cap of 5 rounds**.
+A STOP result is reported, not hidden.
+
+```bash
+psf review start [--base main | --full]   # files + OCR rules -> .psf/review/<session>.json
+psf review record findings.json           # 0 DONE · 10 CONTINUE · 11 STOP
+```
+
+Turning it on in a project: `psf upgrade`. That adds `gates.code_review`, `factory/agents/code-review.md`,
+and the loop step in `factory/AGENTS.md`. Your root `AGENTS.md`/`CLAUDE.md` belong to you,
+so upgrade leaves them alone; if they don't already point there, add one line pointing to `factory/agents/code-review.md`. To review the whole codebase once, run `psf review start --full`.
+The skill is `.claude/skills/code-review-loop`.
+
 ## Design principles
 
 1. **Agents propose; the controller decides.** No agent writes lifecycle state.
