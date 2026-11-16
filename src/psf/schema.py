@@ -222,6 +222,17 @@ def validate(raw: Any, *, base_dir: Path) -> list[str]:
     vc = gates.get("verify_command")
     if vc is not None and not (isinstance(vc, str) or (isinstance(vc, list) and all(isinstance(x, str) for x in vc))):
         errors.append("gates.verify_command must be a string or a list of strings")
+    cr = gates.get("code_review") if isinstance(gates, dict) else None
+    if cr is not None:
+        if not isinstance(cr, dict):
+            errors.append("gates.code_review must be a mapping")
+        else:
+            for k, lo in (("max_highs", 0), ("max_rounds", 1)):
+                if k in cr and (not isinstance(cr[k], int) or isinstance(cr[k], bool) or cr[k] < lo):
+                    errors.append(f"gates.code_review.{k} must be an integer >= {lo}")
+            bad = set(cr) - {"max_highs", "max_rounds"}
+            if bad:
+                errors.append(f"gates.code_review has unknown keys: {sorted(bad)}")
     if "verify_quorum" in gates:
         quorum = gates["verify_quorum"]
         # bool is an int subclass; ``true`` must not pass as 1.

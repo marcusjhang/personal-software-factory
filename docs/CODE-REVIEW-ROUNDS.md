@@ -68,3 +68,20 @@ entirely static. Dispositions (P1 = high):
 
 **Open P1 after round 2: mitigations landed; remaining are advisory by design (R2/R7/R8
 need richer runtime evidence, planned). No unmitigated high-severity gate gap.**
+
+## Round 3: the loop becomes `psf review` (2026-11-16)
+
+The stop rule changes from 0 open P1 to **≤2 verified high/critical** with a **cap of 5 rounds** (STOP is reported).
+The mechanics are now code (`src/psf/codereview.py`, `psf review`). The judgment is in the skill
+`code-review-loop` and the template prompt `agents/code-review.md`. The loop ran on its own diff:
+
+### Review R-c2a231eb (workspace, 4 files) → DONE
+
+| round | findings | verified high+ | decision |
+|---|---|---|---|
+| 1 | 2 | 0 | DONE |
+
+| id | sev | finding | disposition |
+|---|---|---|---|
+| M1 | medium | a corrupt session JSON was reported as "cannot read findings" | fixed, with test `test_corrupt_session_is_a_review_error` |
+| L1 | low | a `--base` value starting with `-` reaches ocr unchecked (local CLI input only) | accepted |

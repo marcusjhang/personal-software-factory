@@ -4,8 +4,8 @@ description: >
   Ingest consumer feedback issues into the factory and act on them safely:
   pull the issues, extract each concrete claim, verify it against HEAD before
   believing it, fix the valid ones with a regression test, close the issue with
-  evidence, then run an OCR high-severity loop (fix highs, repeat) until no
-  verified highs remain. Use when a maintainer says "there's feedback in the
+  evidence, then run the OCR code-review loop (fix highs, repeat) until at most
+  2 verified highs remain. Use when a maintainer says "there's feedback in the
   issues", "check the issues and improve the factory", "triage the feedback
   issues", or after ingesting `factory-feedback` envelopes.
 license: MIT
@@ -67,24 +67,12 @@ For each issue, comment with: the classification, the repro, the fix, the file,
 and the commit SHA; then close. For already-fixed ones, cite the commit and test.
 For invalid/unreproducible, say why and close (or leave open only if truly blocked).
 
-## Step 5 — OCR high-severity loop
+## Step 5 — OCR review loop
 
-```bash
-ocr delegate preview --format json                       # which files/mode
-ocr delegate rule --format json <changed files>          # review rules
-git diff / git show <commit> -- <file>                   # the code to review
-```
-
-Review every changed file against the rules; gather findings with a severity.
-Then, from the current tree:
-
-1. Fix every **critical/high** finding; add a test where it is a behavioral bug.
-2. Re-run the battery (Step 6).
-3. Re-run OCR on the files you just changed.
-4. **Repeat until a pass yields no verified high-or-above finding.** Write the
-   rounds into `docs/EVAL-FINDINGS.md`.
-
-Never declare "no highs" without the OCR pass that produced it.
+Run the `code-review-loop` skill on the changed files (`psf review start --base <ref>`).
+It fixes verified highs and re-reviews until at most 2 remain, with a cap of 5 rounds. Re-run
+the battery (Step 6) after each fix round. Paste `psf review status` into
+`docs/EVAL-FINDINGS.md`. Never declare "no highs" without the round that produced it.
 
 ## Step 6 — Battery (must be green)
 

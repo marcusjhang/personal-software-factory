@@ -755,6 +755,52 @@ def cmd_bench(args) -> int:
     return 0 if report.factory_pass >= report.baseline_pass else 1
 
 
+
+def cmd_review(args) -> int:
+    """OCR delegate-mode code-review loop (see the code-review-loop skill)."""
+    from . import codereview as cr
+
+    repo = Path.cwd()
+    try:
+        if args.action == "start":
+            try:
+                gates = load_factory(args.factory).gates
+            except FactoryError:
+                gates = {}
+            base = cr.Settings.from_gates(gates)
+            settings = cr.Settings(args.max_highs if args.max_highs is not None else base.max_highs,
+                                   args.max_rounds if args.max_rounds is not None else base.max_rounds)
+            state = cr.start(repo, full=args.full, base=args.base, settings=settings)
+            if args.json:
+                print(json.dumps(state, indent=2))
+            else:
+                print(f"session {state['session']}  mode={state['mode']}  files={len(state['files'])}  "
+                      f"rule groups={len(state['rule_groups'])}  stop: <={state['max_highs']} verified "
+                      f"high+ / cap {state['max_rounds']} rounds")
+                for f in state["files"]:
+                    print(f"  {f}")
+                print(f"rules + files: .psf/review/{state['session']}.json"
+                      + ("  (nothing to review: DONE)" if state["result"] == cr.DONE else ""))
+            return 0
+        if args.action == "record":
+            if not args.path:
+                raise cr.ReviewError("record needs a findings JSON file")
+            findings = json.loads(Path(args.path).read_text())
+            rnd = cr.record(repo, findings, session=args.session)
+            print(f"round {rnd['round']}: {len(rnd['findings'])} findings, "
+                  f"{rnd['verified_highs']} verified high+ -> {rnd['decision']}")
+            return {cr.DONE: 0, cr.CONTINUE: 10, cr.STOP: 11}[rnd["decision"]]
+        state = cr.load(repo, args.session)
+        print(json.dumps(state, indent=2) if args.json else cr.summary_markdown(state), end="")
+        return 0
+    except cr.ReviewError as e:
+        print(f"review error: {e}", file=sys.stderr)
+        return 2
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"review error: cannot read findings: {e}", file=sys.stderr)
+        return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="psf", description="Personal Software Factory")
     p.add_argument("--factory", default=DEFAULT_FACTORY, help="factory directory (default: ./factory)")
@@ -934,6 +980,17 @@ def build_parser() -> argparse.ArgumentParser:
                    help="for ingest: pull envelopes from factory-feedback issues (requires --github or feedback.upstream)")
     s.add_argument("--auto", action="store_true", help="for opt-in: publish automatically")
     s.set_defaults(func=cmd_feedback)
+
+    s = sub.add_parser("review", help="OCR delegate code-review loop: start | record <findings.json> | status")
+    s.add_argument("action", choices=["start", "record", "status"])
+    s.add_argument("path", nargs="?", help="for record: findings JSON file")
+    s.add_argument("--full", action="store_true", help="for start: review every tracked code file, not just the diff")
+    s.add_argument("--base", help="for start: diff from this ref to HEAD (default: uncommitted workspace changes)")
+    s.add_argument("--max-highs", type=int, help="stop when verified high+ findings <= N (default 2)")
+    s.add_argument("--max-rounds", type=int, help="round cap (default 5)")
+    s.add_argument("--session", help="review session id (default: latest)")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_review)
 
     s = sub.add_parser("log", help="print the ledger")
     s.add_argument("work_id", nargs="?")

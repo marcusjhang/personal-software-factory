@@ -41,6 +41,7 @@ agents:
 gates:
   spec_approval: true
   verify_quorum: 2
+  code_review: { max_highs: 2, max_rounds: 5 }   # `psf review` stop rule (OCR delegate loop)
 limits:
   max_attempts: 2
 feedback:
@@ -82,9 +83,32 @@ Recurring verify-failures and blocks become evaluation cases and improvements in
 the upstream factory. This is evidence, never authority: it cannot change policy.
 
 Do **not** put secrets, customer data, or raw source in a feedback envelope.
+
+## Code review loop (end of every feature)
+
+Before you hand off a feature, run the OCR delegate-mode review loop. It needs the `ocr`
+CLI (open-code-review) but no LLM key. Follow `factory/agents/code-review.md`:
+
+    psf review start                 # this feature: uncommitted changes (or --base main for a branch)
+    psf review start --full          # once per project: every tracked code file
+    psf review record findings.json  # after each round; exit 0 DONE, 10 CONTINUE, 11 STOP
+
+Fix every verified high/critical finding and re-review until at most 2 remain
+(`gates.code_review` in `factory/factory.yml`). The cap is 5 rounds. A STOP result
+means the loop did not converge: report it, do not hide it. Taste and style notes never block.
 """
 
 PROMPTS = {
+    "code-review": (
+        "You run the OCR delegate code-review loop at the end of a feature. The reviewer judges; `psf review` keeps score.\n\n"
+        "1. `psf review start` (add `--base <ref>` for a branch, `--full` for the whole repo). It writes the files to review and the resolved OCR rules to `.psf/review/<session>.json`.\n"
+        "2. Review each listed file's change (or the whole file in --full mode) against its rule group. Record each finding with id, severity (critical|high|medium|low|info|taste|style), file, and summary.\n"
+        "3. Verify every high or critical finding before counting it: reproduce it, or point to the exact line and the input that breaks. Set verified true only when it is real.\n"
+        "4. `psf review record findings.json`. DONE (exit 0) means at most the allowed verified highs remain. Stop there.\n"
+        "5. CONTINUE (exit 10): fix every verified high/critical finding, add a regression test for behavioral bugs, run the project's tests, then go back to step 2 for the files you changed.\n"
+        "6. STOP (exit 11): the round cap was reached without converging. Report the remaining highs; never claim the review is clean.\n\n"
+        "Taste, style and naming notes never block. Do not invent findings to fill a round, and do not drop a real one to finish."
+    ),
     "triage": "You scope a goal: restate it, classify risk, and decide spec-first vs direct. Reply reject only for a non-goal.",
     "spec": (
         "You write a typed spec: title, desired behavior, non-goals, and acceptance criteria that a verifier can check.\n\n"
