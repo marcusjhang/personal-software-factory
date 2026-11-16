@@ -75,8 +75,8 @@ psf improve                                  # turn signals into a gated change
 
 ## Cumulative envelopes and dedupe
 
-An envelope holds a repo's **cumulative** counts, and each one carries a `source`: a digest of the
-consumer repo's path, never the path itself. `psf feedback report` keeps only the **newest envelope per
+An envelope holds a repo's **cumulative** counts, and each one carries a `source`: a random id
+kept in the consumer's `.psf/source-id`, so it is stable from any folder and reveals nothing. `psf feedback report` keeps only the **newest envelope per
 source**, so weekly exports never double-count (`superseded` in the report says how many it dropped).
 Envelopes from before 0.2.1 have no `source` and are all counted, as before.
 

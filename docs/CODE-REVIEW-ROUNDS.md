@@ -96,3 +96,10 @@ The mechanics are now code (`src/psf/codereview.py`, `psf review`). The judgment
 |---|---|---|---|
 | CR1 | medium | an invalid `factory.yml` silently fell back to the default stop rule in `psf review start` | fixed: an invalid factory now errors (exit 5); a missing factory still uses the defaults. Tests added |
 | CR2 | low | a truncated session file raised KeyError | fixed: `load()` checks the required keys. Test added |
+
+### Pre-merge review R-a9d61a89 (0.2.1, range d194835..665dcf5, 5 files) → DONE (independent reviewer)
+
+Round 1: 7 findings, 0 verified high+. F1 (medium: a non-string `source` crashed `report`) fixed. F2 (medium: `--if-changed` with
+publishing could skip an unpublished envelope) fixed: `--if-changed` now requires `--local`. F3 and F4 (low: the source id depended on cwd and was a
+guessable path hash) fixed: random id in `.psf/source-id`. F6 (low) fixed. F7 (style) fixed. F5 (low: a spoofed envelope can hide another
+repo's signals) accepted, because feedback is evidence and never authority.

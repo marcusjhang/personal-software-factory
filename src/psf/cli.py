@@ -440,14 +440,16 @@ def cmd_feedback(args) -> int:
         if local and args.github:
             print("error: --local never publishes; drop --github", file=sys.stderr)
             return 2
+        if getattr(args, "if_changed", False) and (not local or args.out):
+            print("error: --if-changed needs --local and the default output (.psf/feedback/)", file=sys.stderr)
+            return 2
         if mode == "off" and not local:
             print("feedback is OFF — `psf feedback opt-in` to enable, or `--local` for a local file only (nothing was sent)")
             return 0
         target = None if local else (args.github or (upstream if mode == "auto" else None))
         env = build_envelope(args.factory, args.ledger, repo=target)
         if getattr(args, "if_changed", False):
-            out_dir = Path(args.out).parent if args.out else Path(".psf/feedback")
-            if not has_new_work(env, latest_export(out_dir)):
+            if not has_new_work(env, latest_export(Path(".psf/feedback"))):
                 print("no new work since the last export: skipped")
                 return 0
         path = export(args.factory, args.ledger, out=args.out, repo=target, env=env)

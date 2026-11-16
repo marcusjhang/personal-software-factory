@@ -162,8 +162,31 @@ def test_report_keeps_newest_envelope_per_source(tmp_path):
     assert r["totals"]["work_items"] == 7 + 3 + 2
 
 
-def test_source_id_is_stable_and_not_the_path(tmp_path):
+def test_source_id_is_random_stable_and_per_ledger(tmp_path, monkeypatch):
     from psf.feedback import source_id
-    a, b = source_id(tmp_path), source_id(tmp_path)
-    assert a == b and str(tmp_path) not in a and a.startswith("src-")
-    assert source_id(tmp_path / "x") != a
+    a = source_id(tmp_path / ".psf/factory.db")
+    monkeypatch.chdir(tmp_path)                      # cwd no longer matters
+    assert source_id(tmp_path / ".psf/factory.db") == a
+    assert a.startswith("src-") and str(tmp_path) not in a
+    assert (tmp_path / ".psf/source-id").read_text().strip() == a
+    assert source_id(tmp_path / "other/.psf/factory.db") != a
+
+
+def test_report_tolerates_malformed_source(tmp_path):
+    from psf.feedback import report
+    inbox = tmp_path / "inbox"; inbox.mkdir()
+    (inbox / "FB-x.json").write_text(json.dumps({"schema": "psf.feedback/v1", "source": ["x"],
+                                                  "metrics": {"work_items": 1}}))
+    (inbox / "FB-y.json").write_text(json.dumps({"schema": "psf.feedback/v1", "source": {"a": 1},
+                                                  "metrics": {"work_items": 2}}))
+    r = report(inbox)
+    assert r["envelopes"] == 2 and r["totals"]["work_items"] == 3
+
+
+def test_if_changed_requires_local_default_output(tmp_path, monkeypatch):
+    from psf import cli
+    monkeypatch.chdir(tmp_path)
+    root = _cli_factory(tmp_path, "hint")
+    EventLog(tmp_path / "e.db").close()
+    assert cli.main(_args(root, tmp_path / "e.db", "--if-changed")) == 2
+    assert cli.main(_args(root, tmp_path / "e.db", "--local", "--if-changed", "--out", "x.json")) == 2
