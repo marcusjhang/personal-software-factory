@@ -134,15 +134,14 @@ def test_rebase_does_not_touch_normal_locks(tmp_path: Path):
 
 # --- conflicts: insert-only merges, rollback instead of crash, --resolved ------
 
-def test_merge_keeps_both_side_by_side_insertions():
+def test_side_by_side_insertions_are_a_conflict_not_a_guess():
+    """Both sides inserting at the same spot is left to a human (no silent resolution)."""
     from psf.upgrade import _merge
     base = "gates:\n  verify_quorum: 2\nlimits:\n  max_attempts: 2\n"
-    ours = "gates:\n  verify_quorum: 2\n  verify_command: pytest -q\nlimits:\n  max_attempts: 2\n"
-    theirs = "gates:\n  verify_quorum: 2\n  code_review: { max_highs: 2 }\nlimits:\n  max_attempts: 2\n"
-    text, conflict = _merge(ours, base, theirs, "factory.yml")
-    assert not conflict
-    assert text == ("gates:\n  verify_quorum: 2\n  verify_command: pytest -q\n"
-                    "  code_review: { max_highs: 2 }\nlimits:\n  max_attempts: 2\n")
+    ours = "gates:\n  verify_quorum: 2\n  code_review: false\nlimits:\n  max_attempts: 2\n"
+    theirs = "gates:\n  verify_quorum: 2\n  code_review: true\nlimits:\n  max_attempts: 2\n"
+    _, conflict = _merge(ours, base, theirs, "factory.yml")
+    assert conflict
 
 
 def test_merge_real_conflict_still_conflicts():
@@ -188,3 +187,24 @@ def test_resolved_advances_base_only_when_clean(tmp_path: Path):
     assert rep.applied
     assert run_upgrade(root, factory, check=True).drifted is False   # no phantom CONFLICT
     assert "max_attempts: 4" in (factory / "factory.yml").read_text()
+
+
+def test_resolved_refuses_without_a_pinned_base(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    rep = run_upgrade(root, factory, resolved=True)
+    assert not rep.applied and any("run `psf upgrade` first" in n for n in rep.notes)
+    assert not (root / "psf.lock.json").exists()
+    rep = run_upgrade(root, factory)                       # normal path still delivers
+    assert (factory / "agents/code-review.md").exists()
+
+
+def test_resolved_leaves_missing_template_files_addable(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    run_upgrade(root, factory)
+    (factory / "agents/code-review.md").unlink()           # e.g. a rolled-back merge never wrote it
+    rep = run_upgrade(root, factory, resolved=True)
+    assert rep.applied and any("agents/code-review.md" in n for n in rep.notes)
+    run_upgrade(root, factory)
+    assert (factory / "agents/code-review.md").exists()

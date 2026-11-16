@@ -54,8 +54,8 @@ whether the base is self-consistent.
 
 ## Conflicts
 
-Lines both sides only *added* at the same spot are kept side by side. They are not conflicts. A real conflict, where you and
-the template changed the same lines, is rolled back so your factory keeps working. To resolve it:
+When you and the template changed or added lines at the same spot, that is a conflict. psf never guesses: the upgrade is
+rolled back so your factory keeps working. To resolve it:
 
 ```bash
 psf upgrade --force        # write the merge, conflict markers included (adds new template files too)

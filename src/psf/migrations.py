@@ -84,9 +84,14 @@ def rebase_pending(repo_root: Path, factory_dir: Path, applied: list[str]) -> bo
 
 
 def _rebase_applies(repo_root: Path, factory_dir: Path) -> bool:
+    """Only locks pinned by the old bootstrap that show the actual symptom: a
+    template file the stale base claims was installed is absent from the factory.
+    Repos whose owners already restored the files are left alone."""
     lock = read_lock(repo_root)
-    return bool(lock and lock.base and "2026-09-bootstrap-lock" in (lock.migrations or [])
-                and lock.base != _legacy_base(factory_dir))
+    if not (lock and lock.base and "2026-09-bootstrap-lock" in (lock.migrations or [])):
+        return False
+    legacy = _legacy_base(factory_dir)
+    return any(rel not in legacy and not (factory_dir / rel).exists() for rel in lock.base)
 
 
 def _rebase_apply(repo_root: Path, factory_dir: Path) -> str:

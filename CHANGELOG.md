@@ -11,17 +11,15 @@ Verified and merged by sidework.productivity under Marcus's standing permission.
   pinned the *current* template as the merge base, so everything added since 0.1.0 (`agents/code-review.md`,
   `gates.code_review`) looked like a local deletion and never arrived, while `psf validate` still passed. Bootstrap
   now pins a frozen copy of the 0.1.0 template (`src/psf/template_history.py`). A one-time migration
-  (`2026-11-rebase-bootstrap-base`) repairs locks the old bootstrap wrote, so the next `psf upgrade` adds the missing
-  files. Why: consumer feedback (experiments). It was confirmed in 5 repos.
+  (`2026-11-rebase-bootstrap-base`) repairs locks the old bootstrap wrote, but only where a template file is actually missing,
+  so the next `psf upgrade` adds the missing files. If the repo also changed `factory.yml`, that surfaces as a conflict to
+  resolve by hand (see docs/UPGRADE.md). Why: consumer feedback (experiments). It was confirmed in 5 repos.
 - **A conflicted upgrade no longer crashes.** The post-merge check now catches unresolved markers and a factory that no
   longer parses, then rolls back instead of throwing a YAML traceback. Why: consumer feedback (asian-bounty).
-- **Side-by-side insertions no longer conflict.** When both sides only added lines at the same spot (for example a
-  local `verify_command` and the template's `code_review`), both are kept. Real conflicts, where both sides edited the
-  same lines, still stop.
-
 ### Added
 - `psf upgrade --resolved`: after resolving conflicts by hand, it advances the base so `--check` stops reporting the same
-  conflict forever. It refuses while markers remain or the factory doesn't verify. Why: consumer feedback (asian-bounty).
+  conflict forever. It refuses with no pinned base, while markers remain, or when the factory doesn't verify. Template files
+  still missing locally stay addable. Why: consumer feedback (asian-bounty).
 
 ## 0.2.1 — 2026-11-16
 
