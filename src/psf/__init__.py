@@ -7,7 +7,7 @@ enforces gates and records every transition in an append-only hash-chained
 ledger. See PLAN.md and docs/TECH-SPEC.md.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .canonical import canonical_bytes, digest  # noqa: F401
 from .events import EventLog  # noqa: F401

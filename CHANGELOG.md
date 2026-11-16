@@ -2,7 +2,10 @@
 
 What changed in psf and why. Newest first. Consumer projects get template changes with `psf upgrade`.
 
-## Unreleased (branch feat/ocr-review-loop, awaiting Marcus's review)
+## 0.2.0 — 2026-11-16
+
+Verified and merged by sidework.productivity under Marcus's standing permission (16 Nov 2026). Evidence is in the PR.
+Upgrade: reinstall psf (`install.sh`, or `uv tool install --force git+https://github.com/marcusjhang/personal-software-factory@v0.2.0`), then run `psf upgrade` in your repo.
 
 ### Added
 - **`psf review`: the OCR delegate code-review loop.** Why: psf gated on correctness only; nothing caught
