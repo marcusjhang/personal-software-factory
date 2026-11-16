@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from .scaffold import (Lock, as_str, digest, read_lock, render_template,
-                       write_lock)
+from .scaffold import Lock, as_str, digest, read_lock, write_lock
+from .template_history import render_0_1_0
 
 
 @dataclass
@@ -32,27 +32,74 @@ def _bootstrap_applies(repo_root: Path, factory_dir: Path) -> bool:
     return lock is None or not lock.base
 
 
-def _bootstrap_apply(repo_root: Path, factory_dir: Path) -> str:
-    """Give a pre-lock repo a template base + lock so it can be upgraded.
-
-    Repos scaffolded before ``psf upgrade`` existed have no base to merge against;
-    reconstruct it from the current defaults, honoring the repo's own mode and
-    feedback settings so the base matches what it actually installed.
-    """
+def _settings(factory_dir: Path) -> tuple[str, str, str]:
+    """The repo's own mode / feedback mode / upstream, so a base matches what it installed."""
     yml = factory_dir / "factory.yml"
     mode, fb_mode, upstream = "hitl", "hint", "marcusjhang/personal-software-factory"
     if yml.exists():
         import yaml
 
-        raw = yaml.safe_load(yml.read_text()) or {}
-        mode = as_str(raw.get("mode"), mode)
-        fb = raw.get("feedback", {}) or {}
-        fb_mode = as_str(fb.get("mode"), fb_mode)
-        upstream = as_str(fb.get("upstream"), upstream)
-    files = render_template(upstream, fb_mode, mode)
-    write_lock(repo_root, Lock(revision="bootstrap", template_digest=digest(files),
+        try:
+            raw = yaml.safe_load(yml.read_text()) or {}
+        except yaml.YAMLError:
+            raw = {}
+        if isinstance(raw, dict):
+            mode = as_str(raw.get("mode"), mode)
+            fb = raw.get("feedback", {}) or {}
+            if isinstance(fb, dict):
+                fb_mode = as_str(fb.get("mode"), fb_mode)
+                upstream = as_str(fb.get("upstream"), upstream)
+    return upstream, fb_mode, mode
+
+
+def _legacy_base(factory_dir: Path) -> dict[str, str]:
+    """The 0.1.0 template: the newest template a pre-lock repo can have come from.
+
+    Using the *current* template here (the old behavior) made every file and line
+    added upstream since 0.1.0 look like a local deletion, so upgrades silently
+    never delivered them (e.g. agents/code-review.md, gates.code_review).
+    """
+    return render_0_1_0(*_settings(factory_dir))
+
+
+def _bootstrap_apply(repo_root: Path, factory_dir: Path) -> str:
+    """Give a pre-lock repo a template base + lock so it can be upgraded."""
+    files = _legacy_base(factory_dir)
+    write_lock(repo_root, Lock(revision="bootstrap-0.1.0", template_digest=digest(files),
                                base=files, migrations=[m.id for m in MIGRATIONS]).stamp())
-    return "pinned current template as the upgrade base"
+    return "pinned the 0.1.0 template as the upgrade base"
+
+
+REBASE_ID = "2026-11-rebase-bootstrap-base"
+
+
+def legacy_base(factory_dir: Path) -> dict[str, str]:
+    return _legacy_base(factory_dir)
+
+
+def rebase_pending(repo_root: Path, factory_dir: Path, applied: list[str]) -> bool:
+    """True when this lock was pinned by the old bootstrap and must be re-based
+    *before* merging (a post-merge migration would be overwritten by the new base)."""
+    return REBASE_ID not in applied and _rebase_applies(repo_root, factory_dir)
+
+
+def _rebase_applies(repo_root: Path, factory_dir: Path) -> bool:
+    lock = read_lock(repo_root)
+    return bool(lock and lock.base and "2026-09-bootstrap-lock" in (lock.migrations or [])
+                and lock.base != _legacy_base(factory_dir))
+
+
+def _rebase_apply(repo_root: Path, factory_dir: Path) -> str:
+    """Repair locks pinned by the old bootstrap (current template as base).
+
+    Those repos never received files/lines added after 0.1.0. Re-pin the base to
+    the 0.1.0 template so the next merge adds them; local edits still merge.
+    """
+    lock = read_lock(repo_root)
+    files = _legacy_base(factory_dir)
+    write_lock(repo_root, Lock(revision="bootstrap-0.1.0", template_digest=digest(files), base=files,
+                               migrations=list(lock.migrations or [])).stamp())
+    return "re-pinned the bootstrap base to the 0.1.0 template (missing template files will now be added)"
 
 
 MIGRATIONS: list[Migration] = [
@@ -61,6 +108,12 @@ MIGRATIONS: list[Migration] = [
         description="Create psf.lock.json with a template base for repos scaffolded before upgrades existed.",
         applies=_bootstrap_applies,
         apply=_bootstrap_apply,
+    ),
+    Migration(
+        id=REBASE_ID,
+        description="Re-pin locks created by the old bootstrap to the 0.1.0 template so missed template files arrive.",
+        applies=_rebase_applies,
+        apply=_rebase_apply,
     ),
 ]
 

@@ -17,7 +17,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .migrations import run_migrations
+from .migrations import legacy_base, rebase_pending, run_migrations
 from .scaffold import (Lock, as_str, digest, read_lock, read_template,
                        render_template, write_lock)
 
@@ -52,7 +52,14 @@ class UpgradeReport:
 
 
 def _merge(ours: str, base: str, theirs: str, label: str) -> tuple[str, bool]:
-    """Three-way text merge via `git merge-file`; returns (text, conflicted)."""
+    """Three-way text merge via `git merge-file`; returns (text, conflicted).
+
+    Hunks where both sides only *inserted* lines at the same spot (empty base
+    section) are not real conflicts: both insertions are kept, ours first. This
+    is the common case of a local key and a new template key landing side by
+    side (e.g. `verify_command` next to `code_review` under `gates:`). Hunks where
+    both sides changed the same base lines stay conflicts.
+    """
     if ours == theirs:
         return ours, False
     if ours == base:
@@ -70,7 +77,46 @@ def _merge(ours: str, base: str, theirs: str, label: str) -> tuple[str, bool]:
                             "-L", label, "-L", f"{label} (upstream)",
                             str(d / "ours"), str(d / "base"), str(d / "theirs")],
                            capture_output=True, text=True)
-        return p.stdout, p.returncode != 0
+        if p.returncode == 0:
+            return p.stdout, False
+        q = subprocess.run(["git", "merge-file", "-p", "--diff3", "-L", "O", "-L", "B", "-L", "T",
+                            str(d / "ours"), str(d / "base"), str(d / "theirs")],
+                           capture_output=True, text=True)
+        resolved = _resolve_insert_only(q.stdout)
+        if resolved is not None:
+            return resolved, False
+        return p.stdout, True
+
+
+def _resolve_insert_only(diff3: str) -> str | None:
+    """Resolve a --diff3 merge whose every conflict hunk has an empty base; else None."""
+    out: list[str] = []
+    lines = diff3.splitlines(keepends=True)
+    i = 0
+    while i < len(lines):
+        if not lines[i].startswith("<<<<<<< O"):
+            out.append(lines[i]); i += 1
+            continue
+        ours, base, theirs, section = [], [], [], "ours"
+        i += 1
+        while i < len(lines):
+            ln = lines[i]
+            if ln.startswith("||||||| B"):
+                section = "base"
+            elif ln.startswith("=======") and section in ("ours", "base"):
+                section = "theirs"
+            elif ln.startswith(">>>>>>> T"):
+                break
+            else:
+                {"ours": ours, "base": base, "theirs": theirs}[section].append(ln)
+            i += 1
+        else:
+            return None                    # unterminated hunk: do not guess
+        i += 1
+        if any(b.strip() for b in base):
+            return None                    # both sides changed the same lines: a real conflict
+        out += ours + theirs
+    return "".join(out)
 
 
 def _unified(ours: str | None, theirs: str | None, label: str) -> str:
@@ -154,8 +200,10 @@ def template_from(path: str | Path) -> tuple[dict[str, str], str]:
 
 def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str | Path | None = None,
                 revision: str | None = None, pretend: bool = False, check: bool = False,
-                force: bool = False, verify: bool = True) -> UpgradeReport:
+                force: bool = False, verify: bool = True, resolved: bool = False) -> UpgradeReport:
     repo_root, factory_dir = Path(repo_root), Path(factory_dir)
+    if resolved:
+        return _mark_resolved(repo_root, factory_dir, source=source, revision=revision)
     if source is not None:
         theirs, target_digest = template_from(source)
         revision = revision or f"local:{Path(source)}"
@@ -181,6 +229,18 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         applied, rep.notes = run_migrations(repo_root, factory_dir, applied)
         lock = read_lock(repo_root)
         base = dict(lock.base) if lock else {}
+        rep.base_digest = digest(base) if base else ""
+    elif rebase_pending(repo_root, factory_dir, applied):
+        # Lock pinned by the old bootstrap (current template as base): re-pin to
+        # the 0.1.0 template first, or files added since 0.1.0 never arrive.
+        if check or pretend:
+            base = legacy_base(factory_dir)
+            rep.notes.append("bootstrap base is stale: the next `psf upgrade` re-pins it to the 0.1.0 template")
+        else:
+            applied, notes = run_migrations(repo_root, factory_dir, applied)
+            rep.notes += notes
+            lock = read_lock(repo_root)
+            base = dict(lock.base) if lock else {}
         rep.base_digest = digest(base) if base else ""
 
     merged = plan(ours, base, theirs)
@@ -226,6 +286,32 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
     return rep
 
 
+def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | None,
+                   revision: str | None) -> UpgradeReport:
+    """After a human resolved upgrade conflicts by hand, advance the base to the
+    target template so `--check` stops reporting the same conflict forever.
+    Refuses while conflict markers remain or the factory does not verify."""
+    if source is not None:
+        theirs, target_digest = template_from(source)
+        revision = revision or f"local:{Path(source)}"
+    else:
+        theirs = render_template(*_consumer_settings(factory_dir))
+        target_digest = digest(theirs)
+        revision = revision or "current"
+    lock = read_lock(repo_root)
+    rep = UpgradeReport(revision=revision, base_digest=digest(lock.base) if lock and lock.base else "",
+                        target_digest=target_digest)
+    err = _verify(factory_dir)
+    if err:
+        rep.notes.append(f"not marked resolved: {err}")
+        return rep
+    write_lock(repo_root, Lock(revision=revision, template_digest=target_digest,
+                               migrations=list(lock.migrations) if lock else [], base=theirs).stamp())
+    rep.applied = True
+    rep.notes.append("marked resolved: base advanced to the target template; local files left as they are")
+    return rep
+
+
 def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> None:
     """Undo a merge: put back the original files and remove anything we added."""
     for rel in set(before) | touched:
@@ -240,7 +326,16 @@ def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> No
 def _verify(factory_dir: Path) -> str | None:
     from .audit import run_audit
 
-    rep = run_audit(factory_dir, factory_dir.parent / ".psf" / "factory.db", include_bench=False)
+    for f in factory_dir.rglob("*"):
+        if f.is_file() and f.suffix in (".yml", ".yaml", ".md"):
+            text = f.read_text(errors="replace")
+            if "\n<<<<<<< " in "\n" + text or "\n>>>>>>> " in "\n" + text:
+                return f"unresolved conflict markers in {f.relative_to(factory_dir)}"
+    try:
+        rep = run_audit(factory_dir, factory_dir.parent / ".psf" / "factory.db", include_bench=False)
+    except Exception as e:                 # e.g. YAML that no longer parses: roll back, never crash
+        first = (str(e).strip().splitlines() or [""])[0]
+        return f"factory no longer loads: {type(e).__name__}: {first}"
     if not rep.healthy:
         return "; ".join(f"{c.name}: {c.detail}" for c in rep.failures)
     return None

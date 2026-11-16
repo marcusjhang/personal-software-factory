@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from psf.migrations import run_migrations
-from psf.scaffold import Lock, digest, render_template, write_lock
+from psf.scaffold import Lock, digest, read_lock, render_template, write_lock
 from psf.upgrade import plan
 
 
@@ -69,3 +69,122 @@ def test_lock_roundtrip(tmp_path: Path):
 
     lock = read_lock(tmp_path)
     assert lock and lock.revision == "r1" and lock.applied_at
+
+
+# --- bootstrap base (consumer feedback 2026-11-16: missed template files) ----
+
+def _legacy_repo(tmp_path: Path) -> tuple[Path, Path]:
+    """A repo scaffolded by psf 0.1.0 before locks existed."""
+    from psf.template_history import render_0_1_0
+    factory = tmp_path / "factory"
+    for rel, text in render_0_1_0("marcusjhang/personal-software-factory", "off", "hitl").items():
+        (factory / rel).parent.mkdir(parents=True, exist_ok=True)
+        (factory / rel).write_text(text)
+    (tmp_path / ".psf").mkdir()
+    return tmp_path, factory
+
+
+def test_prelock_upgrade_adds_files_and_lines_added_since_0_1_0(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    rep = run_upgrade(root, factory)
+    assert rep.applied and not rep.conflict
+    assert (factory / "agents/code-review.md").exists()
+    assert "code_review" in (factory / "factory.yml").read_text()
+    assert "psf review start" in (factory / "AGENTS.md").read_text()
+    assert run_upgrade(root, factory, check=True).drifted is False
+
+
+def test_prelock_upgrade_keeps_local_edits(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    (factory / "agents/implement.md").write_text("my own implement prompt\n")
+    run_upgrade(root, factory)
+    assert (factory / "agents/implement.md").read_text() == "my own implement prompt\n"
+    assert (factory / "agents/code-review.md").exists()
+
+
+def test_old_bootstrap_lock_is_repaired_on_next_upgrade(tmp_path: Path):
+    """Simulate a lock written by the old bootstrap (current template as base)."""
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    current = render_template("marcusjhang/personal-software-factory", "off", "hitl")
+    write_lock(root, Lock(revision="current", template_digest=digest(current), base=current,
+                          migrations=["2026-09-bootstrap-lock"]).stamp())
+    chk = run_upgrade(root, factory, check=True)            # the bug: used to say "up to date"
+    assert chk.drifted and not (factory / "agents/code-review.md").exists()
+    rep = run_upgrade(root, factory)
+    assert rep.applied and not rep.conflict
+    assert (factory / "agents/code-review.md").exists()
+    assert "code_review" in (factory / "factory.yml").read_text()
+    assert "2026-11-rebase-bootstrap-base" in rep.migrations
+    assert run_upgrade(root, factory, check=True).drifted is False
+
+
+def test_rebase_does_not_touch_normal_locks(tmp_path: Path):
+    from psf.migrations import rebase_pending
+    root, factory = _legacy_repo(tmp_path)
+    current = render_template("marcusjhang/personal-software-factory", "off", "hitl")
+    write_lock(root, Lock(revision="v0.2.1", template_digest=digest(current), base=current,
+                          migrations=["2026-09-bootstrap-lock", "2026-11-rebase-bootstrap-base"]).stamp())
+    assert not rebase_pending(root, factory, ["2026-09-bootstrap-lock", "2026-11-rebase-bootstrap-base"])
+    write_lock(root, Lock(revision="psf 0.1.0", template_digest="x", base={"factory.yml": "a"}, migrations=[]).stamp())
+    assert not rebase_pending(root, factory, [])
+
+
+# --- conflicts: insert-only merges, rollback instead of crash, --resolved ------
+
+def test_merge_keeps_both_side_by_side_insertions():
+    from psf.upgrade import _merge
+    base = "gates:\n  verify_quorum: 2\nlimits:\n  max_attempts: 2\n"
+    ours = "gates:\n  verify_quorum: 2\n  verify_command: pytest -q\nlimits:\n  max_attempts: 2\n"
+    theirs = "gates:\n  verify_quorum: 2\n  code_review: { max_highs: 2 }\nlimits:\n  max_attempts: 2\n"
+    text, conflict = _merge(ours, base, theirs, "factory.yml")
+    assert not conflict
+    assert text == ("gates:\n  verify_quorum: 2\n  verify_command: pytest -q\n"
+                    "  code_review: { max_highs: 2 }\nlimits:\n  max_attempts: 2\n")
+
+
+def test_merge_real_conflict_still_conflicts():
+    from psf.upgrade import _merge
+    base = "limits:\n  max_attempts: 2\n"
+    text, conflict = _merge("limits:\n  max_attempts: 5\n", base, "limits:\n  max_attempts: 3\n", "factory.yml")
+    assert conflict and "<<<<<<<" in text
+
+
+def test_conflicted_yaml_rolls_back_instead_of_crashing(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    run_upgrade(root, factory)                                   # pin a lock
+    before = (factory / "factory.yml").read_text()
+    edited = before.replace("max_attempts: 2", "max_attempts: 7")
+    (factory / "factory.yml").write_text(edited)
+    lock = read_lock(root)
+    base = dict(lock.base)
+    base["factory.yml"] = base["factory.yml"].replace("max_attempts: 2", "max_attempts: 1")
+    theirs_src = tmp_path / "tpl"
+    for rel, text in render_template("marcusjhang/personal-software-factory", "off", "hitl").items():
+        (theirs_src / rel).parent.mkdir(parents=True, exist_ok=True)
+        (theirs_src / rel).write_text(text.replace("max_attempts: 2", "max_attempts: 3"))
+    write_lock(root, Lock(revision="x", template_digest=digest(base), base=base,
+                          migrations=list(lock.migrations)).stamp())
+    rep = run_upgrade(root, factory, source=theirs_src)          # must not raise
+    assert not rep.applied
+    assert any("rolled back" in n for n in rep.notes)
+    assert (factory / "factory.yml").read_text() == edited       # restored, no markers
+
+
+def test_resolved_advances_base_only_when_clean(tmp_path: Path):
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    run_upgrade(root, factory)
+    (factory / "factory.yml").write_text((factory / "factory.yml").read_text()
+                                         + "<<<<<<< factory.yml (yours)\nx\n=======\ny\n>>>>>>> factory.yml (upstream)\n")
+    rep = run_upgrade(root, factory, resolved=True)
+    assert not rep.applied and any("conflict markers" in n for n in rep.notes)
+    good = render_template("marcusjhang/personal-software-factory", "off", "hitl")["factory.yml"]
+    (factory / "factory.yml").write_text(good.replace("max_attempts: 2", "max_attempts: 4"))
+    rep = run_upgrade(root, factory, resolved=True)
+    assert rep.applied
+    assert run_upgrade(root, factory, check=True).drifted is False   # no phantom CONFLICT
+    assert "max_attempts: 4" in (factory / "factory.yml").read_text()

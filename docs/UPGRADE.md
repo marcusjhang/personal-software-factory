@@ -51,3 +51,21 @@ current template as the base.
 
 `psf audit` reports `factory.revision` so you can see what you're pinned to and
 whether the base is self-consistent.
+
+## Conflicts
+
+Lines both sides only *added* at the same spot are kept side by side. They are not conflicts. A real conflict, where you and
+the template changed the same lines, is rolled back so your factory keeps working. To resolve it:
+
+```bash
+psf upgrade --force        # write the merge, conflict markers included (adds new template files too)
+# edit the marked files, keeping what you want
+psf validate
+psf upgrade --resolved     # advance the base so `psf upgrade --check` is clean again
+```
+
+## Repos from before the lock (pre-0.2)
+
+A repo with `factory/` but no usable `psf.lock.json` is pinned to the 0.1.0 template on its first upgrade, so files and
+lines added since then arrive. Locks pinned by the old bootstrap (psf ≤0.2.1) are repaired automatically on the next
+`psf upgrade`.
