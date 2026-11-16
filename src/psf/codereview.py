@@ -163,7 +163,9 @@ def load(repo: Path, session: str | None = None) -> dict[str, Any]:
         state = json.loads(p.read_text())
     except (OSError, json.JSONDecodeError) as e:
         raise ReviewError(f"review session {session} is unreadable: {e}") from e
-    if not isinstance(state, dict) or "rounds" not in state:
+    required = ("session", "rounds", "max_highs", "max_rounds", "files", "mode")
+    if not isinstance(state, dict) or any(k not in state for k in required) \
+            or not isinstance(state["rounds"], list):
         raise ReviewError(f"review session {session} is malformed")
     return state
 

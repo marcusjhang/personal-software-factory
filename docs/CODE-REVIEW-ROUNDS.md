@@ -85,3 +85,14 @@ The mechanics are now code (`src/psf/codereview.py`, `psf review`). The judgment
 |---|---|---|---|
 | M1 | medium | a corrupt session JSON was reported as "cannot read findings" | fixed, with test `test_corrupt_session_is_a_review_error` |
 | L1 | low | a `--base` value starting with `-` reaches ocr unchecked (local CLI input only) | accepted |
+
+### Pre-merge review R-ac65af1a (range main..eafba22, 6 files) → DONE (independent reviewer)
+
+| round | findings | verified high+ | decision |
+|---|---|---|---|
+| 1 | 2 | 0 | DONE |
+
+| id | sev | finding | disposition |
+|---|---|---|---|
+| CR1 | medium | an invalid `factory.yml` silently fell back to the default stop rule in `psf review start` | fixed: an invalid factory now errors (exit 5); a missing factory still uses the defaults. Tests added |
+| CR2 | low | a truncated session file raised KeyError | fixed: `load()` checks the required keys. Test added |

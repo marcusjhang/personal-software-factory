@@ -210,3 +210,28 @@ def test_corrupt_session_is_a_review_error(repo, monkeypatch):
     with pytest.raises(cr.ReviewError, match="unreadable"):
         cr.load(repo)
     assert main(["review", "status"]) == 2
+
+
+def test_invalid_factory_config_is_not_silently_defaulted(repo, monkeypatch):
+    monkeypatch.setenv("FAKE_OCR_FILES", "a.py")
+    fac = repo / "factory"
+    for rel, text in render_template("o/r", "off", "hitl").items():
+        (fac / rel).parent.mkdir(parents=True, exist_ok=True)
+        (fac / rel).write_text(text.replace("max_rounds: 5", "max_round: 1"))
+    assert main(["review", "start"]) == 5  # FactoryError surfaces, no session opened
+    assert not (repo / ".psf/review").exists()
+
+
+def test_missing_factory_uses_defaults(repo, monkeypatch):
+    monkeypatch.setenv("FAKE_OCR_FILES", "a.py")
+    assert main(["review", "start"]) == 0
+    st = cr.load(repo)
+    assert (st["max_highs"], st["max_rounds"]) == (2, 5)
+
+
+def test_truncated_session_is_malformed(repo, monkeypatch):
+    monkeypatch.setenv("FAKE_OCR_FILES", "a.py")
+    state = cr.start(repo)
+    (repo / ".psf/review" / f"{state['session']}.json").write_text('{"rounds": []}')
+    with pytest.raises(cr.ReviewError, match="malformed"):
+        cr.record(repo, [])

@@ -763,10 +763,9 @@ def cmd_review(args) -> int:
     repo = Path.cwd()
     try:
         if args.action == "start":
-            try:
-                gates = load_factory(args.factory).gates
-            except FactoryError:
-                gates = {}
+            # A missing factory means defaults; an invalid one must not silently
+            # weaken the configured gate (FactoryError propagates -> exit 5).
+            gates = load_factory(args.factory).gates if factory_file(args.factory).exists() else {}
             base = cr.Settings.from_gates(gates)
             settings = cr.Settings(args.max_highs if args.max_highs is not None else base.max_highs,
                                    args.max_rounds if args.max_rounds is not None else base.max_rounds)
