@@ -55,3 +55,4 @@ reasoning; see `PLAN.md` / `docs/TECH-SPEC.md` for the intended design.
 ## 2026-11
 
 - 11-16 — **OCR code-review loop as `psf review`** (`src/psf/codereview.py`): diff or `--full` file selection, rule resolution, round ledger, stop at ≤2 verified highs, cap 5 rounds, fails closed without `ocr`. Template ships `gates.code_review`, `agents/code-review.md`, and an AGENTS step. Adds the skill `code-review-loop`, which feedback-ingestion now reuses, and 19 tests. Branch `feat/ocr-review-loop`.
+- 11-16 — **0.2.0 released** (PR #13, merge `d194835`, tag v0.2.0). **0.2.1**: `feedback export --local --if-changed`, envelope `source` digest, `report` dedupes to the newest envelope per source; template feedback step is local and weekly.

@@ -54,6 +54,7 @@ tokens, customer data. Export is explicit; nothing is sent automatically.
 In a consuming repo:
 
 ```bash
+psf feedback export --local --if-changed   # weekly: local file only, skipped when nothing new (any feedback mode)
 psf feedback export                       # writes .psf/feedback/FB-xxxx.json
 psf feedback export --github you/personal-software-factory   # files an issue there
 ```
@@ -71,6 +72,13 @@ psf improve                                  # turn signals into a gated change
 `--issues` reads each `factory-feedback` issue, extracts the envelope from its
 ```json fence, and drops it in `.psf/feedback/inbox/` — so a consumer's
 `export --github` and your `ingest --issues` are the two halves of one round-trip.
+
+## Cumulative envelopes and dedupe
+
+An envelope holds a repo's **cumulative** counts, and each one carries a `source`: a digest of the
+consumer repo's path, never the path itself. `psf feedback report` keeps only the **newest envelope per
+source**, so weekly exports never double-count (`superseded` in the report says how many it dropped).
+Envelopes from before 0.2.1 have no `source` and are all counted, as before.
 
 ## How signals become improvements
 

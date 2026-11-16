@@ -433,13 +433,27 @@ def cmd_feedback(args) -> int:
         return 0
 
     if args.action == "export":
+        from .feedback import build_envelope, has_new_work, latest_export
+
         upstream, mode = _feedback_cfg(args)
-        if mode == "off":
-            print("feedback is OFF — `psf feedback opt-in` to enable (nothing was sent)")
+        local = getattr(args, "local", False)
+        if local and args.github:
+            print("error: --local never publishes; drop --github", file=sys.stderr)
+            return 2
+        if mode == "off" and not local:
+            print("feedback is OFF — `psf feedback opt-in` to enable, or `--local` for a local file only (nothing was sent)")
             return 0
-        target = args.github or (upstream if mode == "auto" else None)
-        path = export(args.factory, args.ledger, out=args.out, repo=target)
+        target = None if local else (args.github or (upstream if mode == "auto" else None))
+        env = build_envelope(args.factory, args.ledger, repo=target)
+        if getattr(args, "if_changed", False):
+            out_dir = Path(args.out).parent if args.out else Path(".psf/feedback")
+            if not has_new_work(env, latest_export(out_dir)):
+                print("no new work since the last export: skipped")
+                return 0
+        path = export(args.factory, args.ledger, out=args.out, repo=target, env=env)
         print(f"wrote {path}")
+        if local:
+            return 0
         if target:
             import json as _json
             env = _json.loads(Path(path).read_text())
@@ -978,6 +992,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--issues", action="store_true",
                    help="for ingest: pull envelopes from factory-feedback issues (requires --github or feedback.upstream)")
     s.add_argument("--auto", action="store_true", help="for opt-in: publish automatically")
+    s.add_argument("--local", action="store_true",
+                   help="for export: write a local file only, never publish (works even when feedback mode is off)")
+    s.add_argument("--if-changed", action="store_true",
+                   help="for export: skip when there is no new work since the newest local export")
     s.set_defaults(func=cmd_feedback)
 
     s = sub.add_parser("review", help="OCR delegate code-review loop: start | record <findings.json> | status")

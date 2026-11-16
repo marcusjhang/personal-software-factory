@@ -88,3 +88,82 @@ def test_ingest_issues_neutralizes_path_traversal(tmp_path, monkeypatch):
     assert not (tmp_path.parent / "PWNED").exists()
     files = list(inbox.glob("*.json"))
     assert len(files) == 1 and ".." not in files[0].name
+
+
+# --- 0.2.1: weekly local export + report dedupe ------------------------------
+
+def _cli_factory(tmp_path, fb_mode):
+    root = _factory(tmp_path)
+    (root / "factory.yml").write_text((root / "factory.yml").read_text()
+                                      + f"feedback:\n  upstream: owner/repo\n  mode: \"{fb_mode}\"\n")
+    return root
+
+
+def _args(root, ledger, *rest):
+    return ["--factory", str(root), "--ledger", str(ledger), "feedback", "export", *rest]
+
+
+def test_local_export_works_when_feedback_off(tmp_path, monkeypatch):
+    from psf import cli
+    monkeypatch.chdir(tmp_path)
+    root = _cli_factory(tmp_path, "off")
+    log = EventLog(tmp_path / "e.db"); Workflow(log).create("g"); log.close()
+    assert cli.main(_args(root, tmp_path / "e.db")) == 0
+    assert not list((tmp_path / ".psf/feedback").glob("FB-*.json"))      # off: nothing
+    assert cli.main(_args(root, tmp_path / "e.db", "--local")) == 0
+    assert len(list((tmp_path / ".psf/feedback").glob("FB-*.json"))) == 1
+
+
+def test_local_never_publishes_even_in_auto_mode(tmp_path, monkeypatch):
+    from psf import cli, feedback
+    monkeypatch.chdir(tmp_path)
+    root = _cli_factory(tmp_path, "auto")
+    EventLog(tmp_path / "e.db").close()
+    called = []
+    monkeypatch.setattr(feedback, "publish_issue", lambda repo, env: called.append(repo) or ("u", None))
+    assert cli.main(_args(root, tmp_path / "e.db", "--local")) == 0
+    assert called == []
+    env = json.loads(next((tmp_path / ".psf/feedback").glob("FB-*.json")).read_text())
+    assert env["repo"] is None
+    assert cli.main(_args(root, tmp_path / "e.db", "--local", "--github", "o/r")) == 2
+
+
+def test_if_changed_skips_empty_and_unchanged(tmp_path, monkeypatch):
+    from psf import cli
+    monkeypatch.chdir(tmp_path)
+    root = _cli_factory(tmp_path, "hint")
+    ledger = tmp_path / "e.db"
+    EventLog(ledger).close()
+    fb = tmp_path / ".psf/feedback"
+    run = lambda: cli.main(_args(root, ledger, "--local", "--if-changed"))
+    assert run() == 0 and not list(fb.glob("FB-*.json"))                # no work, no export
+    log = EventLog(ledger); Workflow(log).create("g"); log.close()
+    assert run() == 0 and len(list(fb.glob("FB-*.json"))) == 1          # new work
+    assert run() == 0 and len(list(fb.glob("FB-*.json"))) == 1          # unchanged: skipped
+    log = EventLog(ledger); Workflow(log).create("g2"); log.close()
+    assert run() == 0 and len(list(fb.glob("FB-*.json"))) == 2          # more work
+
+
+def test_report_keeps_newest_envelope_per_source(tmp_path):
+    from psf.feedback import report
+    inbox = tmp_path / "inbox"; inbox.mkdir()
+    def env(eid, src, at, items):
+        e = {"schema": "psf.feedback/v1", "envelope_id": eid, "generated_at": at,
+             "metrics": {"work_items": items}, "failures": {}}
+        if src:
+            e["source"] = src
+        (inbox / f"{eid}.json").write_text(json.dumps(e))
+    env("FB-a1", "src-a", "2026-11-01T00:00:00Z", 5)
+    env("FB-a2", "src-a", "2026-11-08T00:00:00Z", 7)   # cumulative: supersedes a1
+    env("FB-b1", "src-b", "2026-11-08T00:00:00Z", 3)
+    env("FB-old", None, "2026-10-01T00:00:00Z", 2)     # legacy, ungroupable: kept
+    r = report(inbox)
+    assert r["envelopes"] == 3 and r["superseded"] == 1
+    assert r["totals"]["work_items"] == 7 + 3 + 2
+
+
+def test_source_id_is_stable_and_not_the_path(tmp_path):
+    from psf.feedback import source_id
+    a, b = source_id(tmp_path), source_id(tmp_path)
+    assert a == b and str(tmp_path) not in a and a.startswith("src-")
+    assert source_id(tmp_path / "x") != a
