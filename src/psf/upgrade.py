@@ -229,6 +229,9 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         if err:
             _restore(factory_dir, ours, {c.path for c, _ in merged})
             rep.notes.append(f"rolled back: verification failed — {err}")
+            if rep.conflict:
+                rep.notes.append("to resolve: `psf upgrade --force` (writes the conflict markers), edit the marked files, "
+                                 "`psf validate`, then `psf upgrade --resolved`")
             return rep
 
     # Advance the base only when the merge is conflict-free; otherwise keep the

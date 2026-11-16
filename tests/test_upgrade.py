@@ -171,6 +171,7 @@ def test_conflicted_yaml_rolls_back_instead_of_crashing(tmp_path: Path):
     assert not rep.applied
     assert any("rolled back" in n for n in rep.notes)
     assert (factory / "factory.yml").read_text() == edited       # restored, no markers
+    assert any("psf upgrade --resolved" in n for n in rep.notes)    # tells the user how
 
 
 def test_resolved_advances_base_only_when_clean(tmp_path: Path):
