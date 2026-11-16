@@ -2,6 +2,27 @@
 
 What changed in psf and why. Newest first. Consumer projects get template changes with `psf upgrade`.
 
+## 0.2.1 — 2026-11-16
+
+Verified and merged by sidework.productivity under Marcus's standing permission. Evidence is in the PR.
+
+### Added
+- `psf feedback export --local`: always writes a local file and never publishes, even when `feedback.mode` is `auto`
+  or `off`. Why: consumers export weekly as a local file only. `auto` mode silently filed a GitHub issue, and `off`
+  mode silently wrote nothing (consumer feedback).
+- `psf feedback export --if-changed`: skips when there is no new work since the newest local export, and skips an
+  empty first export. Why: export only in weeks that had work, with no empty exports.
+- Envelopes carry `source`, a random per-repo id kept in `.psf/source-id`. It is stable from any folder and is not derived from the path. Why: dedupe.
+- `--if-changed` requires `--local` and the default output, so an unpublished or custom-named export can't hide new work.
+
+### Fixed
+- `psf feedback report` double-counted, because exports are cumulative and report summed every envelope from the
+  same repo. It now keeps the newest envelope per `source` and reports `superseded`. A malformed `source` from an issue no longer crashes `report`.
+
+### Changed
+- The template AGENTS feedback step is now `psf feedback export --local --if-changed`; `--github` is used only when the
+  maintainer asks.
+
 ## 0.2.0 — 2026-11-16
 
 Verified and merged by sidework.productivity under Marcus's standing permission (16 Nov 2026). Evidence is in the PR.

@@ -1,6 +1,6 @@
 [project]
 name = "personal-software-factory"
-version = "0.2.0"
+version = "0.2.1"
 description = "A repo-native, downloadable software factory: a foreman drives intake -> triage -> spec -> build -> verify -> review -> handoff with enforced gates and a durable ledger."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -71,14 +71,16 @@ verification, and review:
 
 ## Feedback to the factory
 
-At the end of a work cycle, send a **privacy-filtered** usage envelope back to the
-factory that powers this repo. It contains **counts, digests, and versions only** —
-never source code, prompts, file paths, or secrets:
+Once a week, record a **privacy-filtered** usage envelope for the factory that powers
+this repo. It contains **counts, digests, and versions only**, never source code,
+prompts, file paths, or secrets:
 
-    psf feedback export --github <upstream-repo>
+    psf feedback export --local --if-changed
 
-`<upstream-repo>` is the `feedback.upstream` value in `factory/factory.yml`.
-Set `feedback.mode: auto` to make `psf feedback export` publish there by default.
+This writes `.psf/feedback/FB-*.json` locally and skips when there has been no new
+work since the last export. The factory maintainer collects these files. Publishing
+(`psf feedback export --github <upstream-repo>`, or `feedback.mode: auto`) files a
+GitHub issue upstream, so do it only when the maintainer asks.
 Recurring verify-failures and blocks become evaluation cases and improvements in
 the upstream factory. This is evidence, never authority: it cannot change policy.
 

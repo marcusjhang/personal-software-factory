@@ -53,6 +53,49 @@ def envelope_filename(env: dict[str, Any]) -> str:
     return f"{eid}.json"
 
 
+def source_id(ledger_path: str | Path) -> str:
+    """A stable, random id for this consumer repo, kept next to its ledger.
+
+    It lets ``report`` keep only the newest envelope per repo (exports are
+    cumulative). It is random, not derived from any path, so it reveals nothing,
+    and it stays the same from any working directory or after the repo moves.
+    """
+    f = Path(ledger_path).parent / "source-id"
+    try:
+        sid = f.read_text().strip()
+        if _SAFE_ID.match(sid) and sid.startswith("src-"):
+            return sid
+    except OSError:
+        pass
+    sid = "src-" + uuid.uuid4().hex[:16]
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(sid + "\n")
+    return sid
+
+
+def latest_export(directory: str | Path) -> dict[str, Any] | None:
+    """The newest envelope previously exported into ``directory`` (or None)."""
+    best: tuple[str, dict[str, Any]] | None = None
+    for f in Path(directory).glob("FB-*.json"):
+        try:
+            env = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        if not isinstance(env, dict) or env.get("schema") != SCHEMA:
+            continue
+        key = str(env.get("generated_at") or "")
+        if best is None or key > best[0]:
+            best = (key, env)
+    return best[1] if best else None
+
+
+def has_new_work(env: dict[str, Any], prev: dict[str, Any] | None) -> bool:
+    """True when ``env`` carries activity the previous export did not."""
+    if prev is None:
+        return bool(env.get("metrics", {}).get("work_items"))
+    return (env.get("metrics"), env.get("failures")) != (prev.get("metrics"), prev.get("failures"))
+
+
 def factory_digest(factory_path: str | Path) -> str:
     p = Path(factory_path)
     root = p.parent if p.is_file() else p
@@ -97,6 +140,7 @@ def build_envelope(factory_path: str | Path, ledger_path: str | Path,
         "eval_manifest_digest": json.loads(eval_manifest.read_text()).get("manifest_digest")
         if eval_manifest.exists() else None,
         "repo": repo,  # optional; user opts in
+        "source": source_id(ledger_path),  # random per-repo id (.psf/source-id), never a path
         "metrics": {
             "work_items": sum(states.values()),
             "states": states,
@@ -112,8 +156,8 @@ def build_envelope(factory_path: str | Path, ledger_path: str | Path,
 
 
 def export(factory_path: str | Path, ledger_path: str | Path, *, out: str | Path | None = None,
-           repo: str | None = None) -> Path:
-    env = build_envelope(factory_path, ledger_path, repo=repo)
+           repo: str | None = None, env: dict[str, Any] | None = None) -> Path:
+    env = env or build_envelope(factory_path, ledger_path, repo=repo)
     dest = Path(out) if out else Path(".psf/feedback") / f"{env['envelope_id']}.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(env, indent=2) + "\n")
@@ -206,7 +250,8 @@ def ingest_issues(inbox: str | Path, *, repo: str | None = None,
 def report(inbox: str | Path) -> dict[str, Any]:
     """Aggregate ingested envelopes into signals the improvement loop can use."""
     inbox = Path(inbox)
-    items = [json.loads(f.read_text()) for f in sorted(inbox.glob("*.json"))] if inbox.exists() else []
+    raw = [json.loads(f.read_text()) for f in sorted(inbox.glob("*.json"))] if inbox.exists() else []
+    items = dedupe_newest(raw)
     total = {"work_items": 0, "blocked": 0, "retries": 0, "accepted": 0, "review_escape": 0,
              "verify_failures": 0, "cost_usd": 0.0, "human_minutes": 0.0}
     versions: dict[str, int] = {}
@@ -230,5 +275,27 @@ def report(inbox: str | Path) -> dict[str, Any]:
         suggestions.append("review escapes observed — strengthen the verify role or acceptance criteria")
     if total["verify_failures"]:
         suggestions.append("verify failures observed — add these as protected eval cases")
-    return {"envelopes": len(items), "by_version": versions, "totals": total,
-            "suggestions": suggestions}
+    return {"envelopes": len(items), "superseded": len(raw) - len(items),
+            "by_version": versions, "totals": total, "suggestions": suggestions}
+
+
+def dedupe_newest(envelopes: list[Any]) -> list[dict[str, Any]]:
+    """Keep only the newest envelope per ``source`` (exports are cumulative).
+
+    Envelopes are untrusted (they may come from issues). One without a usable
+    string ``source`` (older psf, or malformed) cannot be grouped and is kept,
+    as before. Non-mapping entries are dropped.
+    """
+    newest: dict[str, dict[str, Any]] = {}
+    legacy: list[dict[str, Any]] = []
+    for e in envelopes:
+        if not isinstance(e, dict):
+            continue
+        src = e.get("source")
+        if not isinstance(src, str) or not src:
+            legacy.append(e)
+            continue
+        cur = newest.get(src)
+        if cur is None or str(e.get("generated_at") or "") > str(cur.get("generated_at") or ""):
+            newest[src] = e
+    return legacy + list(newest.values())
