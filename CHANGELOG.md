@@ -2,6 +2,13 @@
 
 What changed in psf and why. Newest first. Consumer projects get template changes with `psf upgrade`.
 
+## Unreleased
+
+### Docs
+- `docs/research/ARCHDEV-FACTORY.md`: full reference for Calvin Grunewald's *A Look Inside the Factory* (archdev,
+  19 Nov 2026), with Top's comparison against psf 0.2.1. Why: the post-finals psf improvement plan works from the whole
+  article. Docs only: no behaviour change, no release, nothing to `psf upgrade`.
+
 ## 0.2.1 — 2026-11-16
 
 Verified and merged by sidework.productivity under Marcus's standing permission. Evidence is in the PR.
