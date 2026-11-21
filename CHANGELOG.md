@@ -25,11 +25,12 @@ Verified and merged by sidework.productivity under Marcus's standing permission.
 - **Every migration id is recorded.** After a bootstrap, the lock listed only the bootstrap id, so deleting a template file
   added since 0.1.0 later re-triggered the repair and brought the file back. Why: independent review R-378237e8 (F1).
 ### Added
-- `psf upgrade --resolved`: after resolving conflicts by hand, it advances the base of the **conflicted files only**, so
-  `--check` stops reporting the same conflict forever while other pending upstream changes still arrive and deliberately
-  deleted files stay deleted. It refuses with no pinned base, a stale bootstrap lock, no pending conflict, remaining markers,
-  or a factory that doesn't verify, and writes nothing under `--check`/`--pretend`. Why: consumer feedback (asian-bounty);
-  review R-378237e8 (F3–F5).
+- `psf upgrade --resolved`: after `psf upgrade --force` and a hand resolution, it advances the base of the files the
+  forced merge left in conflict (recorded in the lock as `conflicts`), so `--check` stops reporting the same conflict
+  forever, while other pending upstream changes still arrive and deliberately deleted files stay deleted. It refuses
+  (exit 1) with no forced conflict pending, a different target, remaining markers, or a factory that doesn't verify, and
+  writes nothing under `--check`/`--pretend`. Why: consumer feedback (asian-bounty); reviews R-378237e8 (F3–F5),
+  R-aaf05b23 (F1–F3).
 
 ## 0.2.1 — 2026-11-16
 

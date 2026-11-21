@@ -256,26 +256,27 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
                 new_base[c.path] = base[c.path]
             else:
                 new_base.pop(c.path, None)
-    write_lock(repo_root, Lock(revision=revision, template_digest=target_digest,
-                               migrations=applied, base=new_base).stamp())
+    write_lock(repo_root, Lock(revision=revision, template_digest=target_digest, migrations=applied,
+                               base=new_base,
+                               conflicts=sorted(c.path for c in rep.changes if c.conflict)).stamp())
     rep.applied = True
     return rep
 
 
 def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | None,
                    revision: str | None, dry_run: bool = False) -> UpgradeReport:
-    """After a human resolved upgrade conflicts by hand, advance the base of the
-    *conflicted files only* to the target template, so `--check` stops reporting
-    the same conflict forever.
+    """After `psf upgrade --force` left conflicts and a human resolved them by hand,
+    advance the base of exactly those files (recorded in the lock as `conflicts`)
+    to the target template, so `--check` stops reporting the same conflict forever.
 
-    Review R-378237e8: advancing every file's base (F5) hid upstream changes that
-    were never applied, and leaving absent files out of the base (F4) re-added
-    files the user had deliberately deleted. Now only files whose three-way merge
-    still conflicts move; everything else keeps its base, so the next
-    `psf upgrade` still delivers pending upstream changes and still respects
-    local deletions. Refuses on a repo with no pinned base, a stale bootstrap
-    base, no pending conflict, remaining conflict markers, or a factory that does
-    not verify. Nothing is written under `--check`/`--pretend` (F3).
+    Only a forced merge writes the clean upstream hunks next to the markers, so only
+    its conflicts can be marked resolved: marking a file whose merge was never
+    written would bury upstream changes for good (review R-aaf05b23 F1). Every other
+    file keeps its base, so pending upstream changes still arrive and deliberate
+    deletions stay deleted (R-378237e8 F4/F5); a conflict resolved by deleting the
+    file stays deleted too (R-aaf05b23 F3). Refuses with no pinned base, no forced
+    conflict pending, a different target than the forced merge, remaining markers,
+    or a factory that does not verify. Nothing is written under `--check`/`--pretend`.
     """
     if source is not None:
         theirs, target_digest = template_from(source)
@@ -290,32 +291,35 @@ def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | N
     if not lock or not lock.base:
         rep.notes.append("not marked resolved: no upgrade base pinned yet; run `psf upgrade` first")
         return rep
-    if rebase_pending(repo_root, factory_dir, list(lock.migrations)):
-        rep.notes.append("not marked resolved: the bootstrap base is stale; run `psf upgrade` first")
+    if not lock.conflicts:
+        rep.notes.append("not marked resolved: no forced conflict is pending; run `psf upgrade` "
+                         "(and `psf upgrade --force` if it reports a conflict)")
+        return rep
+    if lock.template_digest != target_digest:
+        rep.notes.append("not marked resolved: the target differs from the one the conflicts came from; "
+                         "use the same template (or `--from`) as the forced upgrade")
         return rep
     err = _verify(factory_dir)
     if err:
         rep.notes.append(f"not marked resolved: {err}")
         return rep
     ours = read_template(factory_dir)
-    base = dict(lock.base)
-    conflicted = sorted(c.path for c, _ in plan(ours, base, theirs) if c.conflict)
-    if not conflicted:
-        rep.notes.append("not marked resolved: no upgrade conflict is pending; run `psf upgrade` instead")
-        return rep
-    new_base = dict(base)
-    for rel in conflicted:
-        new_base[rel] = theirs[rel]
-    rep.changes = [Change(rel, "resolved") for rel in conflicted]
+    new_base = dict(lock.base)
+    for rel in lock.conflicts:
+        if rel in theirs:
+            new_base[rel] = theirs[rel]
+        else:
+            new_base.pop(rel, None)
+    rep.changes = [Change(rel, "resolved") for rel in lock.conflicts]
     remaining = [c for c, _ in plan(ours, new_base, theirs) if c.action != "kept"]
     rep.drifted = bool(remaining)
     if dry_run:
-        rep.notes.append(f"would mark resolved: {', '.join(conflicted)}")
+        rep.notes.append(f"would mark resolved: {', '.join(lock.conflicts)}")
         return rep
     write_lock(repo_root, Lock(revision=lock.revision, template_digest=lock.template_digest,
                                migrations=list(lock.migrations), base=new_base).stamp())
     rep.applied = True
-    rep.notes.append(f"marked resolved: {', '.join(conflicted)}; local files left as they are")
+    rep.notes.append(f"marked resolved: {', '.join(lock.conflicts)}; local files left as they are")
     if remaining:
         rep.notes.append("upstream changes still pending; run `psf upgrade` to apply them: "
                          + ", ".join(c.path for c in remaining))

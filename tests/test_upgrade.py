@@ -209,20 +209,42 @@ def _conflicted_repo(tmp_path: Path, extra=lambda rel, t: t) -> tuple[Path, Path
     return root, factory, src
 
 
+def _force(root, factory, src):
+    from psf.upgrade import run_upgrade
+    rep = run_upgrade(root, factory, source=src, force=True)
+    assert rep.conflict and read_lock(root).conflicts == ["factory.yml"]
+    return rep
+
+
+def _resolve_yml(factory: Path, keep="max_attempts: 7"):
+    """The human keeps their side of each conflict hunk (and every clean upstream hunk)."""
+    yml = factory / "factory.yml"
+    out, side = [], None
+    for line in yml.read_text().splitlines(keepends=True):
+        if line.startswith("<<<<<<<"):
+            side = "ours"
+        elif line.startswith("=======") and side:
+            side = "theirs"
+        elif line.startswith(">>>>>>>") and side:
+            side = None
+        elif side != "theirs":
+            out.append(line)
+    yml.write_text("".join(out))
+    assert keep in yml.read_text()
+
+
 def test_resolved_advances_only_conflicted_files(tmp_path: Path):
     from psf.upgrade import run_upgrade
     root, factory, src = _conflicted_repo(tmp_path)
-    rep = run_upgrade(root, factory, source=src)
-    assert not rep.applied and rep.conflict                  # rolled back
-    yml = factory / "factory.yml"
-    yml.write_text(yml.read_text() + "<<<<<<< factory.yml (yours)\nx\n=======\ny\n>>>>>>> factory.yml (upstream)\n")
+    _force(root, factory, src)
     rep = run_upgrade(root, factory, source=src, resolved=True)
     assert not rep.applied and any("conflict markers" in n for n in rep.notes)
-    yml.write_text(yml.read_text().split("<<<<<<<")[0])   # human keeps max_attempts 7
+    _resolve_yml(factory)
     rep = run_upgrade(root, factory, source=src, resolved=True)
     assert rep.applied and [c.path for c in rep.changes] == ["factory.yml"]
+    assert read_lock(root).conflicts == []
     assert run_upgrade(root, factory, source=src, check=True).drifted is False   # no phantom CONFLICT
-    assert "max_attempts: 7" in yml.read_text()
+    assert "max_attempts: 7" in (factory / "factory.yml").read_text()
 
 
 def test_resolved_honours_check_and_pretend(tmp_path: Path):
@@ -230,6 +252,8 @@ def test_resolved_honours_check_and_pretend(tmp_path: Path):
     from psf.scaffold import lock_path
     from psf.upgrade import run_upgrade
     root, factory, src = _conflicted_repo(tmp_path)
+    _force(root, factory, src)
+    _resolve_yml(factory)
     before = lock_path(root).read_text()
     for kw in ({"check": True}, {"pretend": True}):
         rep = run_upgrade(root, factory, source=src, resolved=True, **kw)
@@ -242,6 +266,8 @@ def test_resolved_keeps_deliberate_deletions(tmp_path: Path):
     from psf.upgrade import run_upgrade
     root, factory, src = _conflicted_repo(tmp_path)
     (factory / "agents/code-review.md").unlink()           # deliberate local deletion
+    _force(root, factory, src)
+    _resolve_yml(factory)
     assert run_upgrade(root, factory, source=src, resolved=True).applied
     rep = run_upgrade(root, factory, source=src)
     assert rep.applied and not (factory / "agents/code-review.md").exists()
@@ -256,23 +282,57 @@ def test_resolved_requires_a_pending_conflict(tmp_path: Path):
     src = _target(tmp_path, lambda rel, t: t + "upstream line\n" if rel == "agents/spec.md" else t)
     before = lock_path(root).read_text()
     rep = run_upgrade(root, factory, source=src, resolved=True)
-    assert not rep.applied and any("no upgrade conflict is pending" in n for n in rep.notes)
+    assert not rep.applied and any("no forced conflict is pending" in n for n in rep.notes)
     assert lock_path(root).read_text() == before
     assert run_upgrade(root, factory, source=src).applied
     assert "upstream line" in (factory / "agents/spec.md").read_text()
 
 
-def test_resolved_does_not_suppress_other_upstream_changes(tmp_path: Path):
-    """R-378237e8 F5: only the conflicted file's base moves; other upstream edits still arrive."""
+def test_resolved_after_rollback_refuses_and_keeps_clean_hunks(tmp_path: Path):
+    """R-aaf05b23 F1: --resolved after a rolled-back (never written) merge must not bury the
+    clean upstream hunks of the conflicted file."""
     from psf.upgrade import run_upgrade
     root, factory, src = _conflicted_repo(
-        tmp_path, lambda rel, t: t + "upstream line\n" if rel == "agents/spec.md" else t)
+        tmp_path, lambda rel, t: t + "# upstream note\n" if rel == "factory.yml" else t)
+    assert not run_upgrade(root, factory, source=src).applied           # rolled back
     rep = run_upgrade(root, factory, source=src, resolved=True)
-    assert rep.applied and rep.drifted and any("agents/spec.md" in n for n in rep.notes)
-    rep = run_upgrade(root, factory, source=src)
-    assert rep.applied and not rep.conflict
-    assert "upstream line" in (factory / "agents/spec.md").read_text()
-    assert "max_attempts: 7" in (factory / "factory.yml").read_text()
+    assert not rep.applied and any("no forced conflict is pending" in n for n in rep.notes)
+    _force(root, factory, src)
+    _resolve_yml(factory)
+    assert run_upgrade(root, factory, source=src, resolved=True).applied
+    assert "# upstream note" in (factory / "factory.yml").read_text()
+    assert run_upgrade(root, factory, source=src, check=True).drifted is False
+
+
+def test_resolved_by_deleting_the_conflicted_file(tmp_path: Path):
+    """R-aaf05b23 F3: a conflict resolved by deleting the file stays deleted."""
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    (factory / "agents/code-review.md").write_text("my own review prompt\n")   # both sides added it
+    rep = run_upgrade(root, factory, force=True)
+    assert "agents/code-review.md" in read_lock(root).conflicts
+    (factory / "agents/code-review.md").unlink()
+    assert run_upgrade(root, factory, resolved=True).applied
+    run_upgrade(root, factory)
+    assert not (factory / "agents/code-review.md").exists()
+
+
+def test_resolved_refuses_a_different_target(tmp_path: Path):
+    """R-f6501094 F7: --resolved must use the target the conflicts came from."""
+    from psf.upgrade import run_upgrade
+    root, factory, src = _conflicted_repo(tmp_path)
+    _force(root, factory, src)
+    _resolve_yml(factory)
+    rep = run_upgrade(root, factory, resolved=True)          # current template, not src
+    assert not rep.applied and any("target differs" in n for n in rep.notes)
+
+
+def test_cli_resolved_refusal_exits_nonzero(tmp_path: Path, monkeypatch):
+    """R-aaf05b23 F2: a refused --resolved is not reported as success."""
+    from psf.cli import main
+    root, factory, src = _conflicted_repo(tmp_path)
+    monkeypatch.chdir(root)
+    assert main(["upgrade", "--resolved", "--from", str(src)]) == 1
 
 
 def test_rollback_restores_a_rebased_lock(tmp_path: Path):
@@ -348,7 +408,7 @@ def test_force_then_resolved_keeps_a_later_deletion(tmp_path: Path):
     src = _target(tmp_path, lambda rel, t: t.replace("max_attempts: 2", "max_attempts: 3"))
     rep = run_upgrade(root, factory, source=src, force=True)
     assert rep.conflict and (factory / "agents/code-review.md").exists()
-    yml.write_text(render_template(UP, "off", "hitl")["factory.yml"].replace("max_attempts: 2", "max_attempts: 7"))
+    _resolve_yml(factory)
     assert run_upgrade(root, factory, source=src, resolved=True).applied
     lock = read_lock(root)
     assert "agents/code-review.md" in lock.base and digest(lock.base) == lock.template_digest

@@ -64,10 +64,12 @@ psf validate
 psf upgrade --resolved     # advance the base so `psf upgrade --check` is clean again
 ```
 
-`--resolved` moves the base only for the files whose merge still conflicts; your version of those files is kept as the
-resolution. Every other file keeps its base, so upstream changes you have not applied yet still arrive with the next
-`psf upgrade`, and template files you deleted stay deleted. It refuses when no conflict is pending, while conflict markers
-remain, when the factory does not verify, or when an old bootstrap lock still needs its repair (run `psf upgrade` first).
+`psf upgrade --force` records the conflicted files in `psf.lock.json` (`conflicts`). `--resolved` moves the base of exactly
+those files to the target; your version of them is kept as the resolution (deleting a conflicted file is a valid
+resolution and it stays deleted). Every other file keeps its base, so upstream changes you have not applied yet still
+arrive with the next `psf upgrade`, and template files you deleted stay deleted. It refuses with no forced conflict
+pending (run `psf upgrade --force` first: only a forced merge writes the clean upstream hunks next to the markers), with
+a different target than the forced upgrade, while markers remain, or when the factory does not verify, and then exits 1.
 With `--check` or `--pretend` it only reports what it would mark.
 
 A conflicted upgrade without `--force` writes nothing, with or without `--no-verify`. After `psf upgrade --force`, the

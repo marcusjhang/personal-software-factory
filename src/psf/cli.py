@@ -128,7 +128,7 @@ def cmd_upgrade(args) -> int:
             print(f"  {c.action:9} {c.path}{flag}")
         for n in rep.notes:
             print(f"  note: {n}")
-        if not rep.changes:
+        if not rep.changes and not (args.resolved and not rep.applied):
             print("  up to date")
     if args.check:
         return 1 if rep.drifted else 0
@@ -136,6 +136,8 @@ def cmd_upgrade(args) -> int:
         return 1
     if not rep.applied and rep.drifted and not (args.pretend or args.check):
         return 2
+    if args.resolved and not rep.applied and not (args.pretend or args.check):
+        return 1                           # refused: the conflict is still unresolved
     return 0
 
 
