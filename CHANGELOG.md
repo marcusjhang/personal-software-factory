@@ -31,6 +31,10 @@ Verified and merged by sidework.productivity under Marcus's standing permission.
   (exit 1) with no forced conflict pending, a different target, remaining markers, or a factory that doesn't verify, and
   writes nothing under `--check`/`--pretend`. Why: consumer feedback (asian-bounty); reviews R-378237e8 (F3–F5),
   R-aaf05b23 (F1–F3).
+### Docs
+- `docs/research/ARCHDEV-FACTORY.md`: full reference for Calvin Grunewald's *A Look Inside the Factory* (archdev,
+  19 Nov 2026), with Top's comparison against psf 0.2.1. Why: the post-finals psf improvement plan works from the whole
+  article. Docs only.
 
 ## 0.2.1 — 2026-11-16
 
