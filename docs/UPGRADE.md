@@ -70,10 +70,14 @@ resolution. Every other file keeps its base, so upstream changes you have not ap
 remain, when the factory does not verify, or when an old bootstrap lock still needs its repair (run `psf upgrade` first).
 With `--check` or `--pretend` it only reports what it would mark.
 
+A conflicted upgrade without `--force` writes nothing, with or without `--no-verify`. After `psf upgrade --force`, the
+base moves to the target for every file that merged cleanly; only the conflicted files wait for `--resolved`.
 A rolled-back upgrade restores `psf.lock.json` too, so a failed attempt never leaves the repo with a half-moved base.
 
 ## Repos from before the lock (pre-0.2)
 
 A repo with `factory/` but no usable `psf.lock.json` is pinned to the 0.1.0 template on its first upgrade, so files and
 lines added since then arrive. Locks pinned by the old bootstrap (psf ≤0.2.1) are repaired automatically on the next
-`psf upgrade`.
+`psf upgrade`, including repos whose owners restored the missing files by hand (lines added upstream since 0.1.0 still
+arrive). One cost: a template file added after 0.1.0 that you deliberately deleted comes back once; delete it again and
+it stays deleted.

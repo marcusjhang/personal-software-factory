@@ -84,14 +84,20 @@ def rebase_pending(repo_root: Path, factory_dir: Path, applied: list[str]) -> bo
 
 
 def _rebase_applies(repo_root: Path, factory_dir: Path) -> bool:
-    """Only locks pinned by the old bootstrap that show the actual symptom: a
-    template file the stale base claims was installed is absent from the factory.
-    Repos whose owners already restored the files are left alone."""
+    """Every lock pinned by the old bootstrap (it records the bootstrap id but not
+    this one; `psf init` records neither) whose base is not the 0.1.0 template.
+
+    An earlier version also required a template file to be missing. Repos whose
+    owners restored the files by hand were then left on the stale base, and lines
+    added upstream (e.g. `gates.code_review`) stayed silently suppressed (review
+    R-f6501094 F2). Re-pinning to an older base is safe for a three-way merge: it can
+    only surface more changes or conflicts, never hide one. The cost is that a
+    post-0.1.0 template file the user deliberately deleted comes back once.
+    """
     lock = read_lock(repo_root)
     if not (lock and lock.base and "2026-09-bootstrap-lock" in (lock.migrations or [])):
         return False
-    legacy = _legacy_base(factory_dir)
-    return any(rel not in legacy and not (factory_dir / rel).exists() for rel in lock.base)
+    return lock.base != _legacy_base(factory_dir)
 
 
 def _rebase_apply(repo_root: Path, factory_dir: Path) -> str:

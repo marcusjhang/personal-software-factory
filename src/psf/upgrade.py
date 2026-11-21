@@ -208,6 +208,16 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
     if check or pretend:
         return rep
 
+    if rep.conflict and not force:
+        # Never write conflict markers unless asked, whether or not verification runs
+        # (review R-f6501094 F3: --no-verify used to leave markers in place).
+        _restore_lock(repo_root, lock_before)
+        conflicted = ", ".join(c.path for c in rep.changes if c.conflict)
+        rep.notes.append(f"rolled back: merge conflicts in {conflicted}; nothing was written")
+        rep.notes.append("to resolve: `psf upgrade --force` (writes the conflict markers), edit the marked files, "
+                         "`psf validate`, then `psf upgrade --resolved`")
+        return rep
+
     for change, text in merged:
         if change.action == "kept":
             continue                       # no upstream change; leave local file alone
@@ -231,15 +241,21 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         if err:
             _restore(factory_dir, ours, {c.path for c, _ in merged})
             _restore_lock(repo_root, lock_before)
+            rep.migrations = list(read_lock(repo_root).migrations) if lock_before else []
             rep.notes.append(f"rolled back: verification failed — {err}")
-            if rep.conflict:
-                rep.notes.append("to resolve: `psf upgrade --force` (writes the conflict markers), edit the marked files, "
-                                 "`psf validate`, then `psf upgrade --resolved`")
             return rep
 
-    # Advance the base only when the merge is conflict-free; otherwise keep the
-    # old base so the upgrade can be retried after the conflict is resolved.
-    new_base = base if rep.conflict else theirs
+    # Advance the base to the target for everything that merged; a file still in
+    # conflict keeps its old base so `--resolved` can move it after a human fixes it.
+    # (Keeping the old base for *every* file after a forced merge left newly added
+    # files out of the base, so a later deletion brought them back: R-f6501094 F1.)
+    new_base = dict(theirs)
+    for c in rep.changes:
+        if c.conflict:
+            if c.path in base:
+                new_base[c.path] = base[c.path]
+            else:
+                new_base.pop(c.path, None)
     write_lock(repo_root, Lock(revision=revision, template_digest=target_digest,
                                migrations=applied, base=new_base).stamp())
     rep.applied = True

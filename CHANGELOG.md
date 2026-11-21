@@ -11,14 +11,17 @@ Verified and merged by sidework.productivity under Marcus's standing permission.
   pinned the *current* template as the merge base, so everything added since 0.1.0 (`agents/code-review.md`,
   `gates.code_review`) looked like a local deletion and never arrived, while `psf validate` still passed. Bootstrap
   now pins a frozen copy of the 0.1.0 template (`src/psf/template_history.py`). A one-time migration
-  (`2026-11-rebase-bootstrap-base`) repairs locks the old bootstrap wrote, but only where a template file is actually missing,
-  so the next `psf upgrade` adds the missing files. If the repo also changed `factory.yml`, that surfaces as a conflict to
+  (`2026-11-rebase-bootstrap-base`) repairs every lock the old bootstrap wrote (also where owners restored the files by
+  hand, since the lines were still missing; review R-f6501094 F2), so the next `psf upgrade` adds what was skipped. If the repo also changed `factory.yml`, that surfaces as a conflict to
   resolve by hand (see docs/UPGRADE.md). Why: consumer feedback (experiments). It was confirmed in 5 repos.
 - **A conflicted upgrade no longer crashes.** The post-merge check now catches unresolved markers and a factory that no
   longer parses, then rolls back instead of throwing a YAML traceback. Why: consumer feedback (asian-bounty).
 - **A rolled-back upgrade restores the lock.** The bootstrap and the old-lock repair write `psf.lock.json` before the merge; a
   rollback now puts it back exactly, so a failed upgrade can't leave a repo stuck in a permanent conflict. Why: independent
   review R-378237e8 (F2).
+- **A conflict never writes markers without `--force`**, even with `--no-verify` (review R-f6501094 F3). After a forced
+  conflicted upgrade, the base moves to the target for every file that merged cleanly, so files it added stay deletable
+  (F1).
 - **Every migration id is recorded.** After a bootstrap, the lock listed only the bootstrap id, so deleting a template file
   added since 0.1.0 later re-triggered the repair and brought the file back. Why: independent review R-378237e8 (F1).
 ### Added

@@ -335,3 +335,53 @@ def test_bootstrap_records_every_migration_id(tmp_path: Path):
     rep = run_upgrade(root, factory)
     assert not (factory / "agents/code-review.md").exists()
     assert run_upgrade(root, factory, check=True).drifted is False
+
+
+# --- independent review R-f6501094 ---------------------------------------------
+
+def test_force_then_resolved_keeps_a_later_deletion(tmp_path: Path):
+    """R-f6501094 F1: files added by a forced, conflicted upgrade enter the base."""
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    yml = factory / "factory.yml"
+    yml.write_text(yml.read_text().replace("max_attempts: 2", "max_attempts: 7"))
+    src = _target(tmp_path, lambda rel, t: t.replace("max_attempts: 2", "max_attempts: 3"))
+    rep = run_upgrade(root, factory, source=src, force=True)
+    assert rep.conflict and (factory / "agents/code-review.md").exists()
+    yml.write_text(render_template(UP, "off", "hitl")["factory.yml"].replace("max_attempts: 2", "max_attempts: 7"))
+    assert run_upgrade(root, factory, source=src, resolved=True).applied
+    lock = read_lock(root)
+    assert "agents/code-review.md" in lock.base and digest(lock.base) == lock.template_digest
+    (factory / "agents/code-review.md").unlink()
+    assert run_upgrade(root, factory, source=src, check=True).drifted is False
+    run_upgrade(root, factory, source=src)
+    assert not (factory / "agents/code-review.md").exists()
+
+
+def test_rebase_runs_when_owner_restored_the_files_by_hand(tmp_path: Path):
+    """R-f6501094 F2: restoring missing files must not leave missing lines suppressed."""
+    from psf.upgrade import run_upgrade
+    root, factory = _legacy_repo(tmp_path)
+    current = render_template(UP, "off", "hitl")
+    write_lock(root, Lock(revision="current", template_digest=digest(current), base=current,
+                          migrations=["2026-09-bootstrap-lock"]).stamp())
+    for rel, text in current.items():                     # owner copied the missing files in
+        if not (factory / rel).exists():
+            (factory / rel).parent.mkdir(parents=True, exist_ok=True)
+            (factory / rel).write_text(text)
+    assert "code_review" not in (factory / "factory.yml").read_text()
+    assert run_upgrade(root, factory, check=True).drifted
+    rep = run_upgrade(root, factory)
+    assert rep.applied and "code_review" in (factory / "factory.yml").read_text()
+
+
+def test_conflict_without_verify_writes_nothing(tmp_path: Path):
+    """R-f6501094 F3: --no-verify must not leave conflict markers behind."""
+    from psf.scaffold import lock_path
+    from psf.upgrade import run_upgrade
+    root, factory, src = _conflicted_repo(tmp_path)
+    before_yml, before_lock = (factory / "factory.yml").read_text(), lock_path(root).read_text()
+    rep = run_upgrade(root, factory, source=src, verify=False)
+    assert not rep.applied and any("rolled back" in n for n in rep.notes)
+    assert (factory / "factory.yml").read_text() == before_yml
+    assert lock_path(root).read_text() == before_lock
