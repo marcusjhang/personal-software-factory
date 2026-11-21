@@ -51,3 +51,35 @@ current template as the base.
 
 `psf audit` reports `factory.revision` so you can see what you're pinned to and
 whether the base is self-consistent.
+
+## Conflicts
+
+When you and the template changed or added lines at the same spot, that is a conflict. psf never guesses: the upgrade is
+rolled back so your factory keeps working. To resolve it:
+
+```bash
+psf upgrade --force        # write the merge, conflict markers included (adds new template files too)
+# edit the marked files, keeping what you want
+psf validate
+psf upgrade --resolved     # advance the base so `psf upgrade --check` is clean again
+```
+
+`psf upgrade --force` records the conflicted files in `psf.lock.json` (`conflicts`). `--resolved` moves the base of exactly
+those files to the target; your version of them is kept as the resolution (deleting a conflicted file is a valid
+resolution and it stays deleted). Every other file keeps its base, so upstream changes you have not applied yet still
+arrive with the next `psf upgrade`, and template files you deleted stay deleted. It refuses with no forced conflict
+pending (run `psf upgrade --force` first: only a forced merge writes the clean upstream hunks next to the markers), with
+a different target than the forced upgrade, while markers remain, or when the factory does not verify, and then exits 1.
+With `--check` or `--pretend` it only reports what it would mark.
+
+A conflicted upgrade without `--force` writes nothing, with or without `--no-verify`. After `psf upgrade --force`, the
+base moves to the target for every file that merged cleanly; only the conflicted files wait for `--resolved`.
+A rolled-back upgrade restores `psf.lock.json` too, so a failed attempt never leaves the repo with a half-moved base.
+
+## Repos from before the lock (pre-0.2)
+
+A repo with `factory/` but no usable `psf.lock.json` is pinned to the 0.1.0 template on its first upgrade, so files and
+lines added since then arrive. Locks pinned by the old bootstrap (psf ≤0.2.1) are repaired automatically on the next
+`psf upgrade`, including repos whose owners restored the missing files by hand (lines added upstream since 0.1.0 still
+arrive). One cost: a template file added after 0.1.0 that you deliberately deleted comes back once; delete it again and
+it stays deleted.

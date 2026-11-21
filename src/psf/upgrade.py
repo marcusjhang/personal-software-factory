@@ -17,8 +17,8 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .migrations import run_migrations
-from .scaffold import (Lock, as_str, digest, read_lock, read_template,
+from .migrations import legacy_base, rebase_pending, run_migrations
+from .scaffold import (Lock, as_str, digest, lock_path, read_lock, read_template,
                        render_template, write_lock)
 
 
@@ -154,8 +154,11 @@ def template_from(path: str | Path) -> tuple[dict[str, str], str]:
 
 def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str | Path | None = None,
                 revision: str | None = None, pretend: bool = False, check: bool = False,
-                force: bool = False, verify: bool = True) -> UpgradeReport:
+                force: bool = False, verify: bool = True, resolved: bool = False) -> UpgradeReport:
     repo_root, factory_dir = Path(repo_root), Path(factory_dir)
+    if resolved:
+        return _mark_resolved(repo_root, factory_dir, source=source, revision=revision,
+                              dry_run=check or pretend)
     if source is not None:
         theirs, target_digest = template_from(source)
         revision = revision or f"local:{Path(source)}"
@@ -166,6 +169,7 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         revision = revision or "current"
 
     ours = read_template(factory_dir)
+    lock_before = _snapshot_lock(repo_root)   # a rollback restores the lock too (R-378237e8 F2)
     lock = read_lock(repo_root)
     base = dict(lock.base) if lock else {}
     rep = UpgradeReport(revision=revision, base_digest=digest(base) if base else "",
@@ -182,6 +186,18 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         lock = read_lock(repo_root)
         base = dict(lock.base) if lock else {}
         rep.base_digest = digest(base) if base else ""
+    elif rebase_pending(repo_root, factory_dir, applied):
+        # Lock pinned by the old bootstrap (current template as base): re-pin to
+        # the 0.1.0 template first, or files added since 0.1.0 never arrive.
+        if check or pretend:
+            base = legacy_base(factory_dir)
+            rep.notes.append("bootstrap base is stale: the next `psf upgrade` re-pins it to the 0.1.0 template")
+        else:
+            applied, notes = run_migrations(repo_root, factory_dir, applied)
+            rep.notes += notes
+            lock = read_lock(repo_root)
+            base = dict(lock.base) if lock else {}
+        rep.base_digest = digest(base) if base else ""
 
     merged = plan(ours, base, theirs)
     rep.changes = [c for c, _ in merged]
@@ -190,6 +206,16 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
     rep.conflict = any(c.conflict for c in rep.changes)
 
     if check or pretend:
+        return rep
+
+    if rep.conflict and not force:
+        # Never write conflict markers unless asked, whether or not verification runs
+        # (review R-f6501094 F3: --no-verify used to leave markers in place).
+        _restore_lock(repo_root, lock_before)
+        conflicted = ", ".join(c.path for c in rep.changes if c.conflict)
+        rep.notes.append(f"rolled back: merge conflicts in {conflicted}; nothing was written")
+        rep.notes.append("to resolve: `psf upgrade --force` (writes the conflict markers), edit the marked files, "
+                         "`psf validate`, then `psf upgrade --resolved`")
         return rep
 
     for change, text in merged:
@@ -214,16 +240,105 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         err = _verify(factory_dir)
         if err:
             _restore(factory_dir, ours, {c.path for c, _ in merged})
+            _restore_lock(repo_root, lock_before)
+            rep.migrations = list(read_lock(repo_root).migrations) if lock_before else []
             rep.notes.append(f"rolled back: verification failed — {err}")
             return rep
 
-    # Advance the base only when the merge is conflict-free; otherwise keep the
-    # old base so the upgrade can be retried after the conflict is resolved.
-    new_base = base if rep.conflict else theirs
-    write_lock(repo_root, Lock(revision=revision, template_digest=target_digest,
-                               migrations=applied, base=new_base).stamp())
+    # Advance the base to the target for everything that merged; a file still in
+    # conflict keeps its old base so `--resolved` can move it after a human fixes it.
+    # (Keeping the old base for *every* file after a forced merge left newly added
+    # files out of the base, so a later deletion brought them back: R-f6501094 F1.)
+    new_base = dict(theirs)
+    for c in rep.changes:
+        if c.conflict:
+            if c.path in base:
+                new_base[c.path] = base[c.path]
+            else:
+                new_base.pop(c.path, None)
+    write_lock(repo_root, Lock(revision=revision, template_digest=target_digest, migrations=applied,
+                               base=new_base,
+                               conflicts=sorted(c.path for c in rep.changes if c.conflict)).stamp())
     rep.applied = True
     return rep
+
+
+def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | None,
+                   revision: str | None, dry_run: bool = False) -> UpgradeReport:
+    """After `psf upgrade --force` left conflicts and a human resolved them by hand,
+    advance the base of exactly those files (recorded in the lock as `conflicts`)
+    to the target template, so `--check` stops reporting the same conflict forever.
+
+    Only a forced merge writes the clean upstream hunks next to the markers, so only
+    its conflicts can be marked resolved: marking a file whose merge was never
+    written would bury upstream changes for good (review R-aaf05b23 F1). Every other
+    file keeps its base, so pending upstream changes still arrive and deliberate
+    deletions stay deleted (R-378237e8 F4/F5); a conflict resolved by deleting the
+    file stays deleted too (R-aaf05b23 F3). Refuses with no pinned base, no forced
+    conflict pending, a different target than the forced merge, remaining markers,
+    or a factory that does not verify. Nothing is written under `--check`/`--pretend`.
+    """
+    if source is not None:
+        theirs, target_digest = template_from(source)
+        revision = revision or f"local:{Path(source)}"
+    else:
+        theirs = render_template(*_consumer_settings(factory_dir))
+        target_digest = digest(theirs)
+        revision = revision or "current"
+    lock = read_lock(repo_root)
+    rep = UpgradeReport(revision=revision, base_digest=digest(lock.base) if lock and lock.base else "",
+                        target_digest=target_digest)
+    if not lock or not lock.base:
+        rep.notes.append("not marked resolved: no upgrade base pinned yet; run `psf upgrade` first")
+        return rep
+    if not lock.conflicts:
+        rep.notes.append("not marked resolved: no forced conflict is pending; run `psf upgrade` "
+                         "(and `psf upgrade --force` if it reports a conflict)")
+        return rep
+    if lock.template_digest != target_digest:
+        rep.notes.append("not marked resolved: the target differs from the one the conflicts came from; "
+                         "use the same template (or `--from`) as the forced upgrade")
+        return rep
+    err = _verify(factory_dir)
+    if err:
+        rep.notes.append(f"not marked resolved: {err}")
+        return rep
+    ours = read_template(factory_dir)
+    new_base = dict(lock.base)
+    for rel in lock.conflicts:
+        if rel in theirs:
+            new_base[rel] = theirs[rel]
+        else:
+            new_base.pop(rel, None)
+    rep.changes = [Change(rel, "resolved") for rel in lock.conflicts]
+    remaining = [c for c, _ in plan(ours, new_base, theirs) if c.action != "kept"]
+    rep.drifted = bool(remaining)
+    if dry_run:
+        rep.notes.append(f"would mark resolved: {', '.join(lock.conflicts)}")
+        return rep
+    write_lock(repo_root, Lock(revision=lock.revision, template_digest=lock.template_digest,
+                               migrations=list(lock.migrations), base=new_base).stamp())
+    rep.applied = True
+    rep.notes.append(f"marked resolved: {', '.join(lock.conflicts)}; local files left as they are")
+    if remaining:
+        rep.notes.append("upstream changes still pending; run `psf upgrade` to apply them: "
+                         + ", ".join(c.path for c in remaining))
+    return rep
+
+
+def _snapshot_lock(repo_root: Path) -> str | None:
+    p = lock_path(repo_root)
+    return p.read_text() if p.exists() else None
+
+
+def _restore_lock(repo_root: Path, before: str | None) -> None:
+    """Put the lock back exactly as it was before this upgrade (or remove it)."""
+    p = lock_path(repo_root)
+    if before is None:
+        if p.exists():
+            p.unlink()
+    else:
+        p.write_text(before)
 
 
 def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> None:
@@ -240,7 +355,16 @@ def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> No
 def _verify(factory_dir: Path) -> str | None:
     from .audit import run_audit
 
-    rep = run_audit(factory_dir, factory_dir.parent / ".psf" / "factory.db", include_bench=False)
+    for f in factory_dir.rglob("*"):
+        if f.is_file() and f.suffix in (".yml", ".yaml", ".md"):
+            text = f.read_text(errors="replace")
+            if "\n<<<<<<< " in "\n" + text or "\n>>>>>>> " in "\n" + text:
+                return f"unresolved conflict markers in {f.relative_to(factory_dir)}"
+    try:
+        rep = run_audit(factory_dir, factory_dir.parent / ".psf" / "factory.db", include_bench=False)
+    except Exception as e:                 # e.g. YAML that no longer parses: roll back, never crash
+        first = (str(e).strip().splitlines() or [""])[0]
+        return f"factory no longer loads: {type(e).__name__}: {first}"
     if not rep.healthy:
         return "; ".join(f"{c.name}: {c.detail}" for c in rep.failures)
     return None

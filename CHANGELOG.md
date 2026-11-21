@@ -2,12 +2,39 @@
 
 What changed in psf and why. Newest first. Consumer projects get template changes with `psf upgrade`.
 
-## Unreleased
+## 0.2.2 — 2026-11-21
 
+Verified and merged by sidework.productivity under Marcus's standing permission. Evidence is in the PR.
+
+### Fixed
+- **`psf upgrade` silently skipped new template files and lines in repos created before the lock existed.** Bootstrap
+  pinned the *current* template as the merge base, so everything added since 0.1.0 (`agents/code-review.md`,
+  `gates.code_review`) looked like a local deletion and never arrived, while `psf validate` still passed. Bootstrap
+  now pins a frozen copy of the 0.1.0 template (`src/psf/template_history.py`). A one-time migration
+  (`2026-11-rebase-bootstrap-base`) repairs every lock the old bootstrap wrote (also where owners restored the files by
+  hand, since the lines were still missing; review R-f6501094 F2), so the next `psf upgrade` adds what was skipped. If the repo also changed `factory.yml`, that surfaces as a conflict to
+  resolve by hand (see docs/UPGRADE.md). Why: consumer feedback (experiments). It was confirmed in 5 repos.
+- **A conflicted upgrade no longer crashes.** The post-merge check now catches unresolved markers and a factory that no
+  longer parses, then rolls back instead of throwing a YAML traceback. Why: consumer feedback (asian-bounty).
+- **A rolled-back upgrade restores the lock.** The bootstrap and the old-lock repair write `psf.lock.json` before the merge; a
+  rollback now puts it back exactly, so a failed upgrade can't leave a repo stuck in a permanent conflict. Why: independent
+  review R-378237e8 (F2).
+- **A conflict never writes markers without `--force`**, even with `--no-verify` (review R-f6501094 F3). After a forced
+  conflicted upgrade, the base moves to the target for every file that merged cleanly, so files it added stay deletable
+  (F1).
+- **Every migration id is recorded.** After a bootstrap, the lock listed only the bootstrap id, so deleting a template file
+  added since 0.1.0 later re-triggered the repair and brought the file back. Why: independent review R-378237e8 (F1).
+### Added
+- `psf upgrade --resolved`: after `psf upgrade --force` and a hand resolution, it advances the base of the files the
+  forced merge left in conflict (recorded in the lock as `conflicts`), so `--check` stops reporting the same conflict
+  forever, while other pending upstream changes still arrive and deliberately deleted files stay deleted. It refuses
+  (exit 1) with no forced conflict pending, a different target, remaining markers, or a factory that doesn't verify, and
+  writes nothing under `--check`/`--pretend`. Why: consumer feedback (asian-bounty); reviews R-378237e8 (F3–F5),
+  R-aaf05b23 (F1–F3).
 ### Docs
 - `docs/research/ARCHDEV-FACTORY.md`: full reference for Calvin Grunewald's *A Look Inside the Factory* (archdev,
   19 Nov 2026), with Top's comparison against psf 0.2.1. Why: the post-finals psf improvement plan works from the whole
-  article. Docs only: no behaviour change, no release, nothing to `psf upgrade`.
+  article. Docs only.
 
 ## 0.2.1 — 2026-11-16
 

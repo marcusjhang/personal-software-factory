@@ -103,3 +103,33 @@ Round 1: 7 findings, 0 verified high+. F1 (medium: a non-string `source` crashed
 publishing could skip an unpublished envelope) fixed: `--if-changed` now requires `--local`. F3 and F4 (low: the source id depended on cwd and was a
 guessable path hash) fixed: random id in `.psf/source-id`. F6 (low) fixed. F7 (style) fixed. F5 (low: a spoofed envelope can hide another
 repo's signals) accepted, because feedback is evidence and never authority.
+
+### Pre-merge review for 0.2.2 (upgrade fixes), independent reviewers
+
+| session | range | round result | notes |
+|---|---|---|---|
+| R-0a2fd23c | 5efc4b7..4d58e47 | 6 findings, **3 verified high → CONTINUE** | R1–R3 (high) and R4 (medium) all came from a new insert-only auto-merge that could silently lose or override user config (separator mis-parse, duplicate YAML keys, blank-line base, unchecked git rc). **Resolver removed**: conflicts stay with a human. R5 (medium, `--resolved` could re-create the skip bug) fixed. R6 (low, CRLF, pre-existing) accepted |
+| R-378237e8 | 5efc4b7..de30810 | 2 findings, 0 verified high → DONE | S1 (medium) fixed: the rollback note says how to resolve. S2 (low, read-only probe of the lock's own keys) accepted |
+| (self) | de30810..final | 0 findings → DONE | message-only change for S1 |
+
+**Correction (not merged):** R-378237e8 was recorded as DONE from the reviewer's interim result. Its final result was
+F1 (high: a deleted file comes back because the migration ids recorded after bootstrap are incomplete), F2 (high: the rebase
+writes the lock before merging and a rollback doesn't restore it, so a repo can be stuck in a permanent conflict), F3 (medium:
+`--resolved` writes the lock under `--check`/`--pretend`), F4 (medium: `--resolved` re-adds files the user deliberately deleted), F5 (medium:
+`--resolved` without a pending conflict suppresses upstream changes), and F6 (info: the frozen 0.1.0 template is byte-identical).
+**0.2.2 is held on branch `fix/bootstrap-base-0.1` and not merged.** Every fix round has turned up new problems in the
+rebase and `--resolved` design. Next: restore the lock on rollback (F2), persist all migration ids (F1), make
+`--resolved` honour check/pretend, keep deliberate deletions, and require a pending conflict (F3–F5). Then run a fresh
+independent review.
+
+### 0.2.2 finished (weekly pass, 2026-11-21), independent reviewers
+
+The held R-378237e8 findings were fixed first: a rollback restores the lock (F2), every migration id is recorded after
+bootstrap (F1), and `--resolved` honours check/pretend, needs a pending conflict and keeps deliberate deletions (F3–F5).
+8 regression tests. Then three fresh independent review rounds on `main..HEAD`:
+
+| session | head | result | notes |
+|---|---|---|---|
+| R-f6501094 | 5312698 | 7 findings, 2 verified high → DONE (fixed anyway) | F1 high: a forced merge kept the old base for every file, so added files came back after deletion → clean files now take the target base. F2 high: the rebase skipped repos whose owners restored files by hand, so lines stayed suppressed → every old-bootstrap lock is rebased. F3 medium: `--no-verify` left markers → a conflict without `--force` writes nothing. F4/F5 low fixed. F6 (read_lock on null fields, pre-existing) and F7 accepted (F7 fixed in the next round) |
+| R-aaf05b23 | f6bf3ee | 5 findings, 1 verified high → DONE (fixed anyway) | F1 high: `--resolved` after a rolled-back merge buried that file's clean upstream hunks → `--force` records `conflicts` in the lock and `--resolved` acts only on them (and refuses a different target). F2 medium: refused `--resolved` exited 0 → exit 1. F3 medium: a conflict resolved by deletion came back → stays deleted. F4 accepted, F5 fixed |
+| R-2ec9cf53 | 5da626c | 3 findings, 0 verified high → DONE | F1 medium: a target change between `--force` and `--resolved` needs a second resolution. F2 low: `--force` twice nests markers. F3 low: `--resolved --check` refusal exits 0. All accepted and ledgered |

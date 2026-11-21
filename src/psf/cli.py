@@ -114,7 +114,7 @@ def cmd_upgrade(args) -> int:
     try:
         rep = run_upgrade(".", args.factory, source=args.from_dir, revision=args.to,
                           pretend=args.pretend, check=args.check, force=args.force,
-                          verify=not args.no_verify)
+                          verify=not args.no_verify, resolved=args.resolved)
     except (FileNotFoundError, ValueError) as e:
         print(f"upgrade: {e}", file=sys.stderr)
         return 2
@@ -128,7 +128,7 @@ def cmd_upgrade(args) -> int:
             print(f"  {c.action:9} {c.path}{flag}")
         for n in rep.notes:
             print(f"  note: {n}")
-        if not rep.changes:
+        if not rep.changes and not (args.resolved and not rep.applied):
             print("  up to date")
     if args.check:
         return 1 if rep.drifted else 0
@@ -136,6 +136,8 @@ def cmd_upgrade(args) -> int:
         return 1
     if not rep.applied and rep.drifted and not (args.pretend or args.check):
         return 2
+    if args.resolved and not rep.applied and not (args.pretend or args.check):
+        return 1                           # refused: the conflict is still unresolved
     return 0
 
 
@@ -839,6 +841,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--check", action="store_true", help="exit 1 if an upgrade would change anything (CI)")
     s.add_argument("--force", action="store_true", help="apply even if verification fails, and keep conflicts")
     s.add_argument("--no-verify", action="store_true", help="skip validate/audit before applying")
+    s.add_argument("--resolved", action="store_true",
+                   help="after resolving upgrade conflicts by hand: advance the base (refuses while markers remain)")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_upgrade)
 

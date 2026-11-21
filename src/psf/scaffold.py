@@ -223,6 +223,8 @@ class Lock:
     applied_at: str = ""
     base: dict[str, str] = field(default_factory=dict)
     schema: str = LOCK_SCHEMA
+    # Paths a `psf upgrade --force` left in conflict; `--resolved` acts on these only.
+    conflicts: list[str] = field(default_factory=list)
 
     def stamp(self) -> "Lock":
         self.applied_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -243,7 +245,8 @@ def read_lock(repo_root: Path) -> Lock | None:
                 migrations=list(raw.get("migrations", [])),
                 applied_at=raw.get("applied_at", ""),
                 base=dict(raw.get("base", {})),
-                schema=raw.get("schema", LOCK_SCHEMA))
+                schema=raw.get("schema", LOCK_SCHEMA),
+                conflicts=[c for c in (raw.get("conflicts") or []) if isinstance(c, str)])
 
 
 def write_lock(repo_root: Path, lock: Lock) -> Path:
