@@ -121,3 +121,15 @@ writes the lock before merging and a rollback doesn't restore it, so a repo can 
 rebase and `--resolved` design. Next: restore the lock on rollback (F2), persist all migration ids (F1), make
 `--resolved` honour check/pretend, keep deliberate deletions, and require a pending conflict (F3–F5). Then run a fresh
 independent review.
+
+### 0.2.2 finished (weekly pass, 2026-11-21), independent reviewers
+
+The held R-378237e8 findings were fixed first: a rollback restores the lock (F2), every migration id is recorded after
+bootstrap (F1), and `--resolved` honours check/pretend, needs a pending conflict and keeps deliberate deletions (F3–F5).
+8 regression tests. Then three fresh independent review rounds on `main..HEAD`:
+
+| session | head | result | notes |
+|---|---|---|---|
+| R-f6501094 | 5312698 | 7 findings, 2 verified high → DONE (fixed anyway) | F1 high: a forced merge kept the old base for every file, so added files came back after deletion → clean files now take the target base. F2 high: the rebase skipped repos whose owners restored files by hand, so lines stayed suppressed → every old-bootstrap lock is rebased. F3 medium: `--no-verify` left markers → a conflict without `--force` writes nothing. F4/F5 low fixed. F6 (read_lock on null fields, pre-existing) and F7 accepted (F7 fixed in the next round) |
+| R-aaf05b23 | f6bf3ee | 5 findings, 1 verified high → DONE (fixed anyway) | F1 high: `--resolved` after a rolled-back merge buried that file's clean upstream hunks → `--force` records `conflicts` in the lock and `--resolved` acts only on them (and refuses a different target). F2 medium: refused `--resolved` exited 0 → exit 1. F3 medium: a conflict resolved by deletion came back → stays deleted. F4 accepted, F5 fixed |
+| R-2ec9cf53 | 5da626c | 3 findings, 0 verified high → DONE | F1 medium: a target change between `--force` and `--resolved` needs a second resolution. F2 low: `--force` twice nests markers. F3 low: `--resolved --check` refusal exits 0. All accepted and ledgered |
