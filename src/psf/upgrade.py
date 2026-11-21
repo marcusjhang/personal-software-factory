@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .migrations import legacy_base, rebase_pending, run_migrations
-from .scaffold import (Lock, as_str, digest, read_lock, read_template,
+from .scaffold import (Lock, as_str, digest, lock_path, read_lock, read_template,
                        render_template, write_lock)
 
 
@@ -157,7 +157,8 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
                 force: bool = False, verify: bool = True, resolved: bool = False) -> UpgradeReport:
     repo_root, factory_dir = Path(repo_root), Path(factory_dir)
     if resolved:
-        return _mark_resolved(repo_root, factory_dir, source=source, revision=revision)
+        return _mark_resolved(repo_root, factory_dir, source=source, revision=revision,
+                              dry_run=check or pretend)
     if source is not None:
         theirs, target_digest = template_from(source)
         revision = revision or f"local:{Path(source)}"
@@ -168,6 +169,7 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         revision = revision or "current"
 
     ours = read_template(factory_dir)
+    lock_before = _snapshot_lock(repo_root)   # a rollback restores the lock too (R-378237e8 F2)
     lock = read_lock(repo_root)
     base = dict(lock.base) if lock else {}
     rep = UpgradeReport(revision=revision, base_digest=digest(base) if base else "",
@@ -228,6 +230,7 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
         err = _verify(factory_dir)
         if err:
             _restore(factory_dir, ours, {c.path for c, _ in merged})
+            _restore_lock(repo_root, lock_before)
             rep.notes.append(f"rolled back: verification failed — {err}")
             if rep.conflict:
                 rep.notes.append("to resolve: `psf upgrade --force` (writes the conflict markers), edit the marked files, "
@@ -244,14 +247,19 @@ def run_upgrade(repo_root: str | Path, factory_dir: str | Path, *, source: str |
 
 
 def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | None,
-                   revision: str | None) -> UpgradeReport:
-    """After a human resolved upgrade conflicts by hand, advance the base to the
-    target template so `--check` stops reporting the same conflict forever.
+                   revision: str | None, dry_run: bool = False) -> UpgradeReport:
+    """After a human resolved upgrade conflicts by hand, advance the base of the
+    *conflicted files only* to the target template, so `--check` stops reporting
+    the same conflict forever.
 
-    Refuses on a repo with no pinned base (run `psf upgrade` first), while conflict
-    markers remain, or when the factory does not verify. Template files still absent
-    locally are left out of the new base, so a later upgrade *adds* them instead of
-    mistaking them for local deletions.
+    Review R-378237e8: advancing every file's base (F5) hid upstream changes that
+    were never applied, and leaving absent files out of the base (F4) re-added
+    files the user had deliberately deleted. Now only files whose three-way merge
+    still conflicts move; everything else keeps its base, so the next
+    `psf upgrade` still delivers pending upstream changes and still respects
+    local deletions. Refuses on a repo with no pinned base, a stale bootstrap
+    base, no pending conflict, remaining conflict markers, or a factory that does
+    not verify. Nothing is written under `--check`/`--pretend` (F3).
     """
     if source is not None:
         theirs, target_digest = template_from(source)
@@ -266,20 +274,51 @@ def _mark_resolved(repo_root: Path, factory_dir: Path, *, source: str | Path | N
     if not lock or not lock.base:
         rep.notes.append("not marked resolved: no upgrade base pinned yet; run `psf upgrade` first")
         return rep
+    if rebase_pending(repo_root, factory_dir, list(lock.migrations)):
+        rep.notes.append("not marked resolved: the bootstrap base is stale; run `psf upgrade` first")
+        return rep
     err = _verify(factory_dir)
     if err:
         rep.notes.append(f"not marked resolved: {err}")
         return rep
     ours = read_template(factory_dir)
-    new_base = {rel: text for rel, text in theirs.items() if rel in ours}
-    missing = sorted(set(theirs) - set(ours))
-    write_lock(repo_root, Lock(revision=revision, template_digest=digest(new_base),
+    base = dict(lock.base)
+    conflicted = sorted(c.path for c, _ in plan(ours, base, theirs) if c.conflict)
+    if not conflicted:
+        rep.notes.append("not marked resolved: no upgrade conflict is pending; run `psf upgrade` instead")
+        return rep
+    new_base = dict(base)
+    for rel in conflicted:
+        new_base[rel] = theirs[rel]
+    rep.changes = [Change(rel, "resolved") for rel in conflicted]
+    remaining = [c for c, _ in plan(ours, new_base, theirs) if c.action != "kept"]
+    rep.drifted = bool(remaining)
+    if dry_run:
+        rep.notes.append(f"would mark resolved: {', '.join(conflicted)}")
+        return rep
+    write_lock(repo_root, Lock(revision=lock.revision, template_digest=lock.template_digest,
                                migrations=list(lock.migrations), base=new_base).stamp())
     rep.applied = True
-    rep.notes.append("marked resolved: base advanced to the target template; local files left as they are")
-    if missing:
-        rep.notes.append(f"not in your factory yet, will be added by the next `psf upgrade`: {', '.join(missing)}")
+    rep.notes.append(f"marked resolved: {', '.join(conflicted)}; local files left as they are")
+    if remaining:
+        rep.notes.append("upstream changes still pending; run `psf upgrade` to apply them: "
+                         + ", ".join(c.path for c in remaining))
     return rep
+
+
+def _snapshot_lock(repo_root: Path) -> str | None:
+    p = lock_path(repo_root)
+    return p.read_text() if p.exists() else None
+
+
+def _restore_lock(repo_root: Path, before: str | None) -> None:
+    """Put the lock back exactly as it was before this upgrade (or remove it)."""
+    p = lock_path(repo_root)
+    if before is None:
+        if p.exists():
+            p.unlink()
+    else:
+        p.write_text(before)
 
 
 def _restore(factory_dir: Path, before: dict[str, str], touched: set[str]) -> None:

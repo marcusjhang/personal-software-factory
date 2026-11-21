@@ -64,6 +64,14 @@ psf validate
 psf upgrade --resolved     # advance the base so `psf upgrade --check` is clean again
 ```
 
+`--resolved` moves the base only for the files whose merge still conflicts; your version of those files is kept as the
+resolution. Every other file keeps its base, so upstream changes you have not applied yet still arrive with the next
+`psf upgrade`, and template files you deleted stay deleted. It refuses when no conflict is pending, while conflict markers
+remain, when the factory does not verify, or when an old bootstrap lock still needs its repair (run `psf upgrade` first).
+With `--check` or `--pretend` it only reports what it would mark.
+
+A rolled-back upgrade restores `psf.lock.json` too, so a failed attempt never leaves the repo with a half-moved base.
+
 ## Repos from before the lock (pre-0.2)
 
 A repo with `factory/` but no usable `psf.lock.json` is pinned to the 0.1.0 template on its first upgrade, so files and

@@ -2,7 +2,7 @@
 
 What changed in psf and why. Newest first. Consumer projects get template changes with `psf upgrade`.
 
-## 0.2.2 — 2026-11-16
+## 0.2.2 — 2026-11-21
 
 Verified and merged by sidework.productivity under Marcus's standing permission. Evidence is in the PR.
 
@@ -16,10 +16,17 @@ Verified and merged by sidework.productivity under Marcus's standing permission.
   resolve by hand (see docs/UPGRADE.md). Why: consumer feedback (experiments). It was confirmed in 5 repos.
 - **A conflicted upgrade no longer crashes.** The post-merge check now catches unresolved markers and a factory that no
   longer parses, then rolls back instead of throwing a YAML traceback. Why: consumer feedback (asian-bounty).
+- **A rolled-back upgrade restores the lock.** The bootstrap and the old-lock repair write `psf.lock.json` before the merge; a
+  rollback now puts it back exactly, so a failed upgrade can't leave a repo stuck in a permanent conflict. Why: independent
+  review R-378237e8 (F2).
+- **Every migration id is recorded.** After a bootstrap, the lock listed only the bootstrap id, so deleting a template file
+  added since 0.1.0 later re-triggered the repair and brought the file back. Why: independent review R-378237e8 (F1).
 ### Added
-- `psf upgrade --resolved`: after resolving conflicts by hand, it advances the base so `--check` stops reporting the same
-  conflict forever. It refuses with no pinned base, while markers remain, or when the factory doesn't verify. Template files
-  still missing locally stay addable. Why: consumer feedback (asian-bounty).
+- `psf upgrade --resolved`: after resolving conflicts by hand, it advances the base of the **conflicted files only**, so
+  `--check` stops reporting the same conflict forever while other pending upstream changes still arrive and deliberately
+  deleted files stay deleted. It refuses with no pinned base, a stale bootstrap lock, no pending conflict, remaining markers,
+  or a factory that doesn't verify, and writes nothing under `--check`/`--pretend`. Why: consumer feedback (asian-bounty);
+  review R-378237e8 (F3–F5).
 
 ## 0.2.1 — 2026-11-16
 

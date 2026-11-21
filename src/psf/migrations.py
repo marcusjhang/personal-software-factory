@@ -102,8 +102,14 @@ def _rebase_apply(repo_root: Path, factory_dir: Path) -> str:
     """
     lock = read_lock(repo_root)
     files = _legacy_base(factory_dir)
+    # Record this migration's own id in the lock it writes (review R-378237e8 F1):
+    # otherwise a lock that is later written from this one (a rollback, or
+    # `--resolved`) lacks it, the rebase runs again and re-adds deleted files.
+    ids = list(lock.migrations or [])
+    if REBASE_ID not in ids:
+        ids.append(REBASE_ID)
     write_lock(repo_root, Lock(revision="bootstrap-0.1.0", template_digest=digest(files), base=files,
-                               migrations=list(lock.migrations or [])).stamp())
+                               migrations=ids).stamp())
     return "re-pinned the bootstrap base to the 0.1.0 template (missing template files will now be added)"
 
 
@@ -134,4 +140,9 @@ def run_migrations(repo_root: Path, factory_dir: Path, applied: list[str]) -> tu
             continue
         notes.append(f"{m.id}: {m.apply(repo_root, factory_dir)}")
         done.append(m.id)
+        # A migration may mark others as done in the lock it writes (bootstrap marks
+        # every id). Keep those, or the next lock written from `done` loses them and
+        # the rebase later re-adds files the user deleted (review R-378237e8 F1).
+        lock = read_lock(repo_root)
+        done += [i for i in (lock.migrations if lock else []) if i not in done]
     return done, notes
